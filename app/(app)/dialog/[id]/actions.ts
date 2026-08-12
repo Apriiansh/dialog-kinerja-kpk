@@ -1,0 +1,218 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { requireRole } from "@/lib/session";
+import { saveTtdFile } from "@/lib/ttd";
+import { canValidateDialog } from "@/lib/dialog-queries";
+import type { JenisAspek } from "@/generated/prisma/enums";
+
+export interface AspekItemInput {
+  id?: number;
+  dialog_evaluasi?: string;
+  kompetensi_dikembangkan?: string;
+  id_metode_pengembangan?: number | null;
+  metode_pengembangan_lainnya?: string;
+  waktu_pelaksanaan?: string;
+}
+
+export interface AspekInput {
+  jenis_aspek: JenisAspek;
+  tanggung_jawab_pegawai?: string;
+  items: AspekItemInput[];
+}
+
+export interface SaveDialogState {
+  error?: string;
+}
+
+export interface ValidateDialogState {
+  error?: string;
+}
+
+const VALID_JENIS: JenisAspek[] = [
+  "SKP",
+  "GAP_ASESMEN",
+  "PERILAKU",
+  "KARIR_PENDEK",
+  "KARIR_MENENGAH",
+];
+
+function toNullable(value: string | undefined) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+function isEmptyItem(item: AspekItemInput) {
+  return (
+    !item.dialog_evaluasi?.trim() &&
+    !item.kompetensi_dikembangkan?.trim() &&
+    !item.id_metode_pengembangan &&
+    !item.metode_pengembangan_lainnya?.trim() &&
+    !item.waktu_pelaksanaan?.trim()
+  );
+}
+
+export async function saveDialogForm(
+  dialogId: number,
+  mode: "draft" | "submit",
+  aspekInput: AspekInput[],
+): Promise<SaveDialogState> {
+  const session = await requireRole("PEGAWAI");
+
+  const dialog = await prisma.dialogKinerja.findFirst({
+    where: { id: dialogId, id_pegawai: session.id },
+    select: { id: true, status: true },
+  });
+  if (!dialog) {
+    return { error: "Dialog tidak ditemukan." };
+  }
+  if (dialog.status !== "menunggu_pegawai") {
+    return { error: "Dialog sudah dikirim dan tidak dapat diubah." };
+  }
+
+  for (const aspek of aspekInput) {
+    if (!VALID_JENIS.includes(aspek.jenis_aspek)) {
+      return { error: "Jenis aspek tidak valid." };
+    }
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      for (const aspek of aspekInput) {
+        const savedAspek = await tx.dialogKinerjaAspek.upsert({
+          where: {
+            id_dialog_jenis_aspek: {
+              id_dialog: dialog.id,
+              jenis_aspek: aspek.jenis_aspek,
+            },
+          },
+          update: {
+            tanggung_jawab_pegawai: toNullable(aspek.tanggung_jawab_pegawai),
+          },
+          create: {
+            id_dialog: dialog.id,
+            jenis_aspek: aspek.jenis_aspek,
+            tanggung_jawab_pegawai: toNullable(aspek.tanggung_jawab_pegawai),
+          },
+        });
+
+        const existing = await tx.dialogKinerjaItem.findMany({
+          where: { id_aspek: savedAspek.id },
+          select: { id: true },
+        });
+        const existingIds = new Set(existing.map((item) => item.id));
+        const keepIds = new Set<number>();
+
+        for (const item of aspek.items) {
+          if (isEmptyItem(item)) continue;
+
+          const data = {
+            dialog_evaluasi: toNullable(item.dialog_evaluasi),
+            kompetensi_dikembangkan: toNullable(item.kompetensi_dikembangkan),
+            id_metode_pengembangan: item.id_metode_pengembangan ?? null,
+            metode_pengembangan_lainnya: toNullable(
+              item.metode_pengembangan_lainnya,
+            ),
+            waktu_pelaksanaan: toNullable(item.waktu_pelaksanaan),
+          };
+
+          if (item.id && existingIds.has(item.id)) {
+            keepIds.add(item.id);
+            await tx.dialogKinerjaItem.update({ where: { id: item.id }, data });
+          } else {
+            await tx.dialogKinerjaItem.create({
+              data: { id_aspek: savedAspek.id, ...data },
+            });
+          }
+        }
+
+        const idsToDelete = existing
+          .filter((item) => !keepIds.has(item.id))
+          .map((item) => item.id);
+        if (idsToDelete.length > 0) {
+          await tx.dialogKinerjaItem.deleteMany({
+            where: { id: { in: idsToDelete } },
+          });
+        }
+      }
+
+      if (mode === "submit") {
+        await tx.dialogKinerja.update({
+          where: { id: dialog.id },
+          data: { status: "menunggu_atasan" },
+        });
+      }
+    });
+  } catch {
+    return { error: "Gagal menyimpan dialog. Silakan coba lagi." };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/dialog/${dialog.id}`);
+
+  if (mode === "submit") {
+    redirect(`/dialog/${dialog.id}`);
+  }
+
+  return {};
+}
+
+export async function validateDialog(
+  dialogId: number,
+  input: { setuju: boolean; ttdDataUrl: string | null },
+): Promise<ValidateDialogState> {
+  const session = await requireRole("PEGAWAI");
+
+  if (!input.setuju) {
+    return { error: "Centang persetujuan untuk melanjutkan." };
+  }
+  if (!input.ttdDataUrl) {
+    return { error: "Tanda tangan wajib diisi." };
+  }
+
+  const dialog = await prisma.dialogKinerja.findFirst({
+    where: { id: dialogId, id_pegawai: session.id },
+    select: {
+      id: true,
+      status: true,
+      is_valid_pegawai: true,
+      is_valid_atasan: true,
+    },
+  });
+  if (!dialog) {
+    return { error: "Dialog tidak ditemukan." };
+  }
+  if (!canValidateDialog(dialog.status)) {
+    return { error: "Dialog belum siap untuk divalidasi." };
+  }
+  if (dialog.is_valid_pegawai) {
+    return { error: "Anda sudah melakukan validasi." };
+  }
+
+  let ttdUrl: string;
+  try {
+    ttdUrl = await saveTtdFile(input.ttdDataUrl, dialog.id, "pegawai");
+  } catch {
+    return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
+  }
+
+  try {
+    await prisma.dialogKinerja.update({
+      where: { id: dialog.id },
+      data: {
+        is_valid_pegawai: true,
+        ttd_pegawai_path: ttdUrl,
+        waktu_validasi_pegawai: new Date(),
+        status: dialog.is_valid_atasan ? "selesai" : "menunggu_validasi",
+      },
+    });
+  } catch {
+    return { error: "Gagal menyimpan validasi. Silakan coba lagi." };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/dialog/${dialog.id}`);
+  return {};
+}
