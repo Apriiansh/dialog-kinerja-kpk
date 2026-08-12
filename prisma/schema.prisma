@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  ATASAN
+  PEGAWAI
+}
+
+enum StatusDialog {
+  draft_atasan
+  menunggu_pegawai
+  menunggu_atasan
+  menunggu_validasi
+  selesai
+}
+
+enum JenisAspek {
+  SKP
+  GAP_ASESMEN
+  PERILAKU
+  KARIR_PENDEK
+  KARIR_MENENGAH
+}
+
+model User {
+  id                       Int      @id @default(autoincrement())
+  npp                      String   @unique @db.VarChar(50)
+  nip                      String?  @unique @db.VarChar(50)
+  nama_pegawai             String   @db.VarChar(255)
+  tanggal_bergabung        DateTime? @db.Date
+  nama_jabatan             String?  @db.VarChar(150)
+  unit_kerja               String?  @db.VarChar(150)
+  masa_kerja_unit_terakhir String?  @db.VarChar(100)
+  password                 String   @db.VarChar(255)
+  role                     Role     @default(PEGAWAI)
+  created_at               DateTime @default(now())
+  updated_at               DateTime @updatedAt
+
+  dialogAsAtasan  DialogKinerja[] @relation("DialogAtasan")
+  dialogAsPegawai DialogKinerja[] @relation("DialogPegawai")
+}
+
+model MasterMetodePengembangan {
+  id          Int    @id @default(autoincrement())
+  nama_metode String @db.VarChar(255)
+  is_active   Boolean @default(true)
+
+  dialogItems DialogKinerjaItem[]
+}
+
+model DialogKinerja {
+  id                     Int          @id @default(autoincrement())
+  id_atasan              Int
+  id_pegawai             Int
+  periode_tahun          Int
+  deskripsi_kinerja      String?      @db.Text
+  status                 StatusDialog @default(draft_atasan)
+  is_valid_pegawai       Boolean      @default(false)
+  is_valid_atasan        Boolean      @default(false)
+  ttd_pegawai_path       String?      @db.VarChar(255)
+  ttd_atasan_path        String?      @db.VarChar(255)
+  waktu_validasi_pegawai DateTime?
+  waktu_validasi_atasan  DateTime?
+  created_at             DateTime     @default(now())
+  updated_at             DateTime     @updatedAt
+
+  atasan  User @relation("DialogAtasan", fields: [id_atasan], references: [id], onDelete: Restrict)
+  pegawai User @relation("DialogPegawai", fields: [id_pegawai], references: [id], onDelete: Restrict)
+
+  aspek DialogKinerjaAspek[]
+}
+
+model DialogKinerjaAspek {
+  id                     Int        @id @default(autoincrement())
+  id_dialog              Int
+  jenis_aspek            JenisAspek
+  tanggung_jawab_pegawai String?    @db.Text
+  tanggung_jawab_atasan  String?    @db.Text
+  created_at             DateTime   @default(now())
+  updated_at             DateTime   @updatedAt
+
+  dialog DialogKinerja @relation(fields: [id_dialog], references: [id], onDelete: Cascade)
+  item   DialogKinerjaItem[]
+
+  @@unique([id_dialog, jenis_aspek])
+}
+
+model DialogKinerjaItem {
+  id                          Int       @id @default(autoincrement())
+  id_aspek                    Int
+  dialog_evaluasi             String?   @db.Text
+  kompetensi_dikembangkan     String?   @db.Text
+  id_metode_pengembangan      Int?
+  metode_pengembangan_lainnya String?   @db.VarChar(255)
+  waktu_pelaksanaan           String?   @db.VarChar(150)
+  created_at                  DateTime  @default(now())
+  updated_at                  DateTime  @updatedAt
+
+  aspek  DialogKinerjaAspek          @relation(fields: [id_aspek], references: [id], onDelete: Cascade)
+  metode MasterMetodePengembangan?  @relation(fields: [id_metode_pengembangan], references: [id], onDelete: SetNull)
+}
