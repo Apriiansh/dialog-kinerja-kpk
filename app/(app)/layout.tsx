@@ -7,5 +7,16 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const session = await requireAuth();
-  return <AppShell session={session}>{children}</AppShell>;
+  return (
+    <AppShell
+      session={{
+        id: session.id,
+        npp: session.npp,
+        nama: session.nama,
+        role: session.role,
+      }}
+    >
+      {children}
+    </AppShell>
+  );
 }
