@@ -1,6 +1,11 @@
 "use client";
 
-import { SquaresFour, SignOut } from "@phosphor-icons/react";
+import {
+  ChatCircleDots,
+  ClockCounterClockwise,
+  SquaresFour,
+  SignOut,
+} from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,7 +13,11 @@ import { logoutAction } from "@/app/(app)/actions";
 import type { SessionData } from "@/lib/session";
 import { RoleTag } from "./role-tag";
 
-const NAV_ITEMS = [{ href: "/dashboard", label: "Dashboard", icon: SquaresFour }];
+const NAV_ITEMS = [
+  { href: "/dashboard", label: "Dashboard", icon: SquaresFour, exact: true },
+  { href: "/dashboard/dialog", label: "Dialog Kinerja", icon: ChatCircleDots },
+  { href: "/dashboard/history", label: "Riwayat", icon: ClockCounterClockwise },
+];
 
 function initials(name: string) {
   return name
@@ -74,9 +83,10 @@ export function AppShell({
         </div>
 
         <nav className="flex-1 space-y-1 px-3">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active =
-              pathname === href || pathname.startsWith(`${href}/`);
+          {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+            const active = exact
+              ? pathname === href
+              : pathname === href || pathname.startsWith(`${href}/`);
             return (
               <Link
                 key={href}
