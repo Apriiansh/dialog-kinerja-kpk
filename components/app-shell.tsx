@@ -1,14 +1,78 @@
 "use client";
 
-import { SquaresFour, SignOut } from "@phosphor-icons/react";
+import { Suspense, useState } from "react";
+import {
+  SquaresFourIcon,
+  ClipboardTextIcon,
+  PencilSimpleIcon,
+  HourglassIcon,
+  ShieldCheckIcon,
+  CheckCircleIcon,
+  SignOutIcon,
+  ListIcon,
+  XIcon,
+  PlusCircleIcon,
+  DatabaseIcon,
+} from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { logoutAction } from "@/app/(app)/actions";
 import type { SessionData } from "@/lib/session";
 import { RoleTag } from "./role-tag";
 
-const NAV_ITEMS = [{ href: "/dashboard", label: "Dashboard", icon: SquaresFour }];
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  statusQuery?: string;
+};
+
+type NavGroup = {
+  title?: string;
+  items: NavItem[];
+};
+
+const PEGAWAI_NAV_GROUPS: NavGroup[] = [
+  {
+    title: "Navigasi",
+    items: [
+      {
+        href: "/dashboard",
+        label: "Dashboard",
+        icon: SquaresFourIcon,
+      },
+      {
+        href: "/dialog",
+        label: "Dialog Kinerja Saya",
+        icon: ClipboardTextIcon,
+      },
+    ],
+  },
+];
+
+const ATASAN_NAV_GROUPS: NavGroup[] = [
+  {
+    title: "Navigasi",
+    items: [
+      {
+        href: "/dashboard",
+        label: "Dashboard",
+        icon: SquaresFourIcon,
+      },
+      {
+        href: "/dialog/new",
+        label: "Buat Dialog Kinerja",
+        icon: PlusCircleIcon,
+      },
+      {
+        href: "/master-metode",
+        label: "Master Metode Pengembangan",
+        icon: DatabaseIcon,
+      },
+    ],
+  },
+];
 
 function initials(name: string) {
   return name
@@ -21,14 +85,14 @@ function initials(name: string) {
 
 function Brand() {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-row gap-3">
       <Image
         src="/logo-kpk.png"
         alt="Logo KPK"
         width={160}
         height={64}
         priority
-        className="h-auto w-40"
+        className="h-auto w-20"
       />
       <div className="flex flex-col leading-none">
         <span className="text-sm font-semibold text-white">Dialog Kinerja</span>
@@ -50,10 +114,68 @@ function LogoutButton({ className }: { className?: string }) {
           "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
         }
       >
-        <SignOut size={18} weight="bold" />
+        <SignOutIcon size={18} weight="bold" />
         Keluar
       </button>
     </form>
+  );
+}
+
+function NavItemsList({
+  role,
+  onItemClick,
+}: {
+  role: "ATASAN" | "PEGAWAI";
+  onItemClick?: () => void;
+}) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentStatus = searchParams.get("status");
+
+  const groups = role === "PEGAWAI" ? PEGAWAI_NAV_GROUPS : ATASAN_NAV_GROUPS;
+
+  return (
+    <div className="space-y-5 px-3">
+      {groups.map((group, idx) => (
+        <div key={group.title ?? idx} className="space-y-1">
+          {group.title && (
+            <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-white/40">
+              {group.title}
+            </div>
+          )}
+          {group.items.map(({ href, label, icon: Icon, statusQuery }) => {
+            let active = false;
+            if (statusQuery !== undefined) {
+              active =
+                pathname === "/dashboard" &&
+                (currentStatus === statusQuery ||
+                  (statusQuery === "semua" && !currentStatus));
+            } else if (href === "/dashboard") {
+              active = pathname === "/dashboard" && !currentStatus;
+            } else {
+              active = pathname === href || pathname.startsWith(`${href}/`);
+            }
+
+            return (
+              <Link
+                key={href + (statusQuery ?? "")}
+                href={href}
+                onClick={onItemClick}
+                aria-current={active ? "page" : undefined}
+                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  active
+                    ? "bg-white/15 font-semibold text-white shadow-xs"
+                    : "text-white/60 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <Icon size={18} weight={active ? "fill" : "regular"} />
+                {label}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -64,35 +186,20 @@ export function AppShell({
   session: SessionData;
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen">
+      {/* Desktop Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col bg-primary-strong lg:flex">
-        <div className="px-5 pb-8 pt-6">
+        <div className="px-5 pb-6 pt-6">
           <Brand />
         </div>
 
-        <nav className="flex-1 space-y-1 px-3">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-            const active =
-              pathname === href || pathname.startsWith(`${href}/`);
-            return (
-              <Link
-                key={href}
-                href={href}
-                aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-white/10 text-white"
-                    : "text-white/60 hover:bg-white/5 hover:text-white"
-                }`}
-              >
-                <Icon size={18} weight={active ? "fill" : "regular"} />
-                {label}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 overflow-y-auto">
+          <Suspense fallback={<div className="p-4 text-xs text-white/40">Loading navigation...</div>}>
+            <NavItemsList role={session.role} />
+          </Suspense>
         </nav>
 
         <div className="mt-auto border-t border-white/10 p-4">
@@ -113,15 +220,73 @@ export function AppShell({
         </div>
       </aside>
 
-      <header className="fixed inset-x-0 top-0 z-20 flex h-14 items-center justify-between bg-primary-strong px-4 lg:hidden">
-        <Image
-          src="/logo-kpk.png"
-          alt="Logo KPK"
-          width={96}
-          height={38}
-          priority
-          className="h-8 w-auto"
+      {/* Mobile Drawer Backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-xs lg:hidden"
+          onClick={() => setMobileOpen(false)}
         />
+      )}
+
+      {/* Mobile Sidebar Drawer */}
+      {mobileOpen && (
+        <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-primary-strong shadow-2xl lg:hidden">
+          <div className="flex items-center justify-between px-5 pb-4 pt-5">
+            <Brand />
+            <button
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
+            >
+              <XIcon size={20} weight="bold" />
+            </button>
+          </div>
+
+          <nav className="flex-1 overflow-y-auto">
+            <Suspense fallback={<div className="p-4 text-xs text-white/40">Loading navigation...</div>}>
+              <NavItemsList role={session.role} onItemClick={() => setMobileOpen(false)} />
+            </Suspense>
+          </nav>
+
+          <div className="mt-auto border-t border-white/10 p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-xs font-bold text-white">
+                {initials(session.nama)}
+              </div>
+              <div className="flex min-w-0 flex-col gap-1">
+                <span className="truncate text-sm font-medium text-white">
+                  {session.nama}
+                </span>
+                <RoleTag role={session.role} tone="dark" />
+              </div>
+            </div>
+            <div className="mt-3">
+              <LogoutButton />
+            </div>
+          </div>
+        </aside>
+      )}
+
+      {/* Mobile Header */}
+      <header className="fixed inset-x-0 top-0 z-20 flex h-14 items-center justify-between bg-primary-strong px-4 lg:hidden">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
+            aria-label="Buka menu navigasi"
+          >
+            <ListIcon size={22} weight="bold" />
+          </button>
+          <Image
+            src="/logo-kpk.png"
+            alt="Logo KPK"
+            width={96}
+            height={38}
+            priority
+            className="h-8 w-auto"
+          />
+        </div>
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-xs font-bold text-white">
             {initials(session.nama)}
@@ -130,6 +295,7 @@ export function AppShell({
         </div>
       </header>
 
+      {/* Main Content Area */}
       <div className="flex min-h-screen w-full flex-col lg:pl-60">
         <div className="flex flex-1 flex-col px-4 pb-10 pt-20 lg:px-10 lg:pt-10">
           <div className="mx-auto w-full max-w-6xl flex-1">{children}</div>
@@ -138,3 +304,4 @@ export function AppShell({
     </div>
   );
 }
+

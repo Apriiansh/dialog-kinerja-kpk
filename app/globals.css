@@ -27,6 +27,17 @@
   --color-outline: #c5c5d3;
   --color-outline-strong: #757682;
 
+  --color-status-draft: #475569;
+  --color-status-draft-soft: #eef2f7;
+  --color-status-amber: #b45309;
+  --color-status-amber-soft: #fef3c7;
+  --color-status-blue: #1d4ed8;
+  --color-status-blue-soft: #dbeafe;
+  --color-status-indigo: #4338ca;
+  --color-status-indigo-soft: #e0e7ff;
+  --color-status-green: #15803d;
+  --color-status-green-soft: #dcfce7;
+
   --shadow-ambient: 0 20px 30px -12px rgb(30 58 138 / 0.08);
   --shadow-focus: 0 0 0 3px rgb(30 58 138 / 0.14);
 }
