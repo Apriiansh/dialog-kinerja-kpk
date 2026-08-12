@@ -1,0 +1,25 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getRequestSession } from "@/lib/session";
+
+export async function proxy(request: NextRequest) {
+  const session = await getRequestSession(request);
+
+  const { pathname } = request.nextUrl;
+  const isLoggedIn = Boolean(session?.id);
+
+  if (!isLoggedIn && pathname !== "/login") {
+    const url = new URL("/login", request.url);
+    url.searchParams.set("from", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  if (isLoggedIn && pathname === "/login") {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"],
+};
