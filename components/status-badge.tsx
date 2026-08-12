@@ -1,28 +1,40 @@
-import { CheckCircleIcon, ClockIcon } from "@phosphor-icons/react/dist/ssr";
-import type { StatusDialog } from "@/generated/prisma/enums";
-import { STATUS_CONFIG, type StatusTone } from "@/lib/status-dialog";
+import { CheckCircle } from "@phosphor-icons/react/dist/ssr";
+import type { StatusDialog } from "@/generated/prisma/client";
 
-const TONE_CLASSES: Record<StatusTone, string> = {
-  draft: "bg-status-draft-soft text-status-draft",
-  "waiting-pegawai": "bg-status-amber-soft text-status-amber",
-  "waiting-atasan": "bg-status-blue-soft text-status-blue",
-  validation: "bg-status-indigo-soft text-status-indigo",
-  done: "bg-status-green-soft text-status-green",
+const STATUS: Record<
+  StatusDialog,
+  { label: string; className: string; icon?: typeof CheckCircle }
+> = {
+  draft_atasan: {
+    label: "Draft",
+    className: "bg-slate-100 text-slate-700",
+  },
+  menunggu_pegawai: {
+    label: "Menunggu Pegawai",
+    className: "bg-amber-100 text-amber-800",
+  },
+  menunggu_atasan: {
+    label: "Menunggu Atasan",
+    className: "bg-blue-100 text-blue-800",
+  },
+  menunggu_validasi: {
+    label: "Menunggu Validasi",
+    className: "bg-indigo-100 text-indigo-800",
+  },
+  selesai: {
+    label: "Selesai",
+    className: "bg-emerald-100 text-emerald-800",
+    icon: CheckCircle,
+  },
 };
 
 export function StatusBadge({ status }: { status: StatusDialog }) {
-  const { label, tone } = STATUS_CONFIG[status];
-  const isDone = tone === "done";
-
+  const { label, className, icon: Icon } = STATUS[status];
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold leading-4 ${TONE_CLASSES[tone]}`}
+      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-bold leading-4 ${className}`}
     >
-      {isDone ? (
-        <CheckCircleIcon size={12} weight="bold" aria-hidden />
-      ) : (
-        <ClockIcon size={12} weight="bold" aria-hidden />
-      )}
+      {Icon ? <Icon size={12} weight="bold" /> : null}
       {label}
     </span>
   );

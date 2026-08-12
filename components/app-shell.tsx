@@ -1,18 +1,10 @@
 "use client";
 
-import { Suspense, useState } from "react";
 import {
-  SquaresFourIcon,
-  ClipboardTextIcon,
-  PencilSimpleIcon,
-  HourglassIcon,
-  ShieldCheckIcon,
-  CheckCircleIcon,
-  SignOutIcon,
-  ListIcon,
-  XIcon,
-  PlusCircleIcon,
-  DatabaseIcon,
+  ChatCircleDots,
+  ClockCounterClockwise,
+  SquaresFour,
+  SignOut,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,57 +13,10 @@ import { logoutAction } from "@/app/(app)/actions";
 import type { SessionData } from "@/lib/session";
 import { RoleTag } from "./role-tag";
 
-type NavItem = {
-  href: string;
-  label: string;
-  icon: React.ElementType;
-  statusQuery?: string;
-};
-
-type NavGroup = {
-  title?: string;
-  items: NavItem[];
-};
-
-const PEGAWAI_NAV_GROUPS: NavGroup[] = [
-  {
-    title: "Navigasi",
-    items: [
-      {
-        href: "/dashboard",
-        label: "Dashboard",
-        icon: SquaresFourIcon,
-      },
-      {
-        href: "/dialog",
-        label: "Dialog Kinerja Saya",
-        icon: ClipboardTextIcon,
-      },
-    ],
-  },
-];
-
-const ATASAN_NAV_GROUPS: NavGroup[] = [
-  {
-    title: "Navigasi",
-    items: [
-      {
-        href: "/dashboard",
-        label: "Dashboard",
-        icon: SquaresFourIcon,
-      },
-      {
-        href: "/dialog/new",
-        label: "Buat Dialog Kinerja",
-        icon: PlusCircleIcon,
-      },
-      {
-        href: "/master-metode",
-        label: "Master Metode Pengembangan",
-        icon: DatabaseIcon,
-      },
-    ],
-  },
+const NAV_ITEMS = [
+  { href: "/dashboard", label: "Dashboard", icon: SquaresFour, exact: true },
+  { href: "/dashboard/dialog", label: "Dialog Kinerja", icon: ChatCircleDots },
+  { href: "/dashboard/history", label: "Riwayat", icon: ClockCounterClockwise },
 ];
 
 function initials(name: string) {
@@ -156,6 +101,11 @@ function NavItemsList({
               active = pathname === href || pathname.startsWith(`${href}/`);
             }
 
+        <nav className="flex-1 space-y-1 px-3">
+          {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+            const active = exact
+              ? pathname === href
+              : pathname === href || pathname.startsWith(`${href}/`);
             return (
               <Link
                 key={href + (statusQuery ?? "")}
