@@ -47,6 +47,8 @@ model User {
 
   dialogAsAtasan  DialogKinerja[] @relation("DialogAtasan")
   dialogAsPegawai DialogKinerja[] @relation("DialogPegawai")
+
+  @@map("users")
 }
 
 model MasterMetodePengembangan {
@@ -55,6 +57,8 @@ model MasterMetodePengembangan {
   is_active   Boolean @default(true)
 
   dialogItems DialogKinerjaItem[]
+
+  @@map("master_metode_pengembangan")
 }
 
 model DialogKinerja {
@@ -77,6 +81,8 @@ model DialogKinerja {
   pegawai User @relation("DialogPegawai", fields: [id_pegawai], references: [id], onDelete: Restrict)
 
   aspek DialogKinerjaAspek[]
+
+  @@map("dialog_kinerja")
 }
 
 model DialogKinerjaAspek {
@@ -92,6 +98,8 @@ model DialogKinerjaAspek {
   item   DialogKinerjaItem[]
 
   @@unique([id_dialog, jenis_aspek])
+
+  @@map("dialog_kinerja_aspek")
 }
 
 model DialogKinerjaItem {
@@ -107,4 +115,6 @@ model DialogKinerjaItem {
 
   aspek  DialogKinerjaAspek          @relation(fields: [id_aspek], references: [id], onDelete: Cascade)
   metode MasterMetodePengembangan?  @relation(fields: [id_metode_pengembangan], references: [id], onDelete: SetNull)
+
+  @@map("dialog_kinerja_item")
 }

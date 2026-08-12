@@ -39,14 +39,14 @@ export function LoginForm() {
             required
             autoComplete="username"
             inputMode="numeric"
-            maxLength={15}
-            pattern="[0-9]{15}"
-            title="max 15 digit"
+            maxLength={7}
+            pattern="[0-9]{7}"
+            title="NPP terdiri dari 7 digit angka"
             placeholder="Masukkan NPP Anda"
             className="h-11 rounded-md border border-outline bg-surface px-3.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 invalid:[&:not(:placeholder-shown)]:border-error focus:border-primary focus:shadow-focus"
           />
           <span className="text-xs leading-4 text-ink-muted">
-            NPP max 15 digit angka.
+            NPP terdiri dari 7 digit angka.
           </span>
         </div>
 

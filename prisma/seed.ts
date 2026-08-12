@@ -21,7 +21,7 @@ const MASTER_METODE = [
 
 const USERS = [
   {
-    npp: "000000000000000",
+    npp: "1000001",
     nama_pegawai: "Bambang Sutrisno",
     nama_jabatan: "Kepala Bidang",
     unit_kerja: "Biro SDM",
@@ -29,7 +29,7 @@ const USERS = [
     password: "atasan123",
   },
   {
-    npp: "111111111111111",
+    npp: "2000001",
     nama_pegawai: "Siti Rahayu",
     nama_jabatan: "Pranata Kearsipan",
     unit_kerja: "Biro SDM",
@@ -37,7 +37,7 @@ const USERS = [
     password: "pegawai123",
   },
   {
-    npp: "222222222222222",
+    npp: "2000002",
     nama_pegawai: "Ahmad Fauzi",
     nama_jabatan: "Pranata Komputer",
     unit_kerja: "Biro SDM",
@@ -50,6 +50,9 @@ const LEGACY_DUMMY_NPPS = [
   "198001012000011001",
   "199505152022031002",
   "199203042019052003",
+  "000000000000000",
+  "111111111111111",
+  "222222222222222",
 ];
 
 async function main() {

@@ -22,8 +22,8 @@ export async function loginAction(
     return { error: "NPP dan kata sandi wajib diisi." };
   }
 
-  if (!/^\d{15}$/.test(npp)) {
-    return { error: "NPP harus terdiri dari 15 digit angka." };
+  if (!/^\d{7}$/.test(npp)) {
+    return { error: "NPP harus terdiri dari 7 digit angka." };
   }
 
   const user = await prisma.user.findUnique({ where: { npp } });
