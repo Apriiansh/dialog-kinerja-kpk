@@ -1,10 +1,14 @@
 "use client";
 
+import { Suspense, useState } from "react";
 import {
+  SquaresFour,
   ChatCircleDots,
   ClockCounterClockwise,
-  SquaresFour,
+  ClipboardText,
   SignOut,
+  List,
+  X,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,10 +17,60 @@ import { logoutAction } from "@/app/(app)/actions";
 import type { SessionData } from "@/lib/session";
 import { RoleTag } from "./role-tag";
 
-const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard", icon: SquaresFour, exact: true },
-  { href: "/dashboard/dialog", label: "Dialog Kinerja", icon: ChatCircleDots },
-  { href: "/dashboard/history", label: "Riwayat", icon: ClockCounterClockwise },
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  statusQuery?: string;
+  exact?: boolean;
+};
+
+type NavGroup = {
+  title?: string;
+  items: NavItem[];
+};
+
+const PEGAWAI_NAV_GROUPS: NavGroup[] = [
+  {
+    title: "Navigasi",
+    items: [
+      {
+        href: "/dashboard",
+        label: "Dashboard",
+        icon: SquaresFour,
+        exact: true,
+      },
+      {
+        href: "/dialog",
+        label: "Dialog Kinerja Saya",
+        icon: ClipboardText,
+      },
+    ],
+  },
+];
+
+const ATASAN_NAV_GROUPS: NavGroup[] = [
+  {
+    title: "Navigasi",
+    items: [
+      {
+        href: "/dashboard",
+        label: "Dashboard",
+        icon: SquaresFour,
+        exact: true,
+      },
+      {
+        href: "/dashboard/dialog",
+        label: "Dialog Kinerja",
+        icon: ChatCircleDots,
+      },
+      {
+        href: "/dashboard/history",
+        label: "Riwayat",
+        icon: ClockCounterClockwise,
+      },
+    ],
+  },
 ];
 
 function initials(name: string) {
@@ -59,7 +113,7 @@ function LogoutButton({ className }: { className?: string }) {
           "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
         }
       >
-        <SignOutIcon size={18} weight="bold" />
+        <SignOut size={18} weight="bold" />
         Keluar
       </button>
     </form>
@@ -88,24 +142,19 @@ function NavItemsList({
               {group.title}
             </div>
           )}
-          {group.items.map(({ href, label, icon: Icon, statusQuery }) => {
+          {group.items.map(({ href, label, icon: Icon, statusQuery, exact }) => {
             let active = false;
             if (statusQuery !== undefined) {
               active =
                 pathname === "/dashboard" &&
                 (currentStatus === statusQuery ||
                   (statusQuery === "semua" && !currentStatus));
-            } else if (href === "/dashboard") {
-              active = pathname === "/dashboard" && !currentStatus;
+            } else if (exact) {
+              active = pathname === href && !currentStatus;
             } else {
               active = pathname === href || pathname.startsWith(`${href}/`);
             }
 
-        <nav className="flex-1 space-y-1 px-3">
-          {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
-            const active = exact
-              ? pathname === href
-              : pathname === href || pathname.startsWith(`${href}/`);
             return (
               <Link
                 key={href + (statusQuery ?? "")}
@@ -188,7 +237,7 @@ export function AppShell({
               onClick={() => setMobileOpen(false)}
               className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
             >
-              <XIcon size={20} weight="bold" />
+              <X size={20} weight="bold" />
             </button>
           </div>
 
@@ -226,7 +275,7 @@ export function AppShell({
             className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
             aria-label="Buka menu navigasi"
           >
-            <ListIcon size={22} weight="bold" />
+            <List size={22} weight="bold" />
           </button>
           <Image
             src="/logo-kpk.png"
@@ -254,4 +303,3 @@ export function AppShell({
     </div>
   );
 }
-

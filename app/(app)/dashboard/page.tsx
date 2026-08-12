@@ -16,6 +16,14 @@ import { DialogList } from "@/components/dialog-list";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 11) return "Selamat pagi";
+  if (hour < 15) return "Selamat siang";
+  if (hour < 18) return "Selamat sore";
+  return "Selamat malam";
+}
+
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -119,10 +127,6 @@ export default async function DashboardPage({
         </div>
         <RoleTag role={session.role} />
       </header>
-
-  if (session.role === "ATASAN") {
-    return <AtasanDashboard />;
-  }
 
       {isAtasan ? (
         <>
