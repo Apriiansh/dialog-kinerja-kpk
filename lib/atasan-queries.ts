@@ -26,8 +26,11 @@ const ATASAN_DIALOG_INCLUDE = {
     select: {
       npp: true,
       nama_pegawai: true,
+      nip: true,
+      tanggal_bergabung: true,
       nama_jabatan: true,
       unit_kerja: true,
+      masa_kerja_unit_terakhir: true,
     },
   },
   aspek: { include: { item: { include: { metode: true } } } },

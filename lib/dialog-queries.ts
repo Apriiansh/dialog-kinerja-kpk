@@ -28,3 +28,19 @@ export function canEditDialog(status: StatusDialog) {
 export function canValidateDialog(status: StatusDialog) {
   return status === "menunggu_validasi";
 }
+
+const ACTOR_PROFILE_SELECT = {
+  nama_pegawai: true,
+  nip: true,
+  tanggal_bergabung: true,
+  nama_jabatan: true,
+  unit_kerja: true,
+  masa_kerja_unit_terakhir: true,
+} as const;
+
+export async function getDialogActor(actorId: number) {
+  return prisma.user.findUnique({
+    where: { id: actorId },
+    select: ACTOR_PROFILE_SELECT,
+  });
+}
