@@ -11,6 +11,7 @@ datasource db {
 }
 
 enum Role {
+  ADMIN
   ATASAN
   PEGAWAI
 }
@@ -41,9 +42,18 @@ model User {
   unit_kerja               String?  @db.VarChar(150)
   masa_kerja_unit_terakhir String?  @db.VarChar(100)
   password                 String   @db.VarChar(255)
-  role                     Role     @default(PEGAWAI)
+
+  default_role             Role     @default(PEGAWAI) // peran default saat login (bukan pembatas akses)
+  as_pegawai               Boolean  @default(false)   // true kalau user ini bawahan seseorang
+  is_admin                 Boolean  @default(false)   // kapabilitas admin, independen dari atasan/pegawai
+  is_active                Boolean  @default(true)    // soft delete
+
   created_at               DateTime @default(now())
   updated_at               DateTime @updatedAt
+
+  id_atasan Int?
+  atasan    User?  @relation("Hierarki", fields: [id_atasan], references: [id])
+  bawahan   User[] @relation("Hierarki")
 
   dialogAsAtasan  DialogKinerja[] @relation("DialogAtasan")
   dialogAsPegawai DialogKinerja[] @relation("DialogPegawai")

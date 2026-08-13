@@ -14,6 +14,7 @@ export default async function PegawaiLayout({
         npp: session.npp,
         nama: session.nama,
         role: session.role,
+        roles: session.roles,
       }}
     >
       {children}

@@ -1,12 +1,12 @@
 import { AppShell } from "@/components/app-shell";
 import { requireRole } from "@/lib/session";
 
-export default async function AtasanLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await requireRole("ATASAN");
+  const session = await requireRole("ADMIN");
   return (
     <AppShell
       session={{

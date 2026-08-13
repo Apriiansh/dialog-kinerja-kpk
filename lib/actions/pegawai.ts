@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { saveTtdFile } from "@/lib/ttd";
+import { assertActiveActor } from "@/lib/auth-helpers";
 import { canValidateDialog } from "@/lib/dialog-queries";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
@@ -131,6 +132,8 @@ export async function saveDialogForm(
   aspekInput: AspekInput[],
 ): Promise<SaveDialogState> {
   const session = await requireRole("PEGAWAI");
+  const err = await assertActiveActor(session.id);
+  if (err) return { error: err };
 
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_pegawai: session.id },
@@ -244,6 +247,9 @@ export async function validateDialog(
   input: { setuju: boolean; ttdDataUrl: string | null },
 ): Promise<ValidateDialogState> {
   const session = await requireRole("PEGAWAI");
+
+  const err = await assertActiveActor(session.id);
+  if (err) return { error: err };
 
   if (!input.setuju) {
     return { error: "Centang persetujuan untuk melanjutkan." };

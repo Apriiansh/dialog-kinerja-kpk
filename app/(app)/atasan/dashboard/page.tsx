@@ -22,16 +22,9 @@ function greeting() {
 
 export default async function AtasanDashboardPage() {
   const session = await requireAuth();
-  const user = await prisma.user.findUnique({
-    where: { id: session.id },
-    select: { unit_kerja: true },
-  });
-
   const [pegawaiCount, dialogs] = await Promise.all([
     prisma.user.count({
-      where: user?.unit_kerja
-        ? { role: "PEGAWAI", unit_kerja: user.unit_kerja }
-        : { role: "PEGAWAI" },
+      where: { id_atasan: session.id, is_active: true },
     }),
     prisma.dialogKinerja.findMany({
       where: { id_atasan: session.id },

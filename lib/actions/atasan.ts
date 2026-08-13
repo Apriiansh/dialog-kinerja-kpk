@@ -5,12 +5,15 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { saveTtdFile } from "@/lib/ttd";
+import { assertActiveActor } from "@/lib/auth-helpers";
 import { JenisAspek } from "@/generated/prisma/client";
 
 export async function startDialog(pegawaiId: number) {
   const session = await requireRole("ATASAN");
+  const err = await assertActiveActor(session.id);
+  if (err) redirect("/login");
   const user = await prisma.user.findFirst({
-    where: { id: pegawaiId, role: "PEGAWAI" },
+    where: { id: pegawaiId, id_atasan: session.id, is_active: true },
     select: { id: true },
   });
   if (!user) redirect("/atasan/dashboard");
@@ -37,6 +40,8 @@ export async function autosaveResponses(
   values: Record<string, string>,
 ) {
   const session = await requireRole("ATASAN");
+  const err = await assertActiveActor(session.id);
+  if (err) redirect("/login");
   const dialog = await prisma.dialogKinerja.findFirst({
     where: {
       id: dialogId,
@@ -66,6 +71,8 @@ export async function saveDeskripsiKinerja(
   value: string,
 ): Promise<SaveDeskripsiState> {
   const session = await requireRole("ATASAN");
+  const err = await assertActiveActor(session.id);
+  if (err) return { error: err };
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_atasan: session.id, status: "draft_atasan" },
     select: { id: true },
@@ -85,6 +92,8 @@ export async function saveDeskripsiKinerja(
 
 export async function submitDialog(dialogId: number) {
   const session = await requireRole("ATASAN");
+  const err = await assertActiveActor(session.id);
+  if (err) redirect("/login");
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_atasan: session.id, status: "draft_atasan" },
     select: { id: true },
@@ -107,6 +116,9 @@ export async function submitEvaluasi(
   input: { setuju: boolean; ttdDataUrl: string | null },
 ): Promise<SubmitEvaluasiState> {
   const session = await requireRole("ATASAN");
+
+  const err = await assertActiveActor(session.id);
+  if (err) return { error: err };
 
   if (!input.setuju) {
     return { error: "Centang persetujuan untuk melanjutkan." };
@@ -152,6 +164,8 @@ export async function submitEvaluasi(
 
 export async function deleteDialog(dialogId: number) {
   const session = await requireRole("ATASAN");
+  const err = await assertActiveActor(session.id);
+  if (err) redirect("/login");
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_atasan: session.id, status: "draft_atasan" },
     select: { id: true },

@@ -178,7 +178,7 @@ export function DeskripsiKinerjaForm({
               className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-60"
             >
               <PaperPlaneTiltIcon size={16} weight="bold" />
-              {pending ? "Mengirim…" : "Simpan & Kirim ke Pegawai"}
+              {pending ? "Mengirim…" : "Simpan & Kicd m ke Pegawai"}
             </button>
           </div>
         </div>

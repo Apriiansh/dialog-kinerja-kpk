@@ -4,13 +4,14 @@ import { redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
 import { cache } from "react";
 
-export type Role = "ATASAN" | "PEGAWAI";
+export type Role = "ADMIN" | "ATASAN" | "PEGAWAI";
 
 export interface SessionData {
   id: number;
   npp: string;
   nama: string;
   role: Role;
+  roles: Role[];
 }
 
 export const sessionOptions = {
@@ -49,7 +50,24 @@ export async function requireAuth() {
 }
 
 export function homePathForRole(role: Role) {
-  return role === "ATASAN" ? "/atasan/dashboard" : "/pegawai/dashboard";
+  switch (role) {
+    case "ADMIN":
+      return "/admin/dashboard";
+    case "ATASAN":
+      return "/atasan/dashboard";
+    case "PEGAWAI":
+      return "/pegawai/dashboard";
+  }
+}
+
+export function capabilitiesForUser(user: {
+  is_admin: boolean;
+  as_pegawai: boolean;
+}): Role[] {
+  if (user.is_admin) return ["ADMIN"];
+  const roles: Role[] = ["ATASAN"];
+  if (user.as_pegawai) roles.push("PEGAWAI");
+  return roles;
 }
 
 export async function requireRole(...roles: Role[]) {

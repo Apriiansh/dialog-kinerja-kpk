@@ -1,15 +1,8 @@
 import { prisma } from "@/lib/prisma";
 
 export async function getAtasanPegawaiOptions(atasanId: number) {
-  const atasan = await prisma.user.findUnique({
-    where: { id: atasanId },
-    select: { unit_kerja: true },
-  });
-
   return prisma.user.findMany({
-    where: atasan?.unit_kerja
-      ? { role: "PEGAWAI", unit_kerja: atasan.unit_kerja }
-      : { role: "PEGAWAI" },
+    where: { id_atasan: atasanId, is_active: true },
     select: {
       id: true,
       npp: true,

@@ -9,13 +9,17 @@ import {
   SignOut,
   List,
   X,
+  Users,
+  UserList,
+  MonitorPlay,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { logoutAction } from "@/app/(app)/actions";
-import type { SessionData } from "@/lib/session";
+import type { Role, SessionData } from "@/lib/session";
 import { RoleTag } from "./role-tag";
+import { RoleSwitcher } from "./role-switcher";
 
 type NavItem = {
   href: string;
@@ -65,6 +69,11 @@ const ATASAN_NAV_GROUPS: NavGroup[] = [
         icon: ChatCircleDots,
       },
       {
+        href: "/atasan/pegawai",
+        label: "Pegawai",
+        icon: Users,
+      },
+      {
         href: "/atasan/history",
         label: "Riwayat",
         icon: ClockCounterClockwise,
@@ -72,6 +81,36 @@ const ATASAN_NAV_GROUPS: NavGroup[] = [
     ],
   },
 ];
+
+const ADMIN_NAV_GROUPS: NavGroup[] = [
+  {
+    title: "Navigasi",
+    items: [
+      {
+        href: "/admin/dashboard",
+        label: "Dashboard",
+        icon: SquaresFour,
+        exact: true,
+      },
+      {
+        href: "/admin/users",
+        label: "Kelola Pengguna",
+        icon: UserList,
+      },
+      {
+        href: "/admin/monitoring",
+        label: "Monitoring Dialog Kinerja",
+        icon: MonitorPlay,
+      },
+    ],
+  },
+];
+
+const NAV_GROUPS: Record<Role, NavGroup[]> = {
+  ADMIN: ADMIN_NAV_GROUPS,
+  ATASAN: ATASAN_NAV_GROUPS,
+  PEGAWAI: PEGAWAI_NAV_GROUPS,
+};
 
 function initials(name: string) {
   return name
@@ -124,14 +163,14 @@ function NavItemsList({
   role,
   onItemClick,
 }: {
-  role: "ATASAN" | "PEGAWAI";
+  role: Role;
   onItemClick?: () => void;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentStatus = searchParams.get("status");
 
-  const groups = role === "PEGAWAI" ? PEGAWAI_NAV_GROUPS : ATASAN_NAV_GROUPS;
+  const groups = NAV_GROUPS[role];
 
   return (
     <div className="space-y-5 px-3">
@@ -213,12 +252,12 @@ export function AppShell({
               <RoleTag role={session.role} tone="dark" />
             </div>
           </div>
+          <RoleSwitcher roles={session.roles} activeRole={session.role} />
           <div className="mt-3">
             <LogoutButton />
           </div>
         </div>
       </aside>
-
       {/* Mobile Drawer Backdrop */}
       {mobileOpen && (
         <div
@@ -259,6 +298,7 @@ export function AppShell({
                 <RoleTag role={session.role} tone="dark" />
               </div>
             </div>
+            <RoleSwitcher roles={session.roles} activeRole={session.role} />
             <div className="mt-3">
               <LogoutButton />
             </div>
