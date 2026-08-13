@@ -14,7 +14,7 @@ export interface AspekItemInput {
   kompetensi_dikembangkan?: string;
   id_metode_pengembangan?: number | null;
   metode_pengembangan_lainnya?: string;
-  waktu_pelaksanaan?: string;
+  waktu_pelaksanaan?: string | null;
 }
 
 export interface AspekInput {
@@ -44,13 +44,22 @@ function toNullable(value: string | undefined) {
   return trimmed ? trimmed : null;
 }
 
+function toNullableDate(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  const match = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return null;
+  const [, y, m, d] = match;
+  const date = new Date(Number(y), Number(m) - 1, Number(d));
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 function isEmptyItem(item: AspekItemInput) {
   return (
     !item.dialog_evaluasi?.trim() &&
     !item.kompetensi_dikembangkan?.trim() &&
     !item.id_metode_pengembangan &&
     !item.metode_pengembangan_lainnya?.trim() &&
-    !item.waktu_pelaksanaan?.trim()
+    !item.waktu_pelaksanaan
   );
 }
 
@@ -115,7 +124,7 @@ export async function saveDialogForm(
             metode_pengembangan_lainnya: toNullable(
               item.metode_pengembangan_lainnya,
             ),
-            waktu_pelaksanaan: toNullable(item.waktu_pelaksanaan),
+            waktu_pelaksanaan: toNullableDate(item.waktu_pelaksanaan),
           };
 
           if (item.id && existingIds.has(item.id)) {

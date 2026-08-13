@@ -46,7 +46,7 @@ interface ExistingAspek {
     kompetensi_dikembangkan: string | null;
     id_metode_pengembangan: number | null;
     metode_pengembangan_lainnya: string | null;
-    waktu_pelaksanaan: string | null;
+    waktu_pelaksanaan: Date | null;
   }[];
 }
 
@@ -65,6 +65,14 @@ function emptyItem(): ItemDraft {
     metode_pengembangan_lainnya: "",
     waktu_pelaksanaan: "",
   };
+}
+
+function toDateInputValue(value: Date | null | undefined): string {
+  if (!value) return "";
+  const y = value.getFullYear();
+  const m = String(value.getMonth() + 1).padStart(2, "0");
+  const d = String(value.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 export function DialogForm({
@@ -96,7 +104,7 @@ export function DialogForm({
             ? String(item.id_metode_pengembangan)
             : "",
           metode_pengembangan_lainnya: item.metode_pengembangan_lainnya ?? "",
-          waktu_pelaksanaan: item.waktu_pelaksanaan ?? "",
+          waktu_pelaksanaan: toDateInputValue(item.waktu_pelaksanaan),
         })),
       };
     }),
@@ -257,26 +265,15 @@ export function DialogForm({
             </div>
 
             <div className="flex flex-col gap-5 px-5 py-4">
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor={`${draft.jenis_aspek}-tj`}
-                  className={LABEL_CLASSES}
-                >
-                  Tanggung Jawab Pegawai
-                </label>
-                <textarea
-                  id={`${draft.jenis_aspek}-tj`}
-                  rows={3}
-                  value={draft.tanggung_jawab_pegawai}
-                  onChange={(e) =>
-                    updateAspek(draft.jenis_aspek, {
-                      tanggung_jawab_pegawai: e.target.value,
-                    })
-                  }
-                  placeholder="Langkah atau komitmen yang akan Anda lakukan"
-                  className={TEXTAREA_CLASSES}
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => addItem(draft.jenis_aspek)}
+                disabled={pending !== null}
+                className="inline-flex w-fit items-center gap-1.5 rounded-md border border-outline px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
+              >
+                <PlusIcon size={14} weight="bold" />
+                Tambah Rincian
+              </button>
 
               {draft.items.length > 0 ? (
                 <div className="flex flex-col gap-3">
@@ -390,14 +387,13 @@ export function DialogForm({
                           </label>
                           <input
                             id={`${draft.jenis_aspek}-${itemIndex}-waktu`}
-                            type="text"
+                            type="date"
                             value={item.waktu_pelaksanaan}
                             onChange={(e) =>
                               updateItem(draft.jenis_aspek, itemIndex, {
                                 waktu_pelaksanaan: e.target.value,
                               })
                             }
-                            placeholder="Contoh: Triwulan II 2026"
                             className={INPUT_CLASSES}
                           />
                         </div>
@@ -419,15 +415,28 @@ export function DialogForm({
                 </div>
               ) : null}
 
-              <button
-                type="button"
-                onClick={() => addItem(draft.jenis_aspek)}
-                disabled={pending !== null}
-                className="inline-flex w-fit items-center gap-1.5 rounded-md border border-outline px-3 py-2 text-xs font-semibold text-ink-muted transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
-              >
-                <PlusIcon size={14} weight="bold" />
-                Tambah Rincian
-              </button>
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor={`${draft.jenis_aspek}-tj`}
+                  className={LABEL_CLASSES}
+                >
+                  Tanggung Jawab Pegawai
+                </label>
+                <textarea
+                  id={`${draft.jenis_aspek}-tj`}
+                  rows={3}
+                  value={draft.tanggung_jawab_pegawai}
+                  onChange={(e) =>
+                    updateAspek(draft.jenis_aspek, {
+                      tanggung_jawab_pegawai: e.target.value,
+                    })
+                  }
+                  placeholder="Langkah atau komitmen yang akan Anda lakukan"
+                  className={TEXTAREA_CLASSES}
+                />
+              </div>
+
+              
             </div>
           </section>
         ))}

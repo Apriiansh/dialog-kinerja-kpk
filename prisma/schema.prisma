@@ -109,7 +109,7 @@ model DialogKinerjaItem {
   kompetensi_dikembangkan     String?   @db.Text
   id_metode_pengembangan      Int?
   metode_pengembangan_lainnya String?   @db.VarChar(255)
-  waktu_pelaksanaan           String?   @db.VarChar(150)
+  waktu_pelaksanaan           DateTime?   @default(now())
   created_at                  DateTime  @default(now())
   updated_at                  DateTime  @updatedAt
 

@@ -87,7 +87,7 @@ CREATE TABLE dialog_kinerja_item (
     kompetensi_dikembangkan TEXT,
     id_metode_pengembangan INT, 
     metode_pengembangan_lainnya VARCHAR(255),
-    waktu_pelaksanaan VARCHAR(150),
+    waktu_pelaksanaan DATE NULL DEFAULT NULL,
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -5,7 +5,7 @@ export interface SummaryItem {
   dialog_evaluasi: string | null;
   kompetensi_dikembangkan: string | null;
   metode_pengembangan_lainnya: string | null;
-  waktu_pelaksanaan: string | null;
+  waktu_pelaksanaan: Date | null;
   metode: { nama_metode: string } | null;
 }
 
@@ -23,12 +23,21 @@ function metodeLabel(item: SummaryItem) {
   return item.metode?.nama_metode ?? null;
 }
 
+function formatWaktuPelaksanaan(value: Date | null) {
+  if (!value) return "—";
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(value);
+}
+
 function isEmptyItem(item: SummaryItem) {
   return (
     !item.dialog_evaluasi?.trim() &&
     !item.kompetensi_dikembangkan?.trim() &&
     !metodeLabel(item) &&
-    !item.waktu_pelaksanaan?.trim()
+    !item.waktu_pelaksanaan
   );
 }
 
@@ -124,7 +133,7 @@ export function DialogSummary({ aspek }: { aspek: SummaryAspek[] }) {
                               Waktu Pelaksanaan
                             </span>
                             <span className="leading-5 text-ink">
-                              {item.waktu_pelaksanaan?.trim() || "—"}
+                              {formatWaktuPelaksanaan(item.waktu_pelaksanaan)}
                             </span>
                           </div>
                         </div>
