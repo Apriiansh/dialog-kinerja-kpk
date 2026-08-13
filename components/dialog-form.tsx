@@ -75,6 +75,22 @@ function toDateInputValue(value: Date | null | undefined): string {
   return `${y}-${m}-${d}`;
 }
 
+function dialogEvaluasiLabel(jenis: JenisAspek): string {
+  if (jenis === "KARIR_PENDEK" || jenis === "KARIR_MENENGAH") {
+    return "Tujuan Karir";
+  }
+  switch (jenis) {
+    case "SKP":
+      return "Evaluasi Kinerja";
+    case "GAP_ASESMEN":
+      return "Evaluasi Gap Asesmen";
+    case "PERILAKU":
+      return "Evaluasi Perilaku";
+    default:
+      return "Tujuan / Evaluasi";
+  }
+}
+
 export function DialogForm({
   dialogId,
   periodeTahun,
@@ -291,7 +307,7 @@ export function DialogForm({
                           htmlFor={`${draft.jenis_aspek}-${itemIndex}-tujuan`}
                           className={LABEL_CLASSES}
                         >
-                          Tujuan / Evaluasi
+                          {dialogEvaluasiLabel(draft.jenis_aspek)}
                         </label>
                         <input
                           id={`${draft.jenis_aspek}-${itemIndex}-tujuan`}

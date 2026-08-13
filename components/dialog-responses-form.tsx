@@ -16,9 +16,11 @@ import {
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { autosaveResponses, submitEvaluasi } from "@/lib/actions/atasan";
-import type { DialogSection } from "@/lib/dialog-sections";
+import { buildDialogSections } from "@/lib/dialog-sections";
+import type { AspekPegawaiRow } from "@/lib/dialog-display";
 import { Banner } from "@/components/ui/banner";
 import { SignaturePadField } from "@/components/signature-pad";
+import { AspekPegawaiInput } from "@/components/aspek-pegawai-input";
 
 const SECTION_ICONS = [ChartBarIcon, GaugeIcon, UserFocusIcon, TrendUpIcon] as const;
 
@@ -27,15 +29,15 @@ type SaveState = "idle" | "saving" | "saved";
 export function DialogResponsesForm({
   dialogId,
   canEdit,
-  sections,
-  initialValues,
+  aspek,
 }: {
   dialogId: number;
   canEdit: boolean;
-  sections: DialogSection[];
-  initialValues: Record<string, string>;
+  aspek: AspekPegawaiRow[];
 }) {
   const router = useRouter();
+  const { sections, initialValues } = buildDialogSections(aspek);
+  const aspekById = new Map(aspek.map((a) => [a.id, a]));
   const [values, setValues] = useState(initialValues);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [savedAt, setSavedAt] = useState<string>("");
@@ -180,27 +182,38 @@ export function DialogResponsesForm({
                   <p className="text-xs leading-4 text-ink-muted">{desc}</p>
                 </div>
               </div>
-              <div className="flex flex-col gap-5 px-6 py-5">
-                {fields.map(({ id, label }) => (
-                  <div key={id} className="flex flex-col gap-1.5">
-                    <label
-                      htmlFor={`aspek_${id}`}
-                      className="text-xs font-semibold uppercase tracking-[0.05em] text-ink-muted"
-                    >
-                      {label}
-                    </label>
-                    <textarea
-                      id={`aspek_${id}`}
-                      name={`aspek_${id}`}
-                      value={values[id] ?? ""}
-                      onChange={(e) => handleChange(String(id), e.target.value)}
-                      readOnly={!canEdit}
-                      rows={4}
-                      placeholder="Tulis tanggung jawab atasan…"
-                      className="resize-y rounded-md border border-outline bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus read-only:bg-surface-muted/60 read-only:focus:border-outline read-only:focus:shadow-none"
-                    />
-                  </div>
-                ))}
+              <div className="flex flex-col gap-6 px-6 py-5">
+                {fields.map(({ id, label }) => {
+                  const aspekRow = aspekById.get(id);
+                  return (
+                    <div key={id} className="flex flex-col gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <label
+                          htmlFor={`aspek_${id}`}
+                          className="text-xs font-semibold uppercase tracking-[0.05em] text-ink-muted"
+                        >
+                          {label}
+                        </label>
+                        <textarea
+                          id={`aspek_${id}`}
+                          name={`aspek_${id}`}
+                          value={values[id] ?? ""}
+                          onChange={(e) => handleChange(String(id), e.target.value)}
+                          readOnly={!canEdit}
+                          rows={4}
+                          placeholder="Tulis tanggung jawab atasan…"
+                          className="resize-y rounded-md border border-outline bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus read-only:bg-surface-muted/60 read-only:focus:border-outline read-only:focus:shadow-none"
+                        />
+                      </div>
+                      <div className="rounded-md border border-outline bg-surface-muted/40 px-4 py-3.5">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                          Isian Pegawai
+                        </span>
+                        {aspekRow ? <AspekPegawaiInput aspek={aspekRow} /> : null}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );

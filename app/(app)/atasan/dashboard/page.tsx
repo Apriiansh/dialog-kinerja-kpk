@@ -56,7 +56,7 @@ export default async function AtasanDashboardPage() {
     }),
   ]);
 
-  const drafts = dialogs.filter((d) => d.status === "draft_atasan");
+  const recent = dialogs.slice(0, 5);
 
   const stats = [
     {
@@ -137,21 +137,21 @@ export default async function AtasanDashboardPage() {
             <ArrowRight size={16} weight="bold" />
           </Link>
         </div>
-        {drafts.length === 0 ? (
+        {recent.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-12 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-primary">
               <ChartLineUp size={22} weight="bold" />
             </span>
             <h3 className="text-base font-semibold text-ink">
-              Belum ada dialog draft
+              Belum ada dialog kinerja
             </h3>
             <p className="max-w-sm text-sm leading-5 text-ink-muted">
               Mulai dialog kinerja untuk pegawai Anda; dialog yang sudah
-              dikirim akan masuk ke riwayat.
+              dibuat akan muncul di sini.
             </p>
           </div>
         ) : (
-          <DialogList dialogs={drafts} />
+          <DialogList dialogs={recent} />
         )}
       </section>
     </div>

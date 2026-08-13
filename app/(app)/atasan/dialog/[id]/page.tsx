@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, PencilSimple, PaperPlaneTilt } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/session";
 import { getAtasanDialog } from "@/lib/atasan-queries";
-import { buildDialogSections } from "@/lib/dialog-sections";
 import { StatusBadge } from "@/components/status-badge";
 import { DeleteDialogButton } from "@/components/delete-dialog-button";
 import { DialogSummary } from "@/components/dialog-summary";
@@ -86,9 +85,6 @@ export default async function DialogDetailPage({ params }: PageProps) {
   const status = dialog.status;
   const isDraft = status === "draft_atasan";
   const isReview = status === "menunggu_atasan";
-  const { sections, initialValues } = isReview
-    ? buildDialogSections(dialog.aspek)
-    : { sections: [], initialValues: {} };
 
   return (
     <div className="flex flex-col gap-8">
@@ -173,26 +169,11 @@ export default async function DialogDetailPage({ params }: PageProps) {
       </div>
 
       {isReview ? (
-        <>
-          <section aria-label="Isian pegawai">
-            <div className="mb-3 flex flex-col gap-0.5">
-              <h2 className="text-sm font-semibold text-ink">
-                Isian Pegawai
-              </h2>
-              <p className="text-xs leading-4 text-ink-muted">
-                Kelima aspek yang telah dilengkapi pegawai sebagai bahan reviu.
-              </p>
-            </div>
-            <DialogSummary aspek={dialog.aspek} />
-          </section>
-
-          <DialogResponsesForm
-            dialogId={dialog.id}
-            canEdit
-            sections={sections}
-            initialValues={initialValues}
-          />
-        </>
+        <DialogResponsesForm
+          dialogId={dialog.id}
+          canEdit
+          aspek={dialog.aspek}
+        />
       ) : (
         <>
           <section aria-label="Aspek dialog kinerja">
