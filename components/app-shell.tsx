@@ -229,7 +229,7 @@ export function AppShell({
   return (
     <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col bg-primary-strong lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col bg-primary-strong lg:flex print:hidden">
         <div className="px-5 pb-6 pt-6">
           <Brand />
         </div>
@@ -261,14 +261,14 @@ export function AppShell({
       {/* Mobile Drawer Backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-xs lg:hidden print:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Mobile Sidebar Drawer */}
       {mobileOpen && (
-        <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-primary-strong shadow-2xl lg:hidden">
+        <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-primary-strong shadow-2xl lg:hidden print:hidden">
           <div className="flex items-center justify-between px-5 pb-4 pt-5">
             <Brand />
             <button
@@ -307,7 +307,7 @@ export function AppShell({
       )}
 
       {/* Mobile Header */}
-      <header className="fixed inset-x-0 top-0 z-20 flex h-14 items-center justify-between bg-primary-strong px-4 lg:hidden">
+      <header className="fixed inset-x-0 top-0 z-20 flex h-14 items-center justify-between bg-primary-strong px-4 lg:hidden print:hidden">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -335,8 +335,8 @@ export function AppShell({
       </header>
 
       {/* Main Content Area */}
-      <div className="flex min-h-screen w-full flex-col lg:pl-60">
-        <div className="flex flex-1 flex-col px-4 pb-10 pt-20 lg:px-10 lg:pt-10">
+      <div className="flex min-h-screen w-full flex-col lg:pl-60 print:pl-0">
+        <div className="flex flex-1 flex-col px-4 pb-10 pt-20 lg:px-10 lg:pt-10 print:p-0">
           <div className="mx-auto w-full max-w-6xl flex-1">{children}</div>
         </div>
       </div>

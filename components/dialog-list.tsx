@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { StatusDialog } from "@/generated/prisma/client";
 import { StatusBadge } from "@/components/status-badge";
 import { DeleteDialogButton } from "@/components/delete-dialog-button";
+import { UnduhBuktiLink } from "@/components/unduh-bukti-link";
 
 export interface DialogRow {
   id: number;
@@ -81,13 +82,21 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                         <DeleteDialogButton dialogId={dialog.id} />
                       </>
                     ) : (
-                      <Link
-                        href={`/atasan/dialog/${dialog.id}`}
-                        className="inline-flex h-8 items-center gap-1 rounded-md bg-surface-muted px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-soft"
-                      >
-                        <EyeIcon size={12} weight="bold" />
-                        Detail
-                      </Link>
+                      <>
+                        {dialog.status === "selesai" ? (
+                          <UnduhBuktiLink
+                            path="/atasan/dialog"
+                            dialogId={dialog.id}
+                          />
+                        ) : null}
+                        <Link
+                          href={`/atasan/dialog/${dialog.id}`}
+                          className="inline-flex h-8 items-center gap-1 rounded-md bg-surface-muted px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-soft"
+                        >
+                          <EyeIcon size={12} weight="bold" />
+                          Detail
+                        </Link>
+                      </>
                     )}
                   </div>
                 </td>
