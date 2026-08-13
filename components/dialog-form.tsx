@@ -1,14 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
   FloppyDiskIcon,
+  PaperPlaneTiltIcon,
   PlusIcon,
   TrashIcon,
   WarningIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 import {
   saveDialogForm,
@@ -133,6 +135,67 @@ function dialogEvaluasiLabel(jenis: JenisAspek): string {
   }
 }
 
+const ASPEK_SECTION_LABEL: Record<JenisAspek, string> = {
+  SKP: "Bagian A (SKP)",
+  GAP_ASESMEN: "Bagian B (Gap Asesmen)",
+  PERILAKU: "Bagian C (Perilaku)",
+  KARIR_PENDEK: "Bagian D.1 (Karir Jangka Pendek)",
+  KARIR_MENENGAH: "Bagian D.2 (Karir Jangka Menengah)",
+};
+
+function isItemEmpty(item: ItemDraft): boolean {
+  return (
+    !item.dialog_evaluasi.trim() &&
+    !item.kompetensi_dikembangkan.trim() &&
+    !item.id_metode_pengembangan &&
+    !item.metode_pengembangan_lainnya.trim() &&
+    !item.waktu_pelaksanaan.trim()
+  );
+}
+
+function isItemComplete(
+  item: ItemDraft,
+  isLainnya: (id: string) => boolean,
+): boolean {
+  if (
+    !item.dialog_evaluasi.trim() ||
+    !item.kompetensi_dikembangkan.trim() ||
+    !item.id_metode_pengembangan ||
+    !item.waktu_pelaksanaan.trim()
+  ) {
+    return false;
+  }
+  if (
+    isLainnya(item.id_metode_pengembangan) &&
+    !item.metode_pengembangan_lainnya.trim()
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function validateSubmit(
+  drafts: AspekDraft[],
+  isLainnya: (id: string) => boolean,
+): string | null {
+  const problems: string[] = [];
+  for (const draft of drafts) {
+    const label = ASPEK_SECTION_LABEL[draft.jenis_aspek];
+    const nonEmptyItems = draft.items.filter((item) => !isItemEmpty(item));
+    if (nonEmptyItems.length === 0) {
+      problems.push(`${label} belum memiliki rincian`);
+      continue;
+    }
+    if (nonEmptyItems.some((item) => !isItemComplete(item, isLainnya))) {
+      problems.push(`${label} terdapat rincian yang belum lengkap`);
+    }
+    if (!draft.tanggung_jawab_pegawai.trim()) {
+      problems.push(`${label} tanggung jawab pegawai wajib diisi`);
+    }
+  }
+  return problems.length > 0 ? problems.join("; ") : null;
+}
+
 export function DialogForm({
   dialogId,
   periodeTahun,
@@ -170,6 +233,7 @@ export function DialogForm({
   const [pending, setPending] = useState<"draft" | "submit" | null>(null);
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const isLainnya = useMemo(() => {
     const names = new Map(metodeList.map((m) => [m.id, m.nama_metode]));
@@ -178,6 +242,15 @@ export function DialogForm({
       return name ? name.toLowerCase().includes("lainnya") : false;
     };
   }, [metodeList]);
+
+  useEffect(() => {
+    if (!showConfirm) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowConfirm(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [showConfirm]);
 
   function updateAspek(jenis: JenisAspek, patch: Partial<AspekDraft>) {
     setDrafts((prev) =>
@@ -252,6 +325,17 @@ export function DialogForm({
       setPending(null);
       setNotice("Draft dialog berhasil disimpan.");
     }
+  }
+
+  function handleSubmitClick() {
+    setError(undefined);
+    setNotice(undefined);
+    const validationError = validateSubmit(drafts, isLainnya);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setShowConfirm(true);
   }
 
   return (
@@ -525,7 +609,7 @@ export function DialogForm({
         </button>
         <button
           type="button"
-          onClick={() => handleSubmit("submit")}
+          onClick={handleSubmitClick}
           disabled={pending !== null}
           className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-60"
         >
@@ -539,6 +623,67 @@ export function DialogForm({
           )}
         </button>
       </div>
+
+      {showConfirm ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Konfirmasi kirim dialog"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
+          onClick={() => setShowConfirm(false)}
+        >
+          <div
+            className="flex w-full max-w-md flex-col rounded-lg bg-surface shadow-ambient"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3 border-b border-outline px-6 py-4">
+              <div className="flex flex-col gap-0.5">
+                <h2 className="text-base font-semibold text-ink">
+                  Kirim Dialog Kinerja?
+                </h2>
+                <p className="text-xs leading-4 text-ink-muted">
+                  Anda akan mengirim dialog ini ke atasan.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowConfirm(false)}
+                aria-label="Tutup"
+                className="flex h-8 w-8 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
+              >
+                <XIcon size={16} weight="bold" />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-5 px-6 py-5">
+              <p className="text-sm leading-5 text-ink">
+                Apakah Anda yakin ingin mengirim dialog kinerja ini ke atasan?
+                Setelah dikirim, isian tidak dapat diubah lagi.
+              </p>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(false)}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-outline-strong bg-surface px-5 text-sm font-semibold text-ink transition-colors hover:bg-surface-muted"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowConfirm(false);
+                    handleSubmit("submit");
+                  }}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong"
+                >
+                  <PaperPlaneTiltIcon size={16} weight="bold" />
+                  Ya, Kirim
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

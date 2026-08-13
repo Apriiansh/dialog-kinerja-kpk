@@ -63,6 +63,68 @@ function isEmptyItem(item: AspekItemInput) {
   );
 }
 
+const ASPEK_SECTION_LABEL: Record<JenisAspek, string> = {
+  SKP: "Bagian A (SKP)",
+  GAP_ASESMEN: "Bagian B (Gap Asesmen)",
+  PERILAKU: "Bagian C (Perilaku)",
+  KARIR_PENDEK: "Bagian D.1 (Karir Jangka Pendek)",
+  KARIR_MENENGAH: "Bagian D.2 (Karir Jangka Menengah)",
+};
+
+function isAspekItemComplete(
+  item: AspekItemInput,
+  isLainnya: (id: number | null) => boolean,
+) {
+  if (
+    !item.dialog_evaluasi?.trim() ||
+    !item.kompetensi_dikembangkan?.trim() ||
+    !item.id_metode_pengembangan ||
+    !item.waktu_pelaksanaan?.trim()
+  ) {
+    return false;
+  }
+  if (
+    isLainnya(item.id_metode_pengembangan ?? null) &&
+    !item.metode_pengembangan_lainnya?.trim()
+  ) {
+    return false;
+  }
+  return true;
+}
+
+async function validateSubmitInput(aspekInput: AspekInput[]): Promise<string | null> {
+  const metodeList = await prisma.masterMetodePengembangan.findMany({
+    select: { id: true, nama_metode: true },
+  });
+  const metodeNames = new Map(metodeList.map((m) => [m.id, m.nama_metode]));
+  const isLainnya = (id: number | null) => {
+    if (!id) return false;
+    const name = metodeNames.get(id);
+    return name ? name.toLowerCase().includes("lainnya") : false;
+  };
+
+  const problems: string[] = [];
+  for (const aspek of aspekInput) {
+    const label = ASPEK_SECTION_LABEL[aspek.jenis_aspek] ?? aspek.jenis_aspek;
+    const nonEmptyItems = (aspek.items ?? []).filter(
+      (item) => !isEmptyItem(item),
+    );
+    if (nonEmptyItems.length === 0) {
+      problems.push(`${label} belum memiliki rincian`);
+      continue;
+    }
+    if (
+      nonEmptyItems.some((item) => !isAspekItemComplete(item, isLainnya))
+    ) {
+      problems.push(`${label} terdapat rincian yang belum lengkap`);
+    }
+    if (!aspek.tanggung_jawab_pegawai?.trim()) {
+      problems.push(`${label} tanggung jawab pegawai wajib diisi`);
+    }
+  }
+  return problems.length > 0 ? problems.join("; ") : null;
+}
+
 export async function saveDialogForm(
   dialogId: number,
   mode: "draft" | "submit",
@@ -84,6 +146,15 @@ export async function saveDialogForm(
   for (const aspek of aspekInput) {
     if (!VALID_JENIS.includes(aspek.jenis_aspek)) {
       return { error: "Jenis aspek tidak valid." };
+    }
+  }
+
+  if (mode === "submit") {
+    const validationError = await validateSubmitInput(aspekInput);
+    if (validationError) {
+      return {
+        error: `Lengkapi isian sebelum mengirim ke atasan: ${validationError}`,
+      };
     }
   }
 
