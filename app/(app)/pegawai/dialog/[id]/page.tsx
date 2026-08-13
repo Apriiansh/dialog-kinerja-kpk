@@ -140,7 +140,7 @@ export default async function DialogDetailPage({ params }: PageProps) {
           {isEditable ? (
             <div className="flex flex-col gap-2 rounded-lg border border-outline bg-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm leading-5 text-ink-muted">
-                Lengkapi kelima aspek evaluasi berikut, lalu kirim ke atasan.
+                Lengkapi empat aspek evaluasi berikut, lalu kirim ke atasan.
               </p>
               <Link
                 href={`/pegawai/dialog/${dialog.id}/edit`}

@@ -7,7 +7,7 @@ export default async function HistoryPage() {
   const session = await requireRole("ATASAN");
 
   const dialogs = await prisma.dialogKinerja.findMany({
-    where: { id_atasan: session.id, status: { not: "draft_atasan" } },
+    where: { id_atasan: session.id, status: "selesai" },
     select: {
       id: true,
       periode_tahun: true,
@@ -33,7 +33,7 @@ export default async function HistoryPage() {
           Riwayat Dialog
         </h1>
         <p className="text-sm leading-5 text-ink-muted">
-          Dialog kinerja yang sudah dikirim dan diproses.
+          Dialog kinerja yang telah selesai divalidasi dan dikunci.
         </p>
       </header>
 
@@ -46,8 +46,7 @@ export default async function HistoryPage() {
             Belum ada riwayat
           </h2>
           <p className="max-w-sm text-sm leading-5 text-ink-muted">
-            Dialog yang sudah Anda kirim akan tercatat di sini beserta status
-            prosesnya.
+            Dialog yang telah selesai akan tercatat di sini.
           </p>
         </div>
       ) : (

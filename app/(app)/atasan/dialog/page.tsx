@@ -10,7 +10,7 @@ export default async function DialogIndexPage() {
 
   const [dialogs, pegawai] = await Promise.all([
     prisma.dialogKinerja.findMany({
-      where: { id_atasan: session.id },
+      where: { id_atasan: session.id, status: { not: "selesai" } },
       select: {
         id: true,
         periode_tahun: true,

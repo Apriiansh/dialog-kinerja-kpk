@@ -28,7 +28,7 @@ function StatusNote({ status }: { status: string }) {
   if (status === "menunggu_pegawai") {
     return (
       <p className="text-sm leading-5 text-ink-muted">
-        Dialog telah dikirim. Menunggu pegawai melengkapi isian kelima aspek.
+        Dialog telah dikirim. Menunggu pegawai melengkapi isian empat aspek.
       </p>
     );
   }
