@@ -60,6 +60,17 @@ body {
   font-feature-settings: "cv02", "cv03";
 }
 
+@media print {
+  @page {
+    size: A4;
+    margin: 2.54cm 1.91cm;
+  }
+
+  @page :first {
+    margin-top: 30;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
