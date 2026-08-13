@@ -1,4 +1,4 @@
-import { Eye, PencilSimple } from "@phosphor-icons/react/dist/ssr";
+import { EyeIcon, PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import type { StatusDialog } from "@/generated/prisma/client";
 import { StatusBadge } from "@/components/status-badge";
@@ -72,20 +72,20 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                     {draft ? (
                       <>
                         <Link
-                          href={`/dashboard/dialog/${dialog.id}/edit`}
+                          href={`/atasan/dialog/${dialog.id}/edit`}
                           className="inline-flex h-8 items-center gap-1 rounded-md bg-primary-soft px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-faint"
                         >
-                          <PencilSimple size={12} weight="bold" />
+                          <PencilSimpleIcon size={12} weight="bold" />
                           Edit
                         </Link>
                         <DeleteDialogButton dialogId={dialog.id} />
                       </>
                     ) : (
                       <Link
-                        href={`/dashboard/dialog/${dialog.id}`}
+                        href={`/atasan/dialog/${dialog.id}`}
                         className="inline-flex h-8 items-center gap-1 rounded-md bg-surface-muted px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-soft"
                       >
-                        <Eye size={12} weight="bold" />
+                        <EyeIcon size={12} weight="bold" />
                         Detail
                       </Link>
                     )}

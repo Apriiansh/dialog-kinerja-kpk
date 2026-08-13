@@ -35,13 +35,13 @@ const PEGAWAI_NAV_GROUPS: NavGroup[] = [
     title: "Navigasi",
     items: [
       {
-        href: "/dashboard",
+        href: "/pegawai/dashboard",
         label: "Dashboard",
         icon: SquaresFour,
         exact: true,
       },
       {
-        href: "/dialog",
+        href: "/pegawai/dialog",
         label: "Dialog Kinerja Saya",
         icon: ClipboardText,
       },
@@ -54,18 +54,18 @@ const ATASAN_NAV_GROUPS: NavGroup[] = [
     title: "Navigasi",
     items: [
       {
-        href: "/dashboard",
+        href: "/atasan/dashboard",
         label: "Dashboard",
         icon: SquaresFour,
         exact: true,
       },
       {
-        href: "/dashboard/dialog",
+        href: "/atasan/dialog",
         label: "Dialog Kinerja",
         icon: ChatCircleDots,
       },
       {
-        href: "/dashboard/history",
+        href: "/atasan/history",
         label: "Riwayat",
         icon: ClockCounterClockwise,
       },
@@ -146,7 +146,7 @@ function NavItemsList({
             let active = false;
             if (statusQuery !== undefined) {
               active =
-                pathname === "/dashboard" &&
+                pathname === "/pegawai/dashboard" &&
                 (currentStatus === statusQuery ||
                   (statusQuery === "semua" && !currentStatus));
             } else if (exact) {

@@ -19,7 +19,7 @@ export default async function DialogEditPage({ params }: PageProps) {
   const session = await requireRole("PEGAWAI");
 
   const dialogId = Number(id);
-  if (Number.isNaN(dialogId)) redirect("/dashboard");
+  if (Number.isNaN(dialogId)) redirect("/pegawai/dashboard");
 
   const [dialog, metodeList] = await Promise.all([
     getPegawaiDialog(dialogId, session.id),
@@ -30,9 +30,9 @@ export default async function DialogEditPage({ params }: PageProps) {
     }),
   ]);
 
-  if (!dialog) redirect("/dashboard");
+  if (!dialog) redirect("/pegawai/dashboard");
   if (!canEditDialog(dialog.status)) {
-    redirect(`/dialog/${dialog.id}`);
+    redirect(`/pegawai/dialog/${dialog.id}`);
   }
 
   return (

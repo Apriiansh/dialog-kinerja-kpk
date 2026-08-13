@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestSession } from "@/lib/session";
+import { getRequestSession, homePathForRole } from "@/lib/session";
 
 export async function proxy(request: NextRequest) {
   const session = await getRequestSession(request);
@@ -14,7 +14,9 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isLoggedIn && pathname === "/login") {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(
+      new URL(homePathForRole(session!.role), request.url),
+    );
   }
 
   return NextResponse.next();

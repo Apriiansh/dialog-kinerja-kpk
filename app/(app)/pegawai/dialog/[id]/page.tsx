@@ -97,7 +97,7 @@ export default async function DialogDetailPage({ params }: PageProps) {
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
         <Link
-          href="/dashboard"
+          href="/pegawai/dashboard"
           className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
         >
           <ArrowLeft size={16} weight="bold" />
@@ -143,7 +143,7 @@ export default async function DialogDetailPage({ params }: PageProps) {
                 Lengkapi kelima aspek evaluasi berikut, lalu kirim ke atasan.
               </p>
               <Link
-                href={`/dialog/${dialog.id}/edit`}
+                href={`/pegawai/dialog/${dialog.id}/edit`}
                 className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong"
               >
                 <PencilSimple size={16} weight="bold" />

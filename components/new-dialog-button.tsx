@@ -1,8 +1,8 @@
 "use client";
 
-import { MagnifyingGlass, Plus, X } from "@phosphor-icons/react";
+import { MagnifyingGlassIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
 import { useEffect, useMemo, useState } from "react";
-import { startDialog } from "@/app/(app)/actions";
+import { startDialog } from "@/lib/actions/atasan";
 
 export interface PegawaiOption {
   id: number;
@@ -65,8 +65,8 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
         onClick={() => setOpen(true)}
         className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong"
       >
-        <Plus size={16} weight="bold" />
-        Dialog Baru
+        <PlusIcon size={16} weight="bold" />
+        Mulai Dialog
       </button>
 
       {open ? (
@@ -96,13 +96,13 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
                 aria-label="Tutup"
                 className="flex h-8 w-8 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
               >
-                <X size={16} weight="bold" />
+                <XIcon size={16} weight="bold" />
               </button>
             </div>
 
             <div className="flex flex-col gap-3 border-b border-outline px-6 py-4 sm:flex-row">
               <div className="relative flex-1">
-                <MagnifyingGlass
+                <MagnifyingGlassIcon
                   size={16}
                   weight="bold"
                   className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted"

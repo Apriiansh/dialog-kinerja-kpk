@@ -5,7 +5,11 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { sessionOptions, type SessionData } from "@/lib/session";
+import {
+  homePathForRole,
+  sessionOptions,
+  type SessionData,
+} from "@/lib/session";
 
 export interface LoginState {
   error?: string;
@@ -42,5 +46,5 @@ export async function loginAction(
   session.role = user.role;
   await session.save();
 
-  redirect("/dashboard");
+  redirect(homePathForRole(user.role));
 }

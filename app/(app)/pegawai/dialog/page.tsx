@@ -24,27 +24,27 @@ const CTA: Record<
 > = {
   draft_atasan: {
     label: "Ditunggu Atasan",
-    href: (id) => `/dialog/${id}`,
+    href: (id) => `/pegawai/dialog/${id}`,
     variant: "plain",
   },
   menunggu_pegawai: {
     label: "Isi Dialog",
-    href: (id) => `/dialog/${id}/edit`,
+    href: (id) => `/pegawai/dialog/${id}/edit`,
     variant: "primary",
   },
   menunggu_atasan: {
     label: "Lihat Detail",
-    href: (id) => `/dialog/${id}`,
+    href: (id) => `/pegawai/dialog/${id}`,
     variant: "plain",
   },
   menunggu_validasi: {
     label: "Validasi",
-    href: (id) => `/dialog/${id}`,
+    href: (id) => `/pegawai/dialog/${id}`,
     variant: "primary",
   },
   selesai: {
     label: "Lihat Detail",
-    href: (id) => `/dialog/${id}`,
+    href: (id) => `/pegawai/dialog/${id}`,
     variant: "plain",
   },
 };
@@ -152,7 +152,7 @@ export default async function PegawaiDialogListPage({
         {stats.map(({ key, label, count, icon: Icon, className }) => (
           <Link
             key={key}
-            href={`/dialog?status=${key}`}
+            href={`/pegawai/dialog?status=${key}`}
             className={`flex items-center gap-3.5 rounded-lg border bg-surface px-5 py-4 transition-all hover:border-outline-strong hover:shadow-ambient ${
               activeStatus === key ? "border-primary ring-1 ring-primary/20" : "border-outline"
             }`}
@@ -183,7 +183,11 @@ export default async function PegawaiDialogListPage({
               return (
                 <Link
                   key={key}
-                  href={key === "semua" ? "/dialog" : `/dialog?status=${key}`}
+                  href={
+                    key === "semua"
+                      ? "/pegawai/dialog"
+                      : `/pegawai/dialog?status=${key}`
+                  }
                   aria-current={active ? "page" : undefined}
                   className={`rounded-md px-3.5 py-1.5 text-xs font-semibold transition-colors ${
                     active

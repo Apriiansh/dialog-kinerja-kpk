@@ -13,7 +13,7 @@ import {
 import {
   saveDialogForm,
   type AspekInput,
-} from "@/app/(app)/dialog/[id]/actions";
+} from "@/lib/actions/pegawai";
 import { ASPEK_DESC, ASPEK_LABEL, ASPEK_ORDER } from "@/lib/aspek";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
@@ -192,7 +192,7 @@ export function DialogForm({
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-3">
         <Link
-          href={`/dialog/${dialogId}`}
+          href={`/pegawai/dialog/${dialogId}`}
           className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
         >
           <ArrowLeftIcon size={16} weight="bold" />

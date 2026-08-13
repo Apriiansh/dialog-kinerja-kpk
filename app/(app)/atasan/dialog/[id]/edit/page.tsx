@@ -3,9 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
-import { buildDialogSections } from "@/lib/dialog-sections";
 import { StatusBadge } from "@/components/status-badge";
-import { DialogResponsesForm } from "@/components/dialog-responses-form";
+import { DeskripsiKinerjaForm } from "@/components/deskripsi-kinerja-form";
 
 export default async function EditDialogPage({
   params,
@@ -17,29 +16,29 @@ export default async function EditDialogPage({
 
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: Number(id), id_atasan: session.id },
-    include: {
+    select: {
+      id: true,
+      deskripsi_kinerja: true,
+      status: true,
+      periode_tahun: true,
       pegawai: {
         select: {
-          npp: true,
           nama_pegawai: true,
           nama_jabatan: true,
           unit_kerja: true,
         },
       },
-      aspek: { select: { id: true, jenis_aspek: true, tanggung_jawab_atasan: true } },
     },
   });
-  if (!dialog) redirect("/dashboard/dialog");
-  if (dialog.status !== "draft_atasan") redirect(`/dashboard/dialog/${dialog.id}`);
-
-  const { sections, initialValues } = buildDialogSections(dialog.aspek);
+  if (!dialog) redirect("/atasan/dialog");
+  if (dialog.status !== "draft_atasan") redirect(`/atasan/dialog/${dialog.id}`);
 
   return (
     <div className="flex flex-col gap-10">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
           <Link
-            href={`/dashboard/dialog/${dialog.id}`}
+            href={`/atasan/dialog/${dialog.id}`}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-strong transition-colors hover:text-primary"
           >
             <ArrowLeft size={14} weight="bold" />
@@ -58,12 +57,9 @@ export default async function EditDialogPage({
         <StatusBadge status={dialog.status} />
       </header>
 
-      <DialogResponsesForm
+      <DeskripsiKinerjaForm
         dialogId={dialog.id}
-        canEdit
-        sections={sections}
-        initialValues={initialValues}
-        detailHref={`/dashboard/dialog/${dialog.id}`}
+        initialValue={dialog.deskripsi_kinerja ?? ""}
       />
     </div>
   );

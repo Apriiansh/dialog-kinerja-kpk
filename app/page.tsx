@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
+import { homePathForRole, requireAuth } from "@/lib/session";
 
-export default function Home() {
-  redirect("/dashboard");
+export default async function Home() {
+  const session = await requireAuth();
+  redirect(homePathForRole(session.role));
 }

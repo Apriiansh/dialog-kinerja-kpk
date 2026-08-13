@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SealCheckIcon, WarningIcon } from "@phosphor-icons/react";
-import { validateDialog } from "@/app/(app)/dialog/[id]/actions";
+import { validateDialog } from "@/lib/actions/pegawai";
 import { Button } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
 import { SignaturePadField } from "@/components/signature-pad";

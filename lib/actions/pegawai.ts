@@ -149,11 +149,11 @@ export async function saveDialogForm(
     return { error: "Gagal menyimpan dialog. Silakan coba lagi." };
   }
 
-  revalidatePath("/dashboard");
-  revalidatePath(`/dialog/${dialog.id}`);
+  revalidatePath("/pegawai/dashboard");
+  revalidatePath(`/pegawai/dialog/${dialog.id}`);
 
   if (mode === "submit") {
-    redirect(`/dialog/${dialog.id}`);
+    redirect(`/pegawai/dialog/${dialog.id}`);
   }
 
   return {};
@@ -212,7 +212,7 @@ export async function validateDialog(
     return { error: "Gagal menyimpan validasi. Silakan coba lagi." };
   }
 
-  revalidatePath("/dashboard");
-  revalidatePath(`/dialog/${dialog.id}`);
+  revalidatePath("/pegawai/dashboard");
+  revalidatePath(`/pegawai/dialog/${dialog.id}`);
   return {};
 }

@@ -48,8 +48,12 @@ export async function requireAuth() {
   return session;
 }
 
+export function homePathForRole(role: Role) {
+  return role === "ATASAN" ? "/atasan/dashboard" : "/pegawai/dashboard";
+}
+
 export async function requireRole(...roles: Role[]) {
   const session = await requireAuth();
-  if (!roles.includes(session.role)) redirect("/dashboard");
+  if (!roles.includes(session.role)) redirect(homePathForRole(session.role));
   return session;
 }

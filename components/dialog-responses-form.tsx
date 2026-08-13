@@ -1,23 +1,26 @@
 "use client";
 
 import {
-  ChartBar,
-  Check,
-  CheckCircle,
-  CloudArrowUp,
-  CloudCheck,
-  Gauge,
-  PaperPlaneTilt,
-  SpinnerGap,
-  TrendUp,
-  UserFocus,
+  ChartBarIcon,
+  CheckIcon,
+  CheckCircleIcon,
+  CloudArrowUpIcon,
+  CloudCheckIcon,
+  GaugeIcon,
+  PaperPlaneTiltIcon,
+  SpinnerGapIcon,
+  TrendUpIcon,
+  UserFocusIcon,
+  WarningIcon,
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { autosaveResponses, submitDialog } from "@/app/(app)/actions";
+import { autosaveResponses, submitEvaluasi } from "@/lib/actions/atasan";
 import type { DialogSection } from "@/lib/dialog-sections";
+import { Banner } from "@/components/ui/banner";
+import { SignaturePadField } from "@/components/signature-pad";
 
-const SECTION_ICONS = [ChartBar, Gauge, UserFocus, TrendUp] as const;
+const SECTION_ICONS = [ChartBarIcon, GaugeIcon, UserFocusIcon, TrendUpIcon] as const;
 
 type SaveState = "idle" | "saving" | "saved";
 
@@ -26,19 +29,21 @@ export function DialogResponsesForm({
   canEdit,
   sections,
   initialValues,
-  detailHref,
 }: {
   dialogId: number;
   canEdit: boolean;
   sections: DialogSection[];
   initialValues: Record<string, string>;
-  detailHref: string;
 }) {
   const router = useRouter();
   const [values, setValues] = useState(initialValues);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [savedAt, setSavedAt] = useState<string>("");
   const [toast, setToast] = useState<string | null>(null);
+  const [setuju, setSetuju] = useState(false);
+  const [ttdDataUrl, setTtdDataUrl] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string>();
+  const [pending, setPending] = useState(false);
   const valuesRef = useRef(values);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -93,30 +98,54 @@ export function DialogResponsesForm({
   const handleSaveNow = async () => {
     if (timer.current) clearTimeout(timer.current);
     await persist(valuesRef.current);
-    notify("Data dialog berhasil disimpan");
-    setTimeout(() => router.push(detailHref), 1200);
+    notify("Tanggung jawab atasan berhasil disimpan");
+    router.refresh();
   };
 
   const handleSubmit = async () => {
+    if (pending) return;
+    if (!setuju) {
+      setSubmitError("Centang persetujuan untuk melanjutkan.");
+      return;
+    }
+    if (!ttdDataUrl) {
+      setSubmitError("Tanda tangan wajib diisi.");
+      return;
+    }
+
+    setSubmitError(undefined);
+    setPending(true);
     if (timer.current) clearTimeout(timer.current);
     await persist(valuesRef.current);
-    await submitDialog(dialogId);
+
+    const result = await submitEvaluasi(dialogId, {
+      setuju,
+      ttdDataUrl,
+    });
+
+    if (result?.error) {
+      setSubmitError(result.error);
+      setPending(false);
+      return;
+    }
+
+    router.refresh();
   };
 
   const saveMeta =
     saveState === "saving" ? (
       <span className="flex items-center gap-1.5 text-xs font-medium text-ink-muted">
-        <SpinnerGap size={14} weight="bold" className="animate-spin" />
+        <SpinnerGapIcon size={14} weight="bold" className="animate-spin" />
         Menyimpan…
       </span>
     ) : saveState === "saved" ? (
       <span className="flex items-center gap-1.5 text-xs font-medium text-secondary">
-        <CloudCheck size={14} weight="fill" />
+        <CloudCheckIcon size={14} weight="fill" />
         Tersimpan otomatis · {savedAt}
       </span>
     ) : (
       <span className="flex items-center gap-1.5 text-xs font-medium text-ink-muted">
-        <CloudArrowUp size={14} weight="bold" />
+        <CloudArrowUpIcon size={14} weight="bold" />
         Perubahan tersimpan otomatis
       </span>
     );
@@ -129,7 +158,7 @@ export function DialogResponsesForm({
           className="fixed left-1/2 top-4 z-50 animate-toast-in"
         >
           <div className="flex items-center gap-2.5 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-on-primary shadow-ambient">
-            <CheckCircle size={18} weight="fill" />
+            <CheckCircleIcon size={18} weight="fill" />
             {toast}
           </div>
         </div>
@@ -178,6 +207,51 @@ export function DialogResponsesForm({
         })}
       </section>
 
+      <section
+        aria-labelledby="evaluasi-heading"
+        className="rounded-lg border border-outline bg-surface"
+      >
+        <div className="border-b border-outline px-5 py-3.5">
+          <h2
+            id="evaluasi-heading"
+            className="text-sm font-semibold text-ink"
+          >
+            Validasi &amp; Tanda Tangan (Atasan)
+          </h2>
+          <p className="mt-0.5 text-xs leading-4 text-ink-muted">
+            Tinjau kembali isian pegawai di atas, lalu beri persetujuan dan
+            tanda tangan Anda.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-5 px-5 py-4">
+          {submitError ? (
+            <Banner tone="error" icon={<WarningIcon size={18} weight="fill" />}>
+              {submitError}
+            </Banner>
+          ) : null}
+
+          <label className="flex cursor-pointer items-start gap-3 text-sm leading-5 text-ink">
+            <input
+              type="checkbox"
+              checked={setuju}
+              onChange={(e) => setSetuju(e.target.checked)}
+              disabled={pending}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-outline-strong accent-[#1e3a8a]"
+            />
+            <span>
+              Saya telah membaca dan menyetujui seluruh isi dialog kinerja ini.
+            </span>
+          </label>
+
+          <SignaturePadField
+            onChange={setTtdDataUrl}
+            disabled={pending}
+            label="Tanda Tangan Atasan"
+          />
+        </div>
+      </section>
+
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-outline bg-surface/90 px-4 py-3 backdrop-blur lg:pl-60">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3">
           {saveMeta}
@@ -185,20 +259,20 @@ export function DialogResponsesForm({
             <button
               type="button"
               onClick={handleSaveNow}
-              disabled={!canEdit}
+              disabled={!canEdit || pending}
               className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-outline-strong bg-surface px-5 text-sm font-semibold text-ink transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <Check size={16} weight="bold" />
+              <CheckIcon size={16} weight="bold" />
               Simpan
             </button>
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!canEdit}
+              disabled={!canEdit || pending}
               className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <PaperPlaneTilt size={16} weight="bold" />
-              Simpan & Kirim
+              <PaperPlaneTiltIcon size={16} weight="bold" />
+              {pending ? "Mengirim…" : "Simpan & Kirim Evaluasi"}
             </button>
           </div>
         </div>

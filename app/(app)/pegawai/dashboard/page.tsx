@@ -31,27 +31,27 @@ const CTA: Record<
 > = {
   draft_atasan: {
     label: "Ditunggu",
-    href: (id) => `/dialog/${id}`,
+    href: (id) => `/pegawai/dialog/${id}`,
     variant: "plain",
   },
   menunggu_pegawai: {
     label: "Isi Dialog",
-    href: (id) => `/dialog/${id}/edit`,
+    href: (id) => `/pegawai/dialog/${id}/edit`,
     variant: "primary",
   },
   menunggu_atasan: {
     label: "Lihat Detail",
-    href: (id) => `/dialog/${id}`,
+    href: (id) => `/pegawai/dialog/${id}`,
     variant: "plain",
   },
   menunggu_validasi: {
     label: "Validasi",
-    href: (id) => `/dialog/${id}`,
+    href: (id) => `/pegawai/dialog/${id}`,
     variant: "primary",
   },
   selesai: {
     label: "Lihat Detail",
-    href: (id) => `/dialog/${id}`,
+    href: (id) => `/pegawai/dialog/${id}`,
     variant: "plain",
   },
 };
@@ -65,12 +65,14 @@ function filledAspekCount(
   ).length;
 }
 
-export async function PegawaiDashboard({
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+export default async function PegawaiDashboardPage({
   searchParams,
 }: {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: SearchParams;
 }) {
-  if (searchParams) await searchParams;
+  await searchParams;
 
   const session = await requireAuth();
 
@@ -173,7 +175,7 @@ export async function PegawaiDashboard({
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-ink">Status Dialog Kinerja</h2>
           <Link
-            href="/dialog"
+            href="/pegawai/dialog"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-primary-strong"
           >
             Lihat Halaman Dialog Kinerja Saya
@@ -184,7 +186,7 @@ export async function PegawaiDashboard({
           {stats.map(({ key, label, count, icon: Icon, className }) => (
             <Link
               key={key}
-              href={`/dialog?status=${key}`}
+              href={`/pegawai/dialog?status=${key}`}
               aria-label={`Lihat dialog berstatus ${label}`}
               className="flex items-center gap-3 rounded-lg border border-outline bg-surface px-5 py-4 transition-colors hover:border-outline-strong hover:shadow-ambient"
             >
@@ -227,7 +229,7 @@ export async function PegawaiDashboard({
               Tidak ada dialog kinerja yang membutuhkan tindakan pengisian atau validasi dari Anda saat ini.
             </p>
             <Link
-              href="/dialog"
+              href="/pegawai/dialog"
               className="mt-2 inline-flex items-center gap-2 rounded-md border border-outline px-4 py-2 text-xs font-semibold text-ink hover:bg-surface-muted"
             >
               Buka Semua Dialog Kinerja Saya
