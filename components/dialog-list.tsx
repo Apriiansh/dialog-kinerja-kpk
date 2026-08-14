@@ -61,9 +61,8 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                 </td>
                 <td className="px-6 py-4">
                   <span
-                    className={`text-xs font-semibold ${
-                      lengkap ? "text-secondary" : "text-amber-800"
-                    }`}
+                    className={`text-xs font-semibold ${lengkap ? "text-secondary" : "text-amber-800"
+                      }`}
                   >
                     {lengkap ? "Lengkap" : "Belum lengkap"}
                   </span>

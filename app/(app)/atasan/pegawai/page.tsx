@@ -112,9 +112,8 @@ export default async function AtasanPegawaiPage() {
                           {p.nama_pegawai}
                         </Link>
                         <span
-                          className={`text-xs ${
-                            p.is_active ? "text-ink-muted" : "text-ink-muted/60"
-                          }`}
+                          className={`text-xs ${p.is_active ? "text-ink-muted" : "text-ink-muted/60"
+                            }`}
                         >
                           NPP {p.npp}
                         </span>
@@ -127,9 +126,8 @@ export default async function AtasanPegawaiPage() {
                     </div>
                   </TableCell>
                   <TableCell
-                    className={`truncate px-5 py-4 text-sm ${
-                      p.is_active ? "text-ink" : "text-ink-muted/60"
-                    }`}
+                    className={`truncate px-5 py-4 text-sm ${p.is_active ? "text-ink" : "text-ink-muted/60"
+                      }`}
                   >
                     {p.tanggal_bergabung ? formatTanggal(p.tanggal_bergabung) : "—"}
                   </TableCell>
