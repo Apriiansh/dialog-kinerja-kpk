@@ -89,7 +89,7 @@ export default async function AtasanDashboardPage() {
             Kelola dialog kinerja pegawai Anda di sini.
           </p>
         </div>
-        <RoleTag role={session.role} />
+        {/* <RoleTag role={session.role} /> */}
       </header>
 
       <section

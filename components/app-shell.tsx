@@ -7,21 +7,19 @@ import {
   ClockCounterClockwiseIcon,
   ClipboardTextIcon,
   SignOutIcon,
-  ListIcon,
   XIcon,
   UsersIcon,
   UserListIcon,
   MonitorPlayIcon,
   ArrowsClockwiseIcon,
-  UserCircleIcon,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { logoutAction } from "@/app/(app)/actions";
 import type { Role, SessionData } from "@/lib/session";
-import { RoleTag } from "./role-tag";
-import { RoleSwitcher } from "./role-switcher";
+import { TopBar } from "./top-bar";
+import { AppFooter } from "./app-footer";
 
 type NavItem = {
   href: string;
@@ -139,35 +137,12 @@ function Brand() {
       <Image
         src="/logo-kpk.png"
         alt="Logo KPK"
-        width={160}
+        width={170}
         height={64}
         priority
-        className="h-auto w-20"
+        className="h-auto w-30"
       />
-      <div className="flex flex-col leading-none">
-        <span className="text-sm font-semibold text-white">Dialog Kinerja</span>
-        <span className="mt-1 text-[11px] font-medium text-white/50">
-          Biro SDM
-        </span>
-      </div>
     </div>
-  );
-}
-
-function LogoutButton({ className }: { className?: string }) {
-  return (
-    <form action={logoutAction}>
-      <button
-        type="submit"
-        className={
-          className ??
-          "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-        }
-      >
-        <SignOutIcon size={18} weight="bold" />
-        Keluar
-      </button>
-    </form>
   );
 }
 
@@ -212,10 +187,11 @@ function NavItemsList({
                 href={href}
                 onClick={onItemClick}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${active
+                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  active
                     ? "bg-white/15 font-semibold text-white shadow-xs"
                     : "text-white/60 hover:bg-white/5 hover:text-white"
-                  }`}
+                }`}
               >
                 <Icon size={18} weight={active ? "fill" : "regular"} />
                 {label}
@@ -225,6 +201,23 @@ function NavItemsList({
         </div>
       ))}
     </div>
+  );
+}
+
+function LogoutButton({ className }: { className?: string }) {
+  return (
+    <form action={logoutAction}>
+      <button
+        type="submit"
+        className={
+          className ??
+          "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white cursor-pointer"
+        }
+      >
+        <SignOutIcon size={18} weight="bold" />
+        Keluar
+      </button>
+    </form>
   );
 }
 
@@ -240,124 +233,65 @@ export function AppShell({
   return (
     <div className="flex min-h-screen">
       {/* Desktop Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col bg-primary-strong lg:flex print:hidden">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-primary-strong lg:flex print:hidden shadow-lg border-r border-white/5">
         <div className="px-5 pb-6 pt-6">
           <Brand />
         </div>
 
-        <nav className="flex-1 overflow-y-auto">
-          <Suspense fallback={<div className="p-4 text-xs text-white/40">Loading navigation...</div>}>
+        <nav className="flex-1 overflow-y-auto py-2">
+          <Suspense fallback={<div className="p-4 text-xs text-white/40">Memuat navigasi...</div>}>
             <NavItemsList role={session.role} />
           </Suspense>
         </nav>
 
         <div className="mt-auto border-t border-white/10 p-4">
-          <Link
-            href={`/${session.role.toLowerCase()}/profil`}
-            title="Buka Profil Pengguna"
-            className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/10 group"
-          >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white shadow-xs ring-2 ring-white/20 group-hover:ring-white/40">
-              {initials(session.nama)}
-            </div>
-            <div className="flex min-w-0 flex-col gap-0.5">
-              <span className="truncate text-xs sm:text-sm font-medium text-white group-hover:text-blue-200 transition-colors">
-                {session.nama}
-              </span>
-              <RoleTag role={session.role} tone="dark" />
-            </div>
-          </Link>
-          <RoleSwitcher roles={session.roles} activeRole={session.role} />
-          <div className="mt-3">
-            <LogoutButton />
-          </div>
+          <LogoutButton />
         </div>
       </aside>
+
       {/* Mobile Drawer Backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/50 backdrop-blur-xs lg:hidden print:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs lg:hidden print:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Mobile Sidebar Drawer */}
       {mobileOpen && (
-        <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-primary-strong shadow-2xl lg:hidden print:hidden">
+        <aside className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-primary-strong shadow-2xl lg:hidden print:hidden">
           <div className="flex items-center justify-between px-5 pb-4 pt-5">
             <Brand />
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
-              className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
+              className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white cursor-pointer"
+              aria-label="Tutup menu"
             >
               <XIcon size={20} weight="bold" />
             </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto">
-            <Suspense fallback={<div className="p-4 text-xs text-white/40">Loading navigation...</div>}>
+          <nav className="flex-1 overflow-y-auto py-2">
+            <Suspense fallback={<div className="p-4 text-xs text-white/40">Memuat navigasi...</div>}>
               <NavItemsList role={session.role} onItemClick={() => setMobileOpen(false)} />
             </Suspense>
           </nav>
 
           <div className="mt-auto border-t border-white/10 p-4">
-            <Link
-              href={`/${session.role.toLowerCase()}/profil`}
-              onClick={() => setMobileOpen(false)}
-              title="Buka Profil Pengguna"
-              className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/10 group"
-            >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white shadow-xs ring-2 ring-white/20 group-hover:ring-white/40">
-                {initials(session.nama)}
-              </div>
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <span className="truncate text-xs sm:text-sm font-medium text-white group-hover:text-blue-200 transition-colors">
-                  {session.nama}
-                </span>
-                <RoleTag role={session.role} tone="dark" />
-              </div>
-            </Link>
-            <RoleSwitcher roles={session.roles} activeRole={session.role} />
-            <div className="mt-3">
-              <LogoutButton />
-            </div>
+            <LogoutButton />
           </div>
         </aside>
       )}
 
-      {/* Mobile Header */}
-      <header className="fixed inset-x-0 top-0 z-20 flex h-14 items-center justify-between bg-primary-strong px-4 lg:hidden print:hidden">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setMobileOpen(true)}
-            className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
-            aria-label="Buka menu navigasi"
-          >
-            <ListIcon size={22} weight="bold" />
-          </button>
-          <Image
-            src="/logo-kpk.png"
-            alt="Logo KPK"
-            width={96}
-            height={38}
-            priority
-            className="h-8 w-auto"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-xs font-bold text-white">
-            {initials(session.nama)}
-          </span>
-          <LogoutButton className="flex items-center justify-center rounded-md p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white" />
-        </div>
-      </header>
+      {/* Top Bar (Unified Desktop & Mobile) */}
+      <TopBar session={session} onOpenMobile={() => setMobileOpen(true)} />
 
       {/* Main Content Area */}
       <div className="flex min-h-screen w-full flex-col lg:pl-60 print:pl-0">
-        <div className="flex flex-1 flex-col px-4 pb-10 pt-20 lg:px-10 lg:pt-10 print:p-0">
+        <div className="flex flex-1 flex-col px-4 pb-6 pt-16 sm:px-6 lg:px-8 lg:pt-18 print:p-0">
           <div className="mx-auto w-full max-w-6xl flex-1">{children}</div>
+          <AppFooter />
         </div>
       </div>
     </div>

@@ -85,11 +85,10 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
         </span>
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
           <label
-            className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm font-semibold transition-colors ${
-              tercapai
+            className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm font-semibold transition-colors ${tercapai
                 ? "border-primary bg-primary-soft/40 text-primary-strong"
                 : "border-outline text-ink hover:border-outline-strong"
-            }`}
+              }`}
           >
             <input
               type="checkbox"
@@ -102,11 +101,10 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
             Tercapai
           </label>
           <label
-            className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm font-semibold transition-colors ${
-              tidakTercapai
+            className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm font-semibold transition-colors ${tidakTercapai
                 ? "border-primary bg-primary-soft/40 text-primary-strong"
                 : "border-outline text-ink hover:border-outline-strong"
-            }`}
+              }`}
           >
             <input
               type="checkbox"
