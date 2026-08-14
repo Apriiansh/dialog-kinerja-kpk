@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -80,11 +80,10 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
             return (
               <label
                 key={option.value}
-                className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm font-semibold transition-colors ${
-                  active
+                className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm font-semibold transition-colors ${active
                     ? "border-primary bg-primary-soft/40 text-primary-strong"
                     : "border-outline text-ink hover:border-outline-strong"
-                }`}
+                  }`}
               >
                 <input
                   type="radio"

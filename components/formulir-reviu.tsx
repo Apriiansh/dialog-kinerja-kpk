@@ -148,7 +148,7 @@ export function FormulirReviu({ reviu }: { reviu: FormulirReviuData }) {
 
       <div className="mt-3">
         <p className="text-justify">
-          Telah  Dialog Kinerja pada tanggal{" "}
+          Telah dilaksanakan Dialog Kinerja pada tanggal{" "}
           <span className="font-semibold">
             {formatWaktuPelaksanaan(tanggalDialog)}
           </span>
