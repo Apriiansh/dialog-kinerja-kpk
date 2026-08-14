@@ -1,34 +1,42 @@
-import { CheckCircleIcon, XCircleIcon } from "@phosphor-icons/react/dist/ssr";
-import type { StatusTindakLanjut } from "@/generated/prisma/enums";
-
-const STATUS: Record<
-  StatusTindakLanjut,
-  { label: string; className: string; icon: typeof CheckCircleIcon | typeof XCircleIcon }
-> = {
-  TERCAPAI: {
-    label: "Tercapai",
-    className: "bg-status-green-soft text-status-green",
-    icon: CheckCircleIcon,
-  },
-  TIDAK_TERCAPAI: {
-    label: "Tidak Tercapai",
-    className: "bg-error-container text-on-error-container",
-    icon: XCircleIcon,
-  },
-};
+import {
+  CheckCircleIcon,
+  XCircleIcon,
+  WarningCircleIcon,
+} from "@phosphor-icons/react/dist/ssr";
 
 export function TindakLanjutBadge({
-  status,
+  is_tercapai,
+  is_tidak_tercapai,
 }: {
-  status: StatusTindakLanjut;
+  is_tercapai: boolean;
+  is_tidak_tercapai: boolean;
 }) {
-  const { label, className, icon: Icon } = STATUS[status];
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-bold leading-4 ${className}`}
-    >
-      <Icon size={12} weight="bold" />
-      {label}
-    </span>
-  );
+  if (is_tercapai && is_tidak_tercapai) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-status-amber-soft px-2.5 py-1 text-[11px] font-bold leading-4 text-status-amber">
+        <WarningCircleIcon size={12} weight="bold" />
+        Tercapai & Tidak Tercapai
+      </span>
+    );
+  }
+
+  if (is_tercapai) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-status-green-soft px-2.5 py-1 text-[11px] font-bold leading-4 text-status-green">
+        <CheckCircleIcon size={12} weight="bold" />
+        Tercapai
+      </span>
+    );
+  }
+
+  if (is_tidak_tercapai) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-error-container px-2.5 py-1 text-[11px] font-bold leading-4 text-on-error-container">
+        <XCircleIcon size={12} weight="bold" />
+        Tidak Tercapai
+      </span>
+    );
+  }
+
+  return null;
 }

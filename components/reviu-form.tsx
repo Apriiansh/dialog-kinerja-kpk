@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRightIcon, WarningIcon } from "@phosphor-icons/react";
 import { createReviu, saveReviu } from "@/lib/actions/reviu";
-import type { StatusTindakLanjut } from "@/generated/prisma/enums";
 import { Button } from "@/components/ui/button";
 import { Banner } from "@/components/ui/banner";
 import { Field } from "@/components/ui/field";
@@ -13,8 +12,10 @@ interface ReviuFormProps {
   dialogId?: number;
   reviuId?: number;
   initial?: {
-    status_tindaklanjut: StatusTindakLanjut;
-    penjelasan: string;
+    is_tercapai: boolean;
+    is_tidak_tercapai: boolean;
+    penjelasan_tercapai?: string | null;
+    penjelasan_tidak_tercapai?: string | null;
     rencana_tindak_lanjut?: string | null;
     tanggal_next_reviu?: string;
   };
@@ -22,11 +23,19 @@ interface ReviuFormProps {
 
 export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
   const router = useRouter();
-  const [status, setStatus] = useState<StatusTindakLanjut>(
-    initial?.status_tindaklanjut ?? "TERCAPAI",
+  const [tercapai, setTercapai] = useState(initial?.is_tercapai ?? false);
+  const [tidakTercapai, setTidakTercapai] = useState(
+    initial?.is_tidak_tercapai ?? false,
   );
-  const [penjelasan, setPenjelasan] = useState(initial?.penjelasan ?? "");
-  const [rencana, setRencana] = useState(initial?.rencana_tindak_lanjut ?? "");
+  const [penjelasanTercapai, setPenjelasanTercapai] = useState(
+    initial?.penjelasan_tercapai ?? "",
+  );
+  const [penjelasanTidakTercapai, setPenjelasanTidakTercapai] = useState(
+    initial?.penjelasan_tidak_tercapai ?? "",
+  );
+  const [rencana, setRencana] = useState(
+    initial?.rencana_tindak_lanjut ?? "",
+  );
   const [tanggal, setTanggal] = useState(initial?.tanggal_next_reviu ?? "");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
@@ -38,8 +47,10 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
     setPending(true);
 
     const input = {
-      status_tindaklanjut: status,
-      penjelasan,
+      is_tercapai: tercapai,
+      is_tidak_tercapai: tidakTercapai,
+      penjelasan_tercapai: penjelasanTercapai,
+      penjelasan_tidak_tercapai: penjelasanTidakTercapai,
       rencana_tindak_lanjut: rencana,
       tanggal_next_reviu: tanggal,
     };
@@ -57,6 +68,21 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
     router.refresh();
   }
 
+  const validToSubmit = (() => {
+    const hasStatus = tercapai || tidakTercapai;
+    if (!hasStatus) return false;
+    if (tercapai && !penjelasanTercapai.trim()) return false;
+    if (
+      tidakTercapai &&
+      (!penjelasanTidakTercapai.trim() ||
+        !rencana.trim() ||
+        !tanggal.trim())
+    ) {
+      return false;
+    }
+    return true;
+  })();
+
   return (
     <div className="flex flex-col gap-6 rounded-lg border border-outline bg-surface px-5 py-6 sm:px-6">
       {error ? (
@@ -70,59 +96,82 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
           Status Tindak Lanjut
         </span>
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-          {(
-            [
-              { value: "TERCAPAI", label: "Tercapai" },
-              { value: "TIDAK_TERCAPAI", label: "Tidak Tercapai" },
-            ] as const
-          ).map((option) => {
-            const active = status === option.value;
-            return (
-              <label
-                key={option.value}
-                className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm font-semibold transition-colors ${active
-                    ? "border-primary bg-primary-soft/40 text-primary-strong"
-                    : "border-outline text-ink hover:border-outline-strong"
-                  }`}
-              >
-                <input
-                  type="radio"
-                  name="status_tindaklanjut"
-                  value={option.value}
-                  checked={active}
-                  onChange={() => setStatus(option.value)}
-                  disabled={pending}
-                  className="h-4 w-4 accent-[#1e3a8a]"
-                />
-                {option.label}
-              </label>
-            );
-          })}
+          <label
+            className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm font-semibold transition-colors ${
+              tercapai
+                ? "border-primary bg-primary-soft/40 text-primary-strong"
+                : "border-outline text-ink hover:border-outline-strong"
+            }`}
+          >
+            <input
+              type="checkbox"
+              name="is_tercapai"
+              checked={tercapai}
+              onChange={(e) => setTercapai(e.target.checked)}
+              disabled={pending}
+              className="h-4 w-4 accent-[#1e3a8a]"
+            />
+            Tercapai
+          </label>
+          <label
+            className={`flex cursor-pointer items-center gap-2.5 rounded-md border px-4 py-3 text-sm font-semibold transition-colors ${
+              tidakTercapai
+                ? "border-primary bg-primary-soft/40 text-primary-strong"
+                : "border-outline text-ink hover:border-outline-strong"
+            }`}
+          >
+            <input
+              type="checkbox"
+              name="is_tidak_tercapai"
+              checked={tidakTercapai}
+              onChange={(e) => setTidakTercapai(e.target.checked)}
+              disabled={pending}
+              className="h-4 w-4 accent-[#1e3a8a]"
+            />
+            Tidak Tercapai
+          </label>
         </div>
       </div>
 
-      <Field
-        htmlFor="penjelasan"
-        label="Penjelasan"
-        required
-        hint={
-          status === "TIDAK_TERCAPAI"
-            ? "Deskripsi penyebab tidak tercapai."
-            : "Penjelasan singkat hasilnya."
-        }
-      >
-        <textarea
-          id="penjelasan"
-          value={penjelasan}
-          onChange={(e) => setPenjelasan(e.target.value)}
-          disabled={pending}
-          rows={4}
-          className="w-full resize-y rounded-md border border-outline bg-white px-3.5 py-2.5 text-sm leading-5 text-ink placeholder:text-ink-muted/60 focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/15 disabled:opacity-60"
-          placeholder="Tulis penjelasan tindak lanjutâ€¦"
-        />
-      </Field>
+      {tercapai ? (
+        <Field
+          htmlFor="penjelasan_tercapai"
+          label="Penjelasan Tercapai"
+          required
+          hint="Penjelasan hasil tindak lanjut yang tercapai."
+        >
+          <textarea
+            id="penjelasan_tercapai"
+            value={penjelasanTercapai}
+            onChange={(e) => setPenjelasanTercapai(e.target.value)}
+            disabled={pending}
+            rows={4}
+            className="w-full resize-y rounded-md border border-outline bg-white px-3.5 py-2.5 text-sm leading-5 text-ink placeholder:text-ink-muted/60 focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/15 disabled:opacity-60"
+            placeholder="Tulis penjelasan hasil tindak lanjut yang tercapai"
+          />
+        </Field>
+      ) : null}
 
-      {status === "TIDAK_TERCAPAI" ? (
+      {tidakTercapai ? (
+        <Field
+          htmlFor="penjelasan_tidak_tercapai"
+          label="Penjelasan Tidak Tercapai"
+          required
+          hint="Deskripsi penyebab tindak lanjut tidak tercapai."
+        >
+          <textarea
+            id="penjelasan_tidak_tercapai"
+            value={penjelasanTidakTercapai}
+            onChange={(e) => setPenjelasanTidakTercapai(e.target.value)}
+            disabled={pending}
+            rows={4}
+            className="w-full resize-y rounded-md border border-outline bg-white px-3.5 py-2.5 text-sm leading-5 text-ink placeholder:text-ink-muted/60 focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/15 disabled:opacity-60"
+            placeholder="Tulis penjelasan penyebab tindak lanjut tidak tercapai"
+          />
+        </Field>
+      ) : null}
+
+      {tidakTercapai ? (
         <Field
           htmlFor="rencana_tindak_lanjut"
           label="Rencana dan Tindak Lanjut ke Depan"
@@ -143,9 +192,9 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
       <Field
         htmlFor="tanggal_next_reviu"
         label="Tanggal Reviu Berikutnya"
-        required={status === "TIDAK_TERCAPAI"}
+        required={tidakTercapai}
         hint={
-          status === "TERCAPAI"
+          !tidakTercapai
             ? "Tidak wajib diisi apabila sasaran sudah tercapai."
             : undefined
         }
@@ -174,10 +223,7 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
           type="button"
           size="md"
           loading={pending}
-          disabled={
-            !penjelasan.trim() ||
-            (status === "TIDAK_TERCAPAI" && !tanggal)
-          }
+          disabled={!validToSubmit}
           onClick={() => submit("submit")}
           leadingIcon={<ArrowRightIcon size={16} weight="bold" />}
         >

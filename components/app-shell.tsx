@@ -77,7 +77,7 @@ const ATASAN_NAV_GROUPS: NavGroup[] = [
       },
       {
         href: "/atasan/reviu",
-        label: "Tindak Lanjut Dialog Kinerja",
+        label: "Reviu Dialog Kinerja",
         icon: ArrowsClockwiseIcon,
       },
       {

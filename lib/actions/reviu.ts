@@ -6,11 +6,12 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { saveTtdFile } from "@/lib/ttd";
 import { assertActiveActor } from "@/lib/auth-helpers";
-import type { StatusTindakLanjut } from "@/generated/prisma/enums";
 
 export interface ReviuInput {
-  status_tindaklanjut: StatusTindakLanjut;
-  penjelasan: string;
+  is_tercapai: boolean;
+  is_tidak_tercapai: boolean;
+  penjelasan_tercapai?: string;
+  penjelasan_tidak_tercapai?: string;
   rencana_tindak_lanjut?: string;
   tanggal_next_reviu?: string | null;
 }
@@ -39,13 +40,19 @@ function toNullableDate(value: string | null | undefined): Date | null {
 
 function validateSubmitInput(input: ReviuInput): string | null {
   const problems: string[] = [];
-  if (!input.status_tindaklanjut) {
-    problems.push("Status tindak lanjut wajib dipilih");
+  const tercapai = Boolean(input.is_tercapai);
+  const tidakTercapai = Boolean(input.is_tidak_tercapai);
+
+  if (!tercapai && !tidakTercapai) {
+    problems.push("Pilih minimal satu status tindak lanjut");
   }
-  if (!input.penjelasan?.trim()) {
-    problems.push("Penjelasan wajib diisi");
+  if (tercapai && !input.penjelasan_tercapai?.trim()) {
+    problems.push("Penjelasan status tercapai wajib diisi");
   }
-  if (input.status_tindaklanjut === "TIDAK_TERCAPAI") {
+  if (tidakTercapai) {
+    if (!input.penjelasan_tidak_tercapai?.trim()) {
+      problems.push("Penjelasan status tidak tercapai wajib diisi");
+    }
     if (!input.rencana_tindak_lanjut?.trim()) {
       problems.push("Rencana tindak lanjut ke depan wajib diisi");
     }
@@ -88,8 +95,10 @@ export async function createReviu(
     const reviu = await prisma.reviu.create({
       data: {
         id_dialog: dialog.id,
-        status_tindaklanjut: input.status_tindaklanjut,
-        penjelasan: input.penjelasan.trim(),
+        is_tercapai: Boolean(input.is_tercapai),
+        is_tidak_tercapai: Boolean(input.is_tidak_tercapai),
+        penjelasan_tercapai: toNullable(input.penjelasan_tercapai),
+        penjelasan_tidak_tercapai: toNullable(input.penjelasan_tidak_tercapai),
         rencana_tindak_lanjut: toNullable(input.rencana_tindak_lanjut),
         tanggal_next_reviu: toNullableDate(input.tanggal_next_reviu),
         status: mode === "submit" ? "menunggu_atasan" : "draft_pegawai",
@@ -137,8 +146,10 @@ export async function saveReviu(
     await prisma.reviu.update({
       where: { id: reviu.id },
       data: {
-        status_tindaklanjut: input.status_tindaklanjut,
-        penjelasan: input.penjelasan.trim(),
+        is_tercapai: Boolean(input.is_tercapai),
+        is_tidak_tercapai: Boolean(input.is_tidak_tercapai),
+        penjelasan_tercapai: toNullable(input.penjelasan_tercapai),
+        penjelasan_tidak_tercapai: toNullable(input.penjelasan_tidak_tercapai),
         rencana_tindak_lanjut: toNullable(input.rencana_tindak_lanjut),
         tanggal_next_reviu: toNullableDate(input.tanggal_next_reviu),
         status: mode === "submit" ? "menunggu_atasan" : "draft_pegawai",

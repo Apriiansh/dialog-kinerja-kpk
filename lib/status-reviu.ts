@@ -1,7 +1,4 @@
-import type {
-  StatusReviu,
-  StatusTindakLanjut,
-} from "@/generated/prisma/enums";
+import type { StatusReviu } from "@/generated/prisma/enums";
 
 export type StatusReviuTone =
   | "draft"
@@ -21,10 +18,18 @@ export const STATUS_REVIU_CONFIG: Record<StatusReviu, StatusReviuConfig> = {
   selesai: { label: "Selesai", tone: "done" },
 };
 
-export const STATUS_TINDAK_LANJUT_LABEL: Record<
-  StatusTindakLanjut,
-  string
-> = {
-  TERCAPAI: "Tercapai",
-  TIDAK_TERCAPAI: "Tidak Tercapai",
-};
+export function tindakLanjutLabel(
+  is_tercapai: boolean,
+  is_tidak_tercapai: boolean,
+): string {
+  if (is_tercapai && is_tidak_tercapai) {
+    return "Tercapai & Tidak Tercapai";
+  }
+  if (is_tercapai) {
+    return "Tercapai";
+  }
+  if (is_tidak_tercapai) {
+    return "Tidak Tercapai";
+  }
+  return "Belum Ditentukan";
+}
