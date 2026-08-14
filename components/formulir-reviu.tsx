@@ -1,12 +1,13 @@
 import { formatTanggal } from "@/lib/format";
-import { formatWaktuPelaksanaan as printDate } from "@/lib/dialog-display";
-import { STATUS_TINDAK_LANJUT_LABEL } from "@/lib/status-reviu";
+import { formatWaktuPelaksanaan } from "@/lib/dialog-display";
 
 interface ActorProfile {
   nama_pegawai?: string | null;
   nip?: string | null;
+  tanggal_bergabung?: Date | null;
   nama_jabatan?: string | null;
   unit_kerja?: string | null;
+  masa_kerja_unit_terakhir?: string | null;
 }
 
 interface FormulirReviuData {
@@ -21,28 +22,97 @@ interface FormulirReviuData {
   status: string;
   dialog: {
     periode_tahun: number;
+    waktu_validasi_atasan: Date | null;
     pegawai: ActorProfile;
     atasan: ActorProfile;
   };
 }
 
+function TtdBlock({
+  tanggal,
+  atasanPath,
+  atasanNama,
+  atasanJabatan,
+  pegawaiPath,
+  pegawaiNama,
+  pegawaiJabatan,
+}: {
+  tanggal: Date;
+  atasanPath: string | null;
+  atasanNama?: string | null;
+  atasanJabatan?: string | null;
+  pegawaiPath: string | null;
+  pegawaiNama?: string | null;
+  pegawaiJabatan?: string | null;
+}) {
+  return (
+    <div className="mt-10 break-inside-avoid">
+      <p className="text-center">Jakarta, {formatWaktuPelaksanaan(tanggal)}</p>
+      <div className="mt-8 flex justify-between text-center">
+        <div className="w-1/2">
+          <p className="font-semibold">Atasan Pegawai,</p>
+          {atasanPath ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={atasanPath}
+              alt="Tanda tangan atasan"
+              className="mx-auto mt-3 h-16 object-contain"
+            />
+          ) : (
+            <div className="h-16" />
+          )}
+          <div className="mx-auto mt-2 w-48 border-b-2 border-black" />
+          <p className="mt-1 font-semibold">{atasanNama ?? "—"}</p>
+          <p>{atasanJabatan ?? "Jabatan"}</p>
+        </div>
+        <div className="w-1/2">
+          <p className="font-semibold">Pegawai,</p>
+          {pegawaiPath ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={pegawaiPath}
+              alt="Tanda tangan pegawai"
+              className="mx-auto mt-3 h-16 object-contain"
+            />
+          ) : (
+            <div className="h-16" />
+          )}
+          <div className="mx-auto mt-2 w-48 border-b-2 border-black" />
+          <p className="mt-1 font-semibold">{pegawaiNama ?? "—"}</p>
+          <p>{pegawaiJabatan ?? "Jabatan"}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function FormulirReviu({ reviu }: { reviu: FormulirReviuData }) {
   if (reviu.status !== "selesai") return null;
 
-  const tanggalValidasi =
+  const tanggalDialog =
+    reviu.dialog.waktu_validasi_atasan ??
     reviu.waktu_validasi_atasan ??
     reviu.waktu_validasi_pegawai ??
     new Date();
   const { dialog } = reviu;
+  const tercapai = reviu.status_tindaklanjut === "TERCAPAI";
 
   const dataRows = [
-    { label: "Nama Pegawai", value: dialog.pegawai.nama_pegawai ?? "—" },
-    { label: "NIP", value: dialog.pegawai.nip ?? "—" },
-    { label: "Nama Jabatan", value: dialog.pegawai.nama_jabatan ?? "—" },
-    { label: "Unit Kerja", value: dialog.pegawai.unit_kerja ?? "—" },
-    { label: "Atasan Pegawai", value: dialog.atasan.nama_pegawai ?? "—" },
-    { label: "Periode", value: `Tahun ${dialog.periode_tahun}` },
+    { label: "Nama Pegawai", value: dialog.pegawai.nama_pegawai ?? null },
+    { label: "NIP", value: dialog.pegawai.nip ?? null },
+    {
+      label: "Tanggal Bergabung",
+      value: formatWaktuPelaksanaan(dialog.pegawai.tanggal_bergabung ?? null),
+    },
+    { label: "Nama Jabatan", value: dialog.pegawai.nama_jabatan ?? null },
+    { label: "Unit Kerja", value: dialog.pegawai.unit_kerja ?? null },
+    {
+      label: "Masa Kerja Unit Terakhir",
+      value: dialog.pegawai.masa_kerja_unit_terakhir ?? null,
+    },
   ];
+
+  const BLANK = "..............................................................";
 
   return (
     <div className="hidden font-[Arial,_Helvetica,_sans-serif] text-[10.5pt] text-black print:block">
@@ -69,7 +139,7 @@ export function FormulirReviu({ reviu }: { reviu: FormulirReviuData }) {
           {dataRows.map((row) => (
             <tr key={row.label}>
               <td className="px-2 py-1">
-                {row.label} : {row.value}
+                {row.label} : {row.value ?? "—"}
               </td>
             </tr>
           ))}
@@ -77,89 +147,82 @@ export function FormulirReviu({ reviu }: { reviu: FormulirReviuData }) {
       </table>
 
       <div className="mt-3">
-        <p className="font-bold">A. Hasil Reviu Dialog Kinerja</p>
-        <table className="mt-1 w-full border-collapse">
-          <tbody>
-            <tr>
-              <td className="w-64 px-2 py-1 font-semibold">Status Tindak Lanjut</td>
-              <td className="px-2 py-1">
-                {STATUS_TINDAK_LANJUT_LABEL[reviu.status_tindaklanjut]}
-              </td>
-            </tr>
-            <tr>
-              <td className="w-64 px-2 py-1 font-semibold align-top">
-                Penjelasan
-              </td>
-              <td className="px-2 py-1 whitespace-pre-wrap">
-                {reviu.penjelasan?.trim() || " "}
-              </td>
-            </tr>
-            {reviu.status_tindaklanjut === "TIDAK_TERCAPAI" ? (
-              <tr>
-                <td className="w-64 px-2 py-1 font-semibold align-top">
-                  Rencana dan Tindak Lanjut ke Depan
-                </td>
-                <td className="px-2 py-1 whitespace-pre-wrap">
-                  {reviu.rencana_tindak_lanjut?.trim() || " "}
-                </td>
-              </tr>
-            ) : null}
-            <tr>
-              <td className="w-64 px-2 py-1 font-semibold">
-                Tanggal Reviu Berikutnya
-              </td>
-              <td className="px-2 py-1">
-                {reviu.tanggal_next_reviu
-                  ? formatTanggal(reviu.tanggal_next_reviu)
-                  : "—"}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div className="mt-10 break-inside-avoid">
-        <p className="text-center">
-          Jakarta, {printDate(tanggalValidasi)}
+        <p className="text-justify">
+          Telah  Dialog Kinerja pada tanggal{" "}
+          <span className="font-semibold">
+            {formatWaktuPelaksanaan(tanggalDialog)}
+          </span>
+          .
         </p>
-        <div className="mt-8 flex justify-between text-center">
-          <div className="w-1/2">
-            <p className="font-semibold">Atasan Pegawai,</p>
-            {reviu.ttd_atasan_path ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={reviu.ttd_atasan_path}
-                alt="Tanda tangan atasan"
-                className="mx-auto mt-3 h-16 object-contain"
-              />
-            ) : (
-              <div className="h-16" />
-            )}
-            <div className="mx-auto mt-2 w-48 border-b-2 border-black" />
-            <p className="mt-1 font-semibold">
-              {dialog.atasan.nama_pegawai ?? "—"}
+        <p className="mt-3 text-justify">
+          Hasil tindak lanjut perbaikan atau penyelesaian untuk permasalahan/
+          kinerja/situasi yang dihadapi pegawai pada saat Dialog Kinerja adalah:
+        </p>
+
+        <div className="mt-2 leading-snug">
+          <div className="border border-black px-2.5 py-1.5">
+            <p className="font-semibold">
+              {tercapai ? "[✓]" : "[  ]"} Tercapai
             </p>
-            <p>{dialog.atasan.nama_jabatan ?? "Jabatan"}</p>
+
+            <p className="mt-1 text-justify whitespace-pre-wrap">
+              <span className="font-semibold">
+                Penjelasan singkat hasilnya:
+              </span>{" "}
+              {tercapai && reviu.penjelasan.trim()
+                ? reviu.penjelasan
+                : BLANK}
+            </p>
           </div>
-          <div className="w-1/2">
-            <p className="font-semibold">Pegawai,</p>
-            {reviu.ttd_pegawai_path ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={reviu.ttd_pegawai_path}
-                alt="Tanda tangan pegawai"
-                className="mx-auto mt-3 h-16 object-contain"
-              />
-            ) : (
-              <div className="h-16" />
-            )}
-            <div className="mx-auto mt-2 w-48 border-b-2 border-black" />
-            <p className="mt-1 font-semibold">
-              {dialog.pegawai.nama_pegawai ?? "—"}
+
+          <div className="border border-black border-t-0 px-2.5 py-1.5">
+            <p className="font-semibold">
+              {tercapai ? "[  ]" : "[✓]"} Tidak Tercapai
             </p>
-            <p>{dialog.pegawai.nama_jabatan ?? "Jabatan"}</p>
+
+            <p className="mt-1 text-justify whitespace-pre-wrap">
+              <span className="font-semibold">
+                Deskripsi penyebab tidak tercapai:
+              </span>{" "}
+              {!tercapai && reviu.penjelasan.trim()
+                ? reviu.penjelasan
+                : BLANK}
+            </p>
+
+            <p className="mt-1 text-justify whitespace-pre-wrap">
+              <span className="font-semibold">
+                Rencana dan tindak lanjut ke depan yang akan dilakukan:
+              </span>{" "}
+              {!tercapai && reviu.rencana_tindak_lanjut?.trim()
+                ? reviu.rencana_tindak_lanjut
+                : BLANK}
+            </p>
+
+            <p className="mt-1">
+              <span className="font-semibold">
+                Tanggal reviu berikutnya:
+              </span>{" "}
+              {!tercapai && reviu.tanggal_next_reviu
+                ? formatTanggal(reviu.tanggal_next_reviu)
+                : BLANK}
+            </p>
           </div>
         </div>
+      </div>
+
+      <div className="mt-8">
+        <p className="text-center font-bold uppercase tracking-wide">
+          Tanda Tangan Reviu Hasil Dialog Kinerja
+        </p>
+        <TtdBlock
+          tanggal={tanggalDialog}
+          atasanPath={reviu.ttd_atasan_path}
+          atasanNama={dialog.atasan.nama_pegawai}
+          atasanJabatan={dialog.atasan.nama_jabatan}
+          pegawaiPath={reviu.ttd_pegawai_path}
+          pegawaiNama={dialog.pegawai.nama_pegawai}
+          pegawaiJabatan={dialog.pegawai.nama_jabatan}
+        />
       </div>
     </div>
   );

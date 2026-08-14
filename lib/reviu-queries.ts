@@ -7,13 +7,16 @@ const REVIU_INCLUDE = {
       id: true,
       periode_tahun: true,
       status: true,
+      waktu_validasi_atasan: true,
       pegawai: {
         select: {
           npp: true,
           nama_pegawai: true,
           nip: true,
+          tanggal_bergabung: true,
           nama_jabatan: true,
           unit_kerja: true,
+          masa_kerja_unit_terakhir: true,
         },
       },
       atasan: {
