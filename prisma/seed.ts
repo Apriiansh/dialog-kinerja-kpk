@@ -312,7 +312,7 @@ async function writeTtdPlaceholder(
   await mkdir(TTD_DIR, { recursive: true });
   const fileName = `ttd-${dialogId}-${role}-${Date.now()}.png`;
   await writeFile(path.join(TTD_DIR, fileName), makeSignaturePng());
-  return `/ttd/${fileName}`;
+  return `/api/ttd/${fileName}`;
 }
 
 interface AspekItemSeed {

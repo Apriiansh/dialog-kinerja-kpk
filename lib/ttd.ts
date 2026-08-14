@@ -2,7 +2,8 @@ import path from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
 
 const TTD_DIR = path.join(process.cwd(), "uploads", "ttd");
-const TTD_URL_PREFIX = "/ttd/";
+const TTD_URL_PREFIX = "/api/ttd/";
+const LEGACY_TTD_URL_PREFIX = "/ttd/";
 const PNG_DATA_URL_PREFIX = "data:image/png;base64,";
 
 export function isPngDataUrl(value: string) {
@@ -42,10 +43,20 @@ export async function saveTtdFile(
 }
 
 export function resolveTtdFile(url: string): string | null {
-  if (!url.startsWith(TTD_URL_PREFIX)) return null;
+  const targetPrefix =
+    url.startsWith(TTD_URL_PREFIX)
+      ? TTD_URL_PREFIX
+      : url.startsWith(LEGACY_TTD_URL_PREFIX)
+        ? LEGACY_TTD_URL_PREFIX
+        : null;
+
+  if (!targetPrefix) return null;
+
   const fileName = path.basename(url);
   if (!/^ttd-[\d]+-(pegawai|atasan)-[\d]+\.png$/.test(fileName)) return null;
+
   const filePath = path.join(TTD_DIR, fileName);
   if (!filePath.startsWith(TTD_DIR)) return null;
+
   return filePath;
 }
