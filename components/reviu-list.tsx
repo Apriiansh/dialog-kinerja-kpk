@@ -2,13 +2,15 @@ import Link from "next/link";
 import { formatTanggal } from "@/lib/format";
 import { ReviuStatusBadge } from "@/components/reviu-status-badge";
 import { TindakLanjutBadge } from "@/components/tindak-lanjut-badge";
-import { STATUS_TINDAK_LANJUT_LABEL } from "@/lib/status-reviu";
+import { tindakLanjutLabel } from "@/lib/status-reviu";
 
 interface ReviuListRow {
   id: number;
   status: "draft_pegawai" | "menunggu_atasan" | "menunggu_validasi" | "selesai";
-  status_tindaklanjut: "TERCAPAI" | "TIDAK_TERCAPAI";
-  penjelasan: string;
+  is_tercapai: boolean;
+  is_tidak_tercapai: boolean;
+  penjelasan_tercapai: string | null;
+  penjelasan_tidak_tercapai: string | null;
   rencana_tindak_lanjut: string | null;
   tanggal_next_reviu: Date | null;
 }
@@ -43,7 +45,10 @@ export function ReviuList({
               </span>
               <div className="flex items-center gap-2">
                 <ReviuStatusBadge status={r.status} />
-                <TindakLanjutBadge status={r.status_tindaklanjut} />
+                <TindakLanjutBadge
+                  is_tercapai={r.is_tercapai}
+                  is_tidak_tercapai={r.is_tidak_tercapai}
+                />
               </div>
             </div>
 
@@ -53,17 +58,29 @@ export function ReviuList({
                   Status Tindak Lanjut
                 </dt>
                 <dd className="text-sm leading-5 text-ink">
-                  {STATUS_TINDAK_LANJUT_LABEL[r.status_tindaklanjut]}
+                  {tindakLanjutLabel(r.is_tercapai, r.is_tidak_tercapai)}
                 </dd>
               </div>
-              <div className="flex flex-col gap-1 px-5 py-3 sm:grid sm:grid-cols-[220px_1fr] sm:gap-4">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-                  Penjelasan
-                </dt>
-                <dd className="whitespace-pre-wrap text-sm leading-5 text-ink">
-                  {r.penjelasan?.trim() || "—"}
-                </dd>
-              </div>
+              {r.penjelasan_tercapai?.trim() ? (
+                <div className="flex flex-col gap-1 px-5 py-3 sm:grid sm:grid-cols-[220px_1fr] sm:gap-4">
+                  <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                    Penjelasan Tercapai
+                  </dt>
+                  <dd className="whitespace-pre-wrap text-sm leading-5 text-ink">
+                    {r.penjelasan_tercapai}
+                  </dd>
+                </div>
+              ) : null}
+              {r.penjelasan_tidak_tercapai?.trim() ? (
+                <div className="flex flex-col gap-1 px-5 py-3 sm:grid sm:grid-cols-[220px_1fr] sm:gap-4">
+                  <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                    Penjelasan Tidak Tercapai
+                  </dt>
+                  <dd className="whitespace-pre-wrap text-sm leading-5 text-ink">
+                    {r.penjelasan_tidak_tercapai}
+                  </dd>
+                </div>
+              ) : null}
               {r.rencana_tindak_lanjut?.trim() ? (
                 <div className="flex flex-col gap-1 px-5 py-3 sm:grid sm:grid-cols-[220px_1fr] sm:gap-4">
                   <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">

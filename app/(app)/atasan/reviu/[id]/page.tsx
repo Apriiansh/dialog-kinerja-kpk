@@ -84,7 +84,10 @@ export default async function AtasanReviuDetailPage({
               </div>
               <div className="flex items-center gap-2">
                 <ReviuStatusBadge status={reviu.status} />
-                <TindakLanjutBadge status={reviu.status_tindaklanjut} />
+                <TindakLanjutBadge
+                  is_tercapai={reviu.is_tercapai}
+                  is_tidak_tercapai={reviu.is_tidak_tercapai}
+                />
                 {isSelesai ? (
                   <UnduhBuktiButton
                     label="Unduh Bukti Reviu"

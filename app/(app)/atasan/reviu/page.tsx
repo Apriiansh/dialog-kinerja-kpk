@@ -16,7 +16,7 @@ import type { StatusReviu } from "@/generated/prisma/enums";
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export const metadata = {
-  title: "Tindak Lanjut Dialog Kinerja - Dialog Kinerja KPK",
+  title: "Reviu Dialog Kinerja - Dialog Kinerja KPK",
 };
 
 const VALID_STATUSES: StatusReviu[] = [
@@ -91,7 +91,7 @@ export default async function AtasanReviuListPage({
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-2">
         <h1 className="text-[28px] font-semibold leading-9 tracking-[-0.01em] text-ink">
-          Tindak Lanjut Dialog Kinerja
+          Reviu Dialog Kinerja
         </h1>
         <p className="text-sm leading-5 text-ink-muted">
           Reviu hasil tindak lanjut yang diajukan pegawai setelah dialog
@@ -186,7 +186,8 @@ export default async function AtasanReviuListPage({
                         </span>
                         <ReviuStatusBadge status={r.status} />
                         <TindakLanjutBadge
-                          status={r.status_tindaklanjut}
+                          is_tercapai={r.is_tercapai}
+                          is_tidak_tercapai={r.is_tidak_tercapai}
                         />
                       </div>
                       <span className="truncate text-xs leading-4 text-ink-muted">

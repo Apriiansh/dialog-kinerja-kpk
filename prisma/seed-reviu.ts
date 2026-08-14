@@ -3,7 +3,6 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import {
   PrismaClient,
   JenisAspek,
-  StatusTindakLanjut,
 } from "../generated/prisma/client";
 
 const adapter = new PrismaMariaDb({
@@ -85,17 +84,21 @@ const ASPEK_SEEDS: AspekSeed[] = [
 ];
 
 interface ReviuSeed {
-  status_tindaklanjut: StatusTindakLanjut;
-  penjelasan: string;
+  is_tercapai: boolean;
+  is_tidak_tercapai: boolean;
+  penjelasan_tercapai: string | null;
+  penjelasan_tidak_tercapai: string | null;
   rencana_tindak_lanjut: string | null;
   tanggal_next_reviu: Date | null;
 }
 
 const REVIU_SEEDS: ReviuSeed[] = [
   {
-    status_tindaklanjut: StatusTindakLanjut.TERCAPAI,
-    penjelasan:
+    is_tercapai: true,
+    is_tidak_tercapai: false,
+    penjelasan_tercapai:
       "Seluruh sasaran kinerja pada Dialog Kinerja telah tercapai sesuai target yang disepakati bersama atasan. Hasil pekerjaan diselesaikan tepat waktu, sesuai prosedur, dan kualitasnya memenuhi standar yang diharapkan.",
+    penjelasan_tidak_tercapai: null,
     rencana_tindak_lanjut: null,
     tanggal_next_reviu: null,
   },
@@ -194,8 +197,10 @@ async function main() {
   const reviu = await prisma.reviu.create({
     data: {
       id_dialog: dialog.id,
-      status_tindaklanjut: reviuSeed.status_tindaklanjut,
-      penjelasan: reviuSeed.penjelasan,
+      is_tercapai: reviuSeed.is_tercapai,
+      is_tidak_tercapai: reviuSeed.is_tidak_tercapai,
+      penjelasan_tercapai: reviuSeed.penjelasan_tercapai,
+      penjelasan_tidak_tercapai: reviuSeed.penjelasan_tidak_tercapai,
       rencana_tindak_lanjut: reviuSeed.rencana_tindak_lanjut,
       tanggal_next_reviu: reviuSeed.tanggal_next_reviu,
       status: "draft_pegawai",
