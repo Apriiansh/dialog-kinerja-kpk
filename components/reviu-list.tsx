@@ -3,7 +3,7 @@ import { formatTanggal } from "@/lib/format";
 import { ReviuStatusBadge } from "@/components/reviu-status-badge";
 import { TindakLanjutBadge } from "@/components/tindak-lanjut-badge";
 import { UnduhWordLink } from "@/components/unduh-word-link";
-import { STATUS_TINDAK_LANJUT_LABEL } from "@/lib/status-reviu";
+import { tindakLanjutLabel } from "@/lib/status-reviu";
 
 interface ReviuListRow {
   id: number;

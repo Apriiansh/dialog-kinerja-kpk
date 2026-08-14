@@ -382,7 +382,7 @@ export async function generateReviuWord(
     reviu.waktu_validasi_pegawai ??
     new Date();
 
-  const tercapai = reviu.status_tindaklanjut === "TERCAPAI";
+  const tercapai = reviu.is_tercapai;
 
   const dataRows = [
     { label: "Nama Pegawai", value: reviu.dialog.pegawai.nama_pegawai },
@@ -505,7 +505,7 @@ p {
       </p>
       <p style="margin: 0 0 2pt 0; font-weight: bold; font-size: 9.5pt;">Penjelasan singkat hasilnya:</p>
       <p style="margin: 0; text-align: justify;">
-        ${tercapai && reviu.penjelasan.trim() ? escapeHtml(reviu.penjelasan) : "-"}
+        ${tercapai && reviu.penjelasan_tercapai?.trim() ? escapeHtml(reviu.penjelasan_tercapai) : "-"}
       </p>
     </div>
 
@@ -517,7 +517,7 @@ p {
       
       <p style="margin: 4pt 0 2pt 0; font-weight: bold; font-size: 9.5pt;">Deskripsi penyebab tidak tercapai:</p>
       <p style="margin: 0 0 6pt 0; text-align: justify;">
-        ${!tercapai && reviu.penjelasan.trim() ? escapeHtml(reviu.penjelasan) : "-"}
+        ${!tercapai && reviu.penjelasan_tidak_tercapai?.trim() ? escapeHtml(reviu.penjelasan_tidak_tercapai) : "-"}
       </p>
 
       <p style="margin: 4pt 0 2pt 0; font-weight: bold; font-size: 9.5pt;">Rencana dan tindak lanjut ke depan yang akan dilakukan:</p>
