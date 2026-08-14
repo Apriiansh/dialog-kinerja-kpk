@@ -5,6 +5,7 @@ import {
   HourglassIcon,
   SealCheckIcon,
   CheckCircleIcon,
+  DownloadSimpleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/session";
 import { getAtasanReviuList } from "@/lib/reviu-queries";
@@ -210,6 +211,15 @@ export default async function AtasanReviuListPage({
                       >
                         {isPending ? "Reviu & Tandatangani" : "Lihat Dialog"}
                       </Link>
+                      {r.status === "selesai" ? (
+                        <Link
+                          href={`/atasan/reviu/${r.id}?cetak=1`}
+                          className="inline-flex items-center gap-2 rounded-md border border-outline bg-white px-4 py-2 text-xs font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted"
+                        >
+                          <DownloadSimpleIcon size={14} weight="bold" />
+                          Unduh Reviu
+                        </Link>
+                      ) : null}
                     </div>
                   </div>
                 </li>

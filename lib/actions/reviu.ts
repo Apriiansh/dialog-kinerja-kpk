@@ -220,6 +220,7 @@ export async function submitReviuAtasan(
   revalidatePath(`/atasan/dialog/${reviu.dialog.id}`);
   revalidatePath("/atasan/dashboard");
   revalidatePath("/atasan/reviu");
+  revalidatePath(`/atasan/reviu/${reviu.id}`);
   revalidatePath(`/pegawai/reviu/${reviu.id}`);
   return {};
 }
