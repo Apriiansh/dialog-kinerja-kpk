@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { SealCheckIcon, WarningIcon } from "@phosphor-icons/react";
+import { SealCheckIcon } from "@phosphor-icons/react";
 import { submitReviuAtasan, validateReviu } from "@/lib/actions/reviu";
 import { Button } from "@/components/ui/button";
-import { Banner } from "@/components/ui/banner";
+import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import { SignaturePadField } from "@/components/signature-pad";
 
 export function ReviuSignForm({
@@ -19,13 +19,11 @@ export function ReviuSignForm({
   const [setuju, setSetuju] = useState(false);
   const [ttdDataUrl, setTtdDataUrl] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string>();
 
   const canSubmit = setuju && ttdDataUrl !== null && !pending;
   const label = role === "atasan" ? "Atasan" : "Pegawai";
 
   async function handleSubmit() {
-    setError(undefined);
     setPending(true);
 
     const input = { setuju, ttdDataUrl };
@@ -35,11 +33,16 @@ export function ReviuSignForm({
         : await validateReviu(reviuId, input);
 
     if (result?.error) {
-      setError(result.error);
+      showError(result.error);
       setPending(false);
       return;
     }
 
+    showSuccess(
+      role === "atasan"
+        ? "Reviu berhasil ditandatangani, menunggu validasi pegawai"
+        : "Reviu berhasil divalidasi dan selesai",
+    );
     router.refresh();
   }
 
@@ -62,12 +65,6 @@ export function ReviuSignForm({
       </div>
 
       <div className="flex flex-col gap-5 px-5 py-4">
-        {error ? (
-          <Banner tone="error" icon={<WarningIcon size={18} weight="fill" />}>
-            {error}
-          </Banner>
-        ) : null}
-
         <label className="flex cursor-pointer items-start gap-3 text-sm leading-5 text-ink">
           <input
             type="checkbox"
@@ -90,12 +87,12 @@ export function ReviuSignForm({
         <div className="flex justify-end">
           <Button
             type="button"
-            size="md"
+            size="default"
             loading={pending}
             disabled={!canSubmit}
             onClick={handleSubmit}
-            leadingIcon={<SealCheckIcon size={16} weight="bold" />}
           >
+            <SealCheckIcon size={16} weight="bold" />
             {role === "atasan"
               ? "Reviu & Tanda Tangani"
               : "Validasi & Tanda Tangani"}

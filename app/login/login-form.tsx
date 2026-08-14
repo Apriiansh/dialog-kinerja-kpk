@@ -1,8 +1,9 @@
 "use client";
 
-import { Warning, ArrowRight } from "@phosphor-icons/react";
-import { useActionState } from "react";
+import { ArrowRight } from "@phosphor-icons/react";
+import { useActionState, useEffect, useRef } from "react";
 import { loginAction, type LoginState } from "./actions";
+import { error as showError } from "@/components/ui/toast";
 
 const initialLoginState: LoginState = {};
 
@@ -11,19 +12,17 @@ export function LoginForm() {
     loginAction,
     initialLoginState,
   );
+  const lastErrorRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (state.error && state.error !== lastErrorRef.current) {
+      lastErrorRef.current = state.error;
+      showError(state.error);
+    }
+  }, [state.error]);
 
   return (
     <form action={formAction} className="flex flex-col gap-6" noValidate>
-      {state.error ? (
-        <div
-          role="alert"
-          className="flex items-start gap-3 rounded-md bg-error-container px-4 py-3 text-sm leading-5 text-on-error-container"
-        >
-          <Warning size={18} weight="fill" className="mt-0.5 shrink-0" />
-          <span>{state.error}</span>
-        </div>
-      ) : null}
-
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label

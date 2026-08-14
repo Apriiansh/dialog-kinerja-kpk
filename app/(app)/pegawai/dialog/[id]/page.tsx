@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, PencilSimpleIcon, PencilSimpleLineIcon } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeftIcon, PencilSimpleLineIcon } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/session";
 import {
   canEditDialog,

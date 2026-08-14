@@ -3,13 +3,9 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ArrowLeftIcon,
-  CheckCircleIcon,
-  WarningIcon,
-  ArrowRightIcon,
-} from "@phosphor-icons/react";
+import { ArrowLeftIcon, ArrowRightIcon } from "@phosphor-icons/react";
 import type { PegawaiFormState } from "@/lib/actions/pegawai-admin";
+import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import {
   formatDurasiKeHariIni,
   parseDateInput,
@@ -41,9 +37,7 @@ export function PegawaiForm({
     initialValues ?? {},
   );
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string>();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [notice, setNotice] = useState<string>();
 
   function setField(key: string, value: string) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -52,9 +46,7 @@ export function PegawaiForm({
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
-    setError(undefined);
     setFieldErrors({});
-    setNotice(undefined);
 
     const formData = new FormData(formRef.current!);
     const masaKerjaDate = parseDateInput(
@@ -81,14 +73,14 @@ export function PegawaiForm({
         return;
       }
       console.error(err);
-      setError("Terjadi kesalahan saat menyimpan. Silakan coba lagi.");
+      showError("Terjadi kesalahan saat menyimpan. Silakan coba lagi.");
       return;
     } finally {
       setPending(false);
     }
 
     if (result?.error) {
-      setError(result.error);
+      showError(result.error);
     }
     if (result?.fieldErrors) {
       setFieldErrors(result.fieldErrors);
@@ -103,7 +95,7 @@ export function PegawaiForm({
       setValues(nextValues);
     }
     if (!result?.error && !result?.fieldErrors) {
-      setNotice("Data berhasil disimpan.");
+      showSuccess("Data berhasil disimpan");
       router.refresh();
     }
   }
@@ -128,26 +120,6 @@ export function PegawaiForm({
           {submitLabel}
         </h1>
       </div>
-
-      {error ? (
-        <div
-          role="alert"
-          className="flex items-start gap-3 rounded-md bg-error-container px-4 py-3 text-sm leading-5 text-on-error-container"
-        >
-          <WarningIcon size={18} weight="fill" className="mt-0.5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      ) : null}
-
-      {notice ? (
-        <div
-          role="status"
-          className="flex items-start gap-3 rounded-md bg-status-green-soft px-4 py-3 text-sm leading-5 text-status-green"
-        >
-          <CheckCircleIcon size={18} weight="bold" className="mt-0.5 shrink-0" />
-          <span>{notice}</span>
-        </div>
-      ) : null}
 
       <form
         ref={formRef}

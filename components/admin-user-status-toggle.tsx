@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { WarningIcon } from "@phosphor-icons/react";
-import {
-  setUserStatus,
-  type AdminUserStatusState,
-} from "@/lib/actions/admin-users";
+import { useRouter } from "next/navigation";
+import { setUserStatus } from "@/lib/actions/admin-users";
+import { error as showError, success as showSuccess } from "@/components/ui/toast";
 
 export function AdminUserStatusToggle({
   id,
@@ -18,8 +16,8 @@ export function AdminUserStatusToggle({
   isActive: boolean;
   isSelf: boolean;
 }) {
+  const router = useRouter();
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string>();
 
   async function handleToggle() {
     if (pending || isSelf) return;
@@ -33,57 +31,53 @@ export function AdminUserStatusToggle({
     }
 
     setPending(true);
-    setError(undefined);
 
     try {
-      const result: AdminUserStatusState = await setUserStatus(id, next);
+      const result = await setUserStatus(id, next);
       if (result?.error) {
-        setError(result.error);
+        showError(result.error);
         return;
       }
-      window.location.reload();
+      showSuccess(
+        next
+          ? "Pengguna berhasil diaktifkan"
+          : "Pengguna berhasil dinonaktifkan",
+      );
+      router.refresh();
     } catch (err) {
       console.error(err);
-      setError("Terjadi kesalahan saat mengubah status. Silakan coba lagi.");
+      showError("Terjadi kesalahan saat mengubah status. Silakan coba lagi.");
     } finally {
       setPending(false);
     }
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-2" title={isSelf ? "Akun ini adalah Anda" : undefined}>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={isActive}
-          aria-disabled={pending || isSelf}
-          onClick={handleToggle}
-          disabled={pending || isSelf}
-          className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full outline-none transition-colors duration-200 focus-visible:shadow-focus disabled:cursor-not-allowed disabled:opacity-50 ${
-            isActive ? "bg-status-green" : "bg-ink-muted/30"
-          }`}
-        >
-          <span
-            className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-              isActive ? "translate-x-[22px]" : "translate-x-[2px]"
-            }`}
-          />
-        </button>
+    <div className="flex items-center gap-2" title={isSelf ? "Akun ini adalah Anda" : undefined}>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isActive}
+        aria-disabled={pending || isSelf}
+        onClick={handleToggle}
+        disabled={pending || isSelf}
+        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full outline-none transition-colors duration-200 focus-visible:shadow-focus disabled:cursor-not-allowed disabled:opacity-50 ${
+          isActive ? "bg-status-green" : "bg-ink-muted/30"
+        }`}
+      >
         <span
-          className={`text-[11px] font-bold ${
-            isActive ? "text-status-green" : "text-error"
+          className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+            isActive ? "translate-x-[22px]" : "translate-x-[2px]"
           }`}
-        >
-          {isActive ? "AKTIF" : "NONAKTIF"}
-        </span>
-      </div>
-      {error ? (
-        <span className="flex items-center gap-1 text-xs font-medium text-error">
-          <WarningIcon size={13} weight="fill" />
-          {error}
-        </span>
-      ) : null}
+        />
+      </button>
+      <span
+        className={`text-[11px] font-bold ${
+          isActive ? "text-status-green" : "text-error"
+        }`}
+      >
+        {isActive ? "AKTIF" : "NONAKTIF"}
+      </span>
     </div>
   );
 }

@@ -9,7 +9,6 @@ import {
   PaperPlaneTiltIcon,
   PlusIcon,
   TrashIcon,
-  WarningIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import {
@@ -17,6 +16,7 @@ import {
   type AspekInput,
 } from "@/lib/actions/pegawai";
 import { ASPEK_DESC, ASPEK_LABEL, ASPEK_ORDER } from "@/lib/aspek";
+import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
 interface MetodeOption {
@@ -231,8 +231,6 @@ export function DialogForm({
     }),
   );
   const [pending, setPending] = useState<"draft" | "submit" | null>(null);
-  const [error, setError] = useState<string>();
-  const [notice, setNotice] = useState<string>();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const isLainnya = useMemo(() => {
@@ -294,8 +292,6 @@ export function DialogForm({
   }
 
   async function handleSubmit(mode: "draft" | "submit") {
-    setError(undefined);
-    setNotice(undefined);
     setPending(mode);
 
     const payload: AspekInput[] = drafts.map((d) => ({
@@ -316,23 +312,21 @@ export function DialogForm({
     const result = await saveDialogForm(dialogId, mode, payload);
 
     if (result?.error) {
-      setError(result.error);
+      showError(result.error);
       setPending(null);
       return;
     }
 
     if (mode === "draft") {
       setPending(null);
-      setNotice("Draft dialog berhasil disimpan.");
+      showSuccess("Draft dialog berhasil disimpan");
     }
   }
 
   function handleSubmitClick() {
-    setError(undefined);
-    setNotice(undefined);
     const validationError = validateSubmit(drafts, isLainnya);
     if (validationError) {
-      setError(validationError);
+      showError(validationError);
       return;
     }
     setShowConfirm(true);
@@ -366,26 +360,6 @@ export function DialogForm({
           </div>
         ) : null}
       </div>
-
-      {error ? (
-        <div
-          role="alert"
-          className="flex items-start gap-3 rounded-md bg-error-container px-4 py-3 text-sm leading-5 text-on-error-container"
-        >
-          <WarningIcon size={18} weight="fill" className="mt-0.5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      ) : null}
-
-      {notice ? (
-        <div
-          role="status"
-          className="flex items-start gap-3 rounded-md bg-status-green-soft px-4 py-3 text-sm leading-5 text-status-green"
-        >
-          <FloppyDiskIcon size={18} weight="bold" className="mt-0.5 shrink-0" />
-          <span>{notice}</span>
-        </div>
-      ) : null}
 
       <div className="flex flex-col gap-4">
         {FORM_SECTIONS.map(({ letter, title, desc, groups }) => (

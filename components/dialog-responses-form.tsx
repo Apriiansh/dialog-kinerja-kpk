@@ -3,7 +3,6 @@
 import {
   ChartBarIcon,
   CheckIcon,
-  CheckCircleIcon,
   CloudArrowUpIcon,
   CloudCheckIcon,
   GaugeIcon,
@@ -11,14 +10,13 @@ import {
   SpinnerGapIcon,
   TrendUpIcon,
   UserFocusIcon,
-  WarningIcon,
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { autosaveResponses, submitEvaluasi } from "@/lib/actions/atasan";
 import { buildDialogSections } from "@/lib/dialog-sections";
 import type { AspekPegawaiRow } from "@/lib/dialog-display";
-import { Banner } from "@/components/ui/banner";
+import { error, success } from "@/components/ui/toast";
 import { SignaturePadField } from "@/components/signature-pad";
 import { AspekPegawaiInput } from "@/components/aspek-pegawai-input";
 
@@ -41,14 +39,11 @@ export function DialogResponsesForm({
   const [values, setValues] = useState(initialValues);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [savedAt, setSavedAt] = useState<string>("");
-  const [toast, setToast] = useState<string | null>(null);
   const [setuju, setSetuju] = useState(false);
   const [ttdDataUrl, setTtdDataUrl] = useState<string | null>(null);
-  const [submitError, setSubmitError] = useState<string>();
   const [pending, setPending] = useState(false);
   const valuesRef = useRef(values);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     valuesRef.current = values;
@@ -91,31 +86,24 @@ export function DialogResponsesForm({
     timer.current = setTimeout(() => persist(next), 800);
   };
 
-  const notify = (message: string) => {
-    setToast(message);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 3000);
-  };
-
   const handleSaveNow = async () => {
     if (timer.current) clearTimeout(timer.current);
     await persist(valuesRef.current);
-    notify("Tanggung jawab atasan berhasil disimpan");
+    success("Tanggung jawab atasan berhasil disimpan");
     router.refresh();
   };
 
   const handleSubmit = async () => {
     if (pending) return;
     if (!setuju) {
-      setSubmitError("Centang persetujuan untuk melanjutkan.");
+      error("Centang persetujuan untuk melanjutkan.");
       return;
     }
     if (!ttdDataUrl) {
-      setSubmitError("Tanda tangan wajib diisi.");
+      error("Tanda tangan wajib diisi.");
       return;
     }
 
-    setSubmitError(undefined);
     setPending(true);
     if (timer.current) clearTimeout(timer.current);
     await persist(valuesRef.current);
@@ -126,11 +114,12 @@ export function DialogResponsesForm({
     });
 
     if (result?.error) {
-      setSubmitError(result.error);
+      error(result.error);
       setPending(false);
       return;
     }
 
+    success("Evaluasi berhasil dikirim ke pegawai");
     router.refresh();
   };
 
@@ -154,18 +143,6 @@ export function DialogResponsesForm({
 
   return (
     <div className="flex flex-col gap-10 pb-24">
-      {toast ? (
-        <div
-          role="status"
-          className="fixed left-1/2 top-4 z-50 animate-toast-in"
-        >
-          <div className="flex items-center gap-2.5 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-on-primary shadow-ambient">
-            <CheckCircleIcon size={18} weight="fill" />
-            {toast}
-          </div>
-        </div>
-      ) : null}
-
       <section aria-label="Form dialog kinerja" className="flex flex-col gap-6">
         {sections.map(({ no, title, desc, fields }, index) => {
           const Icon = SECTION_ICONS[index];
@@ -238,12 +215,6 @@ export function DialogResponsesForm({
         </div>
 
         <div className="flex flex-col gap-5 px-5 py-4">
-          {submitError ? (
-            <Banner tone="error" icon={<WarningIcon size={18} weight="fill" />}>
-              {submitError}
-            </Banner>
-          ) : null}
-
           <label className="flex cursor-pointer items-start gap-3 text-sm leading-5 text-ink">
             <input
               type="checkbox"

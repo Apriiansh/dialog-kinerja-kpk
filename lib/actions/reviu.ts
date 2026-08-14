@@ -1,11 +1,11 @@
 ﻿"use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { saveTtdFile } from "@/lib/ttd";
 import { assertActiveActor } from "@/lib/auth-helpers";
+import { flashRedirect } from "@/lib/flash";
 
 export interface ReviuInput {
   is_tercapai: boolean;
@@ -112,7 +112,12 @@ export async function createReviu(
 
   revalidatePath("/pegawai/dialog");
   revalidatePath("/pegawai/reviu");
-  redirect(`/pegawai/reviu/${reviuId}`);
+  flashRedirect(
+    `/pegawai/reviu/${reviuId}`,
+    mode === "submit"
+      ? { type: "success", title: "Reviu berhasil dikirim ke atasan" }
+      : { type: "success", title: "Draft reviu berhasil disimpan" },
+  );
 }
 
 export async function saveReviu(
@@ -161,7 +166,12 @@ export async function saveReviu(
 
   revalidatePath("/pegawai/reviu");
   revalidatePath(`/pegawai/reviu/${reviu.id}`);
-  redirect(`/pegawai/reviu/${reviu.id}`);
+  flashRedirect(
+    `/pegawai/reviu/${reviu.id}`,
+    mode === "submit"
+      ? { type: "success", title: "Reviu berhasil dikirim ke atasan" }
+      : { type: "success", title: "Draft reviu berhasil disimpan" },
+  );
 }
 
 export async function deleteReviu(reviuId: number): Promise<void> {
@@ -178,7 +188,10 @@ export async function deleteReviu(reviuId: number): Promise<void> {
   await prisma.reviu.delete({ where: { id: reviu.id } });
   revalidatePath("/pegawai/reviu");
   revalidatePath("/pegawai/dialog");
-  redirect("/pegawai/reviu");
+  flashRedirect("/pegawai/reviu", {
+    type: "success",
+    title: "Reviu berhasil dihapus",
+  });
 }
 
 export async function submitReviuAtasan(

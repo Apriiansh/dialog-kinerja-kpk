@@ -1,12 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { saveTtdFile } from "@/lib/ttd";
 import { assertActiveActor } from "@/lib/auth-helpers";
 import { canValidateDialog } from "@/lib/dialog-queries";
+import { flashRedirect } from "@/lib/flash";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
 export interface AspekItemInput {
@@ -236,7 +236,10 @@ export async function saveDialogForm(
   revalidatePath(`/pegawai/dialog/${dialog.id}`);
 
   if (mode === "submit") {
-    redirect(`/pegawai/dialog/${dialog.id}`);
+    flashRedirect(`/pegawai/dialog/${dialog.id}`, {
+      type: "success",
+      title: "Dialog kinerja berhasil dikirim ke atasan",
+    });
   }
 
   return {};

@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import {
   capabilitiesForUser,
@@ -8,11 +7,15 @@ import {
   homePathForRole,
   type Role,
 } from "@/lib/session";
+import { flashRedirect } from "@/lib/flash";
 
 export async function logoutAction() {
   const session = await getSession();
   await session.destroy();
-  redirect("/login");
+  flashRedirect("/login", {
+    type: "success",
+    title: "Berhasil keluar",
+  });
 }
 
 export async function switchRole(target: Role) {
@@ -25,16 +28,25 @@ export async function switchRole(target: Role) {
 
   if (!user || !user.is_active) {
     await session.destroy();
-    redirect("/login");
+    flashRedirect("/login", {
+      type: "info",
+      title: "Sesi berakhir",
+    });
   }
 
   const roles = capabilitiesForUser(user);
   if (!roles.includes(target)) {
-    redirect(homePathForRole(session.role ?? roles[0]));
+    flashRedirect(homePathForRole(session.role ?? roles[0]), {
+      type: "warning",
+      title: "Peran tidak tersedia untuk akun Anda",
+    });
   }
 
   session.role = target;
   session.roles = roles;
   await session.save();
-  redirect(homePathForRole(target));
+  flashRedirect(homePathForRole(target), {
+    type: "success",
+    title: `Beralih peran ke ${target === "ADMIN" ? "Admin" : target === "ATASAN" ? "Atasan" : "Pegawai"}`,
+  });
 }

@@ -35,22 +35,46 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 )
+
+type ButtonProps = ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants> & {
+    loading?: boolean;
+  };
 
 function Button({
   className,
   variant = "default",
   size = "default",
+  loading = false,
+  disabled,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonProps) {
+  const isDisabled = disabled || loading;
+
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      disabled={isDisabled}
+      aria-busy={loading || undefined}
       {...props}
-    />
-  )
+    >
+      {loading ? (
+        <span className="inline-flex items-center gap-2">
+          <span
+            className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent"
+            aria-hidden="true"
+          />
+          <span>{children}</span>
+        </span>
+      ) : (
+        children
+      )}
+    </ButtonPrimitive>
+  );
 }
 
 export { Button, buttonVariants }

@@ -3,11 +3,11 @@
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { assertActiveActor } from "@/lib/auth-helpers";
 import { isDurasiText } from "@/lib/format";
+import { flashRedirect } from "@/lib/flash";
 
 export interface PegawaiFormState {
   error?: string;
@@ -143,7 +143,10 @@ export async function createPegawai(
 
   revalidatePath("/atasan/pegawai");
   revalidatePath("/atasan/dashboard");
-  redirect("/atasan/pegawai");
+  flashRedirect("/atasan/pegawai", {
+    type: "success",
+    title: "Pegawai baru berhasil ditambahkan",
+  });
 }
 
 export async function updatePegawai(
@@ -213,7 +216,10 @@ export async function updatePegawai(
 
   revalidatePath("/atasan/pegawai");
   revalidatePath(`/atasan/pegawai/${id}/edit`);
-  redirect("/atasan/pegawai");
+  flashRedirect("/atasan/pegawai", {
+    type: "success",
+    title: "Data pegawai berhasil diperbarui",
+  });
 }
 
 export interface PegawaiStatusState {

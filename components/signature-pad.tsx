@@ -115,8 +115,8 @@ export function SignaturePadField({
           size="sm"
           onClick={clear}
           disabled={disabled || !hasValue}
-          leadingIcon={<EraserIcon size={14} weight="bold" />}
         >
+          <EraserIcon size={14} weight="bold" />
           Bersihkan
         </Button>
       </div>

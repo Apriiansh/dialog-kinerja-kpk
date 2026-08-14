@@ -1,22 +1,28 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { saveTtdFile } from "@/lib/ttd";
 import { assertActiveActor } from "@/lib/auth-helpers";
+import { flashRedirect } from "@/lib/flash";
 import { JenisAspek } from "@/generated/prisma/client";
 
 export async function startDialog(pegawaiId: number) {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
-  if (err) redirect("/login");
+  if (err) flashRedirect("/login", {
+    type: "warning",
+    title: "Sesi berakhir",
+  });
   const user = await prisma.user.findFirst({
     where: { id: pegawaiId, id_atasan: session.id, is_active: true },
     select: { id: true },
   });
-  if (!user) redirect("/atasan/dashboard");
+  if (!user) flashRedirect("/atasan/dashboard", {
+    type: "error",
+    title: "Pegawai tidak ditemukan",
+  });
 
   const dialog = await prisma.dialogKinerja.create({
     data: {
@@ -32,7 +38,10 @@ export async function startDialog(pegawaiId: number) {
     },
     select: { id: true },
   });
-  redirect(`/atasan/dialog/${dialog.id}/edit`);
+  flashRedirect(`/atasan/dialog/${dialog.id}/edit`, {
+    type: "success",
+    title: "Dialog kinerja baru berhasil dibuat",
+  });
 }
 
 export async function autosaveResponses(
@@ -41,7 +50,10 @@ export async function autosaveResponses(
 ) {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
-  if (err) redirect("/login");
+  if (err) flashRedirect("/login", {
+    type: "warning",
+    title: "Sesi berakhir",
+  });
   const dialog = await prisma.dialogKinerja.findFirst({
     where: {
       id: dialogId,
@@ -93,18 +105,27 @@ export async function saveDeskripsiKinerja(
 export async function submitDialog(dialogId: number) {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
-  if (err) redirect("/login");
+  if (err) flashRedirect("/login", {
+    type: "warning",
+    title: "Sesi berakhir",
+  });
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_atasan: session.id, status: "draft_atasan" },
     select: { id: true },
   });
-  if (!dialog) redirect("/atasan/dashboard");
+  if (!dialog) flashRedirect("/atasan/dashboard", {
+    type: "error",
+    title: "Dialog tidak ditemukan",
+  });
 
   await prisma.dialogKinerja.update({
     where: { id: dialogId },
     data: { status: "menunggu_pegawai" },
   });
-  redirect(`/atasan/dialog/${dialogId}`);
+  flashRedirect(`/atasan/dialog/${dialogId}`, {
+    type: "success",
+    title: "Dialog kinerja berhasil dikirim ke pegawai",
+  });
 }
 
 export interface SubmitEvaluasiState {
@@ -165,13 +186,22 @@ export async function submitEvaluasi(
 export async function deleteDialog(dialogId: number) {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
-  if (err) redirect("/login");
+  if (err) flashRedirect("/login", {
+    type: "warning",
+    title: "Sesi berakhir",
+  });
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_atasan: session.id, status: "draft_atasan" },
     select: { id: true },
   });
-  if (!dialog) redirect("/atasan/dialog");
+  if (!dialog) flashRedirect("/atasan/dialog", {
+    type: "error",
+    title: "Dialog tidak ditemukan",
+  });
 
   await prisma.dialogKinerja.delete({ where: { id: dialogId } });
-  redirect("/atasan/dialog");
+  flashRedirect("/atasan/dialog", {
+    type: "success",
+    title: "Dialog berhasil dihapus",
+  });
 }

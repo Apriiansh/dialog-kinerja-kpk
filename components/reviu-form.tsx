@@ -1,11 +1,10 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowRightIcon, WarningIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon } from "@phosphor-icons/react";
 import { createReviu, saveReviu } from "@/lib/actions/reviu";
 import { Button } from "@/components/ui/button";
-import { Banner } from "@/components/ui/banner";
+import { error as showError } from "@/components/ui/toast";
 import { Field } from "@/components/ui/field";
 
 interface ReviuFormProps {
@@ -22,7 +21,6 @@ interface ReviuFormProps {
 }
 
 export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
-  const router = useRouter();
   const [tercapai, setTercapai] = useState(initial?.is_tercapai ?? false);
   const [tidakTercapai, setTidakTercapai] = useState(
     initial?.is_tidak_tercapai ?? false,
@@ -38,12 +36,10 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
   );
   const [tanggal, setTanggal] = useState(initial?.tanggal_next_reviu ?? "");
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string>();
 
   const isEdit = reviuId !== undefined;
 
   async function submit(mode: "draft" | "submit") {
-    setError(undefined);
     setPending(true);
 
     const input = {
@@ -60,12 +56,10 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
       : await createReviu(dialogId!, mode, input);
 
     if (result?.error) {
-      setError(result.error);
+      showError(result.error);
       setPending(false);
       return;
     }
-
-    router.refresh();
   }
 
   const validToSubmit = (() => {
@@ -85,14 +79,8 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
 
   return (
     <div className="flex flex-col gap-6 rounded-lg border border-outline bg-surface px-5 py-6 sm:px-6">
-      {error ? (
-        <Banner tone="error" icon={<WarningIcon size={18} weight="fill" />}>
-          {error}
-        </Banner>
-      ) : null}
-
       <div className="flex flex-col gap-1.5">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
           Status Tindak Lanjut
         </span>
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
@@ -109,7 +97,7 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
               checked={tercapai}
               onChange={(e) => setTercapai(e.target.checked)}
               disabled={pending}
-              className="h-4 w-4 accent-[#1e3a8a]"
+              className="h-4 w-4 accent-primary"
             />
             Tercapai
           </label>
@@ -126,7 +114,7 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
               checked={tidakTercapai}
               onChange={(e) => setTidakTercapai(e.target.checked)}
               disabled={pending}
-              className="h-4 w-4 accent-[#1e3a8a]"
+              className="h-4 w-4 accent-primary"
             />
             Tidak Tercapai
           </label>
@@ -213,7 +201,7 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
         <Button
           type="button"
           variant="secondary"
-          size="md"
+          size="default"
           disabled={pending}
           onClick={() => submit("draft")}
         >
@@ -221,12 +209,12 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
         </Button>
         <Button
           type="button"
-          size="md"
+          size="default"
           loading={pending}
-          disabled={!validToSubmit}
+          disabled={!validToSubmit || pending}
           onClick={() => submit("submit")}
-          leadingIcon={<ArrowRightIcon size={16} weight="bold" />}
         >
+          <ArrowRightIcon size={16} weight="bold" />
           Kirim ke Atasan
         </Button>
       </div>

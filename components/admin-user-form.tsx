@@ -3,13 +3,9 @@
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ArrowLeftIcon,
-  CheckCircleIcon,
-  WarningIcon,
-  ArrowRightIcon,
-} from "@phosphor-icons/react";
+import { ArrowLeftIcon, ArrowRightIcon } from "@phosphor-icons/react";
 import type { AdminUserFormState } from "@/lib/actions/admin-users";
+import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import {
   formatDurasiKeHariIni,
   parseDateInput,
@@ -51,9 +47,7 @@ export function AdminUserForm({
     initialValues ?? {},
   );
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string>();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [notice, setNotice] = useState<string>();
 
   const isAdmin = values.is_admin === "1" || values.is_admin === "true";
 
@@ -81,9 +75,7 @@ export function AdminUserForm({
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
-    setError(undefined);
     setFieldErrors({});
-    setNotice(undefined);
 
     const formData = new FormData(formRef.current!);
     const masaKerjaDate = parseDateInput(
@@ -110,14 +102,14 @@ export function AdminUserForm({
         return;
       }
       console.error(err);
-      setError("Terjadi kesalahan saat menyimpan. Silakan coba lagi.");
+      showError("Terjadi kesalahan saat menyimpan. Silakan coba lagi.");
       return;
     } finally {
       setPending(false);
     }
 
     if (result?.error) {
-      setError(result.error);
+      showError(result.error);
     }
     if (result?.fieldErrors) {
       setFieldErrors(result.fieldErrors);
@@ -132,7 +124,7 @@ export function AdminUserForm({
       setValues(nextValues);
     }
     if (!result?.error && !result?.fieldErrors) {
-      setNotice("Data berhasil disimpan.");
+      showSuccess("Data berhasil disimpan");
       router.refresh();
     }
   }
@@ -157,26 +149,6 @@ export function AdminUserForm({
           {submitLabel}
         </h1>
       </div>
-
-      {error ? (
-        <div
-          role="alert"
-          className="flex items-start gap-3 rounded-md bg-error-container px-4 py-3 text-sm leading-5 text-on-error-container"
-        >
-          <WarningIcon size={18} weight="fill" className="mt-0.5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      ) : null}
-
-      {notice ? (
-        <div
-          role="status"
-          className="flex items-start gap-3 rounded-md bg-status-green-soft px-4 py-3 text-sm leading-5 text-status-green"
-        >
-          <CheckCircleIcon size={18} weight="bold" className="mt-0.5 shrink-0" />
-          <span>{notice}</span>
-        </div>
-      ) : null}
 
       <form
         ref={formRef}

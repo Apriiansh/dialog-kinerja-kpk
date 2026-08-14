@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { SealCheckIcon, WarningIcon } from "@phosphor-icons/react";
+import { SealCheckIcon } from "@phosphor-icons/react";
 import { validateDialog } from "@/lib/actions/pegawai";
 import { Button } from "@/components/ui/button";
-import { Banner } from "@/components/ui/banner";
+import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import { SignaturePadField } from "@/components/signature-pad";
 
 export function ValidationPanel({
@@ -19,12 +19,10 @@ export function ValidationPanel({
   const [setuju, setSetuju] = useState(false);
   const [ttdDataUrl, setTtdDataUrl] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string>();
 
   const canSubmit = setuju && ttdDataUrl !== null && !pending;
 
   async function handleSubmit() {
-    setError(undefined);
     setPending(true);
 
     const result = await validateDialog(dialogId, {
@@ -33,11 +31,12 @@ export function ValidationPanel({
     });
 
     if (result?.error) {
-      setError(result.error);
+      showError(result.error);
       setPending(false);
       return;
     }
 
+    showSuccess("Dialog berhasil divalidasi dan ditandatangani");
     router.refresh();
   }
 
@@ -57,12 +56,6 @@ export function ValidationPanel({
       </div>
 
       <div className="flex flex-col gap-5 px-5 py-4">
-        {error ? (
-          <Banner tone="error" icon={<WarningIcon size={18} weight="fill" />}>
-            {error}
-          </Banner>
-        ) : null}
-
         <label className="flex cursor-pointer items-start gap-3 text-sm leading-5 text-ink">
           <input
             type="checkbox"
@@ -85,12 +78,12 @@ export function ValidationPanel({
         <div className="flex justify-end">
           <Button
             type="button"
-            size="md"
+            size="default"
             loading={pending}
             disabled={!canSubmit}
             onClick={handleSubmit}
-            leadingIcon={<SealCheckIcon size={16} weight="bold" />}
           >
+            <SealCheckIcon size={16} weight="bold" />
             Validasi &amp; Tanda Tangani
           </Button>
         </div>

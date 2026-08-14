@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  CheckCircleIcon,
   CloudArrowUpIcon,
   CloudCheckIcon,
   FloppyDiskIcon,
@@ -11,6 +10,7 @@ import {
   SpinnerGapIcon,
 } from "@phosphor-icons/react";
 import { saveDeskripsiKinerja, submitDialog } from "@/lib/actions/atasan";
+import { error as showError, success as showSuccess } from "@/components/ui/toast";
 
 type SaveState = "idle" | "saving" | "saved";
 
@@ -25,10 +25,8 @@ export function DeskripsiKinerjaForm({
   const [value, setValue] = useState(initialValue);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [savedAt, setSavedAt] = useState<string>("");
-  const [toast, setToast] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const persist = useCallback(
     async (next: string) => {
@@ -69,20 +67,14 @@ export function DeskripsiKinerjaForm({
     timer.current = setTimeout(() => void persist(next), 800);
   };
 
-  const notify = (message: string) => {
-    setToast(message);
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(null), 3000);
-  };
-
   const handleSaveNow = async () => {
     if (timer.current) clearTimeout(timer.current);
     const error = await persist(value);
     if (error) {
-      notify(error);
+      showError(error);
       return;
     }
-    notify("Deskripsi kinerja berhasil disimpan");
+    showSuccess("Deskripsi kinerja berhasil disimpan");
     router.refresh();
   };
 
@@ -114,18 +106,6 @@ export function DeskripsiKinerjaForm({
 
   return (
     <div className="flex flex-col gap-10 pb-24">
-      {toast ? (
-        <div
-          role="status"
-          className="fixed left-1/2 top-4 z-50 animate-toast-in"
-        >
-          <div className="flex items-center gap-2.5 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-on-primary shadow-ambient">
-            <CheckCircleIcon size={18} weight="fill" />
-            {toast}
-          </div>
-        </div>
-      ) : null}
-
       <section aria-label="Deskripsi kinerja" className="flex flex-col gap-6">
         <div className="rounded-lg border border-outline bg-surface">
           <div className="flex flex-col gap-0.5 border-b border-outline px-6 py-4">
@@ -178,7 +158,7 @@ export function DeskripsiKinerjaForm({
               className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-60"
             >
               <PaperPlaneTiltIcon size={16} weight="bold" />
-              {pending ? "Mengirim…" : "Simpan & Kicd m ke Pegawai"}
+              {pending ? "Mengirim…" : "Simpan & Kirim ke Pegawai"}
             </button>
           </div>
         </div>

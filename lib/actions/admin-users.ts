@@ -3,11 +3,11 @@
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { assertActiveActor } from "@/lib/auth-helpers";
 import { isDurasiText } from "@/lib/format";
+import { flashRedirect } from "@/lib/flash";
 
 export interface AdminUserFormState {
   error?: string;
@@ -193,7 +193,10 @@ export async function createAdminUser(
 
   revalidatePath("/admin/users");
   revalidatePath("/admin/dashboard");
-  redirect("/admin/users");
+  flashRedirect("/admin/users", {
+    type: "success",
+    title: "Pengguna baru berhasil ditambahkan",
+  });
 }
 
 export async function updateAdminUser(
@@ -278,7 +281,10 @@ export async function updateAdminUser(
 
   revalidatePath("/admin/users");
   revalidatePath(`/admin/users/${id}/edit`);
-  redirect("/admin/users");
+  flashRedirect("/admin/users", {
+    type: "success",
+    title: "Data pengguna berhasil diperbarui",
+  });
 }
 
 export interface AdminUserStatusState {

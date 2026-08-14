@@ -3,7 +3,6 @@
 import { getIronSession } from "iron-session";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import {
   capabilitiesForUser,
@@ -11,6 +10,7 @@ import {
   sessionOptions,
   type SessionData,
 } from "@/lib/session";
+import { flashRedirect } from "@/lib/flash";
 
 export interface LoginState {
   error?: string;
@@ -56,5 +56,9 @@ export async function loginAction(
   session.roles = roles;
   await session.save();
 
-  redirect(homePathForRole(activeRole));
+  flashRedirect(homePathForRole(activeRole), {
+    type: "success",
+    title: `Selamat datang, ${user.nama_pegawai}`,
+    description: `Anda masuk sebagai ${activeRole === "ADMIN" ? "Admin" : activeRole === "ATASAN" ? "Atasan" : "Pegawai"}.`,
+  });
 }
