@@ -7,3 +7,35 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+# dialog-kinerja
+
+Next.js 16.3 + React 19 + Tailwind v4 + Prisma 7 (MySQL/MariaDB) app for a performance-review ("Dialog Kinerja") workflow. Indonesian domain: roles are `ADMIN`, `ATASAN` (manager), `PEGAWAI` (employee).
+
+## Commands
+
+- Package manager is **npm** (`package-lock.json` is the only lockfile).
+- `npm run dev` — dev server.
+- `npm run lint` — eslint (no `--fix`, no typecheck).
+- `npm run build` — production build.
+- No test framework is configured; `npx tsc --noEmit` is the typecheck.
+
+## Prisma (v7, breaking changes apply)
+
+- Client is generated to `generated/prisma` (gitignored). **Run `npx prisma generate` after any schema change** — imports resolve from `../generated/prisma/client`, not `@prisma/client`.
+- Prisma 7 requires a **driver adapter**: `lib/prisma.ts` and `prisma/seed.ts` construct `PrismaClient` with `@prisma/adapter-mariadb`. Never drop the adapter or you'll get "driver adapter is required" errors.
+- Config lives in `prisma.config.ts` (schema path, migrations dir, seed `tsx prisma/seed.ts`); env loaded via `dotenv`. `prisma/schema.prisma` uses `@@map` to snake_case table names.
+- Migration flow: `npx prisma migrate dev`; seed via `npx prisma db seed`. Seed users: `admin123` / `atasan123` / `pegawai123`.
+
+## Architecture
+
+- **Auth gate is `proxy.ts`** (Next 16's `proxy` file, replacing `middleware`). It redirects unauthenticated users to `/login` and sends logged-in users to `homePathForRole`. When adding protected routes, keep the `matcher` in sync.
+- Sessions: iron-session cookie (`lib/session.ts`). Roles come from `session.role`; a user's capabilities derive from `is_admin` / `as_pegawai` flags via `capabilitiesForUser`. Guards: `requireAuth()`, `requireRole(...roles)`.
+- Route groups: `app/(app)/admin`, `app/(app)/atasan`, `app/(app)/pegawai` each have their own `layout.tsx`; shared group layout in `app/(app)/layout.tsx`.
+- Mutations are server actions under `lib/actions/*`; read queries in `lib/*-queries.ts`; helpers (status/display/format) in `lib/*.ts`.
+- Signature uploads live in `uploads/` (gitignored) and are served by `app/ttd/[file]/route.ts`.
+- Path alias: `@/*` → repo root (e.g. `@/lib/session`).
+
+## Env
+
+`.env` is required and gitignored: `DATABASE_URL`, plus `DATABASE_HOST/USER/PASSWORD/NAME` (used by the MariaDB adapter), and `SESSION_SECRET`. Domain/app logic uses the individual `DATABASE_*` vars, not the URL.

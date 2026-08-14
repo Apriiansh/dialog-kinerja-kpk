@@ -12,6 +12,14 @@ import { AdminUserStatusToggle } from "@/components/admin-user-status-toggle";
 import { AdminUserDeleteButton } from "@/components/admin-user-delete-button";
 import { RoleTag } from "@/components/role-tag";
 import { formatTanggal } from "@/lib/format";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export const dynamic = "force-dynamic";
 
@@ -68,80 +76,107 @@ export default async function AdminUsersPage() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-lg border border-outline bg-surface">
-          <div className="hidden grid-cols-[1fr_140px_120px_110px_130px_150px] gap-4 border-b border-outline bg-surface-muted/60 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted lg:grid">
-            <span>Nama / NPP</span>
-            <span>Atasan</span>
-            <span>Peran</span>
-            <span>Bergabung</span>
-            <span>Status</span>
-            <span className="text-right">Aksi</span>
-          </div>
-          <ul className="divide-y divide-outline">
-            {users.map((u) => (
-              <li
-                key={u.id}
-                className="flex flex-col gap-2 px-5 py-4 lg:grid lg:grid-cols-[1fr_140px_120px_110px_130px_150px] lg:items-center lg:gap-4"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted text-primary">
-                    {u.is_admin ? (
-                      <ShieldCheck size={20} weight="fill" />
-                    ) : (
-                      <UserCircle size={20} weight="fill" />
-                    )}
-                  </span>
-                  <div className="flex min-w-0 flex-col">
-                    <Link
-                      href={`/admin/users/${u.id}/edit`}
-                      className="truncate text-sm font-semibold text-ink transition-colors hover:text-primary"
-                    >
-                      {u.nama_pegawai}
-                    </Link>
-                    <span
-                      className={`text-xs ${u.is_active ? "text-ink-muted" : "text-ink-muted/60"}`}
-                    >
-                      NPP {u.npp}
-                    </span>
-                  </div>
-                </div>
-                <span
-                  className={`truncate text-sm ${u.is_active ? "text-ink" : "text-ink-muted/60"}`}
+          <Table>
+            <TableHeader className="bg-surface-muted/60">
+              <TableRow className="border-outline hover:bg-transparent">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                  Nama / NPP
+                </TableHead>
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                  Atasan
+                </TableHead>
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                  Peran
+                </TableHead>
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                  Bergabung
+                </TableHead>
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                  Status
+                </TableHead>
+                <TableHead className="h-11 px-5 text-right text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                  Aksi
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.map((u) => (
+                <TableRow
+                  key={u.id}
+                  className="border-outline hover:bg-surface-muted/40"
                 >
-                  {u.atasan?.nama_pegawai ?? "—"}
-                </span>
-                <div className="flex flex-wrap gap-1">
-                  {u.is_admin ? <RoleTag role="ADMIN" /> : null}
-                  {u.as_pegawai ? <RoleTag role="PEGAWAI" /> : null}
-                  {u._count.bawahan > 0 ? <RoleTag role="ATASAN" /> : null}
-                </div>
-                <span
-                  className={`text-sm ${u.is_active ? "text-ink" : "text-ink-muted/60"}`}
-                >
-                  {u.tanggal_bergabung
-                    ? formatTanggal(u.tanggal_bergabung)
-                    : "—"}
-                </span>
-                <AdminUserStatusToggle
-                  id={u.id}
-                  nama={u.nama_pegawai}
-                  isActive={u.is_active}
-                  isSelf={u.id === session.id}
-                />
-                <div className="flex items-center justify-start gap-2 lg:justify-end">
-                  <Link
-                    href={`/admin/users/${u.id}/edit`}
-                    className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
+                  <TableCell className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted text-primary">
+                        {u.is_admin ? (
+                          <ShieldCheck size={20} weight="fill" />
+                        ) : (
+                          <UserCircle size={20} weight="fill" />
+                        )}
+                      </span>
+                      <div className="flex min-w-0 flex-col">
+                        <Link
+                          href={`/admin/users/${u.id}/edit`}
+                          className="truncate text-sm font-semibold text-ink transition-colors hover:text-primary"
+                        >
+                          {u.nama_pegawai}
+                        </Link>
+                        <span
+                          className={`text-xs ${u.is_active ? "text-ink-muted" : "text-ink-muted/60"}`}
+                        >
+                          NPP {u.npp}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell
+                    className={`truncate px-5 py-4 text-sm ${u.is_active ? "text-ink" : "text-ink-muted/60"}`}
                   >
-                    <PencilSimple size={14} weight="bold" />
-                    Edit
-                  </Link>
-                  {!u.is_active ? (
-                    <AdminUserDeleteButton id={u.id} nama={u.nama_pegawai} />
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ul>
+                    {u.atasan?.nama_pegawai ?? "—"}
+                  </TableCell>
+                  <TableCell className="px-5 py-4">
+                    <div className="flex flex-wrap gap-1">
+                      {u.is_admin ? <RoleTag role="ADMIN" /> : null}
+                      {u.as_pegawai ? <RoleTag role="PEGAWAI" /> : null}
+                      {u._count.bawahan > 0 ? <RoleTag role="ATASAN" /> : null}
+                    </div>
+                  </TableCell>
+                  <TableCell
+                    className={`px-5 py-4 text-sm ${u.is_active ? "text-ink" : "text-ink-muted/60"}`}
+                  >
+                    {u.tanggal_bergabung
+                      ? formatTanggal(u.tanggal_bergabung)
+                      : "—"}
+                  </TableCell>
+                  <TableCell className="px-5 py-4">
+                    <AdminUserStatusToggle
+                      id={u.id}
+                      nama={u.nama_pegawai}
+                      isActive={u.is_active}
+                      isSelf={u.id === session.id}
+                    />
+                  </TableCell>
+                  <TableCell className="px-5 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/admin/users/${u.id}/edit`}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
+                      >
+                        <PencilSimple size={14} weight="bold" />
+                        Edit
+                      </Link>
+                      {!u.is_active ? (
+                        <AdminUserDeleteButton
+                          id={u.id}
+                          nama={u.nama_pegawai}
+                        />
+                      ) : null}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

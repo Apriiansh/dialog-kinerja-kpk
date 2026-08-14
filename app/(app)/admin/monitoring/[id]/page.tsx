@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { StatusBadge } from "@/components/status-badge";
 import { DialogSummary } from "@/components/dialog-summary";
+import { ReviuList } from "@/components/reviu-list";
+import { Separator } from "@/components/ui/separator";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +50,9 @@ export default async function AdminMonitoringDetailPage({
         select: { npp: true, nama_pegawai: true, nama_jabatan: true },
       },
       aspek: { include: { item: { include: { metode: true } } } },
+      reviu: {
+        orderBy: { created_at: "asc" as const },
+      },
     },
   });
   if (!dialog) notFound();
@@ -105,6 +110,10 @@ export default async function AdminMonitoringDetailPage({
       <section aria-label="Aspek dialog kinerja">
         <DialogSummary aspek={dialog.aspek} />
       </section>
+
+      <Separator />
+      
+      {dialog.reviu.length > 0 ? <ReviuList reviu={dialog.reviu} /> : null}
 
       {dialog.ttd_pegawai_path || dialog.ttd_atasan_path ? (
         <section

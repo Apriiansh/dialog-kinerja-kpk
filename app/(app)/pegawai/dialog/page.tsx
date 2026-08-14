@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  ArrowsClockwise,
   CheckCircle,
   ClipboardText,
   Hourglass,
@@ -263,11 +264,20 @@ export default async function PegawaiDialogListPage({
 
                     <div className="flex shrink-0 items-center justify-end gap-2 border-t border-outline/50 pt-3 sm:border-t-0 sm:pt-0">
                       {d.status === "selesai" ? (
-                        <UnduhBuktiLink
-                          path="/pegawai/dialog"
-                          dialogId={d.id}
-                          className="inline-flex items-center gap-2 rounded-md border border-outline bg-white px-4 py-2 text-xs font-semibold text-ink hover:border-outline-strong hover:bg-surface-muted"
-                        />
+                        <>
+                          <UnduhBuktiLink
+                            path="/pegawai/dialog"
+                            dialogId={d.id}
+                            className="inline-flex items-center gap-2 rounded-md border border-outline bg-white px-4 py-2 text-xs font-semibold text-ink hover:border-outline-strong hover:bg-surface-muted"
+                          />
+                          <Link
+                            href={`/pegawai/reviu/new?dialog=${d.id}`}
+                            className="inline-flex items-center gap-2 rounded-md border border-outline bg-white px-4 py-2 text-xs font-semibold text-ink hover:border-outline-strong hover:bg-surface-muted"
+                          >
+                            <ArrowsClockwise size={14} weight="bold" />
+                            Reviu
+                          </Link>
+                        </>
                       ) : null}
                       <Link
                         href={cta.href(d.id)}

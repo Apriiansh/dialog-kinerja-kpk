@@ -10,6 +10,9 @@ import { DialogSummary } from "@/components/dialog-summary";
 import { DialogResponsesForm } from "@/components/dialog-responses-form";
 import { UnduhBuktiButton } from "@/components/unduh-bukti-button";
 import { FormulirDialogKinerja } from "@/components/formulir-dialog-kinerja";
+import { ReviuList } from "@/components/reviu-list";
+import { ReviuSignForm } from "@/components/reviu-sign-form";
+import { Separator } from "@/components/ui/separator";
 import { submitDialog } from "@/lib/actions/atasan";
 
 type PageProps = {
@@ -100,10 +103,11 @@ export default async function DialogDetailPage({
   const isDraft = status === "draft_atasan";
   const isReview = status === "menunggu_atasan";
   const isSelesai = status === "selesai";
+  const latestReviu = dialog.reviu[dialog.reviu.length - 1];
 
   return (
     <div className="flex flex-col gap-8">
-      <div className={isSelesai ? "print:hidden" : ""}>
+      <div className={`flex flex-col gap-8 ${isSelesai ? "print:hidden" : ""}`}>
         <div className="flex flex-col gap-4">
           <Link
             href="/atasan/dialog"
@@ -208,10 +212,12 @@ export default async function DialogDetailPage({
 
             {dialog.ttd_pegawai_path || dialog.ttd_atasan_path ? (
               <section
-                aria-label="Tanda tangan"
+                aria-label="Tanda tangan dialog kinerja"
                 className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
               >
-                <h2 className="text-sm font-semibold text-ink">Tanda Tangan</h2>
+                <h2 className="text-sm font-semibold text-ink">
+                  Tanda Tangan Dialog Kinerja
+                </h2>
                 <div className="flex flex-wrap gap-6">
                   {dialog.ttd_pegawai_path ? (
                     <TtdImage
@@ -227,6 +233,52 @@ export default async function DialogDetailPage({
                   ) : null}
                 </div>
               </section>
+            ) : null}
+
+            {isSelesai && dialog.reviu.length > 0 ? (
+              <div className="flex flex-col gap-8">
+                <Separator />
+                <ReviuList reviu={dialog.reviu} />
+
+                {latestReviu?.ttd_pegawai_path || latestReviu?.ttd_atasan_path ? (
+                  <section
+                    aria-label="Tanda tangan reviu dialog kinerja"
+                    className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
+                  >
+                    <h2 className="text-sm font-semibold text-ink">
+                      Tanda Tangan Reviu Dialog Kinerja
+                    </h2>
+                    <div className="flex flex-wrap gap-6">
+                      {latestReviu.ttd_pegawai_path ? (
+                        <TtdImage
+                          url={latestReviu.ttd_pegawai_path}
+                          alt="Tanda tangan pegawai"
+                        />
+                      ) : null}
+                      {latestReviu.ttd_atasan_path ? (
+                        <TtdImage
+                          url={latestReviu.ttd_atasan_path}
+                          alt="Tanda tangan atasan"
+                        />
+                      ) : null}
+                    </div>
+                  </section>
+                ) : null}
+
+                {dialog.reviu.some(
+                  (r) => r.status === "menunggu_atasan" && !r.is_valid_atasan,
+                ) ? (
+                  <ReviuSignForm
+                    reviuId={
+                      dialog.reviu.find(
+                        (r) =>
+                          r.status === "menunggu_atasan" && !r.is_valid_atasan,
+                      )!.id
+                    }
+                    role="atasan"
+                  />
+                ) : null}
+              </div>
             ) : null}
           </>
         )}

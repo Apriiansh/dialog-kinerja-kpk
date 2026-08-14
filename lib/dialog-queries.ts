@@ -8,6 +8,9 @@ const PEGAWAI_DETAIL_INCLUDE = {
   aspek: {
     include: { item: { include: { metode: true } } },
   },
+  reviu: {
+    orderBy: { created_at: "asc" as const },
+  },
 } as const;
 
 export async function getPegawaiDialog(dialogId: number, pegawaiId: number) {

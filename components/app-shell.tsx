@@ -12,6 +12,7 @@ import {
   Users,
   UserList,
   MonitorPlay,
+  ArrowsClockwise,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -49,6 +50,11 @@ const PEGAWAI_NAV_GROUPS: NavGroup[] = [
         label: "Dialog Kinerja Saya",
         icon: ClipboardText,
       },
+      {
+        href: "/pegawai/reviu",
+        label: "Reviu Dialog Kinerja",
+        icon: ArrowsClockwise,
+      },
     ],
   },
 ];
@@ -67,6 +73,11 @@ const ATASAN_NAV_GROUPS: NavGroup[] = [
         href: "/atasan/dialog",
         label: "Dialog Kinerja",
         icon: ChatCircleDots,
+      },
+      {
+        href: "/atasan/reviu",
+        label: "Tindak Lanjut Dialog Kinerja",
+        icon: ArrowsClockwise,
       },
       {
         href: "/atasan/pegawai",

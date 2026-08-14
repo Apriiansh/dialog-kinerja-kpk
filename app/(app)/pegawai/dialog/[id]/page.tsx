@@ -13,6 +13,8 @@ import { DialogSummary } from "@/components/dialog-summary";
 import { ValidationPanel } from "@/components/validation-panel";
 import { UnduhBuktiButton } from "@/components/unduh-bukti-button";
 import { FormulirDialogKinerja } from "@/components/formulir-dialog-kinerja";
+import { ReviuList } from "@/components/reviu-list";
+import { Separator } from "@/components/ui/separator";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -107,10 +109,11 @@ export default async function DialogDetailPage({
   const isSelesai = dialog.status === "selesai";
   const showValidation =
     canValidateDialog(dialog.status) && !dialog.is_valid_pegawai;
+  const latestReviu = dialog.reviu[dialog.reviu.length - 1];
 
   return (
     <div className="flex flex-col gap-8">
-      <div className={isSelesai ? "print:hidden" : ""}>
+      <div className={`flex flex-col gap-8 ${isSelesai ? "print:hidden" : ""}`}>
         <div className="flex flex-col gap-4">
           <Link
             href="/pegawai/dashboard"
@@ -185,10 +188,12 @@ export default async function DialogDetailPage({
 
         {dialog.ttd_pegawai_path || dialog.ttd_atasan_path ? (
           <section
-            aria-label="Tanda tangan"
+            aria-label="Tanda tangan dialog kinerja"
             className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
           >
-            <h2 className="text-sm font-semibold text-ink">Tanda Tangan</h2>
+            <h2 className="text-sm font-semibold text-ink">
+              Tanda Tangan Dialog Kinerja
+            </h2>
             <div className="flex flex-wrap gap-6">
               {dialog.ttd_pegawai_path ? (
                 <TtdImage
@@ -204,6 +209,41 @@ export default async function DialogDetailPage({
               ) : null}
             </div>
           </section>
+        ) : null}
+
+        {isSelesai && dialog.reviu.length > 0 ? (
+          <div className="flex flex-col gap-8">
+            <Separator />
+            <ReviuList
+              reviu={dialog.reviu}
+              href={(id) => `/pegawai/reviu/${id}`}
+            />
+
+            {latestReviu?.ttd_pegawai_path || latestReviu?.ttd_atasan_path ? (
+              <section
+                aria-label="Tanda tangan reviu dialog kinerja"
+                className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
+              >
+                <h2 className="text-sm font-semibold text-ink">
+                  Tanda Tangan Reviu Dialog Kinerja
+                </h2>
+                <div className="flex flex-wrap gap-6">
+                  {latestReviu.ttd_pegawai_path ? (
+                    <TtdImage
+                      url={latestReviu.ttd_pegawai_path}
+                      alt="Tanda tangan pegawai"
+                    />
+                  ) : null}
+                  {latestReviu.ttd_atasan_path ? (
+                    <TtdImage
+                      url={latestReviu.ttd_atasan_path}
+                      alt="Tanda tangan atasan"
+                    />
+                  ) : null}
+                </div>
+              </section>
+            ) : null}
+          </div>
         ) : null}
       </div>
 

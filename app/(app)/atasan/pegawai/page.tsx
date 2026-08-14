@@ -10,6 +10,14 @@ import { requireRole } from "@/lib/session";
 import { PegawaiStatusToggle } from "@/components/pegawai-status-toggle";
 import { PegawaiDeleteButton } from "@/components/pegawai-delete-button";
 import { formatTanggal } from "@/lib/format";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export const dynamic = "force-dynamic";
 
@@ -68,81 +76,88 @@ export default async function AtasanPegawaiPage() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-lg border border-outline bg-surface">
-          <div className="hidden grid-cols-[1fr_140px_140px_110px_130px_150px] gap-4 border-b border-outline bg-surface-muted/60 px-5 py-3 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted lg:grid">
-            <span>Nama / NPP</span>
-            <span>Jabatan</span>
-            <span>Unit Kerja</span>
-            <span>Bergabung</span>
-            <span>Status</span>
-            <span className="text-right">Aksi</span>
-          </div>
-          <ul className="divide-y divide-outline">
-            {pegawai.map((p) => (
-              <li
-                key={p.id}
-                className="flex flex-col gap-2 px-5 py-4 lg:grid lg:grid-cols-[1fr_140px_140px_110px_130px_150px] lg:items-center lg:gap-4"
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                      p.is_active
-                        ? "bg-surface-muted text-primary"
-                        : "bg-surface-muted text-ink-muted/60"
+          <Table>
+            <TableHeader className="bg-surface-muted/60">
+              <TableRow className="border-outline hover:bg-transparent">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                  Nama / NPP
+                </TableHead>
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                  Bergabung
+                </TableHead>
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                  Status
+                </TableHead>
+                <TableHead className="h-11 px-5 text-right text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                  Aksi
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pegawai.map((p) => (
+                <TableRow
+                  key={p.id}
+                  className="border-outline hover:bg-surface-muted/40"
+                >
+                  <TableCell className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted text-primary">
+                        <UserCircle size={20} weight="fill" />
+                      </span>
+                      <div className="flex min-w-0 flex-col">
+                        <Link
+                          href={`/atasan/pegawai/${p.id}/edit`}
+                          className="truncate text-sm font-semibold text-ink transition-colors hover:text-primary"
+                        >
+                          {p.nama_pegawai}
+                        </Link>
+                        <span
+                          className={`text-xs ${
+                            p.is_active ? "text-ink-muted" : "text-ink-muted/60"
+                          }`}
+                        >
+                          NPP {p.npp}
+                        </span>
+                        <span className="truncate text-xs text-ink-muted">
+                          {[p.nama_jabatan, p.unit_kerja]
+                            .filter(Boolean)
+                            .join(" · ") || "—"}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell
+                    className={`truncate px-5 py-4 text-sm ${
+                      p.is_active ? "text-ink" : "text-ink-muted/60"
                     }`}
                   >
-                    <UserCircle size={20} weight="fill" />
-                  </span>
-                  <div className="flex min-w-0 flex-col">
-                    <Link
-                      href={`/atasan/pegawai/${p.id}/edit`}
-                      className="truncate text-sm font-semibold text-ink transition-colors hover:text-primary"
-                    >
-                      {p.nama_pegawai}
-                    </Link>
-                    <span
-                      className={`text-xs ${
-                        p.is_active ? "text-ink-muted" : "text-ink-muted/60"
-                      }`}
-                    >
-                      NPP {p.npp}
-                    </span>
-                  </div>
-                </div>
-                <span
-                  className={`text-sm ${p.is_active ? "text-ink" : "text-ink-muted/60"}`}
-                >
-                  {p.nama_jabatan ?? "—"}
-                </span>
-                <span
-                  className={`text-sm ${p.is_active ? "text-ink" : "text-ink-muted/60"}`}
-                >
-                  {p.unit_kerja ?? "—"}
-                </span>
-                <span
-                  className={`text-sm ${p.is_active ? "text-ink" : "text-ink-muted/60"}`}
-                >
-                  {p.tanggal_bergabung ? formatTanggal(p.tanggal_bergabung) : "—"}
-                </span>
-                <PegawaiStatusToggle
-                  id={p.id}
-                  nama={p.nama_pegawai}
-                  isActive={p.is_active}
-                />
-                <div className="flex items-center justify-start gap-2 lg:justify-end">
-                  <Link
-                    href={`/atasan/pegawai/${p.id}/edit`}
-                    className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
-                  >
-                    <PencilSimple size={14} weight="bold" />
-                    Edit
-                  </Link>
-                  {!p.is_active ? (
-                    <PegawaiDeleteButton id={p.id} nama={p.nama_pegawai} />
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ul>
+                    {p.tanggal_bergabung ? formatTanggal(p.tanggal_bergabung) : "—"}
+                  </TableCell>
+                  <TableCell className="px-5 py-4">
+                    <PegawaiStatusToggle
+                      id={p.id}
+                      nama={p.nama_pegawai}
+                      isActive={p.is_active}
+                    />
+                  </TableCell>
+                  <TableCell className="px-5 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Link
+                        href={`/atasan/pegawai/${p.id}/edit`}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
+                      >
+                        <PencilSimple size={14} weight="bold" />
+                        Edit
+                      </Link>
+                      {!p.is_active ? (
+                        <PegawaiDeleteButton id={p.id} nama={p.nama_pegawai} />
+                      ) : null}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

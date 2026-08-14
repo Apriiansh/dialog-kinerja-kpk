@@ -27,6 +27,9 @@ const ATASAN_DIALOG_INCLUDE = {
     },
   },
   aspek: { include: { item: { include: { metode: true } } } },
+  reviu: {
+    orderBy: { created_at: "asc" as const },
+  },
 } as const;
 
 export async function getAtasanDialog(dialogId: number, atasanId: number) {

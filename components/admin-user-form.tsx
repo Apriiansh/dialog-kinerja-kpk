@@ -67,7 +67,10 @@ export function AdminUserForm({
 
   function toggleAsPegawai(checked: boolean) {
     setValues((prev) => {
-      const next = { ...prev, as_pegawai: checked ? "1" : "" };
+      const next: Record<string, string> = {
+        ...prev,
+        as_pegawai: checked ? "1" : "",
+      };
       if (checked && !prev.default_role) {
         next.default_role = "PEGAWAI";
       }

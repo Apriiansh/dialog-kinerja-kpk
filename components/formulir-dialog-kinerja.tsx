@@ -6,7 +6,6 @@ import {
   metodeLabel,
   type AspekPegawaiRow,
 } from "@/lib/dialog-display";
-
 interface ActorProfile {
   nama_pegawai?: string | null;
   nip?: string | null;
@@ -127,6 +126,64 @@ function TanggungJawabBlock({
   );
 }
 
+function TtdBlock({
+  tanggal,
+  atasanPath,
+  atasanNama,
+  atasanJabatan,
+  pegawaiPath,
+  pegawaiNama,
+  pegawaiJabatan,
+}: {
+  tanggal: Date;
+  atasanPath: string | null;
+  atasanNama?: string | null;
+  atasanJabatan?: string | null;
+  pegawaiPath: string | null;
+  pegawaiNama?: string | null;
+  pegawaiJabatan?: string | null;
+}) {
+  return (
+    <div className="mt-10 break-inside-avoid">
+      <p className="text-center">Jakarta, {formatWaktuPelaksanaan(tanggal)}</p>
+      <div className="mt-8 flex justify-between text-center">
+        <div className="w-1/2">
+          <p className="font-semibold">Atasan Pegawai,</p>
+          {atasanPath ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={atasanPath}
+              alt="Tanda tangan atasan"
+              className="mx-auto mt-3 h-16 object-contain"
+            />
+          ) : (
+            <div className="h-16" />
+          )}
+          <div className="mx-auto mt-2 w-48 border-b-2 border-black" />
+          <p className="mt-1 font-semibold">{atasanNama ?? "—"}</p>
+          <p>{atasanJabatan ?? "Jabatan"}</p>
+        </div>
+        <div className="w-1/2">
+          <p className="font-semibold">Pegawai,</p>
+          {pegawaiPath ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={pegawaiPath}
+              alt="Tanda tangan pegawai"
+              className="mx-auto mt-3 h-16 object-contain"
+            />
+          ) : (
+            <div className="h-16" />
+          )}
+          <div className="mx-auto mt-2 w-48 border-b-2 border-black" />
+          <p className="mt-1 font-semibold">{pegawaiNama ?? "—"}</p>
+          <p>{pegawaiJabatan ?? "Jabatan"}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function FormulirDialogKinerja({
   dialog,
   pegawai,
@@ -235,76 +292,19 @@ export function FormulirDialogKinerja({
         </section>
       ))}
 
-      <div className="mt-4 break-inside-avoid">
-        <p className="font-bold">CATATAN</p>
-        <table className="mt-1 w-full border-collapse">
-          <tbody>
-            <tr>
-              <td className="w-56 py-0.5 align-top font-bold">
-                Metode Pengembangan yang dipilih
-              </td>
-            </tr>
-            <tr>
-              <td className="py-0.5">
-                <div className="flex flex-col gap-0.5">
-                  <span>☐ Penugasan</span>
-                  <span>☐ Pendidikan dan Pelatihan</span>
-                  <span>☐ Mutasi</span>
-                  <span>☐ Lainnya ................................</span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <br />
-        <p className="mt-2">
-          Reviu Hasil Tindak Lanjut akan dilaksanakan pada tanggal:
-          .................................
+      <div className="mt-8">
+        <p className="text-center font-bold uppercase tracking-wide">
+          Tanda Tangan Dialog Kinerja
         </p>
-      </div>
-
-      <div className="mt-10 break-inside-avoid">
-        <p className="text-center">
-          Jakarta, {formatWaktuPelaksanaan(tanggalValidasi)}
-        </p>
-        <div className="mt-8 flex justify-between text-center">
-          <div className="w-1/2">
-            <p className="font-semibold">Atasan Pegawai,</p>
-            {dialog.ttd_atasan_path ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={dialog.ttd_atasan_path}
-                alt="Tanda tangan atasan"
-                className="mx-auto mt-3 h-16 object-contain"
-              />
-            ) : (
-              <div className="h-16" />
-            )}
-            <div className="mx-auto mt-2 w-48 border-b-2 border-black" />
-            <p className="mt-1 font-semibold">
-              {atasan?.nama_pegawai ?? "—"}
-            </p>
-            <p>{atasan?.nama_jabatan ?? "Jabatan"}</p>
-          </div>
-          <div className="w-1/2">
-            <p className="font-semibold">Pegawai,</p>
-            {dialog.ttd_pegawai_path ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={dialog.ttd_pegawai_path}
-                alt="Tanda tangan pegawai"
-                className="mx-auto mt-3 h-16 object-contain"
-              />
-            ) : (
-              <div className="h-16" />
-            )}
-            <div className="mx-auto mt-2 w-48 border-b-2 border-black" />
-            <p className="mt-1 font-semibold">
-              {pegawai?.nama_pegawai ?? "—"}
-            </p>
-            <p>{pegawai?.nama_jabatan ?? "Jabatan"}</p>
-          </div>
-        </div>
+        <TtdBlock
+          tanggal={tanggalValidasi}
+          atasanPath={dialog.ttd_atasan_path}
+          atasanNama={atasan?.nama_pegawai}
+          atasanJabatan={atasan?.nama_jabatan}
+          pegawaiPath={dialog.ttd_pegawai_path}
+          pegawaiNama={pegawai?.nama_pegawai}
+          pegawaiJabatan={pegawai?.nama_jabatan}
+        />
       </div>
     </div>
   );

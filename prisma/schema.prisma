@@ -32,6 +32,18 @@ enum JenisAspek {
   KARIR_MENENGAH
 }
 
+enum StatusReviu {
+  draft_pegawai
+  menunggu_atasan
+  menunggu_validasi
+  selesai
+}
+
+enum StatusTindakLanjut {
+  TERCAPAI
+  TIDAK_TERCAPAI
+}
+
 model User {
   id                       Int      @id @default(autoincrement())
   npp                      String   @unique @db.VarChar(50)
@@ -91,6 +103,7 @@ model DialogKinerja {
   pegawai User @relation("DialogPegawai", fields: [id_pegawai], references: [id], onDelete: Restrict)
 
   aspek DialogKinerjaAspek[]
+  reviu Reviu[]
 
   @@map("dialog_kinerja")
 }
@@ -127,4 +140,26 @@ model DialogKinerjaItem {
   metode MasterMetodePengembangan?  @relation(fields: [id_metode_pengembangan], references: [id], onDelete: SetNull)
 
   @@map("dialog_kinerja_item")
+}
+
+model Reviu {
+  id                     Int                @id @default(autoincrement())
+  id_dialog              Int
+  status_tindaklanjut    StatusTindakLanjut
+  penjelasan             String             @db.Text
+  rencana_tindak_lanjut  String?            @db.Text
+  tanggal_next_reviu     DateTime?          @db.Date
+  status                 StatusReviu        @default(draft_pegawai)
+  is_valid_pegawai       Boolean            @default(false)
+  is_valid_atasan        Boolean            @default(false)
+  ttd_pegawai_path       String?            @db.VarChar(255)
+  ttd_atasan_path        String?            @db.VarChar(255)
+  waktu_validasi_pegawai DateTime?
+  waktu_validasi_atasan  DateTime?
+  created_at             DateTime           @default(now())
+  updated_at             DateTime           @updatedAt
+
+  dialog DialogKinerja @relation(fields: [id_dialog], references: [id], onDelete: Cascade)
+
+  @@map("reviu")
 }

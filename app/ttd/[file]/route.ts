@@ -38,7 +38,7 @@ export async function GET(
 
   const isOwner =
     session.id === dialog.id_pegawai || session.id === dialog.id_atasan;
-  if (!isOwner) {
+  if (!isOwner && session.role !== "ADMIN") {
     return new NextResponse("Forbidden", { status: 403 });
   }
 
