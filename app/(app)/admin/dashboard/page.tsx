@@ -85,7 +85,7 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <RoleTag role={session.role} />
+          {/* <RoleTag role={session.role} /> */}
           <span className="inline-flex items-center gap-1.5 rounded-md bg-surface-muted px-2.5 py-1 text-xs font-semibold text-ink-muted">
             <ShieldCheckIcon size={14} weight="fill" />
             Super User

@@ -38,15 +38,15 @@ const SECTIONS: {
   title: string;
   jenis: JenisAspek[];
 }[] = [
-  { letter: "A", title: "Evaluasi Kinerja (SKP)", jenis: ["SKP"] },
-  { letter: "B", title: "Evaluasi Gap Asesmen Pegawai", jenis: ["GAP_ASESMEN"] },
-  { letter: "C", title: "Evaluasi Perilaku Pegawai", jenis: ["PERILAKU"] },
-  {
-    letter: "D",
-    title: "Aspirasi Karir Pegawai",
-    jenis: ["KARIR_PENDEK", "KARIR_MENENGAH"],
-  },
-];
+    { letter: "A", title: "Evaluasi Kinerja (SKP)", jenis: ["SKP"] },
+    { letter: "B", title: "Evaluasi Gap Asesmen Pegawai", jenis: ["GAP_ASESMEN"] },
+    { letter: "C", title: "Evaluasi Perilaku Pegawai", jenis: ["PERILAKU"] },
+    {
+      letter: "D",
+      title: "Aspirasi Karir Pegawai",
+      jenis: ["KARIR_PENDEK", "KARIR_MENENGAH"],
+    },
+  ];
 
 const KARIR_TITLE: Record<"KARIR_PENDEK" | "KARIR_MENENGAH", string> = {
   KARIR_PENDEK: "1. Jangka Pendek (1-2 Tahun ke depan)",
@@ -247,11 +247,10 @@ p {
         <p style="font-size: 9pt; color: #444444; margin: 0;">Biro Sumber Daya Manusia</p>
       </td>
       <td style="border: none; text-align: right; vertical-align: middle;">
-        ${
-          logoBase64
-            ? `<img src="${logoBase64}" width="120" style="width: 120px; height: auto;" alt="Logo KPK" />`
-            : ""
-        }
+        ${logoBase64
+      ? `<img src="${logoBase64}" width="120" style="width: 120px; height: auto;" alt="Logo KPK" />`
+      : ""
+    }
       </td>
     </tr>
   </table>
@@ -269,15 +268,15 @@ p {
   <table style="width: 100%; border-collapse: collapse; margin-bottom: 12pt;" border="1" cellpadding="5" cellspacing="0">
     <tbody>
       ${dataRows
-        .map(
-          (r) => `
+      .map(
+        (r) => `
         <tr>
           <td style="width: 30%; font-weight: bold; background-color: #f8fafc;">${escapeHtml(r.label)}</td>
           <td style="width: 70%;">${escapeHtml(r.value || "—")}</td>
         </tr>
       `,
-        )
-        .join("")}
+      )
+      .join("")}
     </tbody>
   </table>
 
@@ -306,11 +305,10 @@ p {
         <td style="width: 50%; border: none; text-align: center; vertical-align: top;">
           <p style="font-weight: bold; margin-bottom: 4pt;">Atasan Pegawai,</p>
           <div style="height: 70px; display: flex; align-items: center; justify-content: center; margin: 4pt 0;">
-            ${
-              ttdAtasanBase64
-                ? `<img src="${ttdAtasanBase64}" height="65" style="height: 65px; object-contain: contain;" alt="TTD Atasan" />`
-                : `<div style="height: 65px;"></div>`
-            }
+            ${ttdAtasanBase64
+      ? `<img src="${ttdAtasanBase64}" height="65" style="height: 65px; object-contain: contain;" alt="TTD Atasan" />`
+      : `<div style="height: 65px;"></div>`
+    }
           </div>
           <p style="font-weight: bold; text-decoration: underline; margin: 4pt 0 0 0;">${escapeHtml(dialog.atasan.nama_pegawai || "—")}</p>
           <p style="margin: 0;">NPP. ${escapeHtml(dialog.atasan.npp)}</p>
@@ -320,11 +318,10 @@ p {
         <td style="width: 50%; border: none; text-align: center; vertical-align: top;">
           <p style="font-weight: bold; margin-bottom: 4pt;">Pegawai,</p>
           <div style="height: 70px; display: flex; align-items: center; justify-content: center; margin: 4pt 0;">
-            ${
-              ttdPegawaiBase64
-                ? `<img src="${ttdPegawaiBase64}" height="65" style="height: 65px; object-contain: contain;" alt="TTD Pegawai" />`
-                : `<div style="height: 65px;"></div>`
-            }
+            ${ttdPegawaiBase64
+      ? `<img src="${ttdPegawaiBase64}" height="65" style="height: 65px; object-contain: contain;" alt="TTD Pegawai" />`
+      : `<div style="height: 65px;"></div>`
+    }
           </div>
           <p style="font-weight: bold; text-decoration: underline; margin: 4pt 0 0 0;">${escapeHtml(dialog.pegawai.nama_pegawai || "—")}</p>
           <p style="margin: 0;">NPP. ${escapeHtml(dialog.pegawai.npp)}</p>
@@ -455,11 +452,10 @@ p {
         <p style="font-size: 9pt; color: #444444; margin: 0;">Biro Sumber Daya Manusia</p>
       </td>
       <td style="border: none; text-align: right; vertical-align: middle;">
-        ${
-          logoBase64
-            ? `<img src="${logoBase64}" width="120" style="width: 120px; height: auto;" alt="Logo KPK" />`
-            : ""
-        }
+        ${logoBase64
+      ? `<img src="${logoBase64}" width="120" style="width: 120px; height: auto;" alt="Logo KPK" />`
+      : ""
+    }
       </td>
     </tr>
   </table>
@@ -477,15 +473,15 @@ p {
   <table style="width: 100%; border-collapse: collapse; margin-bottom: 12pt;" border="1" cellpadding="5" cellspacing="0">
     <tbody>
       ${dataRows
-        .map(
-          (r) => `
+      .map(
+        (r) => `
         <tr>
           <td style="width: 30%; font-weight: bold; background-color: #f8fafc;">${escapeHtml(r.label)}</td>
           <td style="width: 70%;">${escapeHtml(r.value || "—")}</td>
         </tr>
       `,
-        )
-        .join("")}
+      )
+      .join("")}
     </tbody>
   </table>
 
@@ -526,11 +522,10 @@ p {
       </p>
 
       <p style="margin: 4pt 0 0 0;">
-        <strong>Tanggal reviu berikutnya:</strong> ${
-          !tercapai && reviu.tanggal_next_reviu
-            ? formatTanggal(reviu.tanggal_next_reviu)
-            : "-"
-        }
+        <strong>Tanggal reviu berikutnya:</strong> ${!tercapai && reviu.tanggal_next_reviu
+      ? formatTanggal(reviu.tanggal_next_reviu)
+      : "-"
+    }
       </p>
     </div>
   </div>
@@ -544,11 +539,10 @@ p {
         <td style="width: 50%; border: none; text-align: center; vertical-align: top;">
           <p style="font-weight: bold; margin-bottom: 4pt;">Atasan Pegawai,</p>
           <div style="height: 70px; display: flex; align-items: center; justify-content: center; margin: 4pt 0;">
-            ${
-              ttdAtasanBase64
-                ? `<img src="${ttdAtasanBase64}" height="65" style="height: 65px; object-contain: contain;" alt="TTD Atasan" />`
-                : `<div style="height: 65px;"></div>`
-            }
+            ${ttdAtasanBase64
+      ? `<img src="${ttdAtasanBase64}" height="65" style="height: 65px; object-contain: contain;" alt="TTD Atasan" />`
+      : `<div style="height: 65px;"></div>`
+    }
           </div>
           <p style="font-weight: bold; text-decoration: underline; margin: 4pt 0 0 0;">${escapeHtml(reviu.dialog.atasan.nama_pegawai || "—")}</p>
           <p style="margin: 0;">NPP. ${escapeHtml(reviu.dialog.atasan.npp)}</p>
@@ -558,11 +552,10 @@ p {
         <td style="width: 50%; border: none; text-align: center; vertical-align: top;">
           <p style="font-weight: bold; margin-bottom: 4pt;">Pegawai,</p>
           <div style="height: 70px; display: flex; align-items: center; justify-content: center; margin: 4pt 0;">
-            ${
-              ttdPegawaiBase64
-                ? `<img src="${ttdPegawaiBase64}" height="65" style="height: 65px; object-contain: contain;" alt="TTD Pegawai" />`
-                : `<div style="height: 65px;"></div>`
-            }
+            ${ttdPegawaiBase64
+      ? `<img src="${ttdPegawaiBase64}" height="65" style="height: 65px; object-contain: contain;" alt="TTD Pegawai" />`
+      : `<div style="height: 65px;"></div>`
+    }
           </div>
           <p style="font-weight: bold; text-decoration: underline; margin: 4pt 0 0 0;">${escapeHtml(reviu.dialog.pegawai.nama_pegawai || "—")}</p>
           <p style="margin: 0;">NPP. ${escapeHtml(reviu.dialog.pegawai.npp)}</p>

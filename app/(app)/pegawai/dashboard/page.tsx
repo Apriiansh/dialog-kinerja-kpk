@@ -145,7 +145,7 @@ export default async function PegawaiDashboardPage({
             Selamat datang di Sistem Aplikasi Dialog Kinerja Biro SDM KPK.
           </p>
         </div>
-        <RoleTag role={session.role} />
+        {/* <RoleTag role={session.role} /> */}
       </header>
 
       {/* Profil Pegawai */}
