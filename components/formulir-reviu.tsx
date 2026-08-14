@@ -50,8 +50,8 @@ function TtdBlock({
 }) {
   return (
     <div className="mt-10 break-inside-avoid">
-      <p className="text-center">Jakarta, {formatWaktuPelaksanaan(tanggal)}</p>
-      <div className="mt-8 flex justify-between text-center">
+      <p>Jakarta, {formatWaktuPelaksanaan(tanggal)}</p>
+      <div className="mt-8 flex justify-between">
         <div className="w-1/2">
           <p className="font-semibold">Atasan Pegawai,</p>
           {atasanPath ? (
@@ -59,12 +59,12 @@ function TtdBlock({
             <img
               src={atasanPath}
               alt="Tanda tangan atasan"
-              className="mx-auto mt-3 h-16 object-contain"
+              className="mt-3 h-16 object-contain"
             />
           ) : (
             <div className="h-16" />
           )}
-          <div className="mx-auto mt-2 w-48 border-b-2 border-black" />
+          <div className="mt-2 w-48 border-b-2 border-black" />
           <p className="mt-1 font-semibold">{atasanNama ?? "—"}</p>
           <p>{atasanJabatan ?? "Jabatan"}</p>
         </div>
@@ -75,12 +75,12 @@ function TtdBlock({
             <img
               src={pegawaiPath}
               alt="Tanda tangan pegawai"
-              className="mx-auto mt-3 h-16 object-contain"
+              className="mt-3 h-16 object-contain"
             />
           ) : (
             <div className="h-16" />
           )}
-          <div className="mx-auto mt-2 w-48 border-b-2 border-black" />
+          <div className="mt-2 w-48 border-b-2 border-black" />
           <p className="mt-1 font-semibold">{pegawaiNama ?? "—"}</p>
           <p>{pegawaiJabatan ?? "Jabatan"}</p>
         </div>
@@ -98,6 +98,8 @@ export function FormulirReviu({ reviu }: { reviu: FormulirReviuData }) {
     reviu.waktu_validasi_pegawai ??
     new Date();
   const { dialog } = reviu;
+  const tercapai = reviu.is_tercapai;
+  const tidakTercapai = reviu.is_tidak_tercapai;
 
   const dataRows = [
     { label: "Nama Pegawai", value: dialog.pegawai.nama_pegawai ?? null },
@@ -113,6 +115,8 @@ export function FormulirReviu({ reviu }: { reviu: FormulirReviuData }) {
       value: dialog.pegawai.masa_kerja_unit_terakhir ?? null,
     },
   ];
+
+  const BLANK = "..............................................................";
 
   return (
     <div className="hidden font-[Arial,_Helvetica,_sans-serif] text-[10.5pt] text-black print:block">
@@ -143,67 +147,81 @@ export function FormulirReviu({ reviu }: { reviu: FormulirReviuData }) {
               </td>
             </tr>
           ))}
+          <tr>
+            <td className="px-2 py-1">
+              Status Tindak Lanjut :{" "}
+              {tindakLanjutLabel(reviu.is_tercapai, reviu.is_tidak_tercapai)}
+            </td>
+          </tr>
         </tbody>
       </table>
 
       <div className="mt-3">
-        <p className="font-bold">A. Hasil Reviu Dialog Kinerja</p>
-        <table className="mt-1 w-full border-collapse">
-          <tbody>
-            <tr>
-              <td className="w-64 px-2 py-1 font-semibold">Status Tindak Lanjut</td>
-              <td className="px-2 py-1">
-                {tindakLanjutLabel(reviu.is_tercapai, reviu.is_tidak_tercapai)}
-              </td>
-            </tr>
-            {reviu.is_tercapai ? (
-              <tr>
-                <td className="w-64 px-2 py-1 font-semibold align-top">
-                  Penjelasan Tercapai
-                </td>
-                <td className="px-2 py-1 whitespace-pre-wrap">
-                  {reviu.penjelasan_tercapai?.trim() || " "}
-                </td>
-              </tr>
-            ) : null}
-            {reviu.is_tidak_tercapai ? (
-              <tr>
-                <td className="w-64 px-2 py-1 font-semibold align-top">
-                  Penjelasan Tidak Tercapai
-                </td>
-                <td className="px-2 py-1 whitespace-pre-wrap">
-                  {reviu.penjelasan_tidak_tercapai?.trim() || " "}
-                </td>
-              </tr>
-            ) : null}
-            {reviu.is_tidak_tercapai ? (
-              <tr>
-                <td className="w-64 px-2 py-1 font-semibold align-top">
-                  Rencana dan Tindak Lanjut ke Depan
-                </td>
-                <td className="px-2 py-1 whitespace-pre-wrap">
-                  {reviu.rencana_tindak_lanjut?.trim() || " "}
-                </td>
-              </tr>
-            ) : null}
-            <tr>
-              <td className="w-64 px-2 py-1 font-semibold">
-                Tanggal Reviu Berikutnya
-              </td>
-              <td className="px-2 py-1">
-                {reviu.tanggal_next_reviu
-                  ? formatTanggal(reviu.tanggal_next_reviu)
-                  : "—"}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <p className="text-justify">
+          Telah dilaksanakan Dialog Kinerja pada tanggal{" "}
+          <span className="font-semibold">
+            {formatWaktuPelaksanaan(tanggalDialog)}
+          </span>
+          .
+        </p>
+        <p className="mt-3 text-justify">
+          Hasil tindak lanjut perbaikan atau penyelesaian untuk permasalahan/
+          kinerja/situasi yang dihadapi pegawai pada saat Dialog Kinerja adalah:
+        </p>
+
+        <div className="mt-2 leading-snug">
+          <div className="py-1.5">
+            <p className="font-semibold">
+              {tercapai ? "[✓]" : "[  ]"} Tercapai
+            </p>
+
+            <p className="mt-1 text-justify whitespace-pre-wrap">
+              <span className="font-semibold">
+                Penjelasan singkat hasilnya:
+              </span>{" "}
+              {tercapai && reviu.penjelasan_tercapai?.trim()
+                ? reviu.penjelasan_tercapai
+                : BLANK}
+            </p>
+          </div>
+
+          <div className="py-1.5">
+            <p className="font-semibold">
+              {tidakTercapai ? "[✓]" : "[  ]"} Tidak Tercapai
+            </p>
+
+            <p className="mt-1 text-justify whitespace-pre-wrap">
+              <span className="font-semibold">
+                Deskripsi penyebab tidak tercapai:
+              </span>{" "}
+              {tidakTercapai && reviu.penjelasan_tidak_tercapai?.trim()
+                ? reviu.penjelasan_tidak_tercapai
+                : BLANK}
+            </p>
+
+            <p className="mt-1 text-justify whitespace-pre-wrap">
+              <span className="font-semibold">
+                Rencana dan tindak lanjut ke depan yang akan dilakukan:
+              </span>{" "}
+              {tidakTercapai && reviu.rencana_tindak_lanjut?.trim()
+                ? reviu.rencana_tindak_lanjut
+                : BLANK}
+            </p>
+
+            <p className="mt-1">
+              <span className="font-semibold">
+                Tanggal reviu berikutnya:
+              </span>{" "}
+              {tidakTercapai && reviu.tanggal_next_reviu
+                ? formatTanggal(reviu.tanggal_next_reviu)
+                : BLANK}
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="mt-8">
-        <p className="text-center font-bold uppercase tracking-wide">
-          Tanda Tangan Reviu Hasil Dialog Kinerja
-        </p>
+
         <TtdBlock
           tanggal={tanggalDialog}
           atasanPath={reviu.ttd_atasan_path}
