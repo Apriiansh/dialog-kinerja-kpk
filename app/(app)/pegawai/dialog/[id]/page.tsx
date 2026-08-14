@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { DialogSummary } from "@/components/dialog-summary";
 import { ValidationPanel } from "@/components/validation-panel";
 import { UnduhBuktiButton } from "@/components/unduh-bukti-button";
+import { UnduhWordLink } from "@/components/unduh-word-link";
 import { FormulirDialogKinerja } from "@/components/formulir-dialog-kinerja";
 import { ReviuList } from "@/components/reviu-list";
 import { Separator } from "@/components/ui/separator";
@@ -139,9 +140,14 @@ export default async function DialogDetailPage({
                     : ""}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={dialog.status} />
-                {isSelesai ? <UnduhBuktiButton autoPrint={cetak} /> : null}
+                {isSelesai ? (
+                  <>
+                    <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />
+                    <UnduhWordLink href={`/api/unduh/dialog/${dialog.id}/word`} />
+                  </>
+                ) : null}
               </div>
             </div>
 

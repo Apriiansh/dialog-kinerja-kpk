@@ -11,6 +11,7 @@ import { requireRole } from "@/lib/session";
 import { getAtasanReviuList } from "@/lib/reviu-queries";
 import { ReviuStatusBadge } from "@/components/reviu-status-badge";
 import { TindakLanjutBadge } from "@/components/tindak-lanjut-badge";
+import { UnduhWordLink } from "@/components/unduh-word-link";
 import type { StatusReviu } from "@/generated/prisma/enums";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -198,10 +199,10 @@ export default async function AtasanReviuListPage({
                       </span>
                     </div>
 
-                    <div className="flex shrink-0 items-center justify-end gap-2 border-t border-outline/50 pt-3 sm:border-t-0 sm:pt-0">
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-outline/50 pt-3 sm:border-t-0 sm:pt-0">
                       <Link
                         href={`/atasan/dialog/${r.dialog.id}`}
-                        className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-xs font-semibold transition-colors ${isPending
+                        className={`inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-semibold transition-colors ${isPending
                             ? "bg-primary text-on-primary hover:bg-primary-strong shadow-xs"
                             : "border border-outline bg-white text-ink hover:border-outline-strong hover:bg-surface-muted"
                           }`}
@@ -209,13 +210,19 @@ export default async function AtasanReviuListPage({
                         {isPending ? "Reviu & Tandatangani" : "Lihat Dialog"}
                       </Link>
                       {r.status === "selesai" ? (
-                        <Link
-                          href={`/atasan/reviu/${r.id}?cetak=1`}
-                          className="inline-flex items-center gap-2 rounded-md border border-outline bg-white px-4 py-2 text-xs font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted"
-                        >
-                          <DownloadSimpleIcon size={14} weight="bold" />
-                          Unduh Reviu
-                        </Link>
+                        <>
+                          <Link
+                            href={`/atasan/reviu/${r.id}?cetak=1`}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted"
+                          >
+                            <DownloadSimpleIcon size={14} weight="bold" />
+                            Unduh PDF
+                          </Link>
+                          <UnduhWordLink
+                            href={`/api/unduh/reviu/${r.id}/word`}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted"
+                          />
+                        </>
                       ) : null}
                     </div>
                   </div>
