@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, PencilSimple } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeftIcon, PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/session";
 import { canValidateReviu, getPegawaiReviu } from "@/lib/reviu-queries";
 import { ReviuStatusBadge } from "@/components/reviu-status-badge";
@@ -64,7 +64,7 @@ export default async function PegawaiReviuDetailPage({
             href="/pegawai/reviu"
             className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
           >
-            <ArrowLeft size={16} weight="bold" />
+            <ArrowLeftIcon size={16} weight="bold" />
             Kembali ke Reviu
           </Link>
 
@@ -91,7 +91,7 @@ export default async function PegawaiReviuDetailPage({
                       href={`/pegawai/reviu/${reviu.id}/edit`}
                       className="inline-flex h-8 items-center gap-1 rounded-md bg-primary-soft px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-faint"
                     >
-                      <PencilSimple size={12} weight="bold" />
+                      <PencilSimpleIcon size={12} weight="bold" />
                       Edit
                     </Link>
                     <DeleteReviuButton reviuId={reviu.id} />

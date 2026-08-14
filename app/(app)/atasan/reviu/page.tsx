@@ -1,10 +1,10 @@
 import Link from "next/link";
 import {
-  ArrowsClockwise,
-  PencilSimple,
-  Hourglass,
-  SealCheck,
-  CheckCircle,
+  ArrowsClockwiseIcon,
+  PencilSimpleIcon,
+  HourglassIcon,
+  SealCheckIcon,
+  CheckCircleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/session";
 import { getAtasanReviuList } from "@/lib/reviu-queries";
@@ -60,28 +60,28 @@ export default async function AtasanReviuListPage({
       key: "draft_pegawai" as const,
       label: "Draft",
       count: count("draft_pegawai"),
-      icon: PencilSimple,
+      icon: PencilSimpleIcon,
       className: "bg-surface-soft text-primary",
     },
     {
       key: "menunggu_atasan" as const,
       label: "Menunggu Reviu Anda",
       count: count("menunggu_atasan"),
-      icon: Hourglass,
+      icon: HourglassIcon,
       className: "bg-status-amber-soft text-status-amber",
     },
     {
       key: "menunggu_validasi" as const,
       label: "Menunggu Validasi",
       count: count("menunggu_validasi"),
-      icon: SealCheck,
+      icon: SealCheckIcon,
       className: "bg-status-indigo-soft text-status-indigo",
     },
     {
       key: "selesai" as const,
       label: "Selesai",
       count: count("selesai"),
-      icon: CheckCircle,
+      icon: CheckCircleIcon,
       className: "bg-status-green-soft text-status-green",
     },
   ];
@@ -159,7 +159,7 @@ export default async function AtasanReviuListPage({
         {visible.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-12 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-primary">
-              <ArrowsClockwise size={22} weight="bold" />
+              <ArrowsClockwiseIcon size={22} weight="bold" />
             </span>
             <h3 className="text-base font-semibold text-ink">
               {activeStatus === "semua"

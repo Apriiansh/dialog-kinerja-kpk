@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, PencilSimple } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeftIcon, PencilSimpleIcon, PencilSimpleLineIcon } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/session";
 import {
   canEditDialog,
@@ -119,7 +119,7 @@ export default async function DialogDetailPage({
             href="/pegawai/dashboard"
             className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
           >
-            <ArrowLeft size={16} weight="bold" />
+            <ArrowLeftIcon size={16} weight="bold" />
             Kembali ke Dashboard
           </Link>
 
@@ -170,7 +170,7 @@ export default async function DialogDetailPage({
                   href={`/pegawai/dialog/${dialog.id}/edit`}
                   className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong"
                 >
-                  <PencilSimple size={16} weight="bold" />
+                  <PencilSimpleLineIcon size={16} weight="bold" />
                   Isi Dialog Kinerja
                 </Link>
               </div>

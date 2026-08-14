@@ -1,10 +1,10 @@
 import {
-  Users,
-  ChatCircleDots,
-  CheckCircle,
-  Hourglass,
-  ShieldCheck,
-  ArrowRight,
+  UsersIcon,
+  ChatCircleDotsIcon,
+  CheckCircleIcon,
+  HourglassIcon,
+  ShieldCheckIcon,
+  ArrowRightIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -51,25 +51,25 @@ export default async function AdminDashboardPage() {
       label: "Pengguna Aktif",
       value: activeUserCount,
       hint: `dari ${userCount} total pengguna`,
-      icon: Users,
+      icon: UsersIcon,
     },
     {
       label: "Dialog Kinerja",
       value: dialogCount,
       hint: "total semua periode",
-      icon: ChatCircleDots,
+      icon: ChatCircleDotsIcon,
     },
     {
       label: "Berjalan",
       value: inProgressCount,
       hint: "belum selesai",
-      icon: Hourglass,
+      icon: HourglassIcon,
     },
     {
       label: "Selesai",
       value: doneCount,
       hint: "validasi lengkap",
-      icon: CheckCircle,
+      icon: CheckCircleIcon,
     },
   ];
 
@@ -87,7 +87,7 @@ export default async function AdminDashboardPage() {
         <div className="flex items-center gap-2">
           <RoleTag role={session.role} />
           <span className="inline-flex items-center gap-1.5 rounded-md bg-surface-muted px-2.5 py-1 text-xs font-semibold text-ink-muted">
-            <ShieldCheck size={14} weight="fill" />
+            <ShieldCheckIcon size={14} weight="fill" />
             Super User
           </span>
         </div>
@@ -126,13 +126,13 @@ export default async function AdminDashboardPage() {
             className="inline-flex h-9 items-center gap-1.5 rounded-md border border-outline bg-surface px-3 text-sm font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted"
           >
             Monitoring Dialog Kinerja
-            <ArrowRight size={16} weight="bold" />
+            <ArrowRightIcon size={16} weight="bold" />
           </Link>
         </div>
         {recentDialogs.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-12 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-primary">
-              <ChatCircleDots size={22} weight="bold" />
+              <ChatCircleDotsIcon size={22} weight="bold" />
             </span>
             <h3 className="text-base font-semibold text-ink">
               Belum ada dialog kinerja

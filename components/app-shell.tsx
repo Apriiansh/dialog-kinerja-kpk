@@ -2,17 +2,17 @@
 
 import { Suspense, useState } from "react";
 import {
-  SquaresFour,
-  ChatCircleDots,
-  ClockCounterClockwise,
-  ClipboardText,
-  SignOut,
-  List,
-  X,
-  Users,
-  UserList,
-  MonitorPlay,
-  ArrowsClockwise,
+  SquaresFourIcon,
+  ChatCircleDotsIcon,
+  ClockCounterClockwiseIcon,
+  ClipboardTextIcon,
+  SignOutIcon,
+  ListIcon,
+  XIcon,
+  UsersIcon,
+  UserListIcon,
+  MonitorPlayIcon,
+  ArrowsClockwiseIcon,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -42,18 +42,18 @@ const PEGAWAI_NAV_GROUPS: NavGroup[] = [
       {
         href: "/pegawai/dashboard",
         label: "Dashboard",
-        icon: SquaresFour,
+        icon: SquaresFourIcon,
         exact: true,
       },
       {
         href: "/pegawai/dialog",
         label: "Dialog Kinerja Saya",
-        icon: ClipboardText,
+        icon: ClipboardTextIcon,
       },
       {
         href: "/pegawai/reviu",
         label: "Reviu Dialog Kinerja",
-        icon: ArrowsClockwise,
+        icon: ArrowsClockwiseIcon,
       },
     ],
   },
@@ -66,28 +66,28 @@ const ATASAN_NAV_GROUPS: NavGroup[] = [
       {
         href: "/atasan/dashboard",
         label: "Dashboard",
-        icon: SquaresFour,
+        icon: SquaresFourIcon,
         exact: true,
       },
       {
         href: "/atasan/dialog",
         label: "Dialog Kinerja",
-        icon: ChatCircleDots,
+        icon: ChatCircleDotsIcon,
       },
       {
         href: "/atasan/reviu",
         label: "Tindak Lanjut Dialog Kinerja",
-        icon: ArrowsClockwise,
+        icon: ArrowsClockwiseIcon,
       },
       {
         href: "/atasan/pegawai",
         label: "Pegawai",
-        icon: Users,
+        icon: UsersIcon,
       },
       {
         href: "/atasan/history",
         label: "Riwayat",
-        icon: ClockCounterClockwise,
+        icon: ClockCounterClockwiseIcon,
       },
     ],
   },
@@ -100,18 +100,18 @@ const ADMIN_NAV_GROUPS: NavGroup[] = [
       {
         href: "/admin/dashboard",
         label: "Dashboard",
-        icon: SquaresFour,
+        icon: SquaresFourIcon,
         exact: true,
       },
       {
         href: "/admin/users",
         label: "Kelola Pengguna",
-        icon: UserList,
+        icon: UserListIcon,
       },
       {
         href: "/admin/monitoring",
         label: "Monitoring Dialog Kinerja",
-        icon: MonitorPlay,
+        icon: MonitorPlayIcon,
       },
     ],
   },
@@ -163,7 +163,7 @@ function LogoutButton({ className }: { className?: string }) {
           "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
         }
       >
-        <SignOut size={18} weight="bold" />
+        <SignOutIcon size={18} weight="bold" />
         Keluar
       </button>
     </form>
@@ -287,7 +287,7 @@ export function AppShell({
               onClick={() => setMobileOpen(false)}
               className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
             >
-              <X size={20} weight="bold" />
+              <XIcon size={20} weight="bold" />
             </button>
           </div>
 
@@ -326,7 +326,7 @@ export function AppShell({
             className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white"
             aria-label="Buka menu navigasi"
           >
-            <List size={22} weight="bold" />
+            <ListIcon size={22} weight="bold" />
           </button>
           <Image
             src="/logo-kpk.png"

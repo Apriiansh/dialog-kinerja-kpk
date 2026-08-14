@@ -1,4 +1,4 @@
-import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeftIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -41,7 +41,7 @@ export default async function EditDialogPage({
             href={`/atasan/dialog/${dialog.id}`}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-strong transition-colors hover:text-primary"
           >
-            <ArrowLeft size={14} weight="bold" />
+            <ArrowLeftIcon size={14} weight="bold" />
             Kembali ke detail
           </Link>
           <h1 className="text-[28px] font-semibold leading-9 tracking-[-0.01em] text-ink">

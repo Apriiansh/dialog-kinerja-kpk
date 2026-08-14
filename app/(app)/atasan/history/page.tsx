@@ -1,4 +1,4 @@
-import { ClockCounterClockwise } from "@phosphor-icons/react/dist/ssr";
+import { ClockCounterClockwiseIcon } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { DialogList } from "@/components/dialog-list";
@@ -40,7 +40,7 @@ export default async function HistoryPage() {
       {dialogs.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-12 text-center">
           <span className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-primary">
-            <ClockCounterClockwise size={22} weight="bold" />
+            <ClockCounterClockwiseIcon size={22} weight="bold" />
           </span>
           <h2 className="text-base font-semibold text-ink">
             Belum ada riwayat

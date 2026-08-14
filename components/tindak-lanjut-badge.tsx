@@ -1,19 +1,19 @@
-import { CheckCircle, XCircle } from "@phosphor-icons/react/dist/ssr";
+import { CheckCircleIcon, XCircleIcon } from "@phosphor-icons/react/dist/ssr";
 import type { StatusTindakLanjut } from "@/generated/prisma/enums";
 
 const STATUS: Record<
   StatusTindakLanjut,
-  { label: string; className: string; icon: typeof CheckCircle }
+  { label: string; className: string; icon: typeof CheckCircleIcon | typeof XCircleIcon }
 > = {
   TERCAPAI: {
     label: "Tercapai",
     className: "bg-status-green-soft text-status-green",
-    icon: CheckCircle,
+    icon: CheckCircleIcon,
   },
   TIDAK_TERCAPAI: {
     label: "Tidak Tercapai",
     className: "bg-error-container text-on-error-container",
-    icon: XCircle,
+    icon: XCircleIcon,
   },
 };
 

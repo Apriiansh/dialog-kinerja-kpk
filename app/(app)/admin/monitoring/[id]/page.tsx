@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Eye } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeftIcon, EyeIcon } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { StatusBadge } from "@/components/status-badge";
@@ -64,7 +64,7 @@ export default async function AdminMonitoringDetailPage({
           href="/admin/monitoring"
           className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
         >
-          <ArrowLeft size={16} weight="bold" />
+          <ArrowLeftIcon size={16} weight="bold" />
           Kembali ke Monitoring
         </Link>
 
@@ -87,7 +87,7 @@ export default async function AdminMonitoringDetailPage({
             </div>
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-md bg-surface-muted px-2.5 py-1 text-xs font-semibold text-ink-muted">
-                <Eye size={14} weight="bold" />
+                <EyeIcon size={14} weight="bold" />
                 Read-only
               </span>
               <StatusBadge status={dialog.status} />

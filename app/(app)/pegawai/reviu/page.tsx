@@ -1,11 +1,11 @@
 import Link from "next/link";
 import {
-  ArrowsClockwise,
-  PencilSimple,
-  SealCheck,
-  Hourglass,
-  CheckCircle,
-  Alarm,
+  ArrowsClockwiseIcon,
+  PencilSimpleIcon,
+  SealCheckIcon,
+  HourglassIcon,
+  CheckCircleIcon,
+  AlarmIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/session";
 import {
@@ -119,28 +119,28 @@ export default async function PegawaiReviuListPage({
       key: "draft_pegawai" as const,
       label: "Draft",
       count: reviuList.filter((r) => r.status === "draft_pegawai").length,
-      icon: PencilSimple,
+      icon: PencilSimpleIcon,
       className: "bg-surface-soft text-primary",
     },
     {
       key: "menunggu_atasan" as const,
       label: "Menunggu Atasan",
       count: reviuList.filter((r) => r.status === "menunggu_atasan").length,
-      icon: Hourglass,
+      icon: HourglassIcon,
       className: "bg-status-blue-soft text-status-blue",
     },
     {
       key: "menunggu_validasi" as const,
       label: "Menunggu Validasi",
       count: reviuList.filter((r) => r.status === "menunggu_validasi").length,
-      icon: SealCheck,
+      icon: SealCheckIcon,
       className: "bg-status-indigo-soft text-status-indigo",
     },
     {
       key: "selesai" as const,
       label: "Selesai",
       count: reviuList.filter((r) => r.status === "selesai").length,
-      icon: CheckCircle,
+      icon: CheckCircleIcon,
       className: "bg-status-green-soft text-status-green",
     },
   ];
@@ -167,7 +167,7 @@ export default async function PegawaiReviuListPage({
         >
           <div className="flex items-start gap-3">
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-status-amber/15 text-status-amber">
-              <Alarm size={18} weight="bold" />
+              <AlarmIcon size={18} weight="bold" />
             </span>
             <div className="flex min-w-0 flex-col gap-2">
               <h2 className="text-sm font-semibold text-ink">
@@ -260,7 +260,7 @@ export default async function PegawaiReviuListPage({
         {visible.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-12 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-primary">
-              <ArrowsClockwise size={22} weight="bold" />
+              <ArrowsClockwiseIcon size={22} weight="bold" />
             </span>
             <h3 className="text-base font-semibold text-ink">
               {activeStatus === "semua"

@@ -1,4 +1,4 @@
-import { DownloadSimple } from "@phosphor-icons/react/dist/ssr";
+import { DownloadSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 
 const DEFAULT_CLASS =
@@ -15,7 +15,7 @@ export function UnduhBuktiLink({
 }) {
   return (
     <Link href={`${path}/${dialogId}?cetak=1`} className={className}>
-      <DownloadSimple size={12} weight="bold" />
+      <DownloadSimpleIcon size={12} weight="bold" />
       Unduh Bukti
     </Link>
   );

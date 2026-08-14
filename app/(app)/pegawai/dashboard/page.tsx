@@ -1,14 +1,14 @@
 import Link from "next/link";
 import {
-  Buildings,
-  Briefcase,
-  CheckCircle,
-  ClipboardText,
-  Hourglass,
-  IdentificationCard,
-  PencilSimple,
-  ShieldCheck,
-  ArrowRight,
+  BuildingsIcon,
+  BriefcaseIcon,
+  CheckCircleIcon,
+  ClipboardTextIcon,
+  HourglassIcon,
+  IdentificationCardIcon,
+  PencilSimpleIcon,
+  ShieldCheckIcon,
+  ArrowRightIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/session";
@@ -102,36 +102,36 @@ export default async function PegawaiDashboardPage({
       key: "menunggu_pegawai" as const,
       label: "Perlu Diisi",
       count: dialogs.filter((d) => d.status === "menunggu_pegawai").length,
-      icon: PencilSimple,
+      icon: PencilSimpleIcon,
       className: "bg-status-amber-soft text-status-amber",
     },
     {
       key: "menunggu_atasan" as const,
       label: "Menunggu Atasan",
       count: dialogs.filter((d) => d.status === "menunggu_atasan").length,
-      icon: Hourglass,
+      icon: HourglassIcon,
       className: "bg-status-blue-soft text-status-blue",
     },
     {
       key: "menunggu_validasi" as const,
       label: "Menunggu Validasi",
       count: dialogs.filter((d) => d.status === "menunggu_validasi").length,
-      icon: ShieldCheck,
+      icon: ShieldCheckIcon,
       className: "bg-status-indigo-soft text-status-indigo",
     },
     {
       key: "selesai" as const,
       label: "Selesai",
       count: dialogs.filter((d) => d.status === "selesai").length,
-      icon: CheckCircle,
+      icon: CheckCircleIcon,
       className: "bg-status-green-soft text-status-green",
     },
   ];
 
   const profile = [
-    { label: "NPP", value: user?.npp ?? session.npp, icon: IdentificationCard },
-    { label: "Jabatan", value: user?.nama_jabatan ?? "—", icon: Briefcase },
-    { label: "Unit Kerja", value: user?.unit_kerja ?? "—", icon: Buildings },
+    { label: "NPP", value: user?.npp ?? session.npp, icon: IdentificationCardIcon },
+    { label: "Jabatan", value: user?.nama_jabatan ?? "—", icon: BriefcaseIcon },
+    { label: "Unit Kerja", value: user?.unit_kerja ?? "—", icon: BuildingsIcon },
   ];
 
   return (
@@ -179,7 +179,7 @@ export default async function PegawaiDashboardPage({
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-primary-strong"
           >
             Lihat Halaman Dialog Kinerja Saya
-            <ArrowRight size={14} weight="bold" />
+            <ArrowRightIcon size={14} weight="bold" />
           </Link>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -220,7 +220,7 @@ export default async function PegawaiDashboardPage({
         {urgentDialogs.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-10 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-primary">
-              <ClipboardText size={22} weight="bold" />
+              <ClipboardTextIcon size={22} weight="bold" />
             </span>
             <h3 className="text-base font-semibold text-ink">
               Semua tugas telah diselesaikan

@@ -1,10 +1,10 @@
 import {
-  ArrowRight,
-  ChartLineUp,
-  CheckCircle,
-  ChatCircleDots,
-  Hourglass,
-  Users,
+  ArrowRightIcon,
+  ChartLineUpIcon,
+  CheckCircleIcon,
+  ChatCircleDotsIcon,
+  HourglassIcon,
+  UsersIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -56,25 +56,25 @@ export default async function AtasanDashboardPage() {
       label: "Pegawai",
       value: pegawaiCount,
       hint: "bawahan di unit kerja",
-      icon: Users,
+      icon: UsersIcon,
     },
     {
       label: "Dialog Kinerja",
       value: dialogs.length,
       hint: "total periode berjalan",
-      icon: ChatCircleDots,
+      icon: ChatCircleDotsIcon,
     },
     {
       label: "Menunggu Anda",
       value: dialogs.filter((d) => d.status === "menunggu_atasan").length,
       hint: "perlu tindakan atasan",
-      icon: Hourglass,
+      icon: HourglassIcon,
     },
     {
       label: "Selesai",
       value: dialogs.filter((d) => d.status === "selesai").length,
       hint: "validasi lengkap",
-      icon: CheckCircle,
+      icon: CheckCircleIcon,
     },
   ];
 
@@ -127,13 +127,13 @@ export default async function AtasanDashboardPage() {
             className="inline-flex h-9 items-center gap-1.5 rounded-md border border-outline bg-surface px-3 text-sm font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted"
           >
             Kelola Dialog Kinerja
-            <ArrowRight size={16} weight="bold" />
+            <ArrowRightIcon size={16} weight="bold" />
           </Link>
         </div>
         {recent.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-12 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-primary">
-              <ChartLineUp size={22} weight="bold" />
+              <ChartLineUpIcon size={22} weight="bold" />
             </span>
             <h3 className="text-base font-semibold text-ink">
               Belum ada dialog kinerja

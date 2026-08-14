@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import {
-  ArrowsClockwise,
+  ArrowsClockwiseIcon,
   MagnifyingGlassIcon,
   PlusIcon,
   XIcon,
@@ -123,7 +123,7 @@ export function NewReviuButton({ dialogs }: { dialogs: SelesaiDialogOption[] }) 
                         </td>
                         <td className="px-6 py-3.5 text-center">
                           <span className="inline-flex items-center gap-1 text-sm text-ink-muted">
-                            <ArrowsClockwise
+                            <ArrowsClockwiseIcon
                               size={14}
                               weight="bold"
                               className="text-primary"

@@ -1,9 +1,9 @@
-import { CheckCircle } from "@phosphor-icons/react/dist/ssr";
+import { CheckCircleIcon } from "@phosphor-icons/react/dist/ssr";
 import type { StatusReviu } from "@/generated/prisma/enums";
 
 const STATUS: Record<
   StatusReviu,
-  { label: string; className: string; icon?: typeof CheckCircle }
+  { label: string; className: string; icon?: typeof CheckCircleIcon }
 > = {
   draft_pegawai: {
     label: "Draft",
@@ -20,7 +20,7 @@ const STATUS: Record<
   selesai: {
     label: "Selesai",
     className: "bg-emerald-100 text-emerald-800",
-    icon: CheckCircle,
+    icon: CheckCircleIcon,
   },
 };
 

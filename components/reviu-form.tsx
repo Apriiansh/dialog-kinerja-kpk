@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, WarningIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, WarningIcon } from "@phosphor-icons/react";
 import { createReviu, saveReviu } from "@/lib/actions/reviu";
 import type { StatusTindakLanjut } from "@/generated/prisma/enums";
 import { Button } from "@/components/ui/button";
@@ -180,7 +180,7 @@ export function ReviuForm({ dialogId, reviuId, initial }: ReviuFormProps) {
             (status === "TIDAK_TERCAPAI" && !tanggal)
           }
           onClick={() => submit("submit")}
-          leadingIcon={<ArrowRight size={16} weight="bold" />}
+          leadingIcon={<ArrowRightIcon size={16} weight="bold" />}
         >
           Kirim ke Atasan
         </Button>

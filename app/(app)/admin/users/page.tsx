@@ -1,9 +1,9 @@
 import {
   PlusIcon,
-  UserCircle,
-  Users,
-  ShieldCheck,
-  PencilSimple,
+  UserCircleIcon,
+  UsersIcon,
+  ShieldCheckIcon,
+  PencilSimpleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -68,7 +68,7 @@ export default async function AdminUsersPage() {
       {users.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-12 text-center">
           <span className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-primary">
-            <Users size={22} weight="bold" />
+            <UsersIcon size={22} weight="bold" />
           </span>
           <h3 className="text-base font-semibold text-ink">
             Belum ada pengguna
@@ -109,9 +109,9 @@ export default async function AdminUsersPage() {
                     <div className="flex items-center gap-3">
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted text-primary">
                         {u.is_admin ? (
-                          <ShieldCheck size={20} weight="fill" />
+                          <ShieldCheckIcon size={20} weight="fill" />
                         ) : (
-                          <UserCircle size={20} weight="fill" />
+                          <UserCircleIcon size={20} weight="fill" />
                         )}
                       </span>
                       <div className="flex min-w-0 flex-col">
@@ -162,7 +162,7 @@ export default async function AdminUsersPage() {
                         href={`/admin/users/${u.id}/edit`}
                         className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
                       >
-                        <PencilSimple size={14} weight="bold" />
+                        <PencilSimpleIcon size={14} weight="bold" />
                         Edit
                       </Link>
                       {!u.is_active ? (

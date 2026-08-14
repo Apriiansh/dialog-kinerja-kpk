@@ -1,4 +1,4 @@
-import { MonitorPlay } from "@phosphor-icons/react/dist/ssr";
+import { MonitorPlayIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
@@ -38,7 +38,7 @@ export default async function AdminMonitoringPage() {
       {dialogs.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-12 text-center">
           <span className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-primary">
-            <MonitorPlay size={22} weight="bold" />
+            <MonitorPlayIcon size={22} weight="bold" />
           </span>
           <h3 className="text-base font-semibold text-ink">
             Belum ada dialog kinerja

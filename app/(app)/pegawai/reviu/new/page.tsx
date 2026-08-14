@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowsClockwise } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeftIcon, ArrowsClockwiseIcon } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { ReviuForm } from "@/components/reviu-form";
@@ -48,7 +48,7 @@ export default async function NewReviuPage({
           href="/pegawai/reviu"
           className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
         >
-          <ArrowLeft size={16} weight="bold" />
+          <ArrowLeftIcon size={16} weight="bold" />
           Kembali ke Reviu
         </Link>
         <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
@@ -64,7 +64,7 @@ export default async function NewReviuPage({
         selesaiDialogs.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-12 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-primary">
-              <ArrowsClockwise size={22} weight="bold" />
+              <ArrowsClockwiseIcon size={22} weight="bold" />
             </span>
             <h3 className="text-base font-semibold text-ink">
               Belum ada dialog yang selesai

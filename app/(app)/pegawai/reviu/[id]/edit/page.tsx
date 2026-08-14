@@ -1,6 +1,6 @@
 ﻿import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeftIcon } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/session";
 import { canEditReviu, getPegawaiReviu } from "@/lib/reviu-queries";
 import { toDateInput } from "@/lib/format";
@@ -35,7 +35,7 @@ export default async function EditReviuPage({
           href={`/pegawai/reviu/${reviu.id}`}
           className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
         >
-          <ArrowLeft size={16} weight="bold" />
+          <ArrowLeftIcon size={16} weight="bold" />
           Kembali ke Detail Reviu
         </Link>
         <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">

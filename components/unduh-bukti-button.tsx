@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { DownloadSimple } from "@phosphor-icons/react";
+import { DownloadSimpleIcon } from "@phosphor-icons/react";
 
 function imagesComplete() {
   return Array.from(document.images).every((img) => img.complete);
@@ -44,7 +44,7 @@ export function UnduhBuktiButton({
       onClick={printWhenReady}
       className="inline-flex h-8 items-center gap-1 rounded-md border border-outline bg-surface px-3 text-xs font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted print:hidden"
     >
-      <DownloadSimple size={12} weight="bold" />
+      <DownloadSimpleIcon size={12} weight="bold" />
       {label}
     </button>
   );

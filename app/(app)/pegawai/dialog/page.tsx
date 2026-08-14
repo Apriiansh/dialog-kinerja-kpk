@@ -1,11 +1,11 @@
 import Link from "next/link";
 import {
-  ArrowsClockwise,
-  CheckCircle,
-  ClipboardText,
-  Hourglass,
-  PencilSimple,
-  ShieldCheck,
+  ArrowsClockwiseIcon,
+  CheckCircleIcon,
+  ClipboardTextIcon,
+  HourglassIcon,
+  PencilSimpleIcon,
+  ShieldCheckIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
@@ -110,28 +110,28 @@ export default async function PegawaiDialogListPage({
       key: "menunggu_pegawai" as const,
       label: "Perlu Diisi",
       count: dialogs.filter((d) => d.status === "menunggu_pegawai").length,
-      icon: PencilSimple,
+      icon: PencilSimpleIcon,
       className: "bg-status-amber-soft text-status-amber",
     },
     {
       key: "menunggu_atasan" as const,
       label: "Menunggu Atasan",
       count: dialogs.filter((d) => d.status === "menunggu_atasan").length,
-      icon: Hourglass,
+      icon: HourglassIcon,
       className: "bg-status-blue-soft text-status-blue",
     },
     {
       key: "menunggu_validasi" as const,
       label: "Menunggu Validasi",
       count: dialogs.filter((d) => d.status === "menunggu_validasi").length,
-      icon: ShieldCheck,
+      icon: ShieldCheckIcon,
       className: "bg-status-indigo-soft text-status-indigo",
     },
     {
       key: "selesai" as const,
       label: "Selesai",
       count: dialogs.filter((d) => d.status === "selesai").length,
-      icon: CheckCircle,
+      icon: CheckCircleIcon,
       className: "bg-status-green-soft text-status-green",
     },
   ];
@@ -210,7 +210,7 @@ export default async function PegawaiDialogListPage({
         {visibleDialogs.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-12 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-primary">
-              <ClipboardText size={22} weight="bold" />
+              <ClipboardTextIcon size={22} weight="bold" />
             </span>
             <h3 className="text-base font-semibold text-ink">
               {activeStatus === "semua"
@@ -274,7 +274,7 @@ export default async function PegawaiDialogListPage({
                             href={`/pegawai/reviu/new?dialog=${d.id}`}
                             className="inline-flex items-center gap-2 rounded-md border border-outline bg-white px-4 py-2 text-xs font-semibold text-ink hover:border-outline-strong hover:bg-surface-muted"
                           >
-                            <ArrowsClockwise size={14} weight="bold" />
+                            <ArrowsClockwiseIcon size={14} weight="bold" />
                             Reviu
                           </Link>
                         </>
