@@ -8,6 +8,7 @@ import { TindakLanjutBadge } from "@/components/tindak-lanjut-badge";
 import { ReviuSummary } from "@/components/reviu-summary";
 import { ReviuSignForm } from "@/components/reviu-sign-form";
 import { UnduhBuktiButton } from "@/components/unduh-bukti-button";
+import { UnduhWordLink } from "@/components/unduh-word-link";
 import { Separator } from "@/components/ui/separator";
 import { FormulirReviu } from "@/components/formulir-reviu";
 import { DeleteReviuButton } from "@/components/delete-reviu-button";
@@ -81,13 +82,15 @@ export default async function PegawaiReviuDetailPage({
                     : ""}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <ReviuStatusBadge status={reviu.status} />
-                <TindakLanjutBadge
-                  is_tercapai={reviu.is_tercapai}
-                  is_tidak_tercapai={reviu.is_tidak_tercapai}
-                />
-                {isSelesai ? <UnduhBuktiButton label="Unduh Reviu" autoPrint={cetak} /> : null}
+                <TindakLanjutBadge status={reviu.status_tindaklanjut} />
+                {isSelesai ? (
+                  <>
+                    <UnduhBuktiButton label="Unduh PDF" autoPrint={cetak} />
+                    <UnduhWordLink href={`/api/unduh/reviu/${reviu.id}/word`} />
+                  </>
+                ) : null}
                 {isDraft ? (
                   <>
                     <Link
