@@ -33,11 +33,10 @@ export function RoleSwitcher({
               <button
                 type="submit"
                 aria-pressed={active}
-                className={`w-full rounded-md px-2 py-1.5 text-xs font-semibold transition-colors ${
-                  active
+                className={`w-full rounded-md px-2 py-1.5 text-xs font-semibold transition-colors ${active
                     ? "bg-white/20 text-white"
                     : "text-white/60 hover:bg-white/10 hover:text-white"
-                }`}
+                  }`}
               >
                 {ROLE_LABEL[role]}
               </button>

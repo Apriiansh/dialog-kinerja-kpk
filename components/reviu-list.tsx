@@ -2,7 +2,8 @@ import Link from "next/link";
 import { formatTanggal } from "@/lib/format";
 import { ReviuStatusBadge } from "@/components/reviu-status-badge";
 import { TindakLanjutBadge } from "@/components/tindak-lanjut-badge";
-import { tindakLanjutLabel } from "@/lib/status-reviu";
+import { UnduhWordLink } from "@/components/unduh-word-link";
+import { STATUS_TINDAK_LANJUT_LABEL } from "@/lib/status-reviu";
 
 interface ReviuListRow {
   id: number;
@@ -103,16 +104,19 @@ export function ReviuList({
               </div>
             </dl>
 
-            {target ? (
-              <div className="border-t border-outline bg-surface-muted/30 px-5 py-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-outline bg-surface-muted/30 px-5 py-2.5">
+              {target ? (
                 <Link
                   href={target}
                   className="inline-flex items-center gap-1 text-xs font-semibold text-primary transition-colors hover:text-primary-strong"
                 >
                   Buka detail reviu →
                 </Link>
-              </div>
-            ) : null}
+              ) : <div />}
+              {r.status === "selesai" ? (
+                <UnduhWordLink href={`/api/unduh/reviu/${r.id}/word`} />
+              ) : null}
+            </div>
           </div>
         );
       })}

@@ -4,6 +4,7 @@ import type { StatusDialog } from "@/generated/prisma/client";
 import { StatusBadge } from "@/components/status-badge";
 import { DeleteDialogButton } from "@/components/delete-dialog-button";
 import { UnduhBuktiLink } from "@/components/unduh-bukti-link";
+import { UnduhWordLink } from "@/components/unduh-word-link";
 
 export interface DialogRow {
   id: number;
@@ -61,9 +62,8 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                 </td>
                 <td className="px-6 py-4">
                   <span
-                    className={`text-xs font-semibold ${
-                      lengkap ? "text-secondary" : "text-amber-800"
-                    }`}
+                    className={`text-xs font-semibold ${lengkap ? "text-secondary" : "text-amber-800"
+                      }`}
                   >
                     {lengkap ? "Lengkap" : "Belum lengkap"}
                   </span>
@@ -84,10 +84,15 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                     ) : (
                       <>
                         {dialog.status === "selesai" ? (
-                          <UnduhBuktiLink
-                            path="/atasan/dialog"
-                            dialogId={dialog.id}
-                          />
+                          <>
+                            <UnduhBuktiLink
+                              path="/atasan/dialog"
+                              dialogId={dialog.id}
+                            />
+                            <UnduhWordLink
+                              href={`/api/unduh/dialog/${dialog.id}/word`}
+                            />
+                          </>
                         ) : null}
                         <Link
                           href={`/atasan/dialog/${dialog.id}`}

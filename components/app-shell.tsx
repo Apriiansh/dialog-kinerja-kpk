@@ -13,6 +13,7 @@ import {
   UserListIcon,
   MonitorPlayIcon,
   ArrowsClockwiseIcon,
+  UserCircleIcon,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -211,11 +212,10 @@ function NavItemsList({
                 href={href}
                 onClick={onItemClick}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                  active
+                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${active
                     ? "bg-white/15 font-semibold text-white shadow-xs"
                     : "text-white/60 hover:bg-white/5 hover:text-white"
-                }`}
+                  }`}
               >
                 <Icon size={18} weight={active ? "fill" : "regular"} />
                 {label}
@@ -252,17 +252,21 @@ export function AppShell({
         </nav>
 
         <div className="mt-auto border-t border-white/10 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-xs font-bold text-white">
+          <Link
+            href={`/${session.role.toLowerCase()}/profil`}
+            title="Buka Profil Pengguna"
+            className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/10 group"
+          >
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white shadow-xs ring-2 ring-white/20 group-hover:ring-white/40">
               {initials(session.nama)}
             </div>
-            <div className="flex min-w-0 flex-col gap-1">
-              <span className="truncate text-sm font-medium text-white">
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <span className="truncate text-xs sm:text-sm font-medium text-white group-hover:text-blue-200 transition-colors">
                 {session.nama}
               </span>
               <RoleTag role={session.role} tone="dark" />
             </div>
-          </div>
+          </Link>
           <RoleSwitcher roles={session.roles} activeRole={session.role} />
           <div className="mt-3">
             <LogoutButton />
@@ -298,17 +302,22 @@ export function AppShell({
           </nav>
 
           <div className="mt-auto border-t border-white/10 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-xs font-bold text-white">
+            <Link
+              href={`/${session.role.toLowerCase()}/profil`}
+              onClick={() => setMobileOpen(false)}
+              title="Buka Profil Pengguna"
+              className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/10 group"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white shadow-xs ring-2 ring-white/20 group-hover:ring-white/40">
                 {initials(session.nama)}
               </div>
-              <div className="flex min-w-0 flex-col gap-1">
-                <span className="truncate text-sm font-medium text-white">
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <span className="truncate text-xs sm:text-sm font-medium text-white group-hover:text-blue-200 transition-colors">
                   {session.nama}
                 </span>
                 <RoleTag role={session.role} tone="dark" />
               </div>
-            </div>
+            </Link>
             <RoleSwitcher roles={session.roles} activeRole={session.role} />
             <div className="mt-3">
               <LogoutButton />

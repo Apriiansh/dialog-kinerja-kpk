@@ -91,9 +91,8 @@ export function SignaturePadField({
         {label}
       </span>
       <div
-        className={`overflow-hidden rounded-md border transition-colors ${
-          hasValue ? "border-primary" : "border-outline"
-        }`}
+        className={`overflow-hidden rounded-md border transition-colors ${hasValue ? "border-primary" : "border-outline"
+          }`}
       >
         <div className="h-40 w-full bg-white">
           <canvas
