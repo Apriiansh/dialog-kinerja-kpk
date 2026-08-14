@@ -38,7 +38,7 @@ export function NewReviuButton({ dialogs }: { dialogs: SelesaiDialogOption[] }) 
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong"
+        className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-on-primary shadow-xs transition-colors hover:bg-primary-strong"
       >
         <PlusIcon size={16} weight="bold" />
         Buat Reviu

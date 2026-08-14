@@ -149,8 +149,8 @@ export default async function PegawaiReviuListPage({
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-col gap-2">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1">
           <h1 className="text-[28px] font-semibold leading-9 tracking-[-0.01em] text-ink">
             Reviu Dialog Kinerja
           </h1>
