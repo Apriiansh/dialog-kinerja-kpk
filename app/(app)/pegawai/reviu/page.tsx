@@ -287,7 +287,8 @@ export default async function PegawaiReviuListPage({
                         </span>
                         <ReviuStatusBadge status={r.status} />
                         <TindakLanjutBadge
-                          status={r.status_tindaklanjut}
+                          is_tercapai={r.is_tercapai}
+                          is_tidak_tercapai={r.is_tidak_tercapai}
                         />
                       </div>
                       <span className="truncate text-xs leading-4 text-ink-muted">

@@ -13,6 +13,7 @@ import { UnduhWordLink } from "@/components/unduh-word-link";
 import { FormulirDialogKinerja } from "@/components/formulir-dialog-kinerja";
 import { ReviuList } from "@/components/reviu-list";
 import { ReviuSignForm } from "@/components/reviu-sign-form";
+import { ScrollToAnchor } from "@/components/scroll-to-anchor";
 import { Separator } from "@/components/ui/separator";
 import { submitDialog } from "@/lib/actions/atasan";
 
@@ -108,6 +109,7 @@ export default async function DialogDetailPage({
 
   return (
     <div className="flex flex-col gap-8">
+      <ScrollToAnchor />
       <div className={`flex flex-col gap-8 ${isSelesai ? "print:hidden" : ""}`}>
         <div className="flex flex-col gap-4">
           <Link
@@ -242,7 +244,7 @@ export default async function DialogDetailPage({
             ) : null}
 
             {isSelesai && dialog.reviu.length > 0 ? (
-              <div className="flex flex-col gap-8">
+              <div id="reviu" className="flex scroll-mt-14 flex-col gap-8">
                 <Separator />
                 <ReviuList reviu={dialog.reviu} />
 

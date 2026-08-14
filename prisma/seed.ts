@@ -1,7 +1,16 @@
 import "dotenv/config";
 import bcrypt from "bcryptjs";
+import path from "node:path";
+import zlib from "node:zlib";
+import { mkdir, writeFile } from "node:fs/promises";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { PrismaClient, Role } from "../generated/prisma/client";
+import {
+  PrismaClient,
+  Role,
+  StatusDialog,
+  StatusReviu,
+  JenisAspek,
+} from "../generated/prisma/client";
 
 const adapter = new PrismaMariaDb({
   host: process.env.DATABASE_HOST,
@@ -232,6 +241,335 @@ function upsertData(user: SeedUser, hashedPassword: string) {
   };
 }
 
+const TTD_DIR = path.join(process.cwd(), "uploads", "ttd");
+
+function crc32(buf: Buffer): number {
+  let crc = 0xffffffff;
+  for (const byte of buf) {
+    crc ^= byte;
+    for (let k = 0; k < 8; k++) {
+      crc = crc & 1 ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function pngChunk(type: string, data: Buffer): Buffer {
+  const typeBuf = Buffer.from(type, "ascii");
+  const lengthBuf = Buffer.alloc(4);
+  lengthBuf.writeUInt32BE(data.length, 0);
+  const crcBuf = Buffer.alloc(4);
+  crcBuf.writeUInt32BE(crc32(Buffer.concat([typeBuf, data])), 0);
+  return Buffer.concat([lengthBuf, typeBuf, data, crcBuf]);
+}
+
+function makeSignaturePng(): Buffer {
+  const width = 220;
+  const height = 90;
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = 8;
+  ihdr[9] = 2;
+  ihdr[10] = 0;
+  ihdr[11] = 0;
+  ihdr[12] = 0;
+
+  const raw = Buffer.alloc((1 + width * 3) * height);
+  for (let y = 0; y < height; y++) {
+    const rowStart = y * (1 + width * 3);
+    raw[rowStart] = 0;
+    for (let x = 0; x < width; x++) {
+      const wave =
+        Math.sin((x / width) * Math.PI * 6) * 14 +
+        Math.sin((x / width) * Math.PI * 13) * 5;
+      const center = height / 2 + wave;
+      const isInk = Math.abs(y - center) < 3.5;
+      const value = isInk ? 25 : 252;
+      const idx = rowStart + 1 + x * 3;
+      raw[idx] = value;
+      raw[idx + 1] = value;
+      raw[idx + 2] = value;
+    }
+  }
+
+  const idat = zlib.deflateSync(raw);
+  const signature = Buffer.from([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+  ]);
+  return Buffer.concat([
+    signature,
+    pngChunk("IHDR", ihdr),
+    pngChunk("IDAT", idat),
+    pngChunk("IEND", Buffer.alloc(0)),
+  ]);
+}
+
+async function writeTtdPlaceholder(
+  dialogId: number,
+  role: "pegawai" | "atasan",
+): Promise<string> {
+  await mkdir(TTD_DIR, { recursive: true });
+  const fileName = `ttd-${dialogId}-${role}-${Date.now()}.png`;
+  await writeFile(path.join(TTD_DIR, fileName), makeSignaturePng());
+  return `/ttd/${fileName}`;
+}
+
+interface AspekItemSeed {
+  dialog_evaluasi: string;
+  kompetensi_dikembangkan: string;
+  metodeNama?: string;
+  waktu_pelaksanaan?: Date;
+}
+
+interface AspekSeed {
+  jenis_aspek: JenisAspek;
+  tanggung_jawab_pegawai: string;
+  tanggung_jawab_atasan: string;
+  items: AspekItemSeed[];
+}
+
+interface ReviuSeed {
+  status: StatusReviu;
+  is_tercapai: boolean;
+  is_tidak_tercapai: boolean;
+  penjelasan_tercapai?: string;
+  penjelasan_tidak_tercapai?: string;
+  rencana_tindak_lanjut?: string;
+  tanggal_next_reviu?: Date;
+}
+
+interface DialogSeed {
+  pegawaiNpp: string;
+  atasanNpp: string;
+  periodeTahun: number;
+  status: StatusDialog;
+  deskripsiKinerja?: string;
+  aspek: AspekSeed[];
+  ttdAtasan?: boolean;
+  ttdPegawai?: boolean;
+  reviu?: ReviuSeed;
+}
+
+const STANDARD_ASPEK: AspekSeed[] = [
+  {
+    jenis_aspek: "SKP",
+    tanggung_jawab_pegawai:
+      "Menyusun dan melaksanakan rencana kerja tahunan sesuai target",
+    tanggung_jawab_atasan:
+      "Memantau capaian kinerja dan memberikan arahan perbaikan",
+    items: [
+      {
+        dialog_evaluasi:
+          "Capaian sasaran kinerja sesuai target yang ditetapkan pada awal tahun.",
+        kompetensi_dikembangkan: "Manajemen waktu dan prioritas",
+        metodeNama: "Penugasan",
+      },
+    ],
+  },
+  {
+    jenis_aspek: "GAP_ASESMEN",
+    tanggung_jawab_pegawai:
+      "Mengikuti asesmen kompetensi dan menindaklanjuti hasilnya",
+    tanggung_jawab_atasan:
+      "Membahas hasil asesmen dan menyusun rencana pengembangan",
+    items: [
+      {
+        dialog_evaluasi:
+          "Kesenjangan kompetensi teknis teridentifikasi dari hasil asesmen.",
+        kompetensi_dikembangkan: "Kompetensi teknis bidang",
+        metodeNama: "Pendidikan dan Pelatihan",
+      },
+    ],
+  },
+  {
+    jenis_aspek: "PERILAKU",
+    tanggung_jawab_pegawai:
+      "Menjaga integritas, disiplin, dan etika dalam pelaksanaan tugas",
+    tanggung_jawab_atasan: "Memberikan umpan balik perilaku kerja",
+    items: [
+      {
+        dialog_evaluasi:
+          "Perilaku kerja menunjukkan integritas dan profesionalisme.",
+        kompetensi_dikembangkan: "Integritas dan etika kerja",
+        metodeNama: "Penugasan",
+      },
+    ],
+  },
+  {
+    jenis_aspek: "KARIR_PENDEK",
+    tanggung_jawab_pegawai:
+      "Menyusun rencana pengembangan karier jangka pendek",
+    tanggung_jawab_atasan:
+      "Memberikan arahan jenjang karier jangka pendek",
+    items: [
+      {
+        dialog_evaluasi:
+          "Rencana pengembangan karier 1 tahun ke depan tersusun.",
+        kompetensi_dikembangkan: "Perencanaan karier",
+        metodeNama: "Mutasi",
+      },
+    ],
+  },
+  {
+    jenis_aspek: "KARIR_MENENGAH",
+    tanggung_jawab_pegawai:
+      "Menyiapkan diri untuk jenjang karier jangka menengah",
+    tanggung_jawab_atasan:
+      "Memberikan arahan jenjang karier jangka menengah",
+    items: [
+      {
+        dialog_evaluasi:
+          "Arah pengembangan karier 3-5 tahun ke depan terpetakan.",
+        kompetensi_dikembangkan: "Kepemimpinan",
+        metodeNama: "Pendidikan dan Pelatihan",
+      },
+    ],
+  },
+];
+
+const DIALOG_SEEDS: DialogSeed[] = [
+  {
+    pegawaiNpp: "2000001",
+    atasanNpp: "1000001",
+    periodeTahun: 2024,
+    status: "draft_atasan",
+    aspek: [],
+  },
+  {
+    pegawaiNpp: "2000001",
+    atasanNpp: "1000001",
+    periodeTahun: 2025,
+    status: "menunggu_pegawai",
+    deskripsiKinerja:
+      "Peningkatan kualitas layanan kearsipan dan ketertiban administrasi kepegawaian.",
+    aspek: [],
+  },
+  {
+    pegawaiNpp: "2000002",
+    atasanNpp: "1000001",
+    periodeTahun: 2025,
+    status: "menunggu_atasan",
+    deskripsiKinerja:
+      "Penguatan pengelolaan data kepegawaian dan dukungan sistem informasi.",
+    aspek: STANDARD_ASPEK,
+  },
+  {
+    pegawaiNpp: "2000001",
+    atasanNpp: "1000001",
+    periodeTahun: 2023,
+    status: "menunggu_validasi",
+    deskripsiKinerja:
+      "Tertib administrasi arsip aktif dan pasif di lingkungan Biro SDM.",
+    aspek: STANDARD_ASPEK,
+    ttdAtasan: true,
+  },
+  {
+    pegawaiNpp: "2000007",
+    atasanNpp: "1000002",
+    periodeTahun: 2025,
+    status: "selesai",
+    deskripsiKinerja:
+      "Optimalisasi layanan administrasi umum dan tata usaha perkantoran.",
+    aspek: STANDARD_ASPEK,
+    ttdAtasan: true,
+    ttdPegawai: true,
+    reviu: {
+      status: "menunggu_validasi",
+      is_tercapai: true,
+      is_tidak_tercapai: false,
+      penjelasan_tercapai:
+        "Seluruh target layanan administrasi umum tercapai sesuai jadwal.",
+    },
+  },
+  {
+    pegawaiNpp: "2000008",
+    atasanNpp: "1000002",
+    periodeTahun: 2024,
+    status: "selesai",
+    deskripsiKinerja:
+      "Pengelolaan barang milik negara yang akurat dan tepat waktu.",
+    aspek: STANDARD_ASPEK,
+    ttdAtasan: true,
+    ttdPegawai: true,
+    reviu: {
+      status: "selesai",
+      is_tercapai: true,
+      is_tidak_tercapai: false,
+      penjelasan_tercapai:
+        "Pengelolaan BMN berjalan baik dan seluruh aset terdata dengan benar.",
+    },
+  },
+  {
+    pegawaiNpp: "2000007",
+    atasanNpp: "1000002",
+    periodeTahun: 2023,
+    status: "selesai",
+    deskripsiKinerja:
+      "Digitalisasi arsip dan surat-menyurat unit kerja.",
+    aspek: STANDARD_ASPEK,
+    ttdAtasan: true,
+    ttdPegawai: true,
+    reviu: {
+      status: "selesai",
+      is_tercapai: false,
+      is_tidak_tercapai: true,
+      penjelasan_tidak_tercapai:
+        "Digitalisasi belum tuntas karena kendala infrastruktur jaringan.",
+      rencana_tindak_lanjut:
+        "Menjadwalkan ulang digitalisasi dengan dukungan tim TIK.",
+      tanggal_next_reviu: new Date("2025-06-30"),
+    },
+  },
+  {
+    pegawaiNpp: "2000002",
+    atasanNpp: "1000001",
+    periodeTahun: 2024,
+    status: "selesai",
+    deskripsiKinerja:
+      "Pemeliharaan dan pembaruan data kepegawaian.",
+    aspek: STANDARD_ASPEK,
+    ttdAtasan: true,
+    ttdPegawai: true,
+  },
+  {
+    pegawaiNpp: "2000001",
+    atasanNpp: "1000001",
+    periodeTahun: 2022,
+    status: "selesai",
+    deskripsiKinerja:
+      "Penyusunan arsip statis dan inventarisasi arsip.",
+    aspek: STANDARD_ASPEK,
+    ttdAtasan: true,
+    ttdPegawai: true,
+    reviu: {
+      status: "draft_pegawai",
+      is_tercapai: true,
+      is_tidak_tercapai: false,
+      penjelasan_tercapai:
+        "Draft reviu sedang disusun oleh pegawai.",
+    },
+  },
+  {
+    pegawaiNpp: "2000002",
+    atasanNpp: "1000001",
+    periodeTahun: 2023,
+    status: "selesai",
+    deskripsiKinerja:
+      "Pengembangan modul pengelolaan kinerja pada sistem informasi.",
+    aspek: STANDARD_ASPEK,
+    ttdAtasan: true,
+    ttdPegawai: true,
+    reviu: {
+      status: "menunggu_atasan",
+      is_tercapai: true,
+      is_tidak_tercapai: false,
+      penjelasan_tercapai:
+        "Modul selesai dikembangkan dan menunggu reviu atasan.",
+    },
+  },
+];
+
 async function main() {
   if ((await prisma.masterMetodePengembangan.count()) === 0) {
     await prisma.masterMetodePengembangan.createMany({
@@ -273,6 +611,135 @@ async function main() {
   console.log(
     `Seeded ${USERS.length} user (${activeCount} aktif, ${inactiveCount} nonaktif), ` +
       `${withBawahan.size} di antaranya punya bawahan.`,
+  );
+
+  const metodeById = new Map(
+    (await prisma.masterMetodePengembangan.findMany()).map((m) => [
+      m.nama_metode,
+      m.id,
+    ]),
+  );
+
+  let seededDialogs = 0;
+  for (const seed of DIALOG_SEEDS) {
+    const idPegawai = idByNpp.get(seed.pegawaiNpp);
+    const idAtasan = idByNpp.get(seed.atasanNpp);
+    if (!idPegawai || !idAtasan) continue;
+
+    const existing = await prisma.dialogKinerja.findFirst({
+      where: {
+        id_pegawai: idPegawai,
+        id_atasan: idAtasan,
+        periode_tahun: seed.periodeTahun,
+      },
+      select: { id: true },
+    });
+    if (existing) continue;
+
+    const dialog = await prisma.dialogKinerja.create({
+      data: {
+        id_pegawai: idPegawai,
+        id_atasan: idAtasan,
+        periode_tahun: seed.periodeTahun,
+        status: seed.status,
+        deskripsi_kinerja: seed.deskripsiKinerja ?? null,
+      },
+      select: { id: true },
+    });
+    const dialogId = dialog.id;
+
+    for (const aspek of seed.aspek) {
+      const createdAspek = await prisma.dialogKinerjaAspek.create({
+        data: {
+          id_dialog: dialogId,
+          jenis_aspek: aspek.jenis_aspek,
+          tanggung_jawab_pegawai: aspek.tanggung_jawab_pegawai,
+          tanggung_jawab_atasan: aspek.tanggung_jawab_atasan,
+        },
+        select: { id: true },
+      });
+      for (const item of aspek.items) {
+        await prisma.dialogKinerjaItem.create({
+          data: {
+            id_aspek: createdAspek.id,
+            dialog_evaluasi: item.dialog_evaluasi,
+            kompetensi_dikembangkan: item.kompetensi_dikembangkan,
+            id_metode_pengembangan: item.metodeNama
+              ? metodeById.get(item.metodeNama) ?? null
+              : null,
+            waktu_pelaksanaan:
+              item.waktu_pelaksanaan ??
+              new Date(Date.UTC(seed.periodeTahun, 5, 15)),
+          },
+        });
+      }
+    }
+
+    if (seed.ttdAtasan) {
+      await prisma.dialogKinerja.update({
+        where: { id: dialogId },
+        data: {
+          is_valid_atasan: true,
+          ttd_atasan_path: await writeTtdPlaceholder(dialogId, "atasan"),
+          waktu_validasi_atasan: new Date(),
+        },
+      });
+    }
+    if (seed.ttdPegawai) {
+      await prisma.dialogKinerja.update({
+        where: { id: dialogId },
+        data: {
+          is_valid_pegawai: true,
+          ttd_pegawai_path: await writeTtdPlaceholder(dialogId, "pegawai"),
+          waktu_validasi_pegawai: new Date(),
+        },
+      });
+    }
+
+    if (seed.reviu) {
+      const r = seed.reviu;
+      const reviu = await prisma.reviu.create({
+        data: {
+          id_dialog: dialogId,
+          status: r.status,
+          is_tercapai: r.is_tercapai,
+          is_tidak_tercapai: r.is_tidak_tercapai,
+          penjelasan_tercapai: r.penjelasan_tercapai ?? null,
+          penjelasan_tidak_tercapai: r.penjelasan_tidak_tercapai ?? null,
+          rencana_tindak_lanjut: r.rencana_tindak_lanjut ?? null,
+          tanggal_next_reviu: r.tanggal_next_reviu ?? null,
+        },
+        select: { id: true },
+      });
+      const reviuId = reviu.id;
+      if (r.status === "menunggu_validasi" || r.status === "selesai") {
+        await prisma.reviu.update({
+          where: { id: reviuId },
+          data: {
+            is_valid_atasan: true,
+            ttd_atasan_path: await writeTtdPlaceholder(dialogId, "atasan"),
+            waktu_validasi_atasan: new Date(),
+          },
+        });
+      }
+      if (r.status === "selesai") {
+        await prisma.reviu.update({
+          where: { id: reviuId },
+          data: {
+            is_valid_pegawai: true,
+            ttd_pegawai_path: await writeTtdPlaceholder(dialogId, "pegawai"),
+            waktu_validasi_pegawai: new Date(),
+          },
+        });
+      }
+    }
+
+    seededDialogs++;
+  }
+
+  const reviuCount = await prisma.reviu.count();
+  console.log(
+    `Seeded ${seededDialogs} dialog kinerja (total ${await prisma.dialogKinerja.count()} dialog, ${reviuCount} reviu).`,
   );
 }
 

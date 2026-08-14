@@ -104,7 +104,7 @@ export async function submitDialog(dialogId: number) {
     where: { id: dialogId },
     data: { status: "menunggu_pegawai" },
   });
-  redirect("/atasan/history");
+  redirect(`/atasan/dialog/${dialogId}`);
 }
 
 export interface SubmitEvaluasiState {

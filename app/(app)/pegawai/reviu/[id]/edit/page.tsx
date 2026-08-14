@@ -52,8 +52,10 @@ export default async function EditReviuPage({
       <ReviuForm
         reviuId={reviu.id}
         initial={{
-          status_tindaklanjut: reviu.status_tindaklanjut,
-          penjelasan: reviu.penjelasan,
+          is_tercapai: reviu.is_tercapai,
+          is_tidak_tercapai: reviu.is_tidak_tercapai,
+          penjelasan_tercapai: reviu.penjelasan_tercapai,
+          penjelasan_tidak_tercapai: reviu.penjelasan_tidak_tercapai,
           rencana_tindak_lanjut: reviu.rencana_tindak_lanjut,
           tanggal_next_reviu: toDateInput(reviu.tanggal_next_reviu),
         }}

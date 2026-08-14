@@ -39,11 +39,6 @@ enum StatusReviu {
   selesai
 }
 
-enum StatusTindakLanjut {
-  TERCAPAI
-  TIDAK_TERCAPAI
-}
-
 model User {
   id                       Int      @id @default(autoincrement())
   npp                      String   @unique @db.VarChar(50)
@@ -145,8 +140,10 @@ model DialogKinerjaItem {
 model Reviu {
   id                     Int                @id @default(autoincrement())
   id_dialog              Int
-  status_tindaklanjut    StatusTindakLanjut
-  penjelasan             String             @db.Text
+  is_tercapai            Boolean            @default(false)
+  is_tidak_tercapai      Boolean            @default(false)
+  penjelasan_tercapai    String?            @db.Text
+  penjelasan_tidak_tercapai String?          @db.Text
   rencana_tindak_lanjut  String?            @db.Text
   tanggal_next_reviu     DateTime?          @db.Date
   status                 StatusReviu        @default(draft_pegawai)

@@ -1,10 +1,12 @@
 import { formatTanggal } from "@/lib/format";
-import { STATUS_TINDAK_LANJUT_LABEL } from "@/lib/status-reviu";
+import { tindakLanjutLabel } from "@/lib/status-reviu";
 import { TindakLanjutBadge } from "@/components/tindak-lanjut-badge";
 
 interface ReviuSummaryRow {
-  status_tindaklanjut: "TERCAPAI" | "TIDAK_TERCAPAI";
-  penjelasan: string;
+  is_tercapai: boolean;
+  is_tidak_tercapai: boolean;
+  penjelasan_tercapai: string | null;
+  penjelasan_tidak_tercapai: string | null;
   rencana_tindak_lanjut: string | null;
   tanggal_next_reviu: Date | null;
   waktu_validasi_pegawai: Date | null;
@@ -25,9 +27,16 @@ export function ReviuSummary({
   const rows = [
     {
       label: "Status Tindak Lanjut",
-      value: STATUS_TINDAK_LANJUT_LABEL[reviu.status_tindaklanjut],
+      value: tindakLanjutLabel(reviu.is_tercapai, reviu.is_tidak_tercapai),
     },
-    { label: "Penjelasan", value: reviu.penjelasan },
+    {
+      label: "Penjelasan Tercapai",
+      value: reviu.penjelasan_tercapai,
+    },
+    {
+      label: "Penjelasan Tidak Tercapai",
+      value: reviu.penjelasan_tidak_tercapai,
+    },
     {
       label: "Rencana Tindak Lanjut",
       value: reviu.rencana_tindak_lanjut,
@@ -58,14 +67,20 @@ export function ReviuSummary({
             <span className="text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
               Formulir Reviu Hasil Dialog Kinerja
             </span>
-            <TindakLanjutBadge status={reviu.status_tindaklanjut} />
+            <TindakLanjutBadge
+              is_tercapai={reviu.is_tercapai}
+              is_tidak_tercapai={reviu.is_tidak_tercapai}
+            />
           </div>
         </div>
       ) : null}
 
       <dl className="flex flex-col divide-y divide-outline">
         {rows.map((row) => {
-          const isLong = row.label === "Penjelasan" || row.label === "Rencana Tindak Lanjut";
+          const isLong =
+            row.label === "Penjelasan Tercapai" ||
+            row.label === "Penjelasan Tidak Tercapai" ||
+            row.label === "Rencana Tindak Lanjut";
           return (
             <div
               key={row.label}
