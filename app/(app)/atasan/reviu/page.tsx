@@ -203,7 +203,11 @@ export default async function AtasanReviuListPage({
 
                     <div className="flex shrink-0 items-center justify-end gap-2 border-t border-outline/50 pt-3 sm:border-t-0 sm:pt-0">
                       <Link
-                        href={`/atasan/dialog/${r.dialog.id}`}
+                        href={
+                          isPending
+                            ? `/atasan/dialog/${r.dialog.id}#reviu`
+                            : `/atasan/dialog/${r.dialog.id}`
+                        }
                         className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-xs font-semibold transition-colors ${
                           isPending
                             ? "bg-primary text-on-primary hover:bg-primary-strong shadow-xs"
