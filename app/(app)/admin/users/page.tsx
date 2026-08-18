@@ -11,6 +11,7 @@ import { requireRole } from "@/lib/session";
 import { deleteAdminUser, setUserStatus } from "@/lib/actions/admin-users";
 import { RoleTag } from "@/components/role-tag";
 import { PegawaiDetailModal } from "@/components/pegawai-detail-modal";
+import { UserImportDialog } from "@/components/user-import-dialog";
 import { mapPegawaiDetail } from "@/lib/pegawai-detail-map";
 import {
   Table,
@@ -97,13 +98,16 @@ export default async function AdminUsersPage() {
             {users.length}.
           </p>
         </div>
-        <Link
-          href="/admin/users/new"
-          className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong"
-        >
-          <PlusIcon size={16} weight="bold" />
-          Tambah Pengguna
-        </Link>
+        <div className="flex items-center gap-2">
+          <UserImportDialog />
+          <Link
+            href="/admin/users/new"
+            className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong"
+          >
+            <PlusIcon size={16} weight="bold" />
+            Tambah Pengguna
+          </Link>
+        </div>
       </header>
 
       {users.length === 0 ? (
