@@ -1,23 +1,14 @@
 import {
   PlusIcon,
   UsersIcon,
-  UserCircleIcon,
-  PencilSimpleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
-import {
-  aktifkanPegawai,
-  deletePegawai,
-  nonaktifkanPegawai,
-} from "@/lib/actions/pegawai-admin";
-import { PegawaiDetailModal } from "@/components/pegawai/detail-modal";
-import { mapPegawaiDetail } from "@/lib/utils/pegawai-map";
+import { PegawaiTableBody } from "@/components/pegawai/pegawai-table-body";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -37,57 +28,13 @@ export default async function AtasanPegawaiPage() {
       nama_pegawai: true,
       nama_jabatan: true,
       unit_kerja: true,
-      tanggal_bergabung: true,
-      masa_kerja_unit_terakhir: true,
-      is_admin: true,
-      as_pegawai: true,
       is_active: true,
-      atasan: { select: { nama_pegawai: true } },
-      _count: { select: { bawahan: true, dialogAsAtasan: true } },
-      bawahan: {
-        select: {
-          id: true,
-          npp: true,
-          nip: true,
-          nama_pegawai: true,
-          nama_jabatan: true,
-          unit_kerja: true,
-          tanggal_bergabung: true,
-          masa_kerja_unit_terakhir: true,
-          is_admin: true,
-          as_pegawai: true,
-          is_active: true,
-          atasan: { select: { nama_pegawai: true } },
-          _count: { select: { bawahan: true, dialogAsAtasan: true } },
-          bawahan: {
-            select: {
-              id: true,
-              npp: true,
-              nip: true,
-              nama_pegawai: true,
-              nama_jabatan: true,
-              unit_kerja: true,
-              tanggal_bergabung: true,
-              masa_kerja_unit_terakhir: true,
-              is_admin: true,
-              as_pegawai: true,
-              is_active: true,
-              atasan: { select: { nama_pegawai: true } },
-              _count: { select: { bawahan: true, dialogAsAtasan: true } },
-            },
-          },
-        },
-      },
     },
     orderBy: [{ is_active: "desc" }, { nama_pegawai: "asc" }],
   });
 
-  const rows = pegawai.map((p) => ({
-    p,
-    detail: mapPegawaiDetail(p, (id) => `/atasan/pegawai/${id}/edit`),
-  }));
-
-  const activeCount = rows.filter((r) => r.p.is_active).length;
+  const activeCount = pegawai.filter((p) => p.is_active).length;
+  const rows = pegawai.map((p) => ({ pegawai: p }));
 
   return (
     <div className="flex flex-col gap-8">
@@ -128,90 +75,18 @@ export default async function AtasanPegawaiPage() {
             <TableHeader className="bg-surface-muted/60">
               <TableRow className="border-outline hover:bg-transparent">
                 <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
-                  Nama / NPP
+                  Nama
                 </TableHead>
                 <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
-                  Unit Kerja
+                  NIP / NPP
                 </TableHead>
-                <TableHead className="h-11 px-5 text-center text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
-                  Bawahan
-                </TableHead>
-                <TableHead className="h-11 px-5 text-center text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
-                  Dialog
-                </TableHead>
-                <TableHead className="h-11 px-5 text-right text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
-                  Aksi
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                  Unit Kerja & Jabatan
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map(({ p, detail }) => (
-                <TableRow
-                  key={p.id}
-                  className="border-outline hover:bg-surface-muted/40"
-                >
-                  <TableCell className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted text-primary">
-                        <UserCircleIcon size={20} weight="fill" />
-                      </span>
-                      <div className="flex min-w-0 flex-col">
-                        <PegawaiDetailModal
-                          user={detail}
-                          onToggleStatus={{
-                            activate: aktifkanPegawai.bind(null, p.id),
-                            deactivate: nonaktifkanPegawai.bind(null, p.id),
-                            deactivateConfirm: `Nonaktifkan ${p.nama_pegawai}? Pegawai tidak dapat masuk sampai diaktifkan kembali.`,
-                            successMessage: "Status pegawai berhasil diubah",
-                            errorMessage:
-                              "Terjadi kesalahan saat mengubah status. Silakan coba lagi.",
-                          }}
-                          onDelete={{
-                            action: deletePegawai.bind(null, p.id),
-                            confirmMessage: `Hapus permanen ${p.nama_pegawai}? Tindakan ini tidak dapat dibatalkan.`,
-                            successMessage: "Pegawai berhasil dihapus",
-                            errorMessage:
-                              "Terjadi kesalahan saat menghapus. Silakan coba lagi.",
-                          }}
-                        >
-                          {p.nama_pegawai}
-                        </PegawaiDetailModal>
-                        <span
-                          className={`text-xs ${p.is_active ? "text-ink-muted" : "text-ink-muted/60"
-                            }`}
-                        >
-                          NPP {p.npp}
-                        </span>
-                        <span className="truncate text-xs text-ink-muted">
-                          {[p.nama_jabatan, p.unit_kerja]
-                            .filter(Boolean)
-                            .join(" · ") || "—"}
-                        </span>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-5 py-4">
-                    <span className="block max-w-[16rem] truncate text-sm text-ink">
-                      {p.unit_kerja ?? "—"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="px-5 py-4 text-center text-sm font-semibold text-ink">
-                    {p._count.bawahan}
-                  </TableCell>
-                  <TableCell className="px-5 py-4 text-center text-sm font-semibold text-ink">
-                    {p._count.dialogAsAtasan}
-                  </TableCell>
-                  <TableCell className="px-5 py-4 text-right">
-                    <Link
-                      href={`/atasan/pegawai/${p.id}/edit`}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
-                    >
-                      <PencilSimpleIcon size={14} weight="bold" />
-                      Edit
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
+              <PegawaiTableBody rows={rows} />
             </TableBody>
           </Table>
         </div>

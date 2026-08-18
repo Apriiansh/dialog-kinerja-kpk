@@ -1,22 +1,15 @@
 import {
   PlusIcon,
-  UserCircleIcon,
   UsersIcon,
-  ShieldCheckIcon,
-  PencilSimpleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
-import { deleteAdminUser, setUserStatus } from "@/lib/actions/admin-users";
-import { RoleTag } from "@/components/shared/role-tag";
-import { PegawaiDetailModal } from "@/components/pegawai/detail-modal";
 import { UserImportDialog } from "@/components/admin/user-import-dialog";
-import { mapPegawaiDetail } from "@/lib/utils/pegawai-map";
+import { AdminUserTableBody } from "@/components/admin/user-table-body";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -25,7 +18,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage() {
-  const session = await requireRole("ADMIN");
+  await requireRole("ADMIN");
 
   const users = await prisma.user.findMany({
     select: {
@@ -36,55 +29,14 @@ export default async function AdminUsersPage() {
       unit_kerja: true,
       is_admin: true,
       as_pegawai: true,
-      default_role: true,
-      nip: true,
-      masa_kerja_unit_terakhir: true,
       is_active: true,
-      tanggal_bergabung: true,
       atasan: { select: { nama_pegawai: true } },
       _count: { select: { bawahan: true } },
-      bawahan: {
-        select: {
-          id: true,
-          npp: true,
-          nip: true,
-          nama_pegawai: true,
-          nama_jabatan: true,
-          unit_kerja: true,
-          tanggal_bergabung: true,
-          masa_kerja_unit_terakhir: true,
-          is_admin: true,
-          as_pegawai: true,
-          is_active: true,
-          atasan: { select: { nama_pegawai: true } },
-          _count: { select: { bawahan: true } },
-          bawahan: {
-            select: {
-              id: true,
-              npp: true,
-              nip: true,
-              nama_pegawai: true,
-              nama_jabatan: true,
-              unit_kerja: true,
-              tanggal_bergabung: true,
-              masa_kerja_unit_terakhir: true,
-              is_admin: true,
-              as_pegawai: true,
-              is_active: true,
-              atasan: { select: { nama_pegawai: true } },
-              _count: { select: { bawahan: true } },
-            },
-          },
-        },
-      },
     },
     orderBy: [{ is_active: "desc" }, { nama_pegawai: "asc" }],
   });
 
-  const rows = users.map((u) => ({
-    u,
-    detail: mapPegawaiDetail(u, (id) => `/admin/users/${id}/edit`),
-  }));
+  const activeCount = users.filter((u) => u.is_active).length;
 
   return (
     <div className="flex flex-col gap-8">
@@ -94,8 +46,7 @@ export default async function AdminUsersPage() {
             Kelola Pengguna
           </h1>
           <p className="text-sm leading-5 text-ink-muted">
-            {users.filter((u) => u.is_active).length} pengguna aktif dari total{" "}
-            {users.length}.
+            {activeCount} pengguna aktif dari total {users.length}.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -133,79 +84,10 @@ export default async function AdminUsersPage() {
                 <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
                   Peran
                 </TableHead>
-                <TableHead className="h-11 px-5 text-right text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
-                  Aksi
-                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map(({ u, detail }) => (
-                <TableRow
-                  key={u.id}
-                  className="border-outline hover:bg-surface-muted/40"
-                >
-                  <TableCell className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-muted text-primary">
-                        {u.is_admin ? (
-                          <ShieldCheckIcon size={20} weight="fill" />
-                        ) : (
-                          <UserCircleIcon size={20} weight="fill" />
-                        )}
-                      </span>
-                      <div className="flex min-w-0 flex-col">
-                        <PegawaiDetailModal
-                          user={detail}
-                          isSelf={u.id === session.id}
-                          onToggleStatus={{
-                            activate: setUserStatus.bind(null, u.id, true),
-                            deactivate: setUserStatus.bind(null, u.id, false),
-                            deactivateConfirm: `Nonaktifkan ${u.nama_pegawai}? Pengguna tidak dapat masuk sampai diaktifkan kembali.`,
-                            successMessage: "Status pengguna berhasil diubah",
-                            errorMessage:
-                              "Terjadi kesalahan saat mengubah status. Silakan coba lagi.",
-                          }}
-                          onDelete={{
-                            action: deleteAdminUser.bind(null, u.id),
-                            confirmMessage: `Hapus permanen ${u.nama_pegawai}? Tindakan ini tidak dapat dibatalkan.`,
-                            successMessage: "Pengguna berhasil dihapus",
-                            errorMessage:
-                              "Terjadi kesalahan saat menghapus. Silakan coba lagi.",
-                          }}
-                        >
-                          {u.nama_pegawai}
-                        </PegawaiDetailModal>
-                        <span
-                          className={`text-xs ${u.is_active ? "text-ink-muted" : "text-ink-muted/60"}`}
-                        >
-                          NPP {u.npp}
-                        </span>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell
-                    className={`px-5 py-4 text-sm ${u.is_active ? "text-ink" : "text-ink-muted/60"}`}
-                  >
-                    {u.atasan?.nama_pegawai ?? "—"}
-                  </TableCell>
-                  <TableCell className="px-5 py-4">
-                    <div className="flex flex-wrap gap-1">
-                      {u.is_admin ? <RoleTag role="ADMIN" /> : null}
-                      {u.as_pegawai ? <RoleTag role="PEGAWAI" /> : null}
-                      {u._count.bawahan > 0 ? <RoleTag role="ATASAN" /> : null}
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-5 py-4 text-right">
-                    <Link
-                      href={`/admin/users/${u.id}/edit`}
-                      className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
-                    >
-                      <PencilSimpleIcon size={14} weight="bold" />
-                      Edit
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
+              <AdminUserTableBody users={users} />
             </TableBody>
           </Table>
         </div>
