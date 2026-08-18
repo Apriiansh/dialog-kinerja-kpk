@@ -3,15 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { TrashIcon } from "@phosphor-icons/react";
-import { deleteAdminUser } from "@/lib/actions/admin-users";
+import { deleteMetode } from "@/lib/actions/admin-metode";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 
-export function AdminUserDeleteButton({
+export function AdminMetodeDeleteButton({
   id,
   nama,
+  digunakan,
 }: {
   id: number;
   nama: string;
+  digunakan?: number;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -19,19 +21,25 @@ export function AdminUserDeleteButton({
   async function handleDelete() {
     setPending(true);
 
-    if (!confirm(`Hapus permanen ${nama}? Tindakan ini tidak dapat dibatalkan.`)) {
+    const warning =
+      digunakan && digunakan > 0
+        ? ` ${nama} saat ini dipakai pada ${digunakan} item dialog kinerja. Item dialog tetap tersimpan, hanya hubungan ke metode ini yang dihapus.`
+        : "";
+    if (
+      !confirm(`Hapus permanen ${nama}?${warning} Tindakan ini tidak dapat dibatalkan.`)
+    ) {
       setPending(false);
       return;
     }
 
-    const result = await deleteAdminUser(id);
+    const result = await deleteMetode(id);
     setPending(false);
 
     if (result?.error) {
       showError(result.error);
       return;
     }
-    showSuccess("Pengguna berhasil dihapus");
+    showSuccess("Metode pengembangan berhasil dihapus");
     router.refresh();
   }
 

@@ -3,13 +3,28 @@ import {
   ChatCircleDotsIcon,
   CheckCircleIcon,
   HourglassIcon,
-  ShieldCheckIcon,
   ArrowRightIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
-import { RoleTag } from "@/components/role-tag";
+import { StatusBars, Donut, type ChartDatum } from "@/components/dashboard/charts";
+import { ChartCard } from "@/components/dashboard/chart-card";
+import {
+  DIALOG_STATUS_CHART,
+  ROLE_CHART,
+} from "@/lib/chart-colors";
+import type { Role, StatusDialog } from "@/generated/prisma/enums";
+
+const PRIMARY = "#1e3a8a";
+const STATUS_ORDER: StatusDialog[] = [
+  "draft_atasan",
+  "menunggu_pegawai",
+  "menunggu_atasan",
+  "menunggu_validasi",
+  "selesai",
+];
+const ROLE_ORDER: Role[] = ["ATASAN", "PEGAWAI"];
 
 function greeting() {
   const hour = new Date().getHours();
@@ -22,29 +37,106 @@ function greeting() {
 export default async function AdminDashboardPage() {
   const session = await requireRole("ADMIN");
 
-  const [userCount, activeUserCount, dialogCount, inProgressCount, doneCount] =
-    await Promise.all([
-      prisma.user.count(),
-      prisma.user.count({ where: { is_active: true } }),
-      prisma.dialogKinerja.count(),
-      prisma.dialogKinerja.count({
-        where: { status: { not: "selesai" } },
-      }),
-      prisma.dialogKinerja.count({ where: { status: "selesai" } }),
-    ]);
+  const [
+    userCount,
+    activeUserCount,
+    dialogCount,
+    inProgressCount,
+    doneCount,
+    reviuCount,
+    reviuTercapai,
+    reviuTidak,
+    statusGroups,
+    periodGroups,
+    roleGroups,
+    recentDialogs,
+  ] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.count({ where: { is_active: true } }),
+    prisma.dialogKinerja.count(),
+    prisma.dialogKinerja.count({ where: { status: { not: "selesai" } } }),
+    prisma.dialogKinerja.count({ where: { status: "selesai" } }),
+    prisma.reviu.count(),
+    prisma.reviu.count({ where: { is_tercapai: true } }),
+    prisma.reviu.count({ where: { is_tidak_tercapai: true } }),
+    prisma.dialogKinerja.groupBy({
+      by: ["status"],
+      _count: { _all: true },
+    }),
+    prisma.dialogKinerja.groupBy({
+      by: ["periode_tahun"],
+      _count: { _all: true },
+    }),
+    prisma.user.groupBy({
+      by: ["default_role"],
+      where: { default_role: { not: "ADMIN" } },
+      _count: { _all: true },
+    }),
+    prisma.dialogKinerja.findMany({
+      select: {
+        id: true,
+        periode_tahun: true,
+        status: true,
+        updated_at: true,
+        pegawai: { select: { nama_pegawai: true, npp: true } },
+        atasan: { select: { nama_pegawai: true } },
+      },
+      orderBy: { updated_at: "desc" },
+      take: 8,
+    }),
+  ]);
 
-  const recentDialogs = await prisma.dialogKinerja.findMany({
-    select: {
-      id: true,
-      periode_tahun: true,
-      status: true,
-      updated_at: true,
-      pegawai: { select: { nama_pegawai: true, npp: true } },
-      atasan: { select: { nama_pegawai: true } },
+  const statusData: ChartDatum[] = STATUS_ORDER.map((status) => {
+    const found = statusGroups.find((g) => g.status === status);
+    const cfg = DIALOG_STATUS_CHART[status];
+    return {
+      label: cfg.short,
+      tooltipLabel: cfg.label,
+      value: found?._count._all ?? 0,
+      color: cfg.color,
+    };
+  }).filter((d) => d.value > 0);
+
+  const periodData: ChartDatum[] = periodGroups
+    .map((g) => ({
+      label: String(g.periode_tahun),
+      value: g._count._all,
+      color: PRIMARY,
+    }))
+    .sort((a, b) => Number(a.label) - Number(b.label));
+
+  const nonAdminActiveUserCount = roleGroups.reduce(
+    (total, group) => total + group._count._all,
+    0,
+  );
+
+  const roleData: ChartDatum[] = ROLE_ORDER.map((role) => {
+    const found = roleGroups.find((g) => g.default_role === role);
+    const cfg = ROLE_CHART[role];
+    return {
+      label: cfg.label,
+      value: found?._count._all ?? 0,
+      color: cfg.color,
+    };
+  }).filter((d) => d.value > 0);
+
+  const reviuData: ChartDatum[] = [
+    {
+      label: "Tercapai",
+      value: reviuTercapai,
+      color: "#15803d",
     },
-    orderBy: { updated_at: "desc" },
-    take: 5,
-  });
+    {
+      label: "Tidak Tercapai",
+      value: reviuTidak,
+      color: "#b45309",
+    },
+    {
+      label: "Dalam Proses",
+      value: Math.max(0, reviuCount - reviuTercapai - reviuTidak),
+      color: "#475569",
+    },
+  ].filter((d) => d.value > 0);
 
   const stats = [
     {
@@ -74,22 +166,15 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="text-[28px] font-semibold leading-9 tracking-[-0.01em] text-ink">
             {greeting()}, {session.nama}
           </h1>
           <p className="text-sm leading-5 text-ink-muted">
-            Pantau pengguna dan dialog kinerja di seluruh organisasi.
+            Pantau pengguna, dialog kinerja, dan reviu di seluruh organisasi.
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {/* <RoleTag role={session.role} /> */}
-          <span className="inline-flex items-center gap-1.5 rounded-md bg-surface-muted px-2.5 py-1 text-xs font-semibold text-ink-muted">
-            <ShieldCheckIcon size={14} weight="fill" />
-            Super User
-          </span>
         </div>
       </header>
 
@@ -118,9 +203,55 @@ export default async function AdminDashboardPage() {
         ))}
       </section>
 
+      <section
+        aria-label="Analitik dialog"
+        className="grid gap-4 lg:grid-cols-2"
+      >
+        <ChartCard
+          title="Dialog Berdasarkan Status"
+          subtitle="Distribusi seluruh dialog kinerja berdasarkan tahapannya"
+        >
+          <StatusBars data={statusData} />
+        </ChartCard>
+        <ChartCard
+          title="Dialog per Periode"
+          subtitle="Jumlah dialog kinerja per tahun periode"
+        >
+          <StatusBars data={periodData} />
+        </ChartCard>
+      </section>
+
+      <section
+        aria-label="Analitik pengguna dan reviu"
+        className="grid gap-4 lg:grid-cols-2"
+      >
+        <ChartCard
+          title="Pengguna per Peran"
+          subtitle={`${nonAdminActiveUserCount} pengguna aktif terdaftar`}
+        >
+          <Donut
+            data={roleData}
+            centerValue={nonAdminActiveUserCount}
+            centerLabel="pengguna"
+          />
+        </ChartCard>
+        <ChartCard
+          title="Hasil Reviu"
+          subtitle={`${reviuCount} reviu tercatat`}
+        >
+          <Donut
+            data={reviuData}
+            centerValue={reviuCount}
+            centerLabel="reviu"
+          />
+        </ChartCard>
+      </section>
+
       <section aria-label="Dialog terbaru" className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold text-ink">Dialog Kinerja Terbaru</h2>
+          <h2 className="text-lg font-semibold text-ink">
+            Dialog Kinerja Terbaru
+          </h2>
           <Link
             href="/admin/monitoring"
             className="inline-flex h-9 items-center gap-1.5 rounded-md border border-outline bg-surface px-3 text-sm font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted"
@@ -144,25 +275,34 @@ export default async function AdminDashboardPage() {
         ) : (
           <div className="overflow-hidden rounded-lg border border-outline bg-surface">
             <ul className="divide-y divide-outline">
-              {recentDialogs.map((d) => (
-                <li
-                  key={d.id}
-                  className="flex items-center justify-between gap-3 px-5 py-3.5"
-                >
-                  <div className="flex min-w-0 flex-col gap-0.5">
-                    <span className="truncate text-sm font-semibold text-ink">
-                      {d.pegawai?.nama_pegawai}
+              {recentDialogs.map((d) => {
+                const cfg = DIALOG_STATUS_CHART[d.status];
+                return (
+                  <li
+                    key={d.id}
+                    className="flex items-center justify-between gap-3 px-5 py-3.5"
+                  >
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <Link
+                        href={`/admin/monitoring/${d.id}`}
+                        className="truncate text-sm font-semibold text-ink transition-colors hover:text-primary"
+                      >
+                        {d.pegawai?.nama_pegawai}
+                      </Link>
+                      <span className="text-xs text-ink-muted">
+                        {d.pegawai?.npp} · Tahun {d.periode_tahun} · Atasan:{" "}
+                        {d.atasan?.nama_pegawai}
+                      </span>
+                    </div>
+                    <span
+                      className="shrink-0 rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide"
+                      style={{ color: cfg.color, backgroundColor: `${cfg.color}1a` }}
+                    >
+                      {cfg.label}
                     </span>
-                    <span className="text-xs text-ink-muted">
-                      {d.pegawai?.npp} · Tahun {d.periode_tahun} · Atasan:{" "}
-                      {d.atasan?.nama_pegawai}
-                    </span>
-                  </div>
-                  <span className="shrink-0 rounded-md bg-surface-muted px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-ink-muted">
-                    {d.status}
-                  </span>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}

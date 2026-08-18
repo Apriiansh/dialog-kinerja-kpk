@@ -2,14 +2,18 @@ import {
   PlusIcon,
   UsersIcon,
   UserCircleIcon,
-  PencilSimpleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
 import { PegawaiStatusToggle } from "@/components/pegawai-status-toggle";
-import { PegawaiDeleteButton } from "@/components/pegawai-delete-button";
-import { formatTanggal } from "@/lib/format";
+import {
+  aktifkanPegawai,
+  deletePegawai,
+  nonaktifkanPegawai,
+} from "@/lib/actions/pegawai-admin";
+import { PegawaiDetailModal } from "@/components/pegawai-detail-modal";
+import { mapPegawaiDetail } from "@/lib/pegawai-detail-map";
 import {
   Table,
   TableBody,
@@ -34,12 +38,56 @@ export default async function AtasanPegawaiPage() {
       nama_jabatan: true,
       unit_kerja: true,
       tanggal_bergabung: true,
+      masa_kerja_unit_terakhir: true,
+      is_admin: true,
+      as_pegawai: true,
       is_active: true,
+      atasan: { select: { nama_pegawai: true } },
+      _count: { select: { bawahan: true } },
+      bawahan: {
+        select: {
+          id: true,
+          npp: true,
+          nip: true,
+          nama_pegawai: true,
+          nama_jabatan: true,
+          unit_kerja: true,
+          tanggal_bergabung: true,
+          masa_kerja_unit_terakhir: true,
+          is_admin: true,
+          as_pegawai: true,
+          is_active: true,
+          atasan: { select: { nama_pegawai: true } },
+          _count: { select: { bawahan: true } },
+          bawahan: {
+            select: {
+              id: true,
+              npp: true,
+              nip: true,
+              nama_pegawai: true,
+              nama_jabatan: true,
+              unit_kerja: true,
+              tanggal_bergabung: true,
+              masa_kerja_unit_terakhir: true,
+              is_admin: true,
+              as_pegawai: true,
+              is_active: true,
+              atasan: { select: { nama_pegawai: true } },
+              _count: { select: { bawahan: true } },
+            },
+          },
+        },
+      },
     },
     orderBy: [{ is_active: "desc" }, { nama_pegawai: "asc" }],
   });
 
-  const activeCount = pegawai.filter((p) => p.is_active).length;
+  const rows = pegawai.map((p) => ({
+    p,
+    detail: mapPegawaiDetail(p, (id) => `/atasan/pegawai/${id}/edit`),
+  }));
+
+  const activeCount = rows.filter((r) => r.p.is_active).length;
 
   return (
     <div className="flex flex-col gap-8">
@@ -83,18 +131,12 @@ export default async function AtasanPegawaiPage() {
                   Nama / NPP
                 </TableHead>
                 <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
-                  Bergabung
-                </TableHead>
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
                   Status
-                </TableHead>
-                <TableHead className="h-11 px-5 text-right text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
-                  Aksi
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {pegawai.map((p) => (
+              {rows.map(({ p, detail }) => (
                 <TableRow
                   key={p.id}
                   className="border-outline hover:bg-surface-muted/40"
@@ -105,12 +147,26 @@ export default async function AtasanPegawaiPage() {
                         <UserCircleIcon size={20} weight="fill" />
                       </span>
                       <div className="flex min-w-0 flex-col">
-                        <Link
-                          href={`/atasan/pegawai/${p.id}/edit`}
-                          className="truncate text-sm font-semibold text-ink transition-colors hover:text-primary"
+                        <PegawaiDetailModal
+                          user={detail}
+                          onToggleStatus={{
+                            activate: aktifkanPegawai.bind(null, p.id),
+                            deactivate: nonaktifkanPegawai.bind(null, p.id),
+                            deactivateConfirm: `Nonaktifkan ${p.nama_pegawai}? Pegawai tidak dapat masuk sampai diaktifkan kembali.`,
+                            successMessage: "Status pegawai berhasil diubah",
+                            errorMessage:
+                              "Terjadi kesalahan saat mengubah status. Silakan coba lagi.",
+                          }}
+                          onDelete={{
+                            action: deletePegawai.bind(null, p.id),
+                            confirmMessage: `Hapus permanen ${p.nama_pegawai}? Tindakan ini tidak dapat dibatalkan.`,
+                            successMessage: "Pegawai berhasil dihapus",
+                            errorMessage:
+                              "Terjadi kesalahan saat menghapus. Silakan coba lagi.",
+                          }}
                         >
                           {p.nama_pegawai}
-                        </Link>
+                        </PegawaiDetailModal>
                         <span
                           className={`text-xs ${p.is_active ? "text-ink-muted" : "text-ink-muted/60"
                             }`}
@@ -125,32 +181,12 @@ export default async function AtasanPegawaiPage() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell
-                    className={`truncate px-5 py-4 text-sm ${p.is_active ? "text-ink" : "text-ink-muted/60"
-                      }`}
-                  >
-                    {p.tanggal_bergabung ? formatTanggal(p.tanggal_bergabung) : "—"}
-                  </TableCell>
                   <TableCell className="px-5 py-4">
                     <PegawaiStatusToggle
                       id={p.id}
                       nama={p.nama_pegawai}
                       isActive={p.is_active}
                     />
-                  </TableCell>
-                  <TableCell className="px-5 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={`/atasan/pegawai/${p.id}/edit`}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
-                      >
-                        <PencilSimpleIcon size={14} weight="bold" />
-                        Edit
-                      </Link>
-                      {!p.is_active ? (
-                        <PegawaiDeleteButton id={p.id} nama={p.nama_pegawai} />
-                      ) : null}
-                    </div>
                   </TableCell>
                 </TableRow>
               ))}

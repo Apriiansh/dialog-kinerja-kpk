@@ -2,8 +2,9 @@
 
 import { getIronSession } from "iron-session";
 import bcrypt from "bcryptjs";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { clearLoginAttempts, consumeLoginAttempt } from "@/lib/rate-limit";
 import {
   capabilitiesForUser,
   homePathForRole,
@@ -31,6 +32,19 @@ export async function loginAction(
     return { error: "NPP harus terdiri dari 7 digit angka." };
   }
 
+  const requestHeaders = await headers();
+  const ip =
+    requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    requestHeaders.get("x-real-ip") ||
+    "unknown";
+
+  const limit = consumeLoginAttempt(ip, npp);
+  if (!limit.allowed) {
+    return {
+      error: `Terlalu banyak percobaan login. Coba lagi dalam ${limit.retryAfterSeconds} detik.`,
+    };
+  }
+
   const user = await prisma.user.findUnique({ where: { npp } });
 
   if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -39,6 +53,8 @@ export async function loginAction(
   if (!user.is_active) {
     return { error: "Akun Anda dinonaktifkan." };
   }
+
+  clearLoginAttempts(ip, npp);
 
   const roles = capabilitiesForUser(user);
   const activeRole = roles.includes(user.default_role)

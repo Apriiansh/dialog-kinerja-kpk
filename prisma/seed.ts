@@ -25,7 +25,7 @@ const MASTER_METODE = [
   "Penugasan",
   "Pendidikan dan Pelatihan",
   "Mutasi",
-  "Lainnya (Freetext)",
+  "Lainnya...",
 ];
 
 interface SeedUser {

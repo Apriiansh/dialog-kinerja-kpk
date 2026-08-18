@@ -30,7 +30,7 @@ INSERT INTO master_metode_pengembangan (nama_metode) VALUES
 ('Penugasan'),
 ('Pendidikan dan Pelatihan'),
 ('Mutasi'),
-('Lainnya (Freetext)');
+('Lainnya...');
 
 -- =========================================================================
 -- 3. TABEL TRANSAKSI UTAMA (HEADER DIALOG KINERJA)

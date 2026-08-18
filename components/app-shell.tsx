@@ -12,6 +12,7 @@ import {
   UserListIcon,
   MonitorPlayIcon,
   ArrowsClockwiseIcon,
+  ListChecksIcon,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -103,15 +104,21 @@ const ADMIN_NAV_GROUPS: NavGroup[] = [
         exact: true,
       },
       {
+        href: "/admin/monitoring",
+        label: "Monitoring Dialog Kinerja",
+        icon: MonitorPlayIcon,
+      },
+      {
         href: "/admin/users",
         label: "Kelola Pengguna",
         icon: UserListIcon,
       },
       {
-        href: "/admin/monitoring",
-        label: "Monitoring Dialog Kinerja",
-        icon: MonitorPlayIcon,
+        href: "/admin/metode",
+        label: "Metode Pengembangan",
+        icon: ListChecksIcon,
       },
+      
     ],
   },
 ];
@@ -211,7 +218,7 @@ function LogoutButton({ className }: { className?: string }) {
         type="submit"
         className={
           className ??
-          "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white cursor-pointer"
+          "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-red-600/50 hover:text-white cursor-pointer"
         }
       >
         <SignOutIcon size={18} weight="bold" />

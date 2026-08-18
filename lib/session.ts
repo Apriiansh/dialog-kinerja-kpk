@@ -14,8 +14,13 @@ export interface SessionData {
   roles: Role[];
 }
 
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret) {
+  throw new Error("SESSION_SECRET environment variable is required.");
+}
+
 export const sessionOptions = {
-  password: process.env.SESSION_SECRET as string,
+  password: sessionSecret,
   cookieName: "dialog_kinerja_session",
   ttl: 60 * 60 * 12,
   cookieOptions: {

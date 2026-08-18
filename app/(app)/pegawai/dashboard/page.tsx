@@ -12,10 +12,20 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/session";
-import { RoleTag } from "@/components/role-tag";
 import { StatusBadge } from "@/components/status-badge";
+import { StatusBars, Donut, type ChartDatum } from "@/components/dashboard/charts";
+import { ChartCard } from "@/components/dashboard/chart-card";
+import { DIALOG_STATUS_CHART } from "@/lib/chart-colors";
 import { ASPEK_ORDER } from "@/lib/aspek";
 import type { StatusDialog } from "@/generated/prisma/enums";
+
+const STATUS_ORDER: StatusDialog[] = [
+  "draft_atasan",
+  "menunggu_pegawai",
+  "menunggu_atasan",
+  "menunggu_validasi",
+  "selesai",
+];
 
 function greeting() {
   const hour = new Date().getHours();
@@ -76,7 +86,7 @@ export default async function PegawaiDashboardPage({
 
   const session = await requireAuth();
 
-  const [user, dialogs] = await Promise.all([
+  const [user, dialogs, reviu] = await Promise.all([
     prisma.user.findUnique({
       where: { id: session.id },
       select: { npp: true, nama_jabatan: true, unit_kerja: true },
@@ -91,11 +101,45 @@ export default async function PegawaiDashboardPage({
       },
       orderBy: { updated_at: "desc" },
     }),
+    prisma.reviu.findMany({
+      where: { dialog: { id_pegawai: session.id } },
+      select: { is_tercapai: true, is_tidak_tercapai: true },
+    }),
   ]);
 
   const urgentDialogs = dialogs.filter(
     (d) => d.status === "menunggu_pegawai" || d.status === "menunggu_validasi",
   );
+
+  const statusData: ChartDatum[] = STATUS_ORDER.map((status) => {
+    const cfg = DIALOG_STATUS_CHART[status];
+    return {
+      label: cfg.short,
+      tooltipLabel: cfg.label,
+      value: dialogs.filter((d) => d.status === status).length,
+      color: cfg.color,
+    };
+  }).filter((d) => d.value > 0);
+
+  const tercapai = reviu.filter((r) => r.is_tercapai).length;
+  const tidakTercapai = reviu.filter((r) => r.is_tidak_tercapai).length;
+  const reviuData: ChartDatum[] = [
+    {
+      label: "Tercapai",
+      value: tercapai,
+      color: "#15803d",
+    },
+    {
+      label: "Tidak Tercapai",
+      value: tidakTercapai,
+      color: "#b45309",
+    },
+    {
+      label: "Dalam Proses",
+      value: Math.max(0, reviu.length - tercapai - tidakTercapai),
+      color: "#475569",
+    },
+  ].filter((d) => d.value > 0);
 
   const stats = [
     {
@@ -135,7 +179,7 @@ export default async function PegawaiDashboardPage({
   ];
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="text-[28px] font-semibold leading-9 tracking-[-0.01em] text-ink">
@@ -145,13 +189,12 @@ export default async function PegawaiDashboardPage({
             Selamat datang di Sistem Aplikasi Dialog Kinerja Biro SDM KPK.
           </p>
         </div>
-        {/* <RoleTag role={session.role} /> */}
       </header>
 
       {/* Profil Pegawai */}
       <section aria-label="Ringkasan profil" className="rounded-lg border border-outline bg-surface">
         <div className="border-b border-outline px-6 py-4">
-          <h2 className="text-sm font-semibold text-ink">Data Kepegawaian</h2>
+          <h2 className="text-sm font-semibold text-ink">Data Pegawai</h2>
         </div>
         <dl className="grid gap-6 px-6 py-5 sm:grid-cols-3">
           {profile.map(({ label, value, icon: Icon }) => (
@@ -206,6 +249,26 @@ export default async function PegawaiDashboardPage({
             </Link>
           ))}
         </div>
+      </section>
+
+      {/* Charts */}
+      <section aria-label="Analitik pribadi" className="grid gap-4 lg:grid-cols-2">
+        <ChartCard
+          title="Status Dialog Saya"
+          subtitle={`${dialogs.length} dialog kinerja atas nama Anda`}
+        >
+          <StatusBars data={statusData} />
+        </ChartCard>
+        <ChartCard
+          title="Hasil Reviu Saya"
+          subtitle={`${reviu.length} reviu tercatat`}
+        >
+          <Donut
+            data={reviuData}
+            centerValue={reviu.length}
+            centerLabel="reviu"
+          />
+        </ChartCard>
       </section>
 
       {/* Action Required Dialogs Section */}

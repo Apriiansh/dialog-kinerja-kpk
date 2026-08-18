@@ -8,10 +8,10 @@ import {
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/session";
-import { AdminUserStatusToggle } from "@/components/admin-user-status-toggle";
-import { AdminUserDeleteButton } from "@/components/admin-user-delete-button";
+import { deleteAdminUser, setUserStatus } from "@/lib/actions/admin-users";
 import { RoleTag } from "@/components/role-tag";
-import { formatTanggal } from "@/lib/format";
+import { PegawaiDetailModal } from "@/components/pegawai-detail-modal";
+import { mapPegawaiDetail } from "@/lib/pegawai-detail-map";
 import {
   Table,
   TableBody,
@@ -36,13 +36,54 @@ export default async function AdminUsersPage() {
       is_admin: true,
       as_pegawai: true,
       default_role: true,
+      nip: true,
+      masa_kerja_unit_terakhir: true,
       is_active: true,
       tanggal_bergabung: true,
       atasan: { select: { nama_pegawai: true } },
       _count: { select: { bawahan: true } },
+      bawahan: {
+        select: {
+          id: true,
+          npp: true,
+          nip: true,
+          nama_pegawai: true,
+          nama_jabatan: true,
+          unit_kerja: true,
+          tanggal_bergabung: true,
+          masa_kerja_unit_terakhir: true,
+          is_admin: true,
+          as_pegawai: true,
+          is_active: true,
+          atasan: { select: { nama_pegawai: true } },
+          _count: { select: { bawahan: true } },
+          bawahan: {
+            select: {
+              id: true,
+              npp: true,
+              nip: true,
+              nama_pegawai: true,
+              nama_jabatan: true,
+              unit_kerja: true,
+              tanggal_bergabung: true,
+              masa_kerja_unit_terakhir: true,
+              is_admin: true,
+              as_pegawai: true,
+              is_active: true,
+              atasan: { select: { nama_pegawai: true } },
+              _count: { select: { bawahan: true } },
+            },
+          },
+        },
+      },
     },
     orderBy: [{ is_active: "desc" }, { nama_pegawai: "asc" }],
   });
+
+  const rows = users.map((u) => ({
+    u,
+    detail: mapPegawaiDetail(u, (id) => `/admin/users/${id}/edit`),
+  }));
 
   return (
     <div className="flex flex-col gap-8">
@@ -88,19 +129,13 @@ export default async function AdminUsersPage() {
                 <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
                   Peran
                 </TableHead>
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
-                  Bergabung
-                </TableHead>
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
-                  Status
-                </TableHead>
                 <TableHead className="h-11 px-5 text-right text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
                   Aksi
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((u) => (
+              {rows.map(({ u, detail }) => (
                 <TableRow
                   key={u.id}
                   className="border-outline hover:bg-surface-muted/40"
@@ -115,12 +150,27 @@ export default async function AdminUsersPage() {
                         )}
                       </span>
                       <div className="flex min-w-0 flex-col">
-                        <Link
-                          href={`/admin/users/${u.id}/edit`}
-                          className="truncate text-sm font-semibold text-ink transition-colors hover:text-primary"
+                        <PegawaiDetailModal
+                          user={detail}
+                          isSelf={u.id === session.id}
+                          onToggleStatus={{
+                            activate: setUserStatus.bind(null, u.id, true),
+                            deactivate: setUserStatus.bind(null, u.id, false),
+                            deactivateConfirm: `Nonaktifkan ${u.nama_pegawai}? Pengguna tidak dapat masuk sampai diaktifkan kembali.`,
+                            successMessage: "Status pengguna berhasil diubah",
+                            errorMessage:
+                              "Terjadi kesalahan saat mengubah status. Silakan coba lagi.",
+                          }}
+                          onDelete={{
+                            action: deleteAdminUser.bind(null, u.id),
+                            confirmMessage: `Hapus permanen ${u.nama_pegawai}? Tindakan ini tidak dapat dibatalkan.`,
+                            successMessage: "Pengguna berhasil dihapus",
+                            errorMessage:
+                              "Terjadi kesalahan saat menghapus. Silakan coba lagi.",
+                          }}
                         >
                           {u.nama_pegawai}
-                        </Link>
+                        </PegawaiDetailModal>
                         <span
                           className={`text-xs ${u.is_active ? "text-ink-muted" : "text-ink-muted/60"}`}
                         >
@@ -130,7 +180,7 @@ export default async function AdminUsersPage() {
                     </div>
                   </TableCell>
                   <TableCell
-                    className={`truncate px-5 py-4 text-sm ${u.is_active ? "text-ink" : "text-ink-muted/60"}`}
+                    className={`px-5 py-4 text-sm ${u.is_active ? "text-ink" : "text-ink-muted/60"}`}
                   >
                     {u.atasan?.nama_pegawai ?? "—"}
                   </TableCell>
@@ -141,37 +191,14 @@ export default async function AdminUsersPage() {
                       {u._count.bawahan > 0 ? <RoleTag role="ATASAN" /> : null}
                     </div>
                   </TableCell>
-                  <TableCell
-                    className={`px-5 py-4 text-sm ${u.is_active ? "text-ink" : "text-ink-muted/60"}`}
-                  >
-                    {u.tanggal_bergabung
-                      ? formatTanggal(u.tanggal_bergabung)
-                      : "—"}
-                  </TableCell>
-                  <TableCell className="px-5 py-4">
-                    <AdminUserStatusToggle
-                      id={u.id}
-                      nama={u.nama_pegawai}
-                      isActive={u.is_active}
-                      isSelf={u.id === session.id}
-                    />
-                  </TableCell>
                   <TableCell className="px-5 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={`/admin/users/${u.id}/edit`}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
-                      >
-                        <PencilSimpleIcon size={14} weight="bold" />
-                        Edit
-                      </Link>
-                      {!u.is_active ? (
-                        <AdminUserDeleteButton
-                          id={u.id}
-                          nama={u.nama_pegawai}
-                        />
-                      ) : null}
-                    </div>
+                    <Link
+                      href={`/admin/users/${u.id}/edit`}
+                      className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
+                    >
+                      <PencilSimpleIcon size={14} weight="bold" />
+                      Edit
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}
