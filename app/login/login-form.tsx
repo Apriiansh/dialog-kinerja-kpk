@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowRight } from "@phosphor-icons/react";
-import { useActionState, useEffect, useRef } from "react";
+import { ArrowRight, Eye, EyeSlash } from "@phosphor-icons/react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { loginAction, type LoginState } from "./actions";
 import { error as showError } from "@/components/ui/toast";
 
@@ -12,6 +12,7 @@ export function LoginForm() {
     loginAction,
     initialLoginState,
   );
+  const [showPassword, setShowPassword] = useState(false);
   const lastErrorRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -56,15 +57,26 @@ export function LoginForm() {
           >
             Kata Sandi
           </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            autoComplete="current-password"
-            placeholder="Masukkan kata sandi"
-            className="h-11 rounded-md border border-outline bg-surface px-3.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus"
-          />
+          <div className="relative">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              required
+              autoComplete="current-password"
+              placeholder="Masukkan kata sandi"
+              className="h-11 w-full rounded-md border border-outline bg-surface pr-11 pl-3.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus"
+            />
+            <button
+              type="button"
+              aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+              title={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+              onClick={() => setShowPassword((current) => !current)}
+              className="absolute inset-y-0 right-3 flex items-center justify-center text-ink-muted transition-colors hover:text-ink"
+            >
+              {showPassword ? <EyeSlash size={18} weight="bold" /> : <Eye size={18} weight="bold" />}
+            </button>
+          </div>
         </div>
       </div>
 

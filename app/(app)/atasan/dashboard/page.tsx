@@ -183,7 +183,7 @@ export default async function AtasanDashboardPage() {
           title="Dialog per Pegawai"
           subtitle="Jumlah dialog yang dibuat untuk masing-masing pegawai"
         >
-          <div className="flex flex-1 items-center">
+          <div className="w-full min-w-0">
             <HorizontalBars data={perPegawaiData} />
           </div>
         </ChartCard>

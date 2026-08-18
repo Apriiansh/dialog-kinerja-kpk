@@ -107,7 +107,8 @@ export function HorizontalBars({
       <BarChart
         data={data}
         layout="vertical"
-        margin={{ top: 0, right: 8, left: 0, bottom: 0 }}
+        margin={{ top: 6, right: 10, left: 10, bottom: 0 }}
+        barCategoryGap={18}
       >
         <CartesianGrid
           strokeDasharray="3 3"
@@ -120,6 +121,7 @@ export function HorizontalBars({
           tickLine={false}
           axisLine={false}
           tick={AXIS_STYLE}
+          width={30}
         />
         <YAxis
           type="category"
@@ -127,10 +129,11 @@ export function HorizontalBars({
           tickLine={false}
           axisLine={false}
           tick={AXIS_STYLE}
-          width={150}
+          width={46}
+          tickMargin={6}
         />
         <Tooltip content={<TooltipCard />} cursor={{ fill: CURSOR_FILL }} />
-        <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={18} fill={PRIMARY} />
+        <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={24} fill={PRIMARY} />
       </BarChart>
     </ResponsiveContainer>
   );
