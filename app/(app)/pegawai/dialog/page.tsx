@@ -12,6 +12,7 @@ import { requireRole } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { UnduhBuktiLink } from "@/components/shared/unduh-bukti-link";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
+import { Progress } from "@/components/ui/progress";
 import { ASPEK_ORDER } from "@/lib/constants/aspek";
 import type { StatusDialog } from "@/generated/prisma/enums";
 
@@ -243,18 +244,11 @@ export default async function PegawaiDialogListPage({
                         {d.atasan.nama_jabatan ? ` (${d.atasan.nama_jabatan})` : ""}
                       </span>
                       <div className="mt-1 flex items-center gap-3">
-                        <div
-                          role="progressbar"
-                          aria-valuenow={progress}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                          className="h-2 w-36 overflow-hidden rounded-full bg-surface-soft"
-                        >
-                          <div
-                            className="h-full rounded-full bg-primary transition-all"
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
+                        <Progress
+                          value={progress}
+                          className="w-36"
+                          aria-label={`${progress}% aspek terisi`}
+                        />
                         <span className="text-[11px] font-medium text-ink-muted">
                           {filled}/{ASPEK_ORDER.length} aspek terisi ({progress}%)
                         </span>

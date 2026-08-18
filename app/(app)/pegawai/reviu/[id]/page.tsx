@@ -4,7 +4,6 @@ import { ArrowLeftIcon, PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr"
 import { requireRole } from "@/lib/auth/session";
 import { canValidateReviu, getPegawaiReviu } from "@/lib/queries/reviu";
 import { ReviuStatusBadge } from "@/components/reviu/status-badge";
-import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
 import { ReviuSummary } from "@/components/reviu/summary";
 import { ReviuSignForm } from "@/components/reviu/sign-form";
 import { UnduhBuktiButton } from "@/components/shared/unduh-bukti-button";
@@ -76,7 +75,7 @@ export default async function PegawaiReviuDetailPage({
                   Reviu Dialog Kinerja Tahun {reviu.dialog.periode_tahun}
                 </h1>
                 <p className="text-sm leading-5 text-ink-muted">
-                  Atasan Penilai: {reviu.dialog.atasan.nama_pegawai}
+                  Atasan: {reviu.dialog.atasan.nama_pegawai}
                   {reviu.dialog.atasan.nama_jabatan
                     ? ` (${reviu.dialog.atasan.nama_jabatan})`
                     : ""}
@@ -84,36 +83,32 @@ export default async function PegawaiReviuDetailPage({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <ReviuStatusBadge status={reviu.status} />
-                <TindakLanjutBadge
-                  is_tercapai={reviu.is_tercapai}
-                  is_tidak_tercapai={reviu.is_tidak_tercapai}
-                />
                 {isSelesai ? (
                   <>
                     <UnduhBuktiButton label="Unduh PDF" autoPrint={cetak} />
                     <UnduhWordLink href={`/api/unduh/reviu/${reviu.id}/docx`} />
                   </>
                 ) : null}
-                {isDraft ? (
-                  <>
-                    <Link
-                      href={`/pegawai/reviu/${reviu.id}/edit`}
-                      className="inline-flex h-8 items-center gap-1 rounded-md bg-primary-soft px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-faint"
-                    >
-                      <PencilSimpleIcon size={12} weight="bold" />
-                      Edit
-                    </Link>
-                    <DeleteReviuButton reviuId={reviu.id} />
-                  </>
-                ) : null}
               </div>
             </div>
 
             {isDraft ? (
-              <p className="text-sm leading-5 text-ink-muted">
-                Reviu masih berupa draft dan belum dikirim ke atasan. Lengkapi
-                isian lalu kirim untuk mendapat persetujuan atasan.
-              </p>
+              <div className="flex flex-col gap-2 rounded-lg border border-outline bg-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm leading-5 text-ink-muted">
+                  Reviu masih berupa draft dan belum dikirim ke atasan. Lengkapi
+                  isian lalu kirim untuk mendapat persetujuan atasan.
+                </p>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Link
+                    href={`/pegawai/reviu/${reviu.id}/edit`}
+                    className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong"
+                  >
+                    <PencilSimpleIcon size={16} weight="bold" />
+                    Edit Reviu
+                  </Link>
+                  <DeleteReviuButton reviuId={reviu.id} />
+                </div>
+              </div>
             ) : null}
             {reviu.status === "menunggu_atasan" ? (
               <p className="text-sm leading-5 text-ink-muted">

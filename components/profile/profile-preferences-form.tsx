@@ -132,36 +132,6 @@ export function ProfilePreferencesForm({
         </div>
       </div>
 
-      {/* Ringkasan Sesi Keamanan */}
-      <div className="overflow-hidden rounded-lg border border-outline bg-surface">
-        <div className="border-b border-outline bg-surface-muted/50 px-5 py-3.5">
-          <h2 className="text-sm font-semibold text-ink">
-            Informasi Sesi Autentikasi
-          </h2>
-        </div>
-
-        <div className="p-5">
-          <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-1">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-                Metode Enkripsi Sesi
-              </dt>
-              <dd className="text-sm text-ink">
-                Cookie Terenkripsi HttpOnly (Iron-Session)
-              </dd>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-                Masa Berlaku Sesi
-              </dt>
-              <dd className="text-sm text-ink">
-                12 Jam sejak login terakhir atau hingga Anda keluar sesi
-              </dd>
-            </div>
-          </dl>
-        </div>
-      </div>
     </div>
   );
 }

@@ -16,8 +16,9 @@
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "docx": "^9.7.1",
     "dotenv": "^17.4.2",
-    "html-to-docx": "^1.8.0",
+    "file-saver": "^2.0.5",
     "iron-session": "^8.0.4",
     "next": "16.3.0",
     "react": "19.2.8",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/file-saver": "^2.0.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
