@@ -3,25 +3,44 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
+import { getPageParams } from "@/lib/utils/pagination";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminMonitoringPage() {
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+export default async function AdminMonitoringPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   await requireRole("ADMIN");
+  const sp = await searchParams;
+  const { page, skip, existingParams } = getPageParams(sp);
 
-  const dialogs = await prisma.dialogKinerja.findMany({
-    select: {
-      id: true,
-      periode_tahun: true,
-      status: true,
-      updated_at: true,
-      pegawai: { select: { npp: true, nama_pegawai: true } },
-      atasan: { select: { nama_pegawai: true } },
-    },
-    orderBy: { updated_at: "desc" },
-  });
+  const where = {};
 
-  const selesai = dialogs.filter((d) => d.status === "selesai").length;
+  const [dialogs, total, selesaiCount] = await Promise.all([
+    prisma.dialogKinerja.findMany({
+      where,
+      select: {
+        id: true,
+        periode_tahun: true,
+        status: true,
+        updated_at: true,
+        pegawai: { select: { npp: true, nama_pegawai: true } },
+        atasan: { select: { nama_pegawai: true } },
+      },
+      orderBy: { updated_at: "desc" },
+      skip,
+      take: PAGE_SIZE,
+    }),
+    prisma.dialogKinerja.count({ where }),
+    prisma.dialogKinerja.count({ where: { status: "selesai" } }),
+  ]);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="flex flex-col gap-8">
@@ -30,8 +49,8 @@ export default async function AdminMonitoringPage() {
           Monitoring Dialog Kinerja
         </h1>
         <p className="text-sm leading-5 text-ink-muted">
-          {selesai} dari {dialogs.length} dialog telah selesai. Klik dialog
-          untuk melihat detail secara read-only.
+          {selesaiCount} dari {total} dialog telah selesai. Klik dialog untuk
+          melihat detail secara read-only.
         </p>
       </header>
 
@@ -83,6 +102,14 @@ export default async function AdminMonitoringPage() {
           </ul>
         </div>
       )}
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        totalItems={total}
+        basePath="/admin/monitoring"
+        existingParams={existingParams}
+      />
     </div>
   );
 }

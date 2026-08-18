@@ -7,11 +7,14 @@ import {
   CheckCircleIcon,
   DownloadSimpleIcon,
 } from "@phosphor-icons/react/dist/ssr";
+import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
-import { getAtasanReviuList } from "@/lib/queries/reviu";
+import { REVIU_INCLUDE } from "@/lib/queries/reviu";
 import { ReviuStatusBadge } from "@/components/reviu/status-badge";
 import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
+import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
+import { getPageParams } from "@/lib/utils/pagination";
 import type { StatusReviu } from "@/generated/prisma/enums";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -46,16 +49,39 @@ export default async function AtasanReviuListPage({
     rawStatus && (VALID_STATUSES as string[]).includes(rawStatus)
       ? (rawStatus as StatusReviu)
       : "semua";
+  const { page, skip, existingParams } = getPageParams(sp, ["status"]);
 
-  const reviuList = await getAtasanReviuList(session.id);
+  const baseWhere = { dialog: { id_atasan: session.id } };
+  const listWhere =
+    activeStatus !== "semua"
+      ? { ...baseWhere, status: activeStatus }
+      : baseWhere;
 
-  const visible =
-    activeStatus === "semua"
-      ? reviuList
-      : reviuList.filter((r) => r.status === activeStatus);
+  const [visible, total, draftCount, menungguAtasanCount, menungguValidasiCount, selesaiCount] =
+    await Promise.all([
+      prisma.reviu.findMany({
+        where: listWhere,
+        include: REVIU_INCLUDE,
+        orderBy: { created_at: "desc" },
+        skip,
+        take: PAGE_SIZE,
+      }),
+      prisma.reviu.count({ where: listWhere }),
+      prisma.reviu.count({ where: { ...baseWhere, status: "draft_pegawai" } }),
+      prisma.reviu.count({ where: { ...baseWhere, status: "menunggu_atasan" } }),
+      prisma.reviu.count({ where: { ...baseWhere, status: "menunggu_validasi" } }),
+      prisma.reviu.count({ where: { ...baseWhere, status: "selesai" } }),
+    ]);
 
-  const count = (status: StatusReviu) =>
-    reviuList.filter((r) => r.status === status).length;
+  const allTotal = draftCount + menungguAtasanCount + menungguValidasiCount + selesaiCount;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  const count = (status: StatusReviu) => {
+    if (status === "draft_pegawai") return draftCount;
+    if (status === "menunggu_atasan") return menungguAtasanCount;
+    if (status === "menunggu_validasi") return menungguValidasiCount;
+    return selesaiCount;
+  };
 
   const stats = [
     {
@@ -152,7 +178,7 @@ export default async function AtasanReviuListPage({
             })}
           </div>
           <span className="text-xs font-medium text-ink-muted">
-            Menampilkan {visible.length} dari {reviuList.length} reviu
+            Menampilkan {total} dari {allTotal} reviu
           </span>
         </div>
 
@@ -233,6 +259,14 @@ export default async function AtasanReviuListPage({
           </ul>
         )}
       </section>
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        totalItems={allTotal}
+        basePath="/atasan/reviu"
+        existingParams={existingParams}
+      />
     </div>
   );
 }

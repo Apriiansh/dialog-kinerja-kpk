@@ -4,13 +4,25 @@ import { requireRole } from "@/lib/auth/session";
 import { getAtasanPegawaiOptions } from "@/lib/queries/atasan";
 import { DialogList } from "@/components/dialog/list";
 import { NewDialogButton } from "@/components/dialog/create-button";
+import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
+import { getPageParams } from "@/lib/utils/pagination";
 
-export default async function DialogIndexPage() {
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+export default async function DialogIndexPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const session = await requireRole("ATASAN");
+  const sp = await searchParams;
+  const { page, skip, existingParams } = getPageParams(sp);
 
-  const [dialogs, pegawai] = await Promise.all([
+  const where = { id_atasan: session.id, status: { not: "selesai" as const } };
+
+  const [dialogs, pegawai, total] = await Promise.all([
     prisma.dialogKinerja.findMany({
-      where: { id_atasan: session.id, status: { not: "selesai" } },
+      where,
       select: {
         id: true,
         periode_tahun: true,
@@ -27,9 +39,14 @@ export default async function DialogIndexPage() {
         },
       },
       orderBy: { updated_at: "desc" },
+      skip,
+      take: PAGE_SIZE,
     }),
     getAtasanPegawaiOptions(session.id),
+    prisma.dialogKinerja.count({ where }),
   ]);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="flex flex-col gap-10">
@@ -61,6 +78,14 @@ export default async function DialogIndexPage() {
       ) : (
         <DialogList dialogs={dialogs} />
       )}
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        totalItems={total}
+        basePath="/atasan/dialog"
+        existingParams={existingParams}
+      />
     </div>
   );
 }

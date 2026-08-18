@@ -126,12 +126,14 @@ function buildPegawaiTable(
           new TableCell({
             borders: sideBorder(labelSides),
             width: { size: 30, type: WidthType.PERCENTAGE },
+            margins: { top: 80, bottom: 80, left: 120, right: 60 },
             shading: { fill: "f8fafc" },
             children: [new Paragraph({ children: [boldTxt(r.label)] })],
           }),
           new TableCell({
             borders: sideBorder(valueSides),
             width: { size: 70, type: WidthType.PERCENTAGE },
+            margins: { top: 80, bottom: 80, left: 120, right: 120 },
             children: [new Paragraph({ children: [txt(`: ${r.value || "—"}`)] })],
           }),
         ],

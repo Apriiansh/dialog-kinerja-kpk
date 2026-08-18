@@ -13,6 +13,8 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { UnduhBuktiLink } from "@/components/shared/unduh-bukti-link";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { Progress } from "@/components/ui/progress";
+import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
+import { getPageParams } from "@/lib/utils/pagination";
 import { ASPEK_ORDER } from "@/lib/constants/aspek";
 import type { StatusDialog } from "@/generated/prisma/enums";
 
@@ -90,49 +92,64 @@ export default async function PegawaiDialogListPage({
     rawStatus && (VALID_STATUSES as string[]).includes(rawStatus)
       ? (rawStatus as StatusDialog)
       : "semua";
+  const { page, skip, existingParams } = getPageParams(sp, ["status"]);
 
-  const dialogs = await prisma.dialogKinerja.findMany({
-    where: { id_pegawai: session.id },
-    include: {
-      atasan: { select: { nama_pegawai: true, nama_jabatan: true } },
-      aspek: {
-        include: { item: { select: { id: true } } },
-      },
-    },
-    orderBy: { updated_at: "desc" },
-  });
+  const baseWhere = { id_pegawai: session.id };
 
-  const visibleDialogs =
-    activeStatus === "semua"
-      ? dialogs
-      : dialogs.filter((d) => d.status === activeStatus);
+  const [allDialogs, filteredTotal, menungguAtasanCount, menungguValidasiCount, selesaiCount] =
+    await Promise.all([
+      prisma.dialogKinerja.findMany({
+        where: baseWhere,
+        include: {
+          atasan: { select: { nama_pegawai: true, nama_jabatan: true } },
+          aspek: { include: { item: { select: { id: true } } } },
+        },
+        orderBy: { updated_at: "desc" },
+      }),
+      prisma.dialogKinerja.count({
+        where:
+          activeStatus !== "semua"
+            ? { ...baseWhere, status: activeStatus }
+            : baseWhere,
+      }),
+      prisma.dialogKinerja.count({ where: { ...baseWhere, status: "menunggu_atasan" } }),
+      prisma.dialogKinerja.count({ where: { ...baseWhere, status: "menunggu_validasi" } }),
+      prisma.dialogKinerja.count({ where: { ...baseWhere, status: "selesai" } }),
+    ]);
+
+  const allTotal = allDialogs.length;
+  const menungguPegawaiCount = allDialogs.filter((d) => d.status === "menunggu_pegawai").length;
+  const totalPages = Math.ceil(filteredTotal / PAGE_SIZE);
+  const visibleDialogs = allDialogs
+    .filter((d) => activeStatus === "semua" || d.status === activeStatus)
+    .slice(skip, skip + PAGE_SIZE);
 
   const stats = [
     {
       key: "menunggu_pegawai" as const,
       label: "Perlu Diisi",
-      count: dialogs.filter((d) => d.status === "menunggu_pegawai").length,
+      count: menungguPegawaiCount,
       icon: PencilSimpleIcon,
       className: "bg-status-amber-soft text-status-amber",
     },
     {
       key: "menunggu_atasan" as const,
       label: "Menunggu Atasan",
-      count: dialogs.filter((d) => d.status === "menunggu_atasan").length,
+      count: menungguAtasanCount,
       icon: HourglassIcon,
       className: "bg-status-blue-soft text-status-blue",
     },
     {
       key: "menunggu_validasi" as const,
       label: "Menunggu Validasi",
-      count: dialogs.filter((d) => d.status === "menunggu_validasi").length,
+      count: menungguValidasiCount,
       icon: ShieldCheckIcon,
       className: "bg-status-indigo-soft text-status-indigo",
     },
     {
       key: "selesai" as const,
       label: "Selesai",
-      count: dialogs.filter((d) => d.status === "selesai").length,
+      count: selesaiCount,
       icon: CheckCircleIcon,
       className: "bg-status-green-soft text-status-green",
     },
@@ -169,7 +186,7 @@ export default async function PegawaiDialogListPage({
               <span className="text-2xl font-semibold leading-8 text-ink">
                 {count}
               </span>
-              <span className="truncate text-xs font-medium text-ink-muted">
+              <span className="text-xs font-medium text-ink-muted">
                 {label}
               </span>
             </div>
@@ -203,7 +220,7 @@ export default async function PegawaiDialogListPage({
             })}
           </div>
           <span className="text-xs font-medium text-ink-muted">
-            Menampilkan {visibleDialogs.length} dari {dialogs.length} dialog
+            Menampilkan {filteredTotal} dari {allTotal} dialog
           </span>
         </div>
 
@@ -246,7 +263,7 @@ export default async function PegawaiDialogListPage({
                       <div className="mt-1 flex items-center gap-3">
                         <Progress
                           value={progress}
-                          className="w-36"
+                          className="w-full max-w-50"
                           aria-label={`${progress}% aspek terisi`}
                         />
                         <span className="text-[11px] font-medium text-ink-muted">
@@ -293,6 +310,14 @@ export default async function PegawaiDialogListPage({
           </ul>
         )}
       </section>
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        totalItems={allTotal}
+        basePath="/pegawai/dialog"
+        existingParams={existingParams}
+      />
     </div>
   );
 }

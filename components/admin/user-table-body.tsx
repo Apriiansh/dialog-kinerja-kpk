@@ -11,7 +11,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 
-const RECENT_DAYS = 7;
+const RECENT_DAYS = 2;
 
 function isRecentlyAdded(date: Date): boolean {
   const now = new Date();

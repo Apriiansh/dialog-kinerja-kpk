@@ -27,14 +27,21 @@ Next.js 16.3 + React 19 + Tailwind v4 + Prisma 7 (MySQL/MariaDB) app for a perfo
 - Config lives in `prisma.config.ts` (schema path, migrations dir, seed `tsx prisma/seed.ts`); env loaded via `dotenv`. `prisma/schema.prisma` uses `@@map` to snake_case table names.
 - Migration flow: `npx prisma migrate dev`; seed via `npx prisma db seed`. Seed users: `admin123` / `atasan123` / `pegawai123`.
 
+## Enums
+
+- `StatusDialog`: `draft_atasan`, `menunggu_pegawai`, `menunggu_atasan`, `menunggu_validasi`, `selesai`
+- `StatusReviu`: `draft_pegawai`, `menunggu_atasan`, `menunggu_validasi`, `selesai`
+- `JenisAspek`: `SKP`, `GAP_ASESMEN`, `PERILAKU`, `KARIR_PENDEK`, `KARIR_MENENGAH` (5 total, ordered via `lib/constants/aspek.ts`)
+
 ## Architecture
 
-- **Auth gate is `proxy.ts`** (Next 16's `proxy` file, replacing `middleware`). It redirects unauthenticated users to `/login` and sends logged-in users to `homePathForRole`. When adding protected routes, keep the `matcher` in sync.
-- Sessions: iron-session cookie (`lib/session.ts`). Roles come from `session.role`; a user's capabilities derive from `is_admin` / `as_pegawai` flags via `capabilitiesForUser`. Guards: `requireAuth()`, `requireRole(...roles)`.
+- **Auth gate is `proxy.ts`** (root-level, Next 16's `proxy` file replacing `middleware.ts`). Redirects unauthenticated users to `/login` and sends logged-in users to `homePathForRole`. When adding protected routes, keep the `matcher` in sync.
+- Sessions: iron-session cookie (`lib/auth/session.ts`). Roles come from `session.role`; a user's capabilities derive from `is_admin` / `as_pegawai` flags via `capabilitiesForUser`. Guards: `requireAuth()`, `requireRole(...roles)`.
 - Route groups: `app/(app)/admin`, `app/(app)/atasan`, `app/(app)/pegawai` each have their own `layout.tsx`; shared group layout in `app/(app)/layout.tsx`.
 - Mutations are server actions under `lib/actions/*`; read queries in `lib/*-queries.ts`; helpers (status/display/format) in `lib/*.ts`.
 - Signature uploads live in `uploads/` (gitignored) and are served by `app/ttd/[file]/route.ts`.
-- Path alias: `@/*` → repo root (e.g. `@/lib/session`).
+- Word export: `lib/export/word-legacy.ts` (HTML-as-`.doc`), `lib/export/docx.ts` (native via `docx` npm package). PDF export via `@react-pdf/renderer` in `lib/export/pdf.ts`.
+- Path alias: `@/*` → repo root (e.g. `@/lib/auth/session`).
 
 ## Env
 

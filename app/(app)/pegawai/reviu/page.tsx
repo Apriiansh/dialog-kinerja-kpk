@@ -8,15 +8,18 @@ import {
   AlarmIcon,
   DownloadSimpleIcon,
 } from "@phosphor-icons/react/dist/ssr";
+import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import {
-  getPegawaiReviuList,
   getPegawaiSelesaiDialogOptions,
+  REVIU_INCLUDE,
 } from "@/lib/queries/reviu";
 import { NewReviuButton } from "@/components/reviu/create-button";
 import { ReviuStatusBadge } from "@/components/reviu/status-badge";
 import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
+import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
+import { getPageParams } from "@/lib/utils/pagination";
 import { formatTanggal, toDateInput } from "@/lib/utils/format";
 import type { StatusReviu } from "@/generated/prisma/enums";
 
@@ -79,14 +82,49 @@ export default async function PegawaiReviuListPage({
     rawStatus && (VALID_STATUSES as string[]).includes(rawStatus)
       ? (rawStatus as StatusReviu)
       : "semua";
+  const { page, skip, existingParams } = getPageParams(sp, ["status"]);
 
-  const [reviuList, selesaiDialogs] = await Promise.all([
-    getPegawaiReviuList(session.id),
-    getPegawaiSelesaiDialogOptions(session.id),
-  ]);
+  const baseWhere = { dialog: { id_pegawai: session.id } };
+  const listWhere =
+    activeStatus !== "semua"
+      ? { ...baseWhere, status: activeStatus }
+      : baseWhere;
 
   const today = new Date();
   const todayInput = toDateInput(today);
+
+  const [
+    visible,
+    filteredTotal,
+    draftCount,
+    menungguAtasanCount,
+    menungguValidasiCount,
+    selesaiCount,
+    selesaiDialogs,
+    allReviuForReminders,
+  ] = await Promise.all([
+    prisma.reviu.findMany({
+      where: listWhere,
+      include: REVIU_INCLUDE,
+      orderBy: { created_at: "desc" },
+      skip,
+      take: PAGE_SIZE,
+    }),
+    prisma.reviu.count({ where: listWhere }),
+    prisma.reviu.count({ where: { ...baseWhere, status: "draft_pegawai" } }),
+    prisma.reviu.count({ where: { ...baseWhere, status: "menunggu_atasan" } }),
+    prisma.reviu.count({ where: { ...baseWhere, status: "menunggu_validasi" } }),
+    prisma.reviu.count({ where: { ...baseWhere, status: "selesai" } }),
+    getPegawaiSelesaiDialogOptions(session.id),
+    prisma.reviu.findMany({
+      where: { ...baseWhere, status: "selesai" },
+      select: { dialog: { select: { id: true, periode_tahun: true } }, tanggal_next_reviu: true },
+      orderBy: { created_at: "desc" },
+    }),
+  ]);
+
+  const allTotal = draftCount + menungguAtasanCount + menungguValidasiCount + selesaiCount;
+  const totalPages = Math.ceil(filteredTotal / PAGE_SIZE);
 
   const seenDialogIds = new Set<number>();
   const reminders: {
@@ -94,11 +132,10 @@ export default async function PegawaiReviuListPage({
     periodeTahun: number;
     tanggal: Date;
   }[] = [];
-  for (const r of reviuList) {
+  for (const r of allReviuForReminders) {
     if (seenDialogIds.has(r.dialog.id)) continue;
     seenDialogIds.add(r.dialog.id);
     if (
-      r.status === "selesai" &&
       r.tanggal_next_reviu &&
       toDateInput(r.tanggal_next_reviu) <= todayInput
     ) {
@@ -111,37 +148,32 @@ export default async function PegawaiReviuListPage({
   }
   reminders.sort((a, b) => a.tanggal.getTime() - b.tanggal.getTime());
 
-  const visible =
-    activeStatus === "semua"
-      ? reviuList
-      : reviuList.filter((r) => r.status === activeStatus);
-
   const stats = [
     {
       key: "draft_pegawai" as const,
       label: "Draft",
-      count: reviuList.filter((r) => r.status === "draft_pegawai").length,
+      count: draftCount,
       icon: PencilSimpleIcon,
       className: "bg-surface-soft text-primary",
     },
     {
       key: "menunggu_atasan" as const,
       label: "Menunggu Atasan",
-      count: reviuList.filter((r) => r.status === "menunggu_atasan").length,
+      count: menungguAtasanCount,
       icon: HourglassIcon,
       className: "bg-status-blue-soft text-status-blue",
     },
     {
       key: "menunggu_validasi" as const,
       label: "Menunggu Validasi",
-      count: reviuList.filter((r) => r.status === "menunggu_validasi").length,
+      count: menungguValidasiCount,
       icon: SealCheckIcon,
       className: "bg-status-indigo-soft text-status-indigo",
     },
     {
       key: "selesai" as const,
       label: "Selesai",
-      count: reviuList.filter((r) => r.status === "selesai").length,
+      count: selesaiCount,
       icon: CheckCircleIcon,
       className: "bg-status-green-soft text-status-green",
     },
@@ -253,7 +285,7 @@ export default async function PegawaiReviuListPage({
             })}
           </div>
           <span className="text-xs font-medium text-ink-muted">
-            Menampilkan {visible.length} dari {reviuList.length} reviu
+            Menampilkan {filteredTotal} dari {allTotal} reviu
           </span>
         </div>
 
@@ -335,6 +367,14 @@ export default async function PegawaiReviuListPage({
           </ul>
         )}
       </section>
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        totalItems={allTotal}
+        basePath="/pegawai/reviu"
+        existingParams={existingParams}
+      />
     </div>
   );
 }

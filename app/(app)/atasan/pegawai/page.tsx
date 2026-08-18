@@ -13,27 +13,45 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
+import { getPageParams } from "@/lib/utils/pagination";
 
 export const dynamic = "force-dynamic";
 
-export default async function AtasanPegawaiPage() {
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+export default async function AtasanPegawaiPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const session = await requireRole("ATASAN");
+  const sp = await searchParams;
+  const { page, skip, existingParams } = getPageParams(sp);
 
-  const pegawai = await prisma.user.findMany({
-    where: { id_atasan: session.id },
-    select: {
-      id: true,
-      npp: true,
-      nip: true,
-      nama_pegawai: true,
-      nama_jabatan: true,
-      unit_kerja: true,
-      is_active: true,
-    },
-    orderBy: [{ is_active: "desc" }, { nama_pegawai: "asc" }],
-  });
+  const where = { id_atasan: session.id };
 
-  const activeCount = pegawai.filter((p) => p.is_active).length;
+  const [pegawai, total, activeCount] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        npp: true,
+        nip: true,
+        nama_pegawai: true,
+        nama_jabatan: true,
+        unit_kerja: true,
+        is_active: true,
+      },
+      orderBy: [{ is_active: "desc" }, { nama_pegawai: "asc" }],
+      skip,
+      take: PAGE_SIZE,
+    }),
+    prisma.user.count({ where }),
+    prisma.user.count({ where: { ...where, is_active: true } }),
+  ]);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
   const rows = pegawai.map((p) => ({ pegawai: p }));
 
   return (
@@ -91,6 +109,14 @@ export default async function AtasanPegawaiPage() {
           </Table>
         </div>
       )}
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        totalItems={total}
+        basePath="/atasan/pegawai"
+        existingParams={existingParams}
+      />
     </div>
   );
 }

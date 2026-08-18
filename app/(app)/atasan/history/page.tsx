@@ -2,29 +2,48 @@ import { ClockCounterClockwiseIcon } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { DialogList } from "@/components/dialog/list";
+import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
+import { getPageParams } from "@/lib/utils/pagination";
 
-export default async function HistoryPage() {
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+export default async function HistoryPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const session = await requireRole("ATASAN");
+  const sp = await searchParams;
+  const { page, skip, existingParams } = getPageParams(sp);
 
-  const dialogs = await prisma.dialogKinerja.findMany({
-    where: { id_atasan: session.id, status: "selesai" },
-    select: {
-      id: true,
-      periode_tahun: true,
-      status: true,
-      is_valid_pegawai: true,
-      is_valid_atasan: true,
-      pegawai: {
-        select: {
-          npp: true,
-          nama_pegawai: true,
-          nama_jabatan: true,
-          unit_kerja: true,
+  const where = { id_atasan: session.id, status: "selesai" as const };
+
+  const [dialogs, total] = await Promise.all([
+    prisma.dialogKinerja.findMany({
+      where,
+      select: {
+        id: true,
+        periode_tahun: true,
+        status: true,
+        is_valid_pegawai: true,
+        is_valid_atasan: true,
+        pegawai: {
+          select: {
+            npp: true,
+            nama_pegawai: true,
+            nama_jabatan: true,
+            unit_kerja: true,
+          },
         },
       },
-    },
-    orderBy: { updated_at: "desc" },
-  });
+      orderBy: { updated_at: "desc" },
+      skip,
+      take: PAGE_SIZE,
+    }),
+    prisma.dialogKinerja.count({ where }),
+  ]);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="flex flex-col gap-10">
@@ -52,6 +71,14 @@ export default async function HistoryPage() {
       ) : (
         <DialogList dialogs={dialogs} />
       )}
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        totalItems={total}
+        basePath="/atasan/history"
+        existingParams={existingParams}
+      />
     </div>
   );
 }

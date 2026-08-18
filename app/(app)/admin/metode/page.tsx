@@ -16,21 +16,42 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
+import { getPageParams } from "@/lib/utils/pagination";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminMetodePage() {
-  await requireRole("ADMIN");
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-  const metodeList = await prisma.masterMetodePengembangan.findMany({
-    select: {
-      id: true,
-      nama_metode: true,
-      is_active: true,
-      _count: { select: { dialogItems: true } },
-    },
-    orderBy: [{ is_active: "desc" }, { nama_metode: "asc" }],
-  });
+export default async function AdminMetodePage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  await requireRole("ADMIN");
+  const sp = await searchParams;
+  const { page, skip, existingParams } = getPageParams(sp);
+
+  const where = {};
+
+  const [metodeList, total, activeCount] = await Promise.all([
+    prisma.masterMetodePengembangan.findMany({
+      where,
+      select: {
+        id: true,
+        nama_metode: true,
+        is_active: true,
+        _count: { select: { dialogItems: true } },
+      },
+      orderBy: [{ is_active: "desc" }, { nama_metode: "asc" }],
+      skip,
+      take: PAGE_SIZE,
+    }),
+    prisma.masterMetodePengembangan.count({ where }),
+    prisma.masterMetodePengembangan.count({ where: { is_active: true } }),
+  ]);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div className="flex flex-col gap-8">
@@ -40,8 +61,7 @@ export default async function AdminMetodePage() {
             Metode Pengembangan
           </h1>
           <p className="text-sm leading-5 text-ink-muted">
-            {metodeList.filter((m) => m.is_active).length} metode aktif dari
-            total {metodeList.length}.
+            {activeCount} metode aktif dari total {total}.
           </p>
         </div>
         <Link
@@ -123,10 +143,10 @@ export default async function AdminMetodePage() {
                         Edit
                       </Link>
                       <AdminMetodeDeleteButton
-                          id={m.id}
-                          nama={m.nama_metode}
-                          digunakan={m._count.dialogItems}
-                        />
+                        id={m.id}
+                        nama={m.nama_metode}
+                        digunakan={m._count.dialogItems}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -135,6 +155,14 @@ export default async function AdminMetodePage() {
           </Table>
         </div>
       )}
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        totalItems={total}
+        basePath="/admin/metode"
+        existingParams={existingParams}
+      />
     </div>
   );
 }

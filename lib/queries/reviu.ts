@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { StatusReviu } from "@/generated/prisma/enums";
 
-const REVIU_INCLUDE = {
+export const REVIU_INCLUDE = {
   dialog: {
     select: {
       id: true,
@@ -32,11 +32,18 @@ const REVIU_INCLUDE = {
   },
 } as const;
 
-export async function getPegawaiReviuList(pegawaiId: number) {
+export async function getPegawaiReviuList(
+  pegawaiId: number,
+  opts?: { skip?: number; take?: number; status?: StatusReviu },
+) {
+  const where: Record<string, unknown> = { dialog: { id_pegawai: pegawaiId } };
+  if (opts?.status) where.status = opts.status;
   return prisma.reviu.findMany({
-    where: { dialog: { id_pegawai: pegawaiId } },
+    where,
     include: REVIU_INCLUDE,
     orderBy: { created_at: "desc" },
+    skip: opts?.skip,
+    take: opts?.take,
   });
 }
 
@@ -54,12 +61,25 @@ export async function getAtasanReviu(reviuId: number, atasanId: number) {
   });
 }
 
-export async function getAtasanReviuList(atasanId: number) {
+export async function getAtasanReviuList(
+  atasanId: number,
+  opts?: { skip?: number; take?: number; status?: StatusReviu },
+) {
+  const where: Record<string, unknown> = { dialog: { id_atasan: atasanId } };
+  if (opts?.status) where.status = opts.status;
   return prisma.reviu.findMany({
-    where: { dialog: { id_atasan: atasanId } },
+    where,
     include: REVIU_INCLUDE,
     orderBy: { created_at: "desc" },
+    skip: opts?.skip,
+    take: opts?.take,
   });
+}
+
+export async function countReviu(
+  where: Record<string, unknown>,
+) {
+  return prisma.reviu.count({ where });
 }
 
 export async function getDialogReviuList(dialogId: number) {
