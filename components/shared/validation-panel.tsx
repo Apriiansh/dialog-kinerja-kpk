@@ -3,17 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SealCheckIcon } from "@phosphor-icons/react";
-import { submitReviuAtasan, validateReviu } from "@/lib/actions/reviu";
+import { validateDialog } from "@/lib/actions/pegawai";
 import { Button } from "@/components/ui/button";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
-import { SignaturePadField } from "@/components/signature-pad";
+import { SignaturePadField } from "@/components/shared/signature-pad";
 
-export function ReviuSignForm({
-  reviuId,
-  role = "pegawai",
+export function ValidationPanel({
+  dialogId,
+  roleLabel = "Pegawai",
 }: {
-  reviuId: number;
-  role?: "atasan" | "pegawai";
+  dialogId: number;
+  roleLabel?: string;
 }) {
   const router = useRouter();
   const [setuju, setSetuju] = useState(false);
@@ -21,16 +21,14 @@ export function ReviuSignForm({
   const [pending, setPending] = useState(false);
 
   const canSubmit = setuju && ttdDataUrl !== null && !pending;
-  const label = role === "atasan" ? "Atasan" : "Pegawai";
 
   async function handleSubmit() {
     setPending(true);
 
-    const input = { setuju, ttdDataUrl };
-    const result =
-      role === "atasan"
-        ? await submitReviuAtasan(reviuId, input)
-        : await validateReviu(reviuId, input);
+    const result = await validateDialog(dialogId, {
+      setuju,
+      ttdDataUrl,
+    });
 
     if (result?.error) {
       showError(result.error);
@@ -38,28 +36,21 @@ export function ReviuSignForm({
       return;
     }
 
-    showSuccess(
-      role === "atasan"
-        ? "Reviu berhasil ditandatangani, menunggu validasi pegawai"
-        : "Reviu berhasil divalidasi dan selesai",
-    );
+    showSuccess("Dialog berhasil divalidasi dan ditandatangani");
     router.refresh();
   }
 
   return (
     <section
-      aria-labelledby="reviu-sign-heading"
+      aria-labelledby="validasi-heading"
       className="rounded-lg border border-outline bg-surface"
     >
       <div className="border-b border-outline px-5 py-3.5">
-        <h2
-          id="reviu-sign-heading"
-          className="text-sm font-semibold text-ink"
-        >
-          Reviu &amp; Tanda Tangan ({label})
+        <h2 id="validasi-heading" className="text-sm font-semibold text-ink">
+          Validasi &amp; Tanda Tangan ({roleLabel})
         </h2>
         <p className="mt-0.5 text-xs leading-4 text-ink-muted">
-          Tinjau kembali isi reviu di atas, lalu beri persetujuan dan tanda
+          Tinjau kembali isi dialog di atas, lalu beri persetujuan dan tanda
           tangan Anda.
         </p>
       </div>
@@ -74,14 +65,14 @@ export function ReviuSignForm({
             className="mt-0.5 h-4 w-4 shrink-0 rounded border-outline-strong accent-[#1e3a8a]"
           />
           <span>
-            Saya telah membaca dan menyetujui seluruh isi reviu ini.
+            Saya telah membaca dan menyetujui seluruh isi dialog kinerja ini.
           </span>
         </label>
 
         <SignaturePadField
           onChange={setTtdDataUrl}
           disabled={pending}
-          label={`Tanda Tangan ${label}`}
+          label="Tanda Tangan Pegawai"
         />
 
         <div className="flex justify-end">
@@ -93,9 +84,7 @@ export function ReviuSignForm({
             onClick={handleSubmit}
           >
             <SealCheckIcon size={16} weight="bold" />
-            {role === "atasan"
-              ? "Reviu & Tanda Tangani"
-              : "Validasi & Tanda Tangani"}
+            Validasi &amp; Tanda Tangani
           </Button>
         </div>
       </div>

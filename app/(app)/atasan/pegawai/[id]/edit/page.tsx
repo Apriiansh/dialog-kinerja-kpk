@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { PegawaiForm } from "@/components/pegawai-form";
+import { PegawaiForm } from "@/components/pegawai/form";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { pegawaiFormDefaults } from "@/lib/user-form-defaults";
+import { requireRole } from "@/lib/auth/session";
+import { pegawaiFormDefaults } from "@/lib/utils/user-defaults";
 import { updatePegawai } from "@/lib/actions/pegawai-admin";
 
 export const dynamic = "force-dynamic";

@@ -8,11 +8,11 @@ import {
   ShieldCheckIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { StatusBadge } from "@/components/status-badge";
-import { UnduhBuktiLink } from "@/components/unduh-bukti-link";
-import { UnduhWordLink } from "@/components/unduh-word-link";
-import { ASPEK_ORDER } from "@/lib/aspek";
+import { requireRole } from "@/lib/auth/session";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { UnduhBuktiLink } from "@/components/shared/unduh-bukti-link";
+import { UnduhWordLink } from "@/components/shared/unduh-word-link";
+import { ASPEK_ORDER } from "@/lib/constants/aspek";
 import type { StatusDialog } from "@/generated/prisma/enums";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;

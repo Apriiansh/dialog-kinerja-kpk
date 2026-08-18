@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "@/components/ui/toast";
-import type { FlashType } from "@/lib/flash";
+import type { FlashType } from "@/lib/utils/flash";
 
 export function FlashToaster() {
   const searchParams = useSearchParams();

@@ -7,13 +7,13 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
+import { requireRole } from "@/lib/auth/session";
 import { StatusBars, Donut, type ChartDatum } from "@/components/dashboard/charts";
 import { ChartCard } from "@/components/dashboard/chart-card";
 import {
   DIALOG_STATUS_CHART,
   ROLE_CHART,
-} from "@/lib/chart-colors";
+} from "@/lib/utils/chart-colors";
 import type { Role, StatusDialog } from "@/generated/prisma/enums";
 
 const PRIMARY = "#1e3a8a";

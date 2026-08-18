@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { requireRole, capabilitiesForUser } from "@/lib/session";
-import { getUserProfileData } from "@/lib/profile-queries";
+import { requireRole, capabilitiesForUser } from "@/lib/auth/session";
+import { getUserProfileData } from "@/lib/queries/profile";
 import { ProfileView } from "@/components/profile/profile-view";
 
 export const metadata = {

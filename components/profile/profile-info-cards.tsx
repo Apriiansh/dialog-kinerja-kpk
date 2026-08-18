@@ -1,5 +1,5 @@
-import { formatTanggal } from "@/lib/format";
-import type { UserProfileData } from "@/lib/profile-queries";
+import { formatTanggal } from "@/lib/utils/format";
+import type { UserProfileData } from "@/lib/queries/profile";
 
 export function ProfileInfoCards({ user }: { user: UserProfileData }) {
   return (

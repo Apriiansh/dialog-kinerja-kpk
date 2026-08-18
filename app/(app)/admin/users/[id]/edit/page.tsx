@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { AdminUserForm } from "@/components/admin-user-form";
+import { AdminUserForm } from "@/components/admin/user-form";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { adminUserFormDefaults } from "@/lib/user-form-defaults";
+import { requireRole } from "@/lib/auth/session";
+import { adminUserFormDefaults } from "@/lib/utils/user-defaults";
 import { updateAdminUser } from "@/lib/actions/admin-users";
 
 export const dynamic = "force-dynamic";

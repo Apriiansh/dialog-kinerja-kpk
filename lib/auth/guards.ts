@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { capabilitiesForUser, type SessionData } from "@/lib/session";
+import { capabilitiesForUser, type SessionData } from "@/lib/auth/session";
 
 export async function assertActiveActor(
   userId: number,

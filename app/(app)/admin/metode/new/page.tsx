@@ -1,5 +1,5 @@
-import { AdminMetodeForm } from "@/components/admin-metode-form";
-import { requireRole } from "@/lib/session";
+import { AdminMetodeForm } from "@/components/admin/metode-form";
+import { requireRole } from "@/lib/auth/session";
 import { createMetode } from "@/lib/actions/admin-metode";
 
 export const dynamic = "force-dynamic";

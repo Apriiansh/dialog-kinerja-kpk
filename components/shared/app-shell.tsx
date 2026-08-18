@@ -17,10 +17,10 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { logoutAction } from "@/app/(app)/actions";
-import type { Role, SessionData } from "@/lib/session";
+import { logoutAction } from "@/lib/actions/auth";
+import type { Role, SessionData } from "@/lib/auth/session";
 import { TopBar } from "./top-bar";
-import { AppFooter } from "./app-footer";
+import { AppFooter } from "./footer";
 
 type NavItem = {
   href: string;
@@ -128,15 +128,6 @@ const NAV_GROUPS: Record<Role, NavGroup[]> = {
   ATASAN: ATASAN_NAV_GROUPS,
   PEGAWAI: PEGAWAI_NAV_GROUPS,
 };
-
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]!.toUpperCase())
-    .join("");
-}
 
 function Brand() {
   return (

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import { AdminMetodeForm } from "@/components/admin-metode-form";
+import { AdminMetodeForm } from "@/components/admin/metode-form";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
+import { requireRole } from "@/lib/auth/session";
 import { updateMetode } from "@/lib/actions/admin-metode";
 
 export const dynamic = "force-dynamic";

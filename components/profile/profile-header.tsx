@@ -1,6 +1,6 @@
-import { RoleTag } from "@/components/role-tag";
-import type { UserProfileData } from "@/lib/profile-queries";
-import type { Role } from "@/lib/session";
+import { RoleTag } from "@/components/shared/role-tag";
+import type { UserProfileData } from "@/lib/queries/profile";
+import type { Role } from "@/lib/auth/session";
 
 function initials(name: string) {
   return name

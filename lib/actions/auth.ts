@@ -6,8 +6,8 @@ import {
   getSession,
   homePathForRole,
   type Role,
-} from "@/lib/session";
-import { flashRedirect } from "@/lib/flash";
+} from "@/lib/auth/session";
+import { flashRedirect } from "@/lib/utils/flash";
 
 export async function logoutAction() {
   const session = await getSession();

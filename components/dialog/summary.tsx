@@ -1,6 +1,6 @@
-import { ASPEK_DESC, ASPEK_LABEL } from "@/lib/aspek";
-import type { AspekPegawaiRow } from "@/lib/dialog-display";
-import { AspekPegawaiInput } from "@/components/aspek-pegawai-input";
+import { ASPEK_DESC, ASPEK_LABEL } from "@/lib/constants/aspek";
+import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
+import { AspekPegawaiInput } from "@/components/pegawai/aspek-input";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
 interface SummaryGroup {

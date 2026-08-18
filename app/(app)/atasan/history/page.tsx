@@ -1,7 +1,7 @@
 import { ClockCounterClockwiseIcon } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { DialogList } from "@/components/dialog-list";
+import { requireRole } from "@/lib/auth/session";
+import { DialogList } from "@/components/dialog/list";
 
 export default async function HistoryPage() {
   const session = await requireRole("ATASAN");

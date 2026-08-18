@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getRequestSession } from "@/lib/session";
-import { resolveTtdFile } from "@/lib/ttd";
+import { getRequestSession } from "@/lib/auth/session";
+import { resolveTtdFile } from "@/lib/export/ttd";
 
 export const dynamic = "force-dynamic";
 

@@ -1,5 +1,5 @@
-import { AppShell } from "@/components/app-shell";
-import { requireRole } from "@/lib/session";
+import { AppShell } from "@/components/shared/app-shell";
+import { requireRole } from "@/lib/auth/session";
 
 export default async function AtasanLayout({
   children,

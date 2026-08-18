@@ -8,16 +8,16 @@ import {
   AlarmIcon,
   DownloadSimpleIcon,
 } from "@phosphor-icons/react/dist/ssr";
-import { requireRole } from "@/lib/session";
+import { requireRole } from "@/lib/auth/session";
 import {
   getPegawaiReviuList,
   getPegawaiSelesaiDialogOptions,
-} from "@/lib/reviu-queries";
-import { NewReviuButton } from "@/components/new-reviu-button";
-import { ReviuStatusBadge } from "@/components/reviu-status-badge";
-import { TindakLanjutBadge } from "@/components/tindak-lanjut-badge";
-import { UnduhWordLink } from "@/components/unduh-word-link";
-import { formatTanggal, toDateInput } from "@/lib/format";
+} from "@/lib/queries/reviu";
+import { NewReviuButton } from "@/components/reviu/create-button";
+import { ReviuStatusBadge } from "@/components/reviu/status-badge";
+import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
+import { UnduhWordLink } from "@/components/shared/unduh-word-link";
+import { formatTanggal, toDateInput } from "@/lib/utils/format";
 import type { StatusReviu } from "@/generated/prisma/enums";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;

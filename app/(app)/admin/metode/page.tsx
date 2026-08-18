@@ -5,9 +5,9 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { AdminMetodeStatusToggle } from "@/components/admin-metode-status-toggle";
-import { AdminMetodeDeleteButton } from "@/components/admin-metode-delete-button";
+import { requireRole } from "@/lib/auth/session";
+import { AdminMetodeStatusToggle } from "@/components/admin/metode-status-toggle";
+import { AdminMetodeDeleteButton } from "@/components/admin/metode-delete-button";
 import {
   Table,
   TableBody,

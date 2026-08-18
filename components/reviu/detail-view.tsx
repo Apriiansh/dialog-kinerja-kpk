@@ -1,6 +1,6 @@
-import { formatTanggal } from "@/lib/format";
-import { formatWaktuPelaksanaan } from "@/lib/dialog-display";
-import { tindakLanjutLabel } from "@/lib/status-reviu";
+import { formatTanggal } from "@/lib/utils/format";
+import { formatWaktuPelaksanaan } from "@/lib/utils/dialog-display";
+import { tindakLanjutLabel } from "@/lib/constants/reviu-status";
 
 interface ActorProfile {
   nama_pegawai?: string | null;

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestSession } from "@/lib/session";
-import { generateDialogKinerjaWord } from "@/lib/word-export";
+import { getRequestSession } from "@/lib/auth/session";
+import { generateDialogKinerjaWord } from "@/lib/export/word";
 
 export const dynamic = "force-dynamic";
 

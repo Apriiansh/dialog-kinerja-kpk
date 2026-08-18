@@ -2,10 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon, EyeIcon } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { StatusBadge } from "@/components/status-badge";
-import { DialogSummary } from "@/components/dialog-summary";
-import { ReviuList } from "@/components/reviu-list";
+import { requireRole } from "@/lib/auth/session";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { DialogSummary } from "@/components/dialog/summary";
+import { ReviuList } from "@/components/reviu/list";
 import { Separator } from "@/components/ui/separator";
 
 export const dynamic = "force-dynamic";

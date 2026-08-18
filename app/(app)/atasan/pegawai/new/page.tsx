@@ -1,5 +1,5 @@
-import { PegawaiForm } from "@/components/pegawai-form";
-import { requireRole } from "@/lib/session";
+import { PegawaiForm } from "@/components/pegawai/form";
+import { requireRole } from "@/lib/auth/session";
 import { createPegawai } from "@/lib/actions/pegawai-admin";
 
 export const dynamic = "force-dynamic";

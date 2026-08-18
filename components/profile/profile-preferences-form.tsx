@@ -10,8 +10,8 @@ import {
   updateProfilePreferencesAction,
   type ProfilePreferencesState,
 } from "@/lib/actions/profile";
-import type { UserProfileData } from "@/lib/profile-queries";
-import type { Role } from "@/lib/session";
+import type { UserProfileData } from "@/lib/queries/profile";
+import type { Role } from "@/lib/auth/session";
 
 const INPUT_CLASSES =
   "h-11 w-full rounded-md border border-outline bg-surface px-3.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus disabled:opacity-60";

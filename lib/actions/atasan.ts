@@ -2,10 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { saveTtdFile } from "@/lib/ttd";
-import { assertActiveActor } from "@/lib/auth-helpers";
-import { flashRedirect } from "@/lib/flash";
+import { requireRole } from "@/lib/auth/session";
+import { saveTtdFile } from "@/lib/export/ttd";
+import { assertActiveActor } from "@/lib/auth/guards";
+import { flashRedirect } from "@/lib/utils/flash";
 import { JenisAspek } from "@/generated/prisma/client";
 
 export async function startDialog(pegawaiId: number) {

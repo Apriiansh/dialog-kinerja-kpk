@@ -7,12 +7,12 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
+import { requireRole } from "@/lib/auth/session";
 import { deleteAdminUser, setUserStatus } from "@/lib/actions/admin-users";
-import { RoleTag } from "@/components/role-tag";
-import { PegawaiDetailModal } from "@/components/pegawai-detail-modal";
-import { UserImportDialog } from "@/components/user-import-dialog";
-import { mapPegawaiDetail } from "@/lib/pegawai-detail-map";
+import { RoleTag } from "@/components/shared/role-tag";
+import { PegawaiDetailModal } from "@/components/pegawai/detail-modal";
+import { UserImportDialog } from "@/components/admin/user-import-dialog";
+import { mapPegawaiDetail } from "@/lib/utils/pegawai-map";
 import {
   Table,
   TableBody,

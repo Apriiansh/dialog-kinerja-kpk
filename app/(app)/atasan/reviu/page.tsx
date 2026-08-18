@@ -7,11 +7,11 @@ import {
   CheckCircleIcon,
   DownloadSimpleIcon,
 } from "@phosphor-icons/react/dist/ssr";
-import { requireRole } from "@/lib/session";
-import { getAtasanReviuList } from "@/lib/reviu-queries";
-import { ReviuStatusBadge } from "@/components/reviu-status-badge";
-import { TindakLanjutBadge } from "@/components/tindak-lanjut-badge";
-import { UnduhWordLink } from "@/components/unduh-word-link";
+import { requireRole } from "@/lib/auth/session";
+import { getAtasanReviuList } from "@/lib/queries/reviu";
+import { ReviuStatusBadge } from "@/components/reviu/status-badge";
+import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
+import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import type { StatusReviu } from "@/generated/prisma/enums";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;

@@ -4,7 +4,7 @@ import {
   isEmptyItem,
   metodeLabel,
   type AspekPegawaiRow,
-} from "@/lib/dialog-display";
+} from "@/lib/utils/dialog-display";
 
 export function AspekPegawaiInput({ aspek }: { aspek: AspekPegawaiRow }) {
   const items = (aspek.item ?? []).filter((i) => !isEmptyItem(i));

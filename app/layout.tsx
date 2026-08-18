@@ -4,7 +4,7 @@ import { Poppins, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toast";
-import { FlashToaster } from "@/components/flash-toaster";
+import { FlashToaster } from "@/components/shared/flash-toaster";
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
 

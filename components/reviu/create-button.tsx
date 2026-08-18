@@ -8,7 +8,7 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { useEffect, useMemo, useState } from "react";
-import type { SelesaiDialogOption } from "@/lib/reviu-queries";
+import type { SelesaiDialogOption } from "@/lib/queries/reviu";
 
 export function NewReviuButton({ dialogs }: { dialogs: SelesaiDialogOption[] }) {
   const [open, setOpen] = useState(false);

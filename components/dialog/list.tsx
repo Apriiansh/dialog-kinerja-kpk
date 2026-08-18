@@ -1,10 +1,10 @@
 import { EyeIcon, PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import type { StatusDialog } from "@/generated/prisma/client";
-import { StatusBadge } from "@/components/status-badge";
-import { DeleteDialogButton } from "@/components/delete-dialog-button";
-import { UnduhBuktiLink } from "@/components/unduh-bukti-link";
-import { UnduhWordLink } from "@/components/unduh-word-link";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { DeleteDialogButton } from "@/components/dialog/delete-button";
+import { UnduhBuktiLink } from "@/components/shared/unduh-bukti-link";
+import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 
 export interface DialogRow {
   id: number;

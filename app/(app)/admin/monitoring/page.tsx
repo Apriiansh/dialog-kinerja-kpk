@@ -1,8 +1,8 @@
 import { MonitorPlayIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { StatusBadge } from "@/components/status-badge";
+import { requireRole } from "@/lib/auth/session";
+import { StatusBadge } from "@/components/shared/status-badge";
 
 export const dynamic = "force-dynamic";
 

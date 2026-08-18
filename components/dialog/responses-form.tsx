@@ -14,11 +14,11 @@ import {
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { autosaveResponses, submitEvaluasi } from "@/lib/actions/atasan";
-import { buildDialogSections } from "@/lib/dialog-sections";
-import type { AspekPegawaiRow } from "@/lib/dialog-display";
+import { buildDialogSections } from "@/lib/constants/dialog-sections";
+import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
 import { error, success } from "@/components/ui/toast";
-import { SignaturePadField } from "@/components/signature-pad";
-import { AspekPegawaiInput } from "@/components/aspek-pegawai-input";
+import { SignaturePadField } from "@/components/shared/signature-pad";
+import { AspekPegawaiInput } from "@/components/pegawai/aspek-input";
 
 const SECTION_ICONS = [ChartBarIcon, GaugeIcon, UserFocusIcon, TrendUpIcon] as const;
 

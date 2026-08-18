@@ -1,9 +1,9 @@
 import { ChartLineUpIcon } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { getAtasanPegawaiOptions } from "@/lib/atasan-queries";
-import { DialogList } from "@/components/dialog-list";
-import { NewDialogButton } from "@/components/new-dialog-button";
+import { requireRole } from "@/lib/auth/session";
+import { getAtasanPegawaiOptions } from "@/lib/queries/atasan";
+import { DialogList } from "@/components/dialog/list";
+import { NewDialogButton } from "@/components/dialog/create-button";
 
 export default async function DialogIndexPage() {
   const session = await requireRole("ATASAN");

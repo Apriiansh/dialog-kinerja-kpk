@@ -12,8 +12,8 @@ import { ProfileInfoCards } from "./profile-info-cards";
 import { EditProfileForm } from "./edit-profile-form";
 import { ChangePasswordForm } from "./change-password-form";
 import { ProfilePreferencesForm } from "./profile-preferences-form";
-import type { UserProfileData } from "@/lib/profile-queries";
-import type { Role } from "@/lib/session";
+import type { UserProfileData } from "@/lib/queries/profile";
+import type { Role } from "@/lib/auth/session";
 
 type TabKey = "info" | "edit" | "password" | "preferences";
 

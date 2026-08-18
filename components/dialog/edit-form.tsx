@@ -15,7 +15,7 @@ import {
   saveDialogForm,
   type AspekInput,
 } from "@/lib/actions/pegawai";
-import { ASPEK_DESC, ASPEK_LABEL, ASPEK_ORDER } from "@/lib/aspek";
+import { ASPEK_DESC, ASPEK_LABEL, ASPEK_ORDER } from "@/lib/constants/aspek";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import type { JenisAspek } from "@/generated/prisma/enums";
 

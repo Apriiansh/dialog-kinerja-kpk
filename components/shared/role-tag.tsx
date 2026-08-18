@@ -1,4 +1,4 @@
-import type { Role } from "@/lib/session";
+import type { Role } from "@/lib/auth/session";
 
 export function RoleTag({
   role,

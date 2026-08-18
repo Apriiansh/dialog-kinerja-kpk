@@ -1,20 +1,20 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon, PencilSimpleLineIcon } from "@phosphor-icons/react/dist/ssr";
-import { requireRole } from "@/lib/session";
+import { requireRole } from "@/lib/auth/session";
 import {
   canEditDialog,
   canValidateDialog,
   getDialogActor,
   getPegawaiDialog,
-} from "@/lib/dialog-queries";
-import { StatusBadge } from "@/components/status-badge";
-import { DialogSummary } from "@/components/dialog-summary";
-import { ValidationPanel } from "@/components/validation-panel";
-import { UnduhBuktiButton } from "@/components/unduh-bukti-button";
-import { UnduhWordLink } from "@/components/unduh-word-link";
-import { FormulirDialogKinerja } from "@/components/formulir-dialog-kinerja";
-import { ReviuList } from "@/components/reviu-list";
+} from "@/lib/queries/dialog";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { DialogSummary } from "@/components/dialog/summary";
+import { ValidationPanel } from "@/components/shared/validation-panel";
+import { UnduhBuktiButton } from "@/components/shared/unduh-bukti-button";
+import { UnduhWordLink } from "@/components/shared/unduh-word-link";
+import { FormulirDialogKinerja } from "@/components/dialog/detail-view";
+import { ReviuList } from "@/components/reviu/list";
 import { Separator } from "@/components/ui/separator";
 
 type PageProps = {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRequestSession, homePathForRole } from "@/lib/session";
+import { getRequestSession, homePathForRole } from "@/lib/auth/session";
 
 export async function proxy(request: NextRequest) {
   const session = await getRequestSession(request);

@@ -4,10 +4,10 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { assertActiveActor } from "@/lib/auth-helpers";
-import { isDurasiText } from "@/lib/format";
-import { flashRedirect } from "@/lib/flash";
+import { requireRole } from "@/lib/auth/session";
+import { assertActiveActor } from "@/lib/auth/guards";
+import { isDurasiText } from "@/lib/utils/format";
+import { flashRedirect } from "@/lib/utils/flash";
 
 export interface AdminUserFormState {
   error?: string;

@@ -1,14 +1,14 @@
 import path from "node:path";
 import { readFile } from "node:fs/promises";
 import { prisma } from "@/lib/prisma";
-import { formatTanggal } from "@/lib/format";
+import { formatTanggal } from "@/lib/utils/format";
 import {
   dialogEvaluasiLabel,
   formatWaktuPelaksanaan,
   isEmptyItem,
   metodeLabel,
-} from "@/lib/dialog-display";
-import { resolveTtdFile } from "@/lib/ttd";
+} from "@/lib/utils/dialog-display";
+import { resolveTtdFile } from "@/lib/export/ttd";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
 async function getBase64Image(filePath: string): Promise<string | null> {

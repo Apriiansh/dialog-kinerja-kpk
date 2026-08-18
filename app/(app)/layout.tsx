@@ -1,5 +1,5 @@
-import { requireAuth } from "@/lib/session";
-import { backfillSessionRoles } from "@/lib/auth-helpers";
+import { requireAuth } from "@/lib/auth/session";
+import { backfillSessionRoles } from "@/lib/auth/guards";
 
 export default async function AppLayout({
   children,

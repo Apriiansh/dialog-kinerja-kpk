@@ -1,5 +1,5 @@
-import { formatTanggal } from "@/lib/format";
-import type { PegawaiDetail } from "@/components/pegawai-detail-modal";
+import { formatTanggal } from "@/lib/utils/format";
+import type { PegawaiDetail } from "@/components/pegawai/detail-modal";
 
 export interface PegawaiDetailRow {
   id: number;

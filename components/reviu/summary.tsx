@@ -1,6 +1,6 @@
-import { formatTanggal } from "@/lib/format";
-import { tindakLanjutLabel } from "@/lib/status-reviu";
-import { TindakLanjutBadge } from "@/components/tindak-lanjut-badge";
+import { formatTanggal } from "@/lib/utils/format";
+import { tindakLanjutLabel } from "@/lib/constants/reviu-status";
+import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
 
 interface ReviuSummaryRow {
   is_tercapai: boolean;

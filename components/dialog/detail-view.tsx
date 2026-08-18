@@ -5,7 +5,7 @@ import {
   isEmptyItem,
   metodeLabel,
   type AspekPegawaiRow,
-} from "@/lib/dialog-display";
+} from "@/lib/utils/dialog-display";
 interface ActorProfile {
   nama_pegawai?: string | null;
   nip?: string | null;

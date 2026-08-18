@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
-import { requireRole } from "@/lib/session";
-import { getAtasanReviu } from "@/lib/reviu-queries";
-import { ReviuStatusBadge } from "@/components/reviu-status-badge";
-import { TindakLanjutBadge } from "@/components/tindak-lanjut-badge";
-import { ReviuSummary } from "@/components/reviu-summary";
-import { ReviuSignForm } from "@/components/reviu-sign-form";
-import { UnduhBuktiButton } from "@/components/unduh-bukti-button";
-import { UnduhWordLink } from "@/components/unduh-word-link";
+import { requireRole } from "@/lib/auth/session";
+import { getAtasanReviu } from "@/lib/queries/reviu";
+import { ReviuStatusBadge } from "@/components/reviu/status-badge";
+import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
+import { ReviuSummary } from "@/components/reviu/summary";
+import { ReviuSignForm } from "@/components/reviu/sign-form";
+import { UnduhBuktiButton } from "@/components/shared/unduh-bukti-button";
+import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { Separator } from "@/components/ui/separator";
-import { FormulirReviu } from "@/components/formulir-reviu";
+import { FormulirReviu } from "@/components/reviu/detail-view";
 
 type PageProps = {
   params: Promise<{ id: string }>;

@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { formatTanggal } from "@/lib/format";
-import { ReviuStatusBadge } from "@/components/reviu-status-badge";
-import { TindakLanjutBadge } from "@/components/tindak-lanjut-badge";
-import { UnduhWordLink } from "@/components/unduh-word-link";
-import { tindakLanjutLabel } from "@/lib/status-reviu";
+import { formatTanggal } from "@/lib/utils/format";
+import { ReviuStatusBadge } from "@/components/reviu/status-badge";
+import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
+import { UnduhWordLink } from "@/components/shared/unduh-word-link";
+import { tindakLanjutLabel } from "@/lib/constants/reviu-status";
 
 interface ReviuListRow {
   id: number;

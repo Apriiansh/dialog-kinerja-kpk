@@ -1,6 +1,6 @@
-import { AdminUserForm } from "@/components/admin-user-form";
+import { AdminUserForm } from "@/components/admin/user-form";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
+import { requireRole } from "@/lib/auth/session";
 import { createAdminUser } from "@/lib/actions/admin-users";
 
 export const dynamic = "force-dynamic";

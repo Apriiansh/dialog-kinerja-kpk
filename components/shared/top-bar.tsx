@@ -3,7 +3,7 @@
 import { ListIcon } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
-import type { SessionData } from "@/lib/session";
+import type { SessionData } from "@/lib/auth/session";
 import { RoleTag } from "./role-tag";
 import { RoleSwitcher } from "./role-switcher";
 

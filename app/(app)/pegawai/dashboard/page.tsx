@@ -11,12 +11,12 @@ import {
   ArrowRightIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/session";
-import { StatusBadge } from "@/components/status-badge";
+import { requireAuth } from "@/lib/auth/session";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { StatusBars, Donut, type ChartDatum } from "@/components/dashboard/charts";
 import { ChartCard } from "@/components/dashboard/chart-card";
-import { DIALOG_STATUS_CHART } from "@/lib/chart-colors";
-import { ASPEK_ORDER } from "@/lib/aspek";
+import { DIALOG_STATUS_CHART } from "@/lib/utils/chart-colors";
+import { ASPEK_ORDER } from "@/lib/constants/aspek";
 import type { StatusDialog } from "@/generated/prisma/enums";
 
 const STATUS_ORDER: StatusDialog[] = [

@@ -7,14 +7,14 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/session";
+import { requireAuth } from "@/lib/auth/session";
 import {
   StatusBars,
   HorizontalBars,
   type ChartDatum,
 } from "@/components/dashboard/charts";
 import { ChartCard } from "@/components/dashboard/chart-card";
-import { DIALOG_STATUS_CHART } from "@/lib/chart-colors";
+import { DIALOG_STATUS_CHART } from "@/lib/utils/chart-colors";
 import type { StatusDialog } from "@/generated/prisma/enums";
 
 const STATUS_ORDER: StatusDialog[] = [

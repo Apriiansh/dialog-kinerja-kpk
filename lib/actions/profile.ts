@@ -4,8 +4,8 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, capabilitiesForUser, type Role } from "@/lib/session";
-import { isDurasiText, parseDateInput, formatDurasiKeHariIni } from "@/lib/format";
+import { requireAuth, capabilitiesForUser, type Role } from "@/lib/auth/session";
+import { parseDateInput, formatDurasiKeHariIni } from "@/lib/utils/format";
 
 export interface ChangePasswordState {
   error?: string;

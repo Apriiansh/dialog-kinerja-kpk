@@ -1,8 +1,8 @@
 "use client";
 
 import { ArrowsLeftRightIcon } from "@phosphor-icons/react";
-import { switchRole } from "@/app/(app)/actions";
-import type { Role } from "@/lib/session";
+import { switchRole } from "@/lib/actions/auth";
+import type { Role } from "@/lib/auth/session";
 
 const ROLE_LABEL: Record<Role, string> = {
   ADMIN: "Admin",

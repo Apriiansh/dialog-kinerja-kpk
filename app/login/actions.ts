@@ -4,14 +4,14 @@ import { getIronSession } from "iron-session";
 import bcrypt from "bcryptjs";
 import { cookies, headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { clearLoginAttempts, consumeLoginAttempt } from "@/lib/rate-limit";
+import { clearLoginAttempts, consumeLoginAttempt } from "@/lib/auth/rate-limit";
 import {
   capabilitiesForUser,
   homePathForRole,
   sessionOptions,
   type SessionData,
-} from "@/lib/session";
-import { flashRedirect } from "@/lib/flash";
+} from "@/lib/auth/session";
+import { flashRedirect } from "@/lib/utils/flash";
 
 export interface LoginState {
   error?: string;

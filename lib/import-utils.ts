@@ -1,4 +1,4 @@
-import { formatDurasiKeHariIni } from "@/lib/format";
+import { formatDurasiKeHariIni } from "@/lib/utils/format";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */

@@ -2,9 +2,9 @@ import { ArrowLeftIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { StatusBadge } from "@/components/status-badge";
-import { DeskripsiKinerjaForm } from "@/components/deskripsi-kinerja-form";
+import { requireRole } from "@/lib/auth/session";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { DeskripsiKinerjaForm } from "@/components/dialog/deskripsi-form";
 
 export default async function EditDialogPage({
   params,

@@ -6,14 +6,14 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
+import { requireRole } from "@/lib/auth/session";
 import {
   aktifkanPegawai,
   deletePegawai,
   nonaktifkanPegawai,
 } from "@/lib/actions/pegawai-admin";
-import { PegawaiDetailModal } from "@/components/pegawai-detail-modal";
-import { mapPegawaiDetail } from "@/lib/pegawai-detail-map";
+import { PegawaiDetailModal } from "@/components/pegawai/detail-modal";
+import { mapPegawaiDetail } from "@/lib/utils/pegawai-map";
 import {
   Table,
   TableBody,

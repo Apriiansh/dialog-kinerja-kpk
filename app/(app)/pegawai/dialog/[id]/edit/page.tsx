@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
+import { requireRole } from "@/lib/auth/session";
 import {
   canEditDialog,
   getPegawaiDialog,
-} from "@/lib/dialog-queries";
-import { DialogForm } from "@/components/dialog-form";
+} from "@/lib/queries/dialog";
+import { DialogForm } from "@/components/dialog/edit-form";
 
 type PageProps = { params: Promise<{ id: string }> };
 

@@ -1,10 +1,10 @@
 ﻿import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeftIcon } from "@phosphor-icons/react/dist/ssr";
-import { requireRole } from "@/lib/session";
-import { canEditReviu, getPegawaiReviu } from "@/lib/reviu-queries";
-import { toDateInput } from "@/lib/format";
-import { ReviuForm } from "@/components/reviu-form";
+import { requireRole } from "@/lib/auth/session";
+import { canEditReviu, getPegawaiReviu } from "@/lib/queries/reviu";
+import { toDateInput } from "@/lib/utils/format";
+import { ReviuForm } from "@/components/reviu/edit-form";
 
 export const dynamic = "force-dynamic";
 

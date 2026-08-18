@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { saveTtdFile } from "@/lib/ttd";
-import { assertActiveActor } from "@/lib/auth-helpers";
-import { canValidateDialog } from "@/lib/dialog-queries";
-import { flashRedirect } from "@/lib/flash";
+import { requireRole } from "@/lib/auth/session";
+import { saveTtdFile } from "@/lib/export/ttd";
+import { assertActiveActor } from "@/lib/auth/guards";
+import { canValidateDialog } from "@/lib/queries/dialog";
+import { flashRedirect } from "@/lib/utils/flash";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
 export interface AspekItemInput {

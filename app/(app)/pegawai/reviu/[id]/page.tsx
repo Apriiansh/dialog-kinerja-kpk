@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon, PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr";
-import { requireRole } from "@/lib/session";
-import { canValidateReviu, getPegawaiReviu } from "@/lib/reviu-queries";
-import { ReviuStatusBadge } from "@/components/reviu-status-badge";
-import { TindakLanjutBadge } from "@/components/tindak-lanjut-badge";
-import { ReviuSummary } from "@/components/reviu-summary";
-import { ReviuSignForm } from "@/components/reviu-sign-form";
-import { UnduhBuktiButton } from "@/components/unduh-bukti-button";
-import { UnduhWordLink } from "@/components/unduh-word-link";
+import { requireRole } from "@/lib/auth/session";
+import { canValidateReviu, getPegawaiReviu } from "@/lib/queries/reviu";
+import { ReviuStatusBadge } from "@/components/reviu/status-badge";
+import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
+import { ReviuSummary } from "@/components/reviu/summary";
+import { ReviuSignForm } from "@/components/reviu/sign-form";
+import { UnduhBuktiButton } from "@/components/shared/unduh-bukti-button";
+import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { Separator } from "@/components/ui/separator";
-import { FormulirReviu } from "@/components/formulir-reviu";
-import { DeleteReviuButton } from "@/components/delete-reviu-button";
+import { FormulirReviu } from "@/components/reviu/detail-view";
+import { DeleteReviuButton } from "@/components/reviu/delete-button";
 
 type PageProps = {
   params: Promise<{ id: string }>;

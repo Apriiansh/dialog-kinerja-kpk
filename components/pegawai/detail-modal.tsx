@@ -11,7 +11,7 @@ import {
   UserCircleIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import { RoleTag } from "@/components/role-tag";
+import { RoleTag } from "@/components/shared/role-tag";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 
 export interface PegawaiDetail {

@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon, ArrowsClockwiseIcon } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/session";
-import { ReviuForm } from "@/components/reviu-form";
+import { requireRole } from "@/lib/auth/session";
+import { ReviuForm } from "@/components/reviu/edit-form";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
