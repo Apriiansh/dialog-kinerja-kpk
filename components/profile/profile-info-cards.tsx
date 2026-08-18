@@ -124,14 +124,14 @@ export function ProfileInfoCards({ user }: { user: UserProfileData }) {
       <section className="overflow-hidden rounded-lg border border-outline bg-surface">
         <div className="border-b border-outline bg-surface-muted/50 px-5 py-3.5">
           <h2 className="text-sm font-semibold text-ink">
-            Hierarki Organisasi &amp; Penilai
+            Hierarki &amp; Penilai
           </h2>
         </div>
 
         <div className="grid divide-y divide-outline sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           <div className="p-5 flex flex-col gap-2">
             <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-              Atasan Langsung (Pejabat Penilai)
+              Atasan Langsung (Pejabat  )
             </span>
             {user.atasan ? (
               <div className="flex flex-col gap-0.5">

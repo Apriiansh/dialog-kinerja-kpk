@@ -10,7 +10,12 @@ import {
   updateUserProfileDataAction,
   type UpdateProfileState,
 } from "@/lib/actions/profile";
-import { toDateInput, parseDateInput, formatDurasiKeHariIni } from "@/lib/format";
+import {
+  toDateInput,
+  parseDateInput,
+  parseDurasi,
+  formatDurasiKeHariIni,
+} from "@/lib/format";
 import type { UserProfileData } from "@/lib/profile-queries";
 
 const INPUT_CLASSES =
@@ -26,9 +31,11 @@ export function EditProfileForm({ user }: { user: UserProfileData }) {
   const [tanggalBergabung, setTanggalBergabung] = useState(
     user.tanggal_bergabung ? toDateInput(user.tanggal_bergabung) : "",
   );
-  const [masaKerjaInput, setMasaKerjaInput] = useState(
-    user.masa_kerja_unit_terakhir ?? "",
-  );
+  const [masaKerjaInput, setMasaKerjaInput] = useState(() => {
+    const durasi = user.masa_kerja_unit_terakhir ?? "";
+    const date = parseDurasi(durasi);
+    return date ? toDateInput(date) : "";
+  });
 
   const [pending, setPending] = useState(false);
   const [state, setState] = useState<UpdateProfileState>({});
@@ -211,10 +218,9 @@ export function EditProfileForm({ user }: { user: UserProfileData }) {
               <input
                 id="masa_kerja_unit_terakhir"
                 name="masa_kerja_unit_terakhir"
-                type="text"
+                type="date"
                 value={masaKerjaInput}
                 onChange={(e) => setMasaKerjaInput(e.target.value)}
-                placeholder="Contoh: 3 Tahun 4 Bulan atau format tanggal YYYY-MM-DD"
                 disabled={pending}
                 className={INPUT_CLASSES}
               />
@@ -223,7 +229,7 @@ export function EditProfileForm({ user }: { user: UserProfileData }) {
                 if (!date) return null;
                 return (
                   <p className="text-xs text-ink-muted">
-                    Durasi terhitung otomatis: {formatDurasiKeHariIni(date)}
+                    Durasi terhitung: {formatDurasiKeHariIni(date)}
                   </p>
                 );
               })()}
