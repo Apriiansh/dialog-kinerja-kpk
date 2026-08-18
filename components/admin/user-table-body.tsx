@@ -11,6 +11,24 @@ import {
   TableCell,
 } from "@/components/ui/table";
 
+const RECENT_DAYS = 7;
+
+function isRecentlyAdded(date: Date): boolean {
+  const now = new Date();
+  const d = new Date(date);
+  const diffMs = now.getTime() - d.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  return diffDays <= RECENT_DAYS;
+}
+
+function isRecentlyUpdated(created: Date, updated: Date): boolean {
+  const now = new Date();
+  const d = new Date(updated);
+  const diffMs = now.getTime() - d.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  return diffDays <= RECENT_DAYS && d.getTime() > new Date(created).getTime();
+}
+
 interface AdminUserRowProps {
   user: {
     id: number;
@@ -21,6 +39,8 @@ interface AdminUserRowProps {
     is_admin: boolean;
     as_pegawai: boolean;
     is_active: boolean;
+    created_at: Date;
+    updated_at: Date;
     atasan: { nama_pegawai: string } | null;
     _count: { bawahan: number };
   };
@@ -76,6 +96,27 @@ export function AdminUserTableBody({
               {u.is_admin ? <RoleTag role="ADMIN" /> : null}
               {u.as_pegawai ? <RoleTag role="PEGAWAI" /> : null}
               {u._count.bawahan > 0 ? <RoleTag role="ATASAN" /> : null}
+            </div>
+          </TableCell>
+          <TableCell className="px-5 py-4">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs text-ink-muted">
+                {new Date(u.created_at).toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
+              {isRecentlyAdded(u.created_at) && (
+                <span className="inline-flex w-fit items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                  Recently Added
+                </span>
+              )}
+              {isRecentlyUpdated(u.created_at, u.updated_at) && (
+                <span className="inline-flex w-fit items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-600/20">
+                  Recently Updated
+                </span>
+              )}
             </div>
           </TableCell>
         </TableRow>

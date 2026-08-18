@@ -270,7 +270,7 @@ export default async function PegawaiDialogListPage({
                             className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink hover:border-outline-strong hover:bg-surface-muted"
                           />
                           <UnduhWordLink
-                            href={`/api/unduh/dialog/${d.id}/word`}
+                            href={`/api/unduh/dialog/${d.id}/docx`}
                             className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink hover:border-outline-strong hover:bg-surface-muted"
                           />
                           <Link

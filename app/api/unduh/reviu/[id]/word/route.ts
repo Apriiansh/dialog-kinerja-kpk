@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestSession } from "@/lib/auth/session";
-import { generateReviuWord } from "@/lib/export/word";
+import { generateReviuWord } from "@/lib/export/word-legacy";
 
 export const dynamic = "force-dynamic";
 

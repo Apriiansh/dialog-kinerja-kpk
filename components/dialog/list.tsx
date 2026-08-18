@@ -90,7 +90,7 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                               dialogId={dialog.id}
                             />
                             <UnduhWordLink
-                              href={`/api/unduh/dialog/${dialog.id}/word`}
+                              href={`/api/unduh/dialog/${dialog.id}/docx`}
                             />
                           </>
                         ) : null}

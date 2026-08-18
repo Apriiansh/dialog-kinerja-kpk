@@ -220,7 +220,7 @@ export default async function AtasanReviuListPage({
                             Unduh PDF
                           </Link>
                           <UnduhWordLink
-                            href={`/api/unduh/reviu/${r.id}/word`}
+                            href={`/api/unduh/reviu/${r.id}/docx`}
                             className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted"
                           />
                         </>

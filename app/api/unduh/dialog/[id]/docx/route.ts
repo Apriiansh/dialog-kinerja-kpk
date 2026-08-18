@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestSession } from "@/lib/auth/session";
-import { generateDialogKinerjaWord } from "@/lib/export/word-legacy";
+import { generateDialogKinerjaDocx } from "@/lib/export/docx";
 
 export const dynamic = "force-dynamic";
 
@@ -20,16 +20,17 @@ export async function GET(
   }
 
   try {
-    const { filename, html } = await generateDialogKinerjaWord(
+    const { filename, buffer } = await generateDialogKinerjaDocx(
       dialogId,
       session.id,
       session.role,
     );
 
-    return new NextResponse(html, {
+    return new NextResponse(buffer as unknown as BodyInit, {
       headers: {
-        "Content-Type": "application/msword; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "Content-Disposition": `attachment; filename="${encodeURIComponent(filename)}"`,
         "Cache-Control": "private, no-cache",
       },
     });

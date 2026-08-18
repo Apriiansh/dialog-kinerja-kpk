@@ -91,7 +91,7 @@ export default async function PegawaiReviuDetailPage({
                 {isSelesai ? (
                   <>
                     <UnduhBuktiButton label="Unduh PDF" autoPrint={cetak} />
-                    <UnduhWordLink href={`/api/unduh/reviu/${reviu.id}/word`} />
+                    <UnduhWordLink href={`/api/unduh/reviu/${reviu.id}/docx`} />
                   </>
                 ) : null}
                 {isDraft ? (

@@ -13,6 +13,7 @@ import {
 } from "@phosphor-icons/react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
+import { Spinner } from "@/components/ui/spinner";
 import {
   importUsersPreview,
   importUsersExecute,
@@ -95,6 +96,7 @@ export function UserImportDialog() {
   const [actions, setActions] = useState<ImportRowAction[]>([]);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -109,6 +111,7 @@ export function UserImportDialog() {
     setActions([]);
     setResult(null);
     setLoading(false);
+    setPreviewLoading(false);
     setError(null);
     setQuery("");
   }, []);
@@ -162,7 +165,6 @@ export function UserImportDialog() {
         return row;
       });
       setRawRows(rows);
-      setStep("preview");
     } catch {
       setError("Gagal membaca file. Pastikan format file valid (.xlsx atau .csv).");
     } finally {
@@ -182,7 +184,7 @@ export function UserImportDialog() {
 
   const handlePreview = useCallback(async () => {
     if (rawRows.length === 0) return;
-    setLoading(true);
+    setPreviewLoading(true);
     setError(null);
     try {
       const rows = await importUsersPreview(rawRows);
@@ -190,10 +192,11 @@ export function UserImportDialog() {
       setActions(
         rows.map((r) => ({ rowIndex: r.rowIndex, action: r.suggestedAction })),
       );
+      setStep("preview");
     } catch {
       setError("Gagal memproses data. Silakan coba lagi.");
     } finally {
-      setLoading(false);
+      setPreviewLoading(false);
     }
   }, [rawRows]);
 
@@ -361,7 +364,7 @@ export function UserImportDialog() {
                       if (f) handleFile(f);
                     }}
                   />
-                  {file && !loading && (
+                  {file && !loading && !previewLoading && (
                     <button
                       type="button"
                       onClick={handlePreview}
@@ -371,8 +374,17 @@ export function UserImportDialog() {
                       <ArrowRightIcon size={14} weight="bold" />
                     </button>
                   )}
-                  {loading && (
-                    <p className="text-sm text-ink-muted">Membaca file...</p>
+                  {previewLoading && (
+                    <span className="inline-flex items-center gap-2 text-sm text-ink-muted">
+                      <Spinner className="size-4" />
+                      Memuat pratinjau...
+                    </span>
+                  )}
+                  {loading && !previewLoading && (
+                    <span className="inline-flex items-center gap-2 text-sm text-ink-muted">
+                      <Spinner className="size-4" />
+                      Membaca file...
+                    </span>
                   )}
                 </div>
               )}
@@ -647,7 +659,8 @@ export function UserImportDialog() {
                     setPreviewRows([]);
                     setActions([]);
                   }}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
+                  disabled={loading}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted disabled:opacity-50"
                 >
                   <ArrowLeftIcon size={12} weight="bold" />
                   Kembali
@@ -663,7 +676,14 @@ export function UserImportDialog() {
                   disabled={loading}
                   className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong disabled:opacity-50"
                 >
-                  {loading ? "Memproses..." : `Impor ${actions.filter((a) => a.action !== "skip").length} Baris`}
+                  {loading ? (
+                    <>
+                      <Spinner className="size-3" />
+                      Memproses...
+                    </>
+                  ) : (
+                    `Impor ${actions.filter((a) => a.action !== "skip").length} Baris`
+                  )}
                 </button>
               )}
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestSession } from "@/lib/auth/session";
-import { generateDialogKinerjaWord } from "@/lib/export/word-legacy";
+import { generateReviuDocx } from "@/lib/export/docx";
 
 export const dynamic = "force-dynamic";
 
@@ -14,22 +14,23 @@ export async function GET(
   }
 
   const { id } = await params;
-  const dialogId = Number(id);
-  if (Number.isNaN(dialogId)) {
+  const reviuId = Number(id);
+  if (Number.isNaN(reviuId)) {
     return new NextResponse("Invalid ID", { status: 400 });
   }
 
   try {
-    const { filename, html } = await generateDialogKinerjaWord(
-      dialogId,
+    const { filename, buffer } = await generateReviuDocx(
+      reviuId,
       session.id,
       session.role,
     );
 
-    return new NextResponse(html, {
+    return new NextResponse(buffer as unknown as BodyInit, {
       headers: {
-        "Content-Type": "application/msword; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Type":
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "Content-Disposition": `attachment; filename="${encodeURIComponent(filename)}"`,
         "Cache-Control": "private, no-cache",
       },
     });

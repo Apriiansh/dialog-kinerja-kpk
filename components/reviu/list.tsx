@@ -114,7 +114,7 @@ export function ReviuList({
                 </Link>
               ) : <div />}
               {r.status === "selesai" ? (
-                <UnduhWordLink href={`/api/unduh/reviu/${r.id}/word`} />
+                <UnduhWordLink href={`/api/unduh/reviu/${r.id}/docx`} />
               ) : null}
             </div>
           </div>

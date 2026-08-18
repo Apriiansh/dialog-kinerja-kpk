@@ -141,7 +141,7 @@ export default async function DialogDetailPage({
                 {isSelesai ? (
                   <>
                     <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />
-                    <UnduhWordLink href={`/api/unduh/dialog/${dialog.id}/word`} />
+                    <UnduhWordLink href={`/api/unduh/dialog/${dialog.id}/docx`} />
                   </>
                 ) : null}
                 {isDraft ? (
