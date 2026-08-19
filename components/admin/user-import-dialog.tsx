@@ -18,6 +18,7 @@ import {
   importUsersPreview,
   importUsersExecute,
 } from "@/lib/actions/import-users";
+import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import {
   COLUMN_ALIASES,
   type ImportRowInput,
@@ -216,8 +217,17 @@ export function UserImportDialog() {
       const res = await importUsersExecute(rawRows, actions);
       setResult(res);
       setStep("result");
+      const total = res.success + res.updated;
+      if (total > 0) {
+        showSuccess("Impor berhasil", `${total} pengguna berhasil diproses.`);
+      }
+      if (res.errors.length > 0) {
+        showError(`${res.errors.length} baris gagal diimpor. Lihat detail di bawah.`);
+      }
     } catch {
-      setError("Gagal menjalankan impor. Silakan coba lagi.");
+      const msg = "Gagal menjalankan impor. Silakan coba lagi.";
+      setError(msg);
+      showError(msg);
     } finally {
       setLoading(false);
     }

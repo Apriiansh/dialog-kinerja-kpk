@@ -2,7 +2,9 @@
 
 import { MagnifyingGlassIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { startDialog } from "@/lib/actions/atasan";
+import { error as showError, success as showSuccess } from "@/components/ui/toast";
 
 export interface PegawaiOption {
   id: number;
@@ -13,10 +15,12 @@ export interface PegawaiOption {
 }
 
 export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [unit, setUnit] = useState("");
   const [jabatan, setJabatan] = useState("");
+  const [creatingId, setCreatingId] = useState<number | null>(null);
 
   const units = useMemo(
     () =>
@@ -57,6 +61,20 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
+
+  async function handleStartDialog(pegawaiId: number) {
+    setCreatingId(pegawaiId);
+    const result = await startDialog(pegawaiId);
+    setCreatingId(null);
+
+    if (result?.error) {
+      showError(result.error);
+      return;
+    }
+    showSuccess("Dialog kinerja baru berhasil dibuat");
+    setOpen(false);
+    router.push(`/atasan/dialog/${result.dialogId}/edit`);
+  }
 
   return (
     <>
@@ -178,14 +196,18 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
                           {p.unit_kerja ?? "—"}
                         </td>
                         <td className="px-6 py-3.5 text-right">
-                          <form action={startDialog.bind(null, p.id)}>
-                            <button
-                              type="submit"
-                              className="inline-flex h-8 items-center gap-1 rounded-md bg-primary-soft px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-faint"
-                            >
-                              Mulai Dialog
-                            </button>
-                          </form>
+                          <button
+                            type="button"
+                            onClick={() => handleStartDialog(p.id)}
+                            disabled={creatingId !== null}
+                            className="inline-flex h-8 items-center gap-1 rounded-md bg-primary-soft px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-faint disabled:opacity-50"
+                          >
+                            {creatingId === p.id ? (
+                              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary-strong/40 border-t-primary-strong" />
+                            ) : (
+                              "Mulai Dialog"
+                            )}
+                          </button>
                         </td>
                       </tr>
                     ))}

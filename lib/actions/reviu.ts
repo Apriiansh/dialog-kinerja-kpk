@@ -6,6 +6,7 @@ import { requireRole } from "@/lib/auth/session";
 import { saveTtdFile } from "@/lib/export/ttd";
 import { assertActiveActor } from "@/lib/auth/guards";
 import { flashRedirect } from "@/lib/utils/flash";
+import { createNotification } from "@/lib/notifications";
 
 export interface ReviuInput {
   is_tercapai: boolean;
@@ -74,7 +75,7 @@ export async function createReviu(
 
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_pegawai: session.id },
-    select: { id: true, status: true },
+    select: { id: true, status: true, id_atasan: true, periode_tahun: true },
   });
   if (!dialog) {
     return { error: "Dialog tidak ditemukan." };
@@ -112,6 +113,17 @@ export async function createReviu(
 
   revalidatePath("/pegawai/dialog");
   revalidatePath("/pegawai/reviu");
+
+  if (mode === "submit") {
+    await createNotification({
+      userId: dialog.id_atasan,
+      type: "reviu_status",
+      title: "Reviu Baru",
+      description: `Reviu untuk dialog kinerja tahun ${dialog.periode_tahun} telah dikirim dan menunggu review Anda.`,
+      link: `/atasan/reviu/${reviuId}`,
+    });
+  }
+
   flashRedirect(
     `/pegawai/reviu/${reviuId}`,
     mode === "submit"
@@ -131,7 +143,7 @@ export async function saveReviu(
 
   const reviu = await prisma.reviu.findFirst({
     where: { id: reviuId, dialog: { id_pegawai: session.id } },
-    select: { id: true, status: true },
+    select: { id: true, status: true, dialog: { select: { id: true, id_atasan: true, periode_tahun: true } } },
   });
   if (!reviu) {
     return { error: "Reviu tidak ditemukan." };
@@ -166,6 +178,17 @@ export async function saveReviu(
 
   revalidatePath("/pegawai/reviu");
   revalidatePath(`/pegawai/reviu/${reviu.id}`);
+
+  if (mode === "submit") {
+    await createNotification({
+      userId: reviu.dialog.id_atasan,
+      type: "reviu_status",
+      title: "Reviu Baru",
+      description: `Reviu untuk dialog kinerja tahun ${reviu.dialog.periode_tahun} telah dikirim dan menunggu review Anda.`,
+      link: `/atasan/reviu/${reviu.id}`,
+    });
+  }
+
   flashRedirect(
     `/pegawai/reviu/${reviu.id}`,
     mode === "submit"
@@ -174,24 +197,23 @@ export async function saveReviu(
   );
 }
 
-export async function deleteReviu(reviuId: number): Promise<void> {
+export async function deleteReviu(reviuId: number): Promise<{ error?: string }> {
   const session = await requireRole("PEGAWAI");
   const err = await assertActiveActor(session.id);
-  if (err) return;
+  if (err) return { error: err };
 
   const reviu = await prisma.reviu.findFirst({
     where: { id: reviuId, dialog: { id_pegawai: session.id } },
     select: { id: true, status: true },
   });
-  if (!reviu || reviu.status !== "draft_pegawai") return;
+  if (!reviu || reviu.status !== "draft_pegawai") {
+    return { error: "Reviu tidak ditemukan atau sudah tidak berstatus draft." };
+  }
 
   await prisma.reviu.delete({ where: { id: reviu.id } });
   revalidatePath("/pegawai/reviu");
   revalidatePath("/pegawai/dialog");
-  flashRedirect("/pegawai/reviu", {
-    type: "success",
-    title: "Reviu berhasil dihapus",
-  });
+  return {};
 }
 
 export async function submitReviuAtasan(
@@ -211,7 +233,7 @@ export async function submitReviuAtasan(
 
   const reviu = await prisma.reviu.findFirst({
     where: { id: reviuId, dialog: { id_atasan: session.id } },
-    select: { id: true, status: true, dialog: { select: { id: true } } },
+    select: { id: true, status: true, dialog: { select: { id: true, id_pegawai: true, periode_tahun: true } } },
   });
   if (!reviu) {
     return { error: "Reviu tidak ditemukan." };
@@ -240,6 +262,14 @@ export async function submitReviuAtasan(
   } catch {
     return { error: "Gagal menyimpan tanda tangan. Silakan coba lagi." };
   }
+
+  await createNotification({
+    userId: reviu.dialog.id_pegawai,
+    type: "reviu_status",
+    title: "Reviu Perlu Validasi",
+    description: `Reviu untuk dialog kinerja tahun ${reviu.dialog.periode_tahun} telah ditandatangani atasan. Silakan validasi.`,
+    link: `/pegawai/reviu/${reviu.id}`,
+  });
 
   revalidatePath(`/atasan/dialog/${reviu.dialog.id}`);
   revalidatePath("/atasan/dashboard");
@@ -270,7 +300,7 @@ export async function validateReviu(
       id: true,
       status: true,
       is_valid_pegawai: true,
-      dialog: { select: { id: true } },
+      dialog: { select: { id: true, id_atasan: true, periode_tahun: true } },
     },
   });
   if (!reviu) {
@@ -303,6 +333,14 @@ export async function validateReviu(
   } catch {
     return { error: "Gagal menyimpan validasi. Silakan coba lagi." };
   }
+
+  await createNotification({
+    userId: reviu.dialog.id_atasan,
+    type: "reviu_status",
+    title: "Reviu Selesai",
+    description: `Reviu untuk dialog kinerja tahun ${reviu.dialog.periode_tahun} telah divalidasi oleh pegawai dan selesai.`,
+    link: `/atasan/reviu/${reviu.id}`,
+  });
 
   revalidatePath("/pegawai/reviu");
   revalidatePath(`/pegawai/reviu/${reviu.id}`);

@@ -10,6 +10,7 @@ import {
   updateProfilePreferencesAction,
   type ProfilePreferencesState,
 } from "@/lib/actions/profile";
+import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import type { UserProfileData } from "@/lib/queries/profile";
 import type { Role } from "@/lib/auth/session";
 
@@ -40,11 +41,16 @@ export function ProfilePreferencesForm({
     try {
       const res = await updateProfilePreferencesAction({}, formData);
       setState(res);
+      if (res.success) {
+        showSuccess("Preferensi berhasil disimpan", "Peran utama saat login telah diperbarui.");
+      } else if (res.error) {
+        showError(res.error);
+      }
     } catch (err) {
       console.error(err);
-      setState({
-        error: "Terjadi kesalahan saat menyimpan pengaturan preferensi.",
-      });
+      const msg = "Terjadi kesalahan saat menyimpan pengaturan preferensi.";
+      setState({ error: msg });
+      showError(msg);
     } finally {
       setPending(false);
     }

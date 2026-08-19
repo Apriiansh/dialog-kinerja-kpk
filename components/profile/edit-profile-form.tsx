@@ -10,6 +10,7 @@ import {
   updateUserProfileDataAction,
   type UpdateProfileState,
 } from "@/lib/actions/profile";
+import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import {
   toDateInput,
   parseDateInput,
@@ -56,11 +57,16 @@ export function EditProfileForm({ user }: { user: UserProfileData }) {
     try {
       const res = await updateUserProfileDataAction({}, formData);
       setState(res);
+      if (res.success) {
+        showSuccess("Data berhasil disimpan", "Profil kepegawaian Anda telah diperbarui.");
+      } else if (res.error) {
+        showError(res.error);
+      }
     } catch (err) {
       console.error(err);
-      setState({
-        error: "Terjadi kesalahan saat menyimpan perubahan. Silakan coba lagi.",
-      });
+      const msg = "Terjadi kesalahan saat menyimpan perubahan. Silakan coba lagi.";
+      setState({ error: msg });
+      showError(msg);
     } finally {
       setPending(false);
     }

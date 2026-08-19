@@ -65,6 +65,8 @@ model User {
   dialogAsAtasan  DialogKinerja[] @relation("DialogAtasan")
   dialogAsPegawai DialogKinerja[] @relation("DialogPegawai")
 
+  notifications Notification[]
+
   @@map("users")
 }
 
@@ -159,4 +161,21 @@ model Reviu {
   dialog DialogKinerja @relation(fields: [id_dialog], references: [id], onDelete: Cascade)
 
   @@map("reviu")
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  id_user     Int
+  type        String   @db.VarChar(50)
+  title       String   @db.VarChar(255)
+  description String   @db.Text
+  link        String   @db.VarChar(500)
+  is_read     Boolean  @default(false)
+  created_at  DateTime @default(now())
+
+  user User @relation(fields: [id_user], references: [id], onDelete: Cascade)
+
+  @@index([id_user, is_read])
+  @@index([id_user, created_at])
+  @@map("notifications")
 }

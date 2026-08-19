@@ -7,6 +7,7 @@ import { saveTtdFile } from "@/lib/export/ttd";
 import { assertActiveActor } from "@/lib/auth/guards";
 import { canValidateDialog } from "@/lib/queries/dialog";
 import { flashRedirect } from "@/lib/utils/flash";
+import { createNotification } from "@/lib/notifications";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
 export interface AspekItemInput {
@@ -137,7 +138,7 @@ export async function saveDialogForm(
 
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_pegawai: session.id },
-    select: { id: true, status: true },
+    select: { id: true, status: true, id_atasan: true, periode_tahun: true },
   });
   if (!dialog) {
     return { error: "Dialog tidak ditemukan." };
@@ -236,6 +237,14 @@ export async function saveDialogForm(
   revalidatePath(`/pegawai/dialog/${dialog.id}`);
 
   if (mode === "submit") {
+    await createNotification({
+      userId: dialog.id_atasan,
+      type: "dialog_status",
+      title: "Dialog Kinerja Perlu Review",
+      description: `Dialog kinerja tahun ${dialog.periode_tahun} telah dikirim oleh pegawai dan menunggu review Anda.`,
+      link: `/atasan/dialog/${dialog.id}`,
+    });
+
     flashRedirect(`/pegawai/dialog/${dialog.id}`, {
       type: "success",
       title: "Dialog kinerja berhasil dikirim ke atasan",
@@ -268,6 +277,8 @@ export async function validateDialog(
       status: true,
       is_valid_pegawai: true,
       is_valid_atasan: true,
+      id_atasan: true,
+      periode_tahun: true,
     },
   });
   if (!dialog) {
@@ -299,6 +310,16 @@ export async function validateDialog(
     });
   } catch {
     return { error: "Gagal menyimpan validasi. Silakan coba lagi." };
+  }
+
+  if (dialog.is_valid_atasan) {
+    await createNotification({
+      userId: dialog.id_atasan,
+      type: "dialog_status",
+      title: "Dialog Kinerja Selesai",
+      description: `Dialog kinerja tahun ${dialog.periode_tahun} telah divalidasi oleh pegawai dan selesai.`,
+      link: `/atasan/dialog/${dialog.id}`,
+    });
   }
 
   revalidatePath("/pegawai/dashboard");

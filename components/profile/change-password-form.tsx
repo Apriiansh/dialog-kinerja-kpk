@@ -12,6 +12,7 @@ import {
   changePasswordAction,
   type ChangePasswordState,
 } from "@/lib/actions/profile";
+import { error as showError, success as showSuccess } from "@/components/ui/toast";
 
 const INPUT_CLASSES =
   "h-11 w-full rounded-md border border-outline bg-surface pl-3.5 pr-11 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus disabled:opacity-60";
@@ -44,15 +45,18 @@ export function ChangePasswordForm() {
       const res = await changePasswordAction({}, formData);
       setState(res);
       if (res.success) {
+        showSuccess("Kata sandi berhasil diubah", "Gunakan kata sandi baru Anda untuk login berikutnya.");
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
+      } else if (res.error) {
+        showError(res.error);
       }
     } catch (err) {
       console.error(err);
-      setState({
-        error: "Terjadi kesalahan saat memproses perubahan kata sandi.",
-      });
+      const msg = "Terjadi kesalahan saat memproses perubahan kata sandi.";
+      setState({ error: msg });
+      showError(msg);
     } finally {
       setPending(false);
     }

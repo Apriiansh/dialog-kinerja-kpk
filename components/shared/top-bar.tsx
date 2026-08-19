@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { SessionData } from "@/lib/auth/session";
 import { RoleTag } from "./role-tag";
 import { RoleSwitcher } from "./role-switcher";
+import { NotificationBell } from "./notification-bell";
 
 function initials(name: string) {
   return name
@@ -61,8 +62,11 @@ export function TopBar({
         </div>
       </div>
 
-      {/* Sisi Kanan: Role Switcher & Profil Ringkas */}
+      {/* Sisi Kanan: Notifikasi, Role Switcher & Profil Ringkas */}
       <div className="flex items-center gap-2 sm:gap-3">
+        {/* Notifikasi */}
+        <NotificationBell role={session.role.toLowerCase()} />
+
         {/* Role Switcher jika memiliki multi-role */}
         <RoleSwitcher roles={session.roles} activeRole={session.role} variant="dark" />
 
