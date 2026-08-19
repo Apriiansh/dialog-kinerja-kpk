@@ -94,7 +94,7 @@ export function LandingHeroCarousel({
 
             return (
               <CarouselItem key={slide.id} className="p-0 relative w-full">
-                <div className="relative w-full min-h-[540px] md:min-h-[620px] lg:min-h-[660px] flex items-center">
+                <div className="relative w-full min-h-[520px] sm:min-h-[560px] md:min-h-[600px] lg:min-h-[640px] flex items-center">
                   {/* Background Sunset Photo */}
                   <Image
                     src={slide.image}
@@ -105,12 +105,12 @@ export function LandingHeroCarousel({
                     sizes="100vw"
                   />
 
-                  {/* Cinematic Sunset Overlays */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/45" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-black/40" />
+                  {/* Sunset / Dusk Overlays */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/40" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-black/30" />
 
-                  {/* Content Container with Framer Motion text animation on slide change */}
-                  <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 w-full">
+                  {/* Content Container */}
+                  <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 pb-20 sm:pb-24 w-full">
                     <AnimatePresence mode="wait">
                       {isActive && (
                         <motion.div
@@ -123,18 +123,18 @@ export function LandingHeroCarousel({
                             visible: {
                               opacity: 1,
                               transition: {
-                                staggerChildren: 0.12,
+                                staggerChildren: 0.1,
                                 delayChildren: 0.05,
                               },
                             },
                             exit: { opacity: 0, transition: { duration: 0.2 } },
                           }}
-                          className="max-w-3xl space-y-6"
+                          className="max-w-3xl space-y-4 sm:space-y-5 md:space-y-6"
                         >
                           {/* Location Tag */}
                           <motion.div
                             variants={{
-                              hidden: { opacity: 0, y: -12 },
+                              hidden: { opacity: 0, y: -10 },
                               visible: {
                                 opacity: 1,
                                 y: 0,
@@ -142,29 +142,14 @@ export function LandingHeroCarousel({
                               },
                             }}
                           >
-                            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-md bg-black/50 border border-white/20 backdrop-blur-md text-xs sm:text-sm text-amber-300 font-semibold tracking-wide">
-                              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-sm shadow-red-500" />
-                              <span>{slide.locationTag}</span>
+                            <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-md bg-black/60 border border-white/20 backdrop-blur-md text-[11px] sm:text-xs md:text-sm text-amber-300 font-semibold tracking-wide">
+                              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-red-500 animate-pulse shadow-xs shadow-red-500 shrink-0" />
+                              <span className="truncate">{slide.locationTag}</span>
                             </div>
                           </motion.div>
 
                           {/* Title */}
                           <motion.h1
-                            variants={{
-                              hidden: { opacity: 0, y: 16 },
-                              visible: {
-                                opacity: 1,
-                                y: 0,
-                                transition: { duration: 0.5, ease: "easeOut" },
-                              },
-                            }}
-                            className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.12] drop-shadow-md"
-                          >
-                            {slide.title}
-                          </motion.h1>
-
-                          {/* Subtitle / Typewriter */}
-                          <motion.div
                             variants={{
                               hidden: { opacity: 0, y: 14 },
                               visible: {
@@ -173,7 +158,22 @@ export function LandingHeroCarousel({
                                 transition: { duration: 0.5, ease: "easeOut" },
                               },
                             }}
-                            className="text-base sm:text-2xl font-bold text-amber-400 min-h-[2rem]"
+                            className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.18] sm:leading-[1.12] drop-shadow-md break-words"
+                          >
+                            {slide.title}
+                          </motion.h1>
+
+                          {/* Subtitle / Typewriter */}
+                          <motion.div
+                            variants={{
+                              hidden: { opacity: 0, y: 12 },
+                              visible: {
+                                opacity: 1,
+                                y: 0,
+                                transition: { duration: 0.5, ease: "easeOut" },
+                              },
+                            }}
+                            className="text-sm sm:text-lg md:text-xl lg:text-2xl font-bold text-amber-400 min-h-[2.5rem] sm:min-h-[2.2rem] flex items-center leading-snug"
                           >
                             {slide.typewriter ? (
                               <TypewriterText
@@ -194,14 +194,14 @@ export function LandingHeroCarousel({
                           {/* Description */}
                           <motion.p
                             variants={{
-                              hidden: { opacity: 0, y: 14 },
+                              hidden: { opacity: 0, y: 12 },
                               visible: {
                                 opacity: 1,
                                 y: 0,
                                 transition: { duration: 0.5, ease: "easeOut" },
                               },
                             }}
-                            className="text-base sm:text-lg text-slate-200 leading-relaxed font-normal max-w-2xl drop-shadow"
+                            className="text-xs sm:text-base md:text-lg text-slate-200 leading-relaxed font-normal max-w-2xl drop-shadow"
                           >
                             {slide.description}
                           </motion.p>
@@ -216,18 +216,18 @@ export function LandingHeroCarousel({
                                 transition: { duration: 0.4, ease: "easeOut" },
                               },
                             }}
-                            className="pt-2"
+                            className="pt-1 sm:pt-2"
                           >
                             <Link
                               href={isLoggedIn ? userHomePath : "/login"}
-                              className="inline-flex items-center gap-3 h-12 px-7 rounded-xl bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-500 hover:to-red-700 text-white text-base font-bold shadow-xl shadow-black/40 border border-red-500/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                              className="inline-flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto h-11 sm:h-12 px-5 sm:px-7 rounded-xl bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-500 hover:to-red-700 text-white text-xs sm:text-sm md:text-base font-bold shadow-xl shadow-black/40 border border-red-500/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
                             >
                               <span>
                                 {isLoggedIn
                                   ? "Buka Dashboard Kinerja"
                                   : "Masuk ke Sistem Dialog Kinerja"}
                               </span>
-                              <ArrowRight className="w-5 h-5" weight="bold" />
+                              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" weight="bold" />
                             </Link>
                           </motion.div>
                         </motion.div>
@@ -241,33 +241,33 @@ export function LandingHeroCarousel({
         </CarouselContent>
 
         {/* Carousel Navigation Buttons */}
-        <div className="hidden sm:flex absolute bottom-8 right-8 z-20 items-center gap-3">
+        <div className="hidden sm:flex absolute bottom-6 sm:bottom-8 right-4 sm:right-8 z-20 items-center gap-2 sm:gap-3">
           <button
             onClick={() => api?.scrollPrev()}
-            className="w-11 h-11 rounded-xl bg-black/60 hover:bg-red-700 text-white border border-white/20 hover:border-red-500 flex items-center justify-center transition-all shadow-lg backdrop-blur-md"
+            className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-black/60 hover:bg-red-700 text-white border border-white/20 hover:border-red-500 flex items-center justify-center transition-all shadow-lg backdrop-blur-md"
             aria-label="Slide sebelumnya"
           >
-            <CaretLeft className="w-6 h-6" weight="bold" />
+            <CaretLeft className="w-5 h-5 sm:w-6 sm:h-6" weight="bold" />
           </button>
           <button
             onClick={() => api?.scrollNext()}
-            className="w-11 h-11 rounded-xl bg-black/60 hover:bg-red-700 text-white border border-white/20 hover:border-red-500 flex items-center justify-center transition-all shadow-lg backdrop-blur-md"
+            className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-black/60 hover:bg-red-700 text-white border border-white/20 hover:border-red-500 flex items-center justify-center transition-all shadow-lg backdrop-blur-md"
             aria-label="Slide berikutnya"
           >
-            <CaretRight className="w-6 h-6" weight="bold" />
+            <CaretRight className="w-5 h-5 sm:w-6 sm:h-6" weight="bold" />
           </button>
         </div>
 
         {/* Slide Indicators */}
-        <div className="absolute bottom-8 left-8 z-20 flex items-center gap-2.5">
+        <div className="absolute bottom-5 sm:bottom-8 left-4 sm:left-8 z-20 flex items-center gap-2 sm:gap-2.5">
           {Array.from({ length: count || slides.length }).map((_, index) => (
             <button
               key={index}
               onClick={() => api?.scrollTo(index)}
               className={`h-2 transition-all duration-400 rounded-full ${
                 current === index
-                  ? "w-10 bg-amber-400 shadow-md shadow-amber-500/50"
-                  : "w-2.5 bg-white/40 hover:bg-white/70"
+                  ? "w-8 sm:w-10 bg-amber-400 shadow-md shadow-amber-500/50"
+                  : "w-2 sm:w-2.5 bg-white/40 hover:bg-white/70"
               }`}
               aria-label={`Ke slide ${index + 1}`}
             />
