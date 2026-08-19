@@ -7,7 +7,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isLoggedIn = Boolean(session?.id);
 
-  if (!isLoggedIn && pathname !== "/login") {
+  if (!isLoggedIn && pathname !== "/login" && pathname !== "/") {
     const url = new URL("/login", request.url);
     url.searchParams.set("from", pathname);
     return NextResponse.redirect(url);
