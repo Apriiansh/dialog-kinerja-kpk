@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react";
+import { ArrowSquareRightIcon, } from "@phosphor-icons/react";
 import { createDialogLanjutan } from "@/lib/actions/lanjutan";
 import { error as showError } from "@/components/ui/toast";
 
@@ -11,7 +11,7 @@ export function EvaluasiLanjutanButton({ reviuId }: { reviuId: number }) {
   async function handleCreate() {
     if (
       !confirm(
-        "Buat Dialog Kinerja lanjutan dari reviu ini? Item yang belum tercapai akan otomatis disalin ke dialog baru.",
+        "Buat Dialog Kinerja lanjutan dari dialog kinerja ini? Item yang belum tercapai akan otomatis disalin ke dialog baru.",
       )
     ) {
       return;
@@ -36,7 +36,7 @@ export function EvaluasiLanjutanButton({ reviuId }: { reviuId: number }) {
       {pending ? (
         <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current/40 border-t-current" />
       ) : (
-        <ArrowCounterClockwiseIcon size={15} weight="bold" />
+        <ArrowSquareRightIcon size={15} weight="bold" />
       )}
       Evaluasi Lanjutan
     </button>

@@ -72,6 +72,11 @@ export default async function PegawaiReviuDetailPage({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <ReviuStatusBadge status={reviu.status} />
+                {reviu.dialog.id_dialog_induk ? (
+                  <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                    Dialog Lanjutan
+                  </span>
+                ) : null}
                 {isSelesai ? (
                   <>
                     <UnduhBuktiButton label="Unduh PDF" autoPrint={cetak} />

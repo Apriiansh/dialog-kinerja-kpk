@@ -12,11 +12,15 @@ export interface DialogRow {
   status: StatusDialog;
   is_valid_pegawai: boolean;
   is_valid_atasan: boolean;
+  id_dialog_induk: number | null;
+  dialog_induk: { periode_tahun: number } | null;
+  dialog_lanjutan: { id: number }[];
   pegawai: {
     nama_pegawai: string;
     nama_jabatan: string | null;
     unit_kerja: string | null;
   };
+  sequence_number?: number;
 }
 
 export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
@@ -36,6 +40,8 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
           {dialogs.map((dialog) => {
             const lengkap = dialog.is_valid_pegawai && dialog.is_valid_atasan;
             const draft = dialog.status === "draft_atasan";
+            const perluEvaluasi = dialog.status === "menunggu_atasan";
+            const hasLanjutan = dialog.dialog_lanjutan.length > 0;
             return (
               <tr
                 key={dialog.id}
@@ -55,7 +61,17 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-ink">
-                  {dialog.periode_tahun}
+                  <div className="flex flex-col gap-1">
+                    <span>
+                      {dialog.sequence_number ? `Dialog Ke-${dialog.sequence_number} ` : ""}
+                      (Tahun {dialog.periode_tahun})
+                    </span>
+                    {dialog.dialog_induk ? (
+                      <span className="w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                        Lanjutan dari {dialog.dialog_induk.periode_tahun}
+                      </span>
+                    ) : null}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <StatusBadge status={dialog.status} />
@@ -79,6 +95,11 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                           <PencilSimpleIcon size={12} weight="bold" />
                           Edit
                         </Link>
+                        {dialog.status === "selesai" && hasLanjutan ? (
+                          <span className="text-[11px] font-semibold text-ink-muted">
+                            Lanjutan sudah dibuat
+                          </span>
+                        ) : null}
                         <DeleteDialogButton dialogId={dialog.id} />
                       </>
                     ) : (
@@ -96,10 +117,14 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                         ) : null}
                         <Link
                           href={`/atasan/dialog/${dialog.id}`}
-                          className="inline-flex h-8 items-center gap-1 rounded-md bg-surface-muted px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-soft"
+                          className={`inline-flex h-8 items-center gap-1 rounded-md px-3 text-xs font-semibold transition-colors ${
+                            perluEvaluasi
+                              ? "bg-primary text-on-primary hover:bg-primary-strong"
+                              : "bg-surface-muted text-primary-strong hover:bg-primary-soft"
+                          }`}
                         >
                           <EyeIcon size={12} weight="bold" />
-                          Detail
+                          {perluEvaluasi ? "Evaluasi" : "Detail"}
                         </Link>
                       </>
                     )}

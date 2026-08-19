@@ -6,6 +6,7 @@ import {
   HourglassIcon,
   PencilSimpleIcon,
   ShieldCheckIcon,
+  ArrowSquareRightIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
@@ -17,6 +18,7 @@ import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
 import { ASPEK_ORDER } from "@/lib/constants/aspek";
 import type { StatusDialog } from "@/generated/prisma/enums";
+import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -80,6 +82,16 @@ function filledAspekCount(
   ).length;
 }
 
+function evaluatedAspekCount(
+  aspek: { item: { is_tercapai: boolean | null }[] }[],
+) {
+  return aspek.filter(
+    (group) =>
+      group.item.length === 0 ||
+      group.item.every((item) => item.is_tercapai !== null),
+  ).length;
+}
+
 export default async function PegawaiDialogListPage({
   searchParams,
 }: {
@@ -102,7 +114,18 @@ export default async function PegawaiDialogListPage({
         where: baseWhere,
         include: {
           atasan: { select: { nama_pegawai: true, nama_jabatan: true } },
-          aspek: { include: { item: { select: { id: true } } } },
+          aspek: { include: { item: { select: { id: true, is_tercapai: true } } } },
+          dialog_induk: {
+            select: {
+              periode_tahun: true,
+              aspek: { select: { item: { select: { is_tercapai: true } } } },
+            },
+          },
+          dialog_lanjutan: { select: { id: true } },
+          reviu: {
+            select: { id: true, status: true, dialog: { select: { id: true } } },
+            orderBy: { created_at: "asc" as const },
+          },
         },
         orderBy: { updated_at: "desc" },
       }),
@@ -123,6 +146,9 @@ export default async function PegawaiDialogListPage({
   const visibleDialogs = allDialogs
     .filter((d) => activeStatus === "semua" || d.status === activeStatus)
     .slice(skip, skip + PAGE_SIZE);
+
+  const sortedById = [...allDialogs].sort((a, b) => a.id - b.id);
+  const seqMap = new Map(sortedById.map((d, index) => [d.id, index + 1]));
 
   const stats = [
     {
@@ -243,18 +269,49 @@ export default async function PegawaiDialogListPage({
         ) : (
           <ul className="flex flex-col gap-3">
             {visibleDialogs.map((d) => {
-              const filled = filledAspekCount(d.aspek);
+              const isLanjutan = d.id_dialog_induk !== null;
+              const filled = isLanjutan
+                ? evaluatedAspekCount(d.aspek)
+                : filledAspekCount(d.aspek);
               const cta = CTA[d.status];
               const progress = Math.round((filled / ASPEK_ORDER.length) * 100);
+              const sourceAspek = isLanjutan
+                ? (d.dialog_induk?.aspek ?? [])
+                : d.aspek;
+              const itemCounts = isLanjutan
+                ? sourceAspek.reduce(
+                    (counts, group) => {
+                      for (const item of group.item) {
+                        if (item.is_tercapai === true) counts.tercapai += 1;
+                        else counts.tidakTercapai += 1;
+                      }
+                      return counts;
+                    },
+                    { tercapai: 0, tidakTercapai: 0 },
+                  )
+                : null;
+              const latestSelesaiReviu = d.reviu
+                .filter((reviu) => reviu.status === "selesai")
+                .at(-1);
+              const hasLanjutan = d.dialog_lanjutan.length > 0;
+              const hasBelumTercapai = d.aspek.some((aspek) =>
+                aspek.item.some((item) => item.is_tercapai === false),
+              );
+              const sequenceNum = seqMap.get(d.id) ?? 1;
               return (
                 <li key={d.id}>
-                  <div className="flex flex-col gap-4 rounded-lg border border-outline bg-surface p-5 transition-colors hover:border-outline-strong hover:shadow-ambient sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-2 rounded-lg border border-outline bg-surface p-5 transition-colors hover:border-outline-strong hover:shadow-ambient sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 flex-col gap-2">
                       <div className="flex flex-wrap items-center gap-3">
                         <span className="text-base font-semibold text-ink">
-                          Dialog Kinerja Tahun {d.periode_tahun}
+                          Dialog Kinerja Ke-{sequenceNum} (Tahun {d.periode_tahun})
                         </span>
                         <StatusBadge status={d.status} />
+                        {d.dialog_induk ? (
+                          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                            Lanjutan dari {d.dialog_induk.periode_tahun}
+                          </span>
+                        ) : null}
                       </div>
                       <span className="truncate text-xs leading-4 text-ink-muted">
                         Atasan Penilai: <strong className="font-medium text-ink">{d.atasan.nama_pegawai}</strong>
@@ -264,18 +321,34 @@ export default async function PegawaiDialogListPage({
                         <Progress
                           value={progress}
                           className="w-full max-w-50"
-                          aria-label={`${progress}% aspek terisi`}
+                          aria-label={
+                            isLanjutan
+                              ? `${progress}% aspek dievaluasi`
+                              : `${progress}% aspek terisi`
+                          }
                         />
                         <span className="text-[11px] font-medium text-ink-muted">
-                          {filled}/{ASPEK_ORDER.length} aspek terisi ({progress}%)
+                          {isLanjutan
+                            ? `${filled}/${ASPEK_ORDER.length} aspek dievaluasi (${progress}%)`
+                            : `${filled}/${ASPEK_ORDER.length} aspek terisi (${progress}%)`}
                         </span>
                       </div>
+                      {itemCounts ? (
+                        <div className="flex flex-wrap gap-2 text-[11px] font-semibold">
+                          <span className="text-emerald-700">
+                            {itemCounts.tercapai} tercapai
+                          </span>
+                          <span className="text-red-700">
+                            {itemCounts.tidakTercapai} tidak tercapai
+                          </span>
+                        </div>
+                      ) : null}
                     </div>
 
                     <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-outline/50 pt-3 sm:border-t-0 sm:pt-0">
                       {d.status === "selesai" ? (
                         <>
-                          <UnduhBuktiLink
+                          {/* <UnduhBuktiLink
                             path="/pegawai/dialog"
                             dialogId={d.id}
                             className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink hover:border-outline-strong hover:bg-surface-muted"
@@ -283,14 +356,20 @@ export default async function PegawaiDialogListPage({
                           <UnduhWordLink
                             href={`/api/unduh/dialog/${d.id}/docx`}
                             className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink hover:border-outline-strong hover:bg-surface-muted"
-                          />
-                          <Link
-                            href={`/pegawai/reviu/new?dialog=${d.id}`}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink hover:border-outline-strong hover:bg-surface-muted"
-                          >
-                            <ArrowsClockwiseIcon size={14} weight="bold" />
-                            Reviu
-                          </Link>
+                          /> */}
+                           {latestSelesaiReviu && !hasLanjutan && hasBelumTercapai ? (
+                             <EvaluasiLanjutanButton
+                               reviuId={latestSelesaiReviu.id}
+                             />
+                           ) : null}
+                           {d.reviu.length === 0 ? (
+                             <Link
+                               href={`/pegawai/reviu/new?dialog=${d.id}`}
+                               className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
+                             >
+                               Buat Reviu
+                             </Link>
+                           ) : null}
                         </>
                       ) : null}
                       <Link

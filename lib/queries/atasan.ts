@@ -30,6 +30,10 @@ const ATASAN_DIALOG_INCLUDE = {
   reviu: {
     orderBy: { created_at: "asc" as const },
   },
+  dialog_lanjutan: { select: { id: true } },
+  dialog_induk: {
+    include: { aspek: { include: { item: { include: { metode: true } } } } },
+  },
 } as const;
 
 export async function getAtasanDialog(dialogId: number, atasanId: number) {

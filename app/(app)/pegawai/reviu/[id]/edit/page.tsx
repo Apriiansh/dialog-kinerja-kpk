@@ -52,6 +52,15 @@ export default async function EditReviuPage({
       <ReviuForm
         reviuId={reviu.id}
         aspek={reviu.dialog.aspek}
+        isLanjutan={reviu.dialog.id_dialog_induk !== null}
+        previousItemKeys={new Set(
+          (reviu.dialog.dialog_induk?.aspek ?? []).flatMap((aspek) =>
+            aspek.item.map(
+              (item) =>
+                `${item.dialog_evaluasi?.trim() ?? ""}|${item.kompetensi_dikembangkan?.trim() ?? ""}`,
+            ),
+          ),
+        )}
         initial={{
           is_tercapai: reviu.is_tercapai,
           is_tidak_tercapai: reviu.is_tidak_tercapai,

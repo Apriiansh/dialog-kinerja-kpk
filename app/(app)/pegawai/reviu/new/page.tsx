@@ -27,6 +27,21 @@ export default async function NewReviuPage({
     where: { id_pegawai: session.id, status: "selesai" },
     select: {
       id: true,
+      id_dialog_induk: true,
+      dialog_induk: {
+        select: {
+          aspek: {
+            select: {
+              item: {
+                select: {
+                  dialog_evaluasi: true,
+                  kompetensi_dikembangkan: true,
+                },
+              },
+            },
+          },
+        },
+      },
       periode_tahun: true,
       atasan: { select: { nama_pegawai: true, nama_jabatan: true } },
     },
@@ -92,6 +107,11 @@ export default async function NewReviuPage({
                     <span className="text-sm font-semibold text-ink">
                       Dialog Kinerja Tahun {d.periode_tahun}
                     </span>
+                    {d.id_dialog_induk ? (
+                      <span className="w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                        Dialog Lanjutan
+                      </span>
+                    ) : null}
                     <span className="text-xs leading-4 text-ink-muted">
                       Atasan Penilai:{" "}
                       <strong className="font-medium text-ink">
@@ -119,9 +139,26 @@ export default async function NewReviuPage({
                 ? ` (${selected?.atasan.nama_jabatan})`
                 : ""}
             </p>
+            {selected?.id_dialog_induk ? (
+              <span className="w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                Dialog Lanjutan
+              </span>
+            ) : null}
           </div>
 
-          <ReviuForm dialogId={selectedDialogId} aspek={selectedAspek ?? []} />
+          <ReviuForm
+            dialogId={selectedDialogId}
+            aspek={selectedAspek ?? []}
+            isLanjutan={Boolean(selected?.id_dialog_induk)}
+            previousItemKeys={new Set(
+              (selected?.dialog_induk?.aspek ?? []).flatMap((aspek) =>
+                aspek.item.map(
+                  (item) =>
+                    `${item.dialog_evaluasi?.trim() ?? ""}|${item.kompetensi_dikembangkan?.trim() ?? ""}`,
+                ),
+              ),
+            )}
+          />
         </div>
       )}
 

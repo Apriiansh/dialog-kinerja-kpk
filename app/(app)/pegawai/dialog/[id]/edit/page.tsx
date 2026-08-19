@@ -42,6 +42,7 @@ export default async function DialogEditPage({ params }: PageProps) {
       deskripsiKinerja={dialog.deskripsi_kinerja}
       atasanNama={dialog.atasan.nama_pegawai}
       aspek={dialog.aspek}
+      isLanjutan={dialog.id_dialog_induk !== null}
       metodeList={metodeList}
     />
   );

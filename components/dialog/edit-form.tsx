@@ -177,12 +177,19 @@ function isItemComplete(
 function validateSubmit(
   drafts: AspekDraft[],
   isLainnya: (id: string) => boolean,
+  isLanjutan: boolean,
 ): string | null {
   const problems: string[] = [];
   for (const draft of drafts) {
     const label = ASPEK_SECTION_LABEL[draft.jenis_aspek];
     const nonEmptyItems = draft.items.filter((item) => !isItemEmpty(item));
     if (nonEmptyItems.length === 0) {
+      if (isLanjutan) {
+        if (!draft.tanggung_jawab_pegawai.trim()) {
+          problems.push(`${label} tanggung jawab pegawai wajib diisi`);
+        }
+        continue;
+      }
       problems.push(`${label} belum memiliki rincian`);
       continue;
     }
@@ -202,6 +209,7 @@ export function DialogForm({
   deskripsiKinerja,
   atasanNama,
   aspek,
+  isLanjutan = false,
   metodeList,
 }: {
   dialogId: number;
@@ -209,6 +217,7 @@ export function DialogForm({
   deskripsiKinerja: string | null;
   atasanNama: string;
   aspek: ExistingAspek[];
+  isLanjutan?: boolean;
   metodeList: MetodeOption[];
 }) {
   const [drafts, setDrafts] = useState<AspekDraft[]>(() =>
@@ -324,7 +333,7 @@ export function DialogForm({
   }
 
   function handleSubmitClick() {
-    const validationError = validateSubmit(drafts, isLainnya);
+    const validationError = validateSubmit(drafts, isLainnya, isLanjutan);
     if (validationError) {
       showError(validationError);
       return;
@@ -408,7 +417,12 @@ export function DialogForm({
                             className="flex flex-col gap-3 rounded-md border border-outline bg-surface-muted/40 px-4 py-3.5"
                           >
                             <legend className="px-1 text-xs font-semibold text-ink-muted">
-                              Rincian #{itemIndex + 1}
+                              <span>Rincian #{itemIndex + 1}</span>
+                              {isLanjutan && item.id !== undefined ? (
+                                <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                                  Dari evaluasi sebelumnya
+                                </span>
+                              ) : null}
                             </legend>
 
                             <div className="flex flex-col gap-1.5">
@@ -528,7 +542,7 @@ export function DialogForm({
                             <button
                               type="button"
                               onClick={() => removeItem(jenis, itemIndex)}
-                              disabled={pending !== null}
+                              disabled={pending !== null || (isLanjutan && item.id !== undefined)}
                               className="inline-flex w-fit items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold text-error transition-colors hover:bg-error-container disabled:opacity-50"
                             >
                               <TrashIcon size={14} weight="bold" />

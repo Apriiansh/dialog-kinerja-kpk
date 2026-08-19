@@ -7,6 +7,8 @@ import { NewDialogButton } from "@/components/dialog/create-button";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
 
+import { getDialogSequenceMap } from "@/lib/queries/dialog";
+
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function DialogIndexPage({
@@ -29,8 +31,12 @@ export default async function DialogIndexPage({
         status: true,
         is_valid_pegawai: true,
         is_valid_atasan: true,
+        id_dialog_induk: true,
+        dialog_induk: { select: { periode_tahun: true } },
+        dialog_lanjutan: { select: { id: true } },
         pegawai: {
           select: {
+            id: true,
             npp: true,
             nama_pegawai: true,
             nama_jabatan: true,
@@ -45,6 +51,13 @@ export default async function DialogIndexPage({
     getAtasanPegawaiOptions(session.id),
     prisma.dialogKinerja.count({ where }),
   ]);
+
+  const dialogIds = dialogs.map((d) => d.id);
+  const seqMap = await getDialogSequenceMap(dialogIds);
+  const dialogsWithSeq = dialogs.map((d) => ({
+    ...d,
+    sequence_number: seqMap.get(d.id),
+  }));
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -76,7 +89,7 @@ export default async function DialogIndexPage({
           </p>
         </div>
       ) : (
-        <DialogList dialogs={dialogs} />
+        <DialogList dialogs={dialogsWithSeq} />
       )}
 
       <Pagination

@@ -15,7 +15,7 @@ export function TindakLanjutBadge({
     return (
       <span className="inline-flex items-center gap-1.5 rounded-md bg-status-amber-soft px-2.5 py-1 text-[11px] font-bold leading-4 text-status-amber">
         <WarningCircleIcon size={12} weight="bold" />
-        Tercapai & Tidak Tercapai
+        Tercapai Sebagian
       </span>
     );
   }
@@ -24,7 +24,7 @@ export function TindakLanjutBadge({
     return (
       <span className="inline-flex items-center gap-1.5 rounded-md bg-status-green-soft px-2.5 py-1 text-[11px] font-bold leading-4 text-status-green">
         <CheckCircleIcon size={12} weight="bold" />
-        Tercapai
+        Tercapai Semua
       </span>
     );
   }

@@ -19,20 +19,92 @@ export async function startDialog(pegawaiId: number): Promise<{ error?: string; 
   });
   if (!user) return { error: "Pegawai tidak ditemukan" };
 
+  const latestDialog = await prisma.dialogKinerja.findFirst({
+    where: { id_pegawai: pegawaiId },
+    orderBy: { id: "desc" },
+    include: {
+      reviu: {
+        orderBy: { id: "desc" },
+        take: 1,
+      },
+    },
+  });
+
+  let idDialogInduk: number | null = null;
+  let aspekData: any = null;
+
+  if (latestDialog) {
+    if (latestDialog.status !== "selesai") {
+      return { error: "Pegawai masih memiliki dialog kinerja berjalan yang belum selesai." };
+    }
+    const latestReviu = latestDialog.reviu[0];
+    if (!latestReviu) {
+      return { error: "Dialog kinerja sebelumnya belum memiliki reviu." };
+    }
+    if (latestReviu.status !== "selesai") {
+      return { error: "Reviu untuk dialog kinerja sebelumnya belum selesai divalidasi." };
+    }
+
+    idDialogInduk = latestDialog.id;
+
+    const parent = await prisma.dialogKinerja.findFirst({
+      where: { id: latestDialog.id },
+      include: {
+        aspek: {
+          include: {
+            item: {
+              select: {
+                dialog_evaluasi: true,
+                kompetensi_dikembangkan: true,
+                id_metode_pengembangan: true,
+                metode_pengembangan_lainnya: true,
+                waktu_pelaksanaan: true,
+                is_tercapai: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    aspekData = Object.values(JenisAspek).map((jenis_aspek) => {
+      const parentAspek = parent?.aspek.find((a) => a.jenis_aspek === jenis_aspek);
+      const belumTercapai = (parentAspek?.item ?? []).filter((item) => item.is_tercapai === false);
+      return {
+        jenis_aspek,
+        tanggung_jawab_pegawai: parentAspek?.tanggung_jawab_pegawai,
+        tanggung_jawab_atasan: parentAspek?.tanggung_jawab_atasan,
+        item: {
+          create: belumTercapai.map((item) => ({
+            dialog_evaluasi: item.dialog_evaluasi,
+            kompetensi_dikembangkan: item.kompetensi_dikembangkan,
+            id_metode_pengembangan: item.id_metode_pengembangan,
+            metode_pengembangan_lainnya: item.metode_pengembangan_lainnya,
+            waktu_pelaksanaan: item.waktu_pelaksanaan,
+          })),
+        },
+      };
+    });
+  } else {
+    aspekData = Object.values(JenisAspek).map((jenis_aspek) => ({
+      jenis_aspek,
+    }));
+  }
+
   const dialog = await prisma.dialogKinerja.create({
     data: {
       id_atasan: session.id,
       id_pegawai: pegawaiId,
       periode_tahun: new Date().getFullYear(),
+      id_dialog_induk: idDialogInduk,
       status: "draft_atasan",
       aspek: {
-        create: Object.values(JenisAspek).map((jenis_aspek) => ({
-          jenis_aspek,
-        })),
+        create: aspekData,
       },
     },
     select: { id: true },
   });
+
   revalidatePath("/atasan/dialog");
   return { dialogId: dialog.id };
 }

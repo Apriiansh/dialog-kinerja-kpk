@@ -6,6 +6,8 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
 
+import { getDialogSequenceMap } from "@/lib/queries/dialog";
+
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -26,8 +28,11 @@ export default async function AdminMonitoringPage({
       where,
       select: {
         id: true,
+        id_pegawai: true,
         periode_tahun: true,
         status: true,
+        id_dialog_induk: true,
+        dialog_induk: { select: { periode_tahun: true } },
         updated_at: true,
         pegawai: { select: { npp: true, nama_pegawai: true } },
         atasan: { select: { nama_pegawai: true } },
@@ -39,6 +44,9 @@ export default async function AdminMonitoringPage({
     prisma.dialogKinerja.count({ where }),
     prisma.dialogKinerja.count({ where: { status: "selesai" } }),
   ]);
+
+  const dialogIds = dialogs.map((d) => d.id);
+  const seqMap = await getDialogSequenceMap(dialogIds);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
@@ -75,24 +83,36 @@ export default async function AdminMonitoringPage({
             <span>Status</span>
           </div>
           <ul className="divide-y divide-outline">
-            {dialogs.map((d) => (
-              <li key={d.id}>
-                <Link
-                  href={`/admin/monitoring/${d.id}`}
-                  className="flex flex-col gap-1 px-5 py-4 transition-colors hover:bg-surface-muted/40 lg:grid lg:grid-cols-[1fr_160px_120px_120px] lg:items-center lg:gap-4"
-                >
-                  <div className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm font-semibold text-ink">
-                      {d.pegawai?.nama_pegawai}
+            {dialogs.map((d) => {
+              const seq = seqMap.get(d.id);
+              return (
+                <li key={d.id}>
+                  <Link
+                    href={`/admin/monitoring/${d.id}`}
+                    className="flex flex-col gap-1 px-5 py-4 transition-colors hover:bg-surface-muted/40 lg:grid lg:grid-cols-[1fr_160px_120px_120px] lg:items-center lg:gap-4"
+                  >
+                    <div className="flex min-w-0 flex-col">
+                      <span className="truncate text-sm font-semibold text-ink">
+                        {d.pegawai?.nama_pegawai}
+                      </span>
+                      <span className="text-xs text-ink-muted">
+                        NPP {d.pegawai?.npp}
+                      </span>
+                    </div>
+                    <span className="truncate text-sm text-ink">
+                      {d.atasan?.nama_pegawai ?? "—"}
                     </span>
-                    <span className="text-xs text-ink-muted">
-                      NPP {d.pegawai?.npp}
+                    <span className="flex flex-col gap-1 text-sm text-ink">
+                      <span>
+                        {seq ? `Dialog Ke-${seq} ` : ""}
+                        (Tahun {d.periode_tahun})
+                      </span>
+                      {d.dialog_induk ? (
+                        <span className="w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                          Lanjutan dari {d.dialog_induk.periode_tahun}
+                        </span>
+                      ) : null}
                     </span>
-                  </div>
-                  <span className="truncate text-sm text-ink">
-                    {d.atasan?.nama_pegawai ?? "—"}
-                  </span>
-                  <span className="text-sm text-ink">{d.periode_tahun}</span>
                   <span className="flex justify-start lg:justify-end">
                     <StatusBadge status={d.status} />
                   </span>

@@ -32,6 +32,7 @@ export async function createDialogLanjutan(
       id: reviuId,
       status: "selesai",
       dialog: {
+        status: "selesai",
         OR: [{ id_pegawai: session.id }, { id_atasan: session.id }],
       },
     },
@@ -63,11 +64,25 @@ export async function createDialogLanjutan(
 
   const parent = reviu.dialog;
   const isPegawai = session.role === "PEGAWAI";
+  const hasLanjutan = await prisma.dialogKinerja.count({
+    where: { id_dialog_induk: parent.id },
+  });
+  if (hasLanjutan > 0) {
+    return { error: "Dialog lanjutan untuk reviu ini sudah dibuat." };
+  }
+
+  const hasBelumTercapai = parent.aspek.some((aspek) =>
+    aspek.item.some((item) => item.is_tercapai === false),
+  );
+  if (!hasBelumTercapai) {
+    return { error: "Tidak ada item evaluasi yang belum tercapai." };
+  }
 
   const tahunBerjalan = new Date().getFullYear();
 
+  let newDialog: number;
   try {
-    const newDialog = await prisma.$transaction(async (tx) => {
+    newDialog = await prisma.$transaction(async (tx) => {
       const created = await tx.dialogKinerja.create({
         data: {
           id_atasan: parent.id_atasan,
@@ -104,41 +119,41 @@ export async function createDialogLanjutan(
       });
       return created.id;
     });
-
-    await createNotification({
-      userId: isPegawai ? parent.id_atasan : parent.id_pegawai,
-      type: "dialog_status",
-      title: "Dialog Kinerja Lanjutan",
-      description: `Dialog kinerja lanjutan tahun ${tahunBerjalan} telah dibuat dari reviu dialog tahun ${parent.periode_tahun}. Item yang belum tercapai otomatis disalin.`,
-      link: isPegawai
-        ? `/atasan/dialog/${newDialog}`
-        : `/pegawai/dialog/${newDialog}`,
-    });
-
-    revalidatePath("/pegawai/reviu");
-    revalidatePath("/atasan/reviu");
-
-    if (session.role === "ATASAN") {
-      flashRedirect(`/atasan/dialog/${newDialog}/edit`, {
-        type: "success",
-        title: "Dialog kinerja lanjutan berhasil dibuat",
-        description:
-          "Item yang belum tercapai telah disalin ke dialog lanjutan. Lengkapi lalu kirim ke pegawai.",
-      });
-    }
-    if (session.role === "ADMIN") {
-      flashRedirect(`/admin/monitoring/${newDialog}`, {
-        type: "success",
-        title: "Dialog kinerja lanjutan berhasil dibuat",
-      });
-    }
-    flashRedirect(`/pegawai/dialog/${newDialog}`, {
-      type: "success",
-      title: "Dialog kinerja lanjutan berhasil dibuat",
-      description:
-        "Item yang belum tercapai telah disalin. Atasan akan mengirim dialog lanjutan untuk Anda.",
-    });
   } catch {
     return { error: "Gagal membuat dialog kinerja lanjutan. Silakan coba lagi." };
   }
+
+  await createNotification({
+    userId: isPegawai ? parent.id_atasan : parent.id_pegawai,
+    type: "dialog_status",
+    title: "Dialog Kinerja Lanjutan",
+    description: `Dialog kinerja lanjutan tahun ${tahunBerjalan} telah dibuat dari reviu dialog tahun ${parent.periode_tahun}. Item yang belum tercapai otomatis disalin.`,
+    link: isPegawai
+      ? `/atasan/dialog/${newDialog}`
+      : `/pegawai/dialog/${newDialog}`,
+  });
+
+  revalidatePath("/pegawai/reviu");
+  revalidatePath("/atasan/reviu");
+
+  if (session.role === "ATASAN") {
+    flashRedirect(`/atasan/dialog/${newDialog}/edit`, {
+      type: "success",
+      title: "Dialog kinerja lanjutan berhasil dibuat",
+      description:
+        "Item yang belum tercapai telah disalin ke dialog lanjutan. Lengkapi lalu kirim ke pegawai.",
+    });
+  }
+  if (session.role === "ADMIN") {
+    flashRedirect(`/admin/monitoring/${newDialog}`, {
+      type: "success",
+      title: "Dialog kinerja lanjutan berhasil dibuat",
+    });
+  }
+  flashRedirect(`/pegawai/dialog/${newDialog}`, {
+    type: "success",
+    title: "Dialog kinerja lanjutan berhasil dibuat",
+    description:
+      "Item yang belum tercapai telah disalin. Atasan akan mengirim dialog lanjutan untuk Anda.",
+  });
 }

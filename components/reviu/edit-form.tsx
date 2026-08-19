@@ -26,6 +26,8 @@ interface ReviuFormProps {
   dialogId?: number;
   reviuId?: number;
   aspek?: ReviuAspekRow[];
+  isLanjutan?: boolean;
+  previousItemKeys?: Set<string>;
   initial?: {
     is_tercapai: boolean;
     is_tidak_tercapai: boolean;
@@ -50,7 +52,14 @@ function buildInitialCapaian(aspek: ReviuAspekRow[] | undefined) {
   return map;
 }
 
-export function ReviuForm({ dialogId, reviuId, aspek, initial }: ReviuFormProps) {
+export function ReviuForm({
+  dialogId,
+  reviuId,
+  aspek,
+  isLanjutan = false,
+  previousItemKeys,
+  initial,
+}: ReviuFormProps) {
   const [capaian, setCapaian] = useState(() => buildInitialCapaian(aspek));
   const [penjelasanTercapai, setPenjelasanTercapai] = useState(
     initial?.penjelasan_tercapai ?? "",
@@ -166,6 +175,13 @@ export function ReviuForm({ dialogId, reviuId, aspek, initial }: ReviuFormProps)
                               ? item.dialog_evaluasi
                               : `Item evaluasi #${item.id}`}
                           </p>
+                          {isLanjutan && previousItemKeys?.has(
+                            `${item.dialog_evaluasi?.trim() ?? ""}|${item.kompetensi_dikembangkan?.trim() ?? ""}`,
+                          ) ? (
+                            <span className="mt-1 inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                              Dari evaluasi sebelumnya
+                            </span>
+                          ) : null}
                           {item.kompetensi_dikembangkan?.trim() ? (
                             <p className="mt-0.5 text-xs leading-4 text-ink-muted">
                               Kompetensi: {item.kompetensi_dikembangkan}

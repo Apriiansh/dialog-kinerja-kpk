@@ -84,6 +84,10 @@ export default async function DialogDetailPage({
   const dialog = await getAtasanDialog(dialogId, session.id);
   if (!dialog) notFound();
 
+  const sequenceNum = await prisma.dialogKinerja.count({
+    where: { id_pegawai: dialog.id_pegawai, id: { lte: dialogId } },
+  });
+
   const status = dialog.status;
   const isDraft = status === "draft_atasan";
   const isReview = status === "menunggu_atasan";
@@ -92,6 +96,10 @@ export default async function DialogDetailPage({
     .filter((r) => r.status === "selesai")
     .map((r) => r.id);
   const latestSelesaiReviuId = selesaiReviuIds[selesaiReviuIds.length - 1];
+  const hasLanjutan = dialog.dialog_lanjutan.length > 0;
+  const hasBelumTercapai = dialog.aspek.some((aspek) =>
+    aspek.item.some((item) => item.is_tercapai === false),
+  );
 
   return (
     <div className="flex flex-col gap-8">
@@ -110,7 +118,7 @@ export default async function DialogDetailPage({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-                  Dialog Kinerja Tahun {dialog.periode_tahun}
+                  Dialog Kinerja Ke-{sequenceNum} (Tahun {dialog.periode_tahun})
                 </h1>
                 <p className="text-sm leading-5 text-ink-muted">
                   Pegawai: {dialog.pegawai.nama_pegawai}
@@ -124,11 +132,16 @@ export default async function DialogDetailPage({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={status} />
+                {dialog.id_dialog_induk ? (
+                  <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                    Dialog Lanjutan
+                  </span>
+                ) : null}
                 {isSelesai ? (
                   <>
                     <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />
                     <UnduhWordLink href={`/api/unduh/dialog/${dialog.id}/docx`} />
-                    {latestSelesaiReviuId ? (
+                    {latestSelesaiReviuId && !hasLanjutan && hasBelumTercapai ? (
                       <EvaluasiLanjutanButton reviuId={latestSelesaiReviuId} />
                     ) : null}
                   </>
@@ -198,7 +211,11 @@ export default async function DialogDetailPage({
         ) : (
           <>
             <section aria-label="Aspek dialog kinerja">
-              <DialogSummary aspek={dialog.aspek} />
+              <DialogSummary
+                aspek={dialog.aspek}
+                isLanjutan={dialog.id_dialog_induk !== null}
+                previousItems={dialog.dialog_induk?.aspek.flatMap((aspek) => aspek.item)}
+              />
             </section>
 
             {status === "menunggu_validasi" ? (

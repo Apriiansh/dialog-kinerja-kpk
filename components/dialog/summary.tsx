@@ -1,5 +1,9 @@
 import { ASPEK_DESC, ASPEK_LABEL } from "@/lib/constants/aspek";
-import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
+import {
+  aspekItemKey,
+  type AspekPegawaiItem,
+  type AspekPegawaiRow,
+} from "@/lib/utils/dialog-display";
 import { AspekPegawaiInput } from "@/components/pegawai/aspek-input";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
@@ -45,14 +49,26 @@ const SUMMARY_SECTIONS: SummarySection[] = [
   },
 ];
 
-export function DialogSummary({ aspek }: { aspek: AspekPegawaiRow[] }) {
+export function DialogSummary({
+  aspek,
+  isLanjutan = false,
+  previousItems,
+}: {
+  aspek: AspekPegawaiRow[];
+  isLanjutan?: boolean;
+  previousItems?: AspekPegawaiItem[];
+}) {
+  const previousItemKeys = new Set(
+    (previousItems ?? []).map((item) => aspekItemKey(item)),
+  );
+  const previousItemStatuses = new Map(
+    (previousItems ?? []).map((item) => [aspekItemKey(item), item.is_tercapai]),
+  );
   const allItems = aspek.flatMap((group) => group.item);
-  const tercapaiCount = allItems.filter((item) => item.is_tercapai === true).length;
-  const tidakTercapaiCount = allItems.filter(
+  const statusItems = isLanjutan && previousItems?.length ? previousItems : allItems;
+  const tercapaiCount = statusItems.filter((item) => item.is_tercapai === true).length;
+  const tidakTercapaiCount = statusItems.filter(
     (item) => item.is_tercapai === false,
-  ).length;
-  const belumDinilaiCount = allItems.filter(
-    (item) => item.is_tercapai === null,
   ).length;
   const hasAssessment = tercapaiCount > 0 || tidakTercapaiCount > 0;
 
@@ -69,11 +85,7 @@ export function DialogSummary({ aspek }: { aspek: AspekPegawaiRow[] }) {
               {tidakTercapaiCount} tidak tercapai
             </span>
           </>
-        ) : (
-          <span className="rounded-full bg-surface-muted px-2.5 py-1 text-xs font-semibold text-ink-muted">
-            {belumDinilaiCount} belum dinilai
-          </span>
-        )}
+        ) : null}
       </div>
 
       {SUMMARY_SECTIONS.map(({ letter, title, desc, groups }) => (
@@ -110,7 +122,12 @@ export function DialogSummary({ aspek }: { aspek: AspekPegawaiRow[] }) {
                     </p>
                   ) : (
                     <>
-                      <AspekPegawaiInput aspek={data} />
+                      <AspekPegawaiInput
+                        aspek={data}
+                        isLanjutan={isLanjutan}
+                        previousItemKeys={previousItemKeys}
+                                              previousItemStatuses={previousItemStatuses}
+                      />
                       {data.tanggung_jawab_atasan?.trim() ? (
                         <div className="flex flex-col gap-1">
                           <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">

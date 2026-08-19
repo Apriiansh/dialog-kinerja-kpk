@@ -105,11 +105,7 @@ export function ReviuSummary({
                   {tidakCount} tidak tercapai
                 </span>
               </>
-            ) : (
-              <span className="rounded-full bg-surface-muted px-2.5 py-1 text-xs font-semibold text-ink-muted">
-                {allItems.length} belum dinilai
-              </span>
-            )}
+            ) : null}
           </div>
         </div>
       ) : null}

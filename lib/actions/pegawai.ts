@@ -94,7 +94,10 @@ function isAspekItemComplete(
   return true;
 }
 
-async function validateSubmitInput(aspekInput: AspekInput[]): Promise<string | null> {
+async function validateSubmitInput(
+  aspekInput: AspekInput[],
+  isLanjutan: boolean,
+): Promise<string | null> {
   const metodeList = await prisma.masterMetodePengembangan.findMany({
     select: { id: true, nama_metode: true },
   });
@@ -112,6 +115,12 @@ async function validateSubmitInput(aspekInput: AspekInput[]): Promise<string | n
       (item) => !isEmptyItem(item),
     );
     if (nonEmptyItems.length === 0) {
+      if (isLanjutan) {
+        if (!aspek.tanggung_jawab_pegawai?.trim()) {
+          problems.push(`${label} tanggung jawab pegawai wajib diisi`);
+        }
+        continue;
+      }
       problems.push(`${label} belum memiliki rincian`);
       continue;
     }
@@ -138,7 +147,13 @@ export async function saveDialogForm(
 
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_pegawai: session.id },
-    select: { id: true, status: true, id_atasan: true, periode_tahun: true },
+    select: {
+      id: true,
+      status: true,
+      id_dialog_induk: true,
+      id_atasan: true,
+      periode_tahun: true,
+    },
   });
   if (!dialog) {
     return { error: "Dialog tidak ditemukan." };
@@ -154,7 +169,10 @@ export async function saveDialogForm(
   }
 
   if (mode === "submit") {
-    const validationError = await validateSubmitInput(aspekInput);
+    const validationError = await validateSubmitInput(
+      aspekInput,
+      dialog.id_dialog_induk !== null,
+    );
     if (validationError) {
       return {
         error: `Lengkapi isian sebelum mengirim ke atasan: ${validationError}`,

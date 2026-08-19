@@ -46,6 +46,20 @@ export const REVIU_INCLUDE = {
         },
         orderBy: { id: "asc" },
       },
+      dialog_induk: {
+        select: {
+          aspek: {
+            select: {
+              item: {
+                select: {
+                  dialog_evaluasi: true,
+                  kompetensi_dikembangkan: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   },
 } as const;
@@ -131,6 +145,7 @@ export async function getDialogAspekItems(dialogId: number) {
 
 export interface SelesaiDialogOption {
   id: number;
+  id_dialog_induk: number | null;
   periode_tahun: number;
   atasan: { nama_pegawai: string; nama_jabatan: string | null };
   _count: { reviu: number };
@@ -143,6 +158,7 @@ export async function getPegawaiSelesaiDialogOptions(
     where: { id_pegawai: pegawaiId, status: "selesai" },
     select: {
       id: true,
+      id_dialog_induk: true,
       periode_tahun: true,
       atasan: { select: { nama_pegawai: true, nama_jabatan: true } },
       _count: { select: { reviu: true } },
