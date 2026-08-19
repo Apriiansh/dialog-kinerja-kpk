@@ -11,6 +11,7 @@ import { UnduhBuktiButton } from "@/components/shared/unduh-bukti-button";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { Separator } from "@/components/ui/separator";
 import { FormulirReviu } from "@/components/reviu/detail-view";
+import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -20,20 +21,6 @@ type PageProps = {
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
   return { title: `Reviu #${id}` };
-}
-
-function TtdImage({ url, alt }: { url: string; alt: string }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-        {alt}
-      </span>
-      <div className="w-56 overflow-hidden rounded-md border border-outline bg-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={alt} className="h-28 w-full object-contain" />
-      </div>
-    </div>
-  );
 }
 
 export default async function AtasanReviuDetailPage({
@@ -52,6 +39,8 @@ export default async function AtasanReviuDetailPage({
   if (!reviu) notFound();
 
   const isSelesai = reviu.status === "selesai";
+  const showEvaluasiLanjutan =
+    isSelesai && reviu.dialog.status === "selesai";
   const isMenungguAtasan =
     reviu.status === "menunggu_atasan" && !reviu.is_valid_atasan;
 
@@ -96,6 +85,9 @@ export default async function AtasanReviuDetailPage({
                       autoPrint={cetak}
                     />
                     <UnduhWordLink href={`/api/unduh/reviu/${reviu.id}/docx`} />
+                    {showEvaluasiLanjutan ? (
+                      <EvaluasiLanjutanButton reviuId={reviu.id} />
+                    ) : null}
                   </>
                 ) : null}
               </div>
@@ -125,23 +117,6 @@ export default async function AtasanReviuDetailPage({
 
         {isMenungguAtasan ? (
           <ReviuSignForm reviuId={reviu.id} role="atasan" />
-        ) : null}
-
-        {reviu.ttd_pegawai_path || reviu.ttd_atasan_path ? (
-          <section
-            aria-label="Tanda tangan reviu"
-            className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
-          >
-            <h2 className="text-sm font-semibold text-ink">Tanda Tangan</h2>
-            <div className="flex flex-wrap gap-6">
-              {reviu.ttd_atasan_path ? (
-                <TtdImage url={reviu.ttd_atasan_path} alt="Tanda tangan atasan" />
-              ) : null}
-              {reviu.ttd_pegawai_path ? (
-                <TtdImage url={reviu.ttd_pegawai_path} alt="Tanda tangan pegawai" />
-              ) : null}
-            </div>
-          </section>
         ) : null}
       </div>
 

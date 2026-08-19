@@ -5,6 +5,7 @@ export const REVIU_INCLUDE = {
   dialog: {
     select: {
       id: true,
+      id_dialog_induk: true,
       periode_tahun: true,
       status: true,
       waktu_validasi_atasan: true,
@@ -27,6 +28,23 @@ export const REVIU_INCLUDE = {
           nama_jabatan: true,
           unit_kerja: true,
         },
+      },
+      aspek: {
+        select: {
+          id: true,
+          jenis_aspek: true,
+          item: {
+            select: {
+              id: true,
+              dialog_evaluasi: true,
+              kompetensi_dikembangkan: true,
+              is_tercapai: true,
+              capaian_keterangan: true,
+            },
+            orderBy: { id: "asc" },
+          },
+        },
+        orderBy: { id: "asc" },
       },
     },
   },
@@ -87,6 +105,27 @@ export async function getDialogReviuList(dialogId: number) {
     where: { id_dialog: dialogId },
     include: REVIU_INCLUDE,
     orderBy: { created_at: "asc" },
+  });
+}
+
+export async function getDialogAspekItems(dialogId: number) {
+  return prisma.dialogKinerjaAspek.findMany({
+    where: { id_dialog: dialogId },
+    select: {
+      id: true,
+      jenis_aspek: true,
+      item: {
+        select: {
+          id: true,
+          dialog_evaluasi: true,
+          kompetensi_dikembangkan: true,
+          is_tercapai: true,
+          capaian_keterangan: true,
+        },
+        orderBy: { id: "asc" },
+      },
+    },
+    orderBy: { id: "asc" },
   });
 }
 

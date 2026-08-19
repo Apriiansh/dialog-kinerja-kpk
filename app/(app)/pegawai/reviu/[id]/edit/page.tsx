@@ -51,6 +51,7 @@ export default async function EditReviuPage({
 
       <ReviuForm
         reviuId={reviu.id}
+        aspek={reviu.dialog.aspek}
         initial={{
           is_tercapai: reviu.is_tercapai,
           is_tidak_tercapai: reviu.is_tidak_tercapai,

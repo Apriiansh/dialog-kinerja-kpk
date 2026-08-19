@@ -16,6 +16,7 @@ import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
 import type { StatusReviu } from "@/generated/prisma/enums";
+import { checkUpcomingReviuReminders } from "@/lib/actions/recurring-notifications";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -44,6 +45,9 @@ export default async function AtasanReviuListPage({
 }) {
   const session = await requireRole("ATASAN");
   const sp = await searchParams;
+
+  await checkUpcomingReviuReminders().catch(() => {});
+
   const rawStatus = typeof sp.status === "string" ? sp.status : undefined;
   const activeStatus: StatusReviu | "semua" =
     rawStatus && (VALID_STATUSES as string[]).includes(rawStatus)

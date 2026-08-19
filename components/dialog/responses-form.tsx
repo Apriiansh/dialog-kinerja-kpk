@@ -17,7 +17,6 @@ import { autosaveResponses, submitEvaluasi } from "@/lib/actions/atasan";
 import { buildDialogSections } from "@/lib/constants/dialog-sections";
 import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
 import { error, success } from "@/components/ui/toast";
-import { SignaturePadField } from "@/components/shared/signature-pad";
 import { AspekPegawaiInput } from "@/components/pegawai/aspek-input";
 
 const SECTION_ICONS = [ChartBarIcon, GaugeIcon, UserFocusIcon, TrendUpIcon] as const;
@@ -40,7 +39,6 @@ export function DialogResponsesForm({
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [savedAt, setSavedAt] = useState<string>("");
   const [setuju, setSetuju] = useState(false);
-  const [ttdDataUrl, setTtdDataUrl] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const valuesRef = useRef(values);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -99,10 +97,6 @@ export function DialogResponsesForm({
       error("Centang persetujuan untuk melanjutkan.");
       return;
     }
-    if (!ttdDataUrl) {
-      error("Tanda tangan wajib diisi.");
-      return;
-    }
 
     setPending(true);
     if (timer.current) clearTimeout(timer.current);
@@ -110,7 +104,7 @@ export function DialogResponsesForm({
 
     const result = await submitEvaluasi(dialogId, {
       setuju,
-      ttdDataUrl,
+      ttdDataUrl: null,
     });
 
     if (result?.error) {
@@ -206,11 +200,10 @@ export function DialogResponsesForm({
             id="evaluasi-heading"
             className="text-sm font-semibold text-ink"
           >
-            Validasi &amp; Tanda Tangan (Atasan)
+            Evaluasi Atasan
           </h2>
           <p className="mt-0.5 text-xs leading-4 text-ink-muted">
-            Tinjau kembali isian pegawai di atas, lalu beri persetujuan dan
-            tanda tangan Anda.
+            Tinjau kembali isian pegawai di atas, lalu beri persetujuan Anda.
           </p>
         </div>
 
@@ -227,12 +220,6 @@ export function DialogResponsesForm({
               Saya telah membaca dan menyetujui seluruh isi dialog kinerja ini.
             </span>
           </label>
-
-          <SignaturePadField
-            onChange={setTtdDataUrl}
-            disabled={pending}
-            label="Tanda Tangan Atasan"
-          />
         </div>
       </section>
 

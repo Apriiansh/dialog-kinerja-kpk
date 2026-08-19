@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeftIcon, ArrowsClockwiseIcon } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
+import { getDialogAspekItems } from "@/lib/queries/reviu";
 import { ReviuForm } from "@/components/reviu/edit-form";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -40,6 +41,8 @@ export default async function NewReviuPage({
   }
 
   const selected = selesaiDialogs.find((d) => d.id === selectedDialogId);
+  const selectedAspek =
+    selectedDialogId !== null ? await getDialogAspekItems(selectedDialogId) : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -118,7 +121,7 @@ export default async function NewReviuPage({
             </p>
           </div>
 
-          <ReviuForm dialogId={selectedDialogId} />
+          <ReviuForm dialogId={selectedDialogId} aspek={selectedAspek ?? []} />
         </div>
       )}
 

@@ -6,7 +6,6 @@ import { SealCheckIcon } from "@phosphor-icons/react";
 import { validateDialog } from "@/lib/actions/pegawai";
 import { Button } from "@/components/ui/button";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
-import { SignaturePadField } from "@/components/shared/signature-pad";
 
 export function ValidationPanel({
   dialogId,
@@ -17,17 +16,16 @@ export function ValidationPanel({
 }) {
   const router = useRouter();
   const [setuju, setSetuju] = useState(false);
-  const [ttdDataUrl, setTtdDataUrl] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
-  const canSubmit = setuju && ttdDataUrl !== null && !pending;
+  const canSubmit = setuju && !pending;
 
   async function handleSubmit() {
     setPending(true);
 
     const result = await validateDialog(dialogId, {
       setuju,
-      ttdDataUrl,
+      ttdDataUrl: null,
     });
 
     if (result?.error) {
@@ -36,7 +34,7 @@ export function ValidationPanel({
       return;
     }
 
-    showSuccess("Dialog berhasil divalidasi dan ditandatangani");
+    showSuccess("Dialog berhasil divalidasi");
     router.refresh();
   }
 
@@ -47,11 +45,10 @@ export function ValidationPanel({
     >
       <div className="border-b border-outline px-5 py-3.5">
         <h2 id="validasi-heading" className="text-sm font-semibold text-ink">
-          Validasi &amp; Tanda Tangan ({roleLabel})
+          Validasi ({roleLabel})
         </h2>
         <p className="mt-0.5 text-xs leading-4 text-ink-muted">
-          Tinjau kembali isi dialog di atas, lalu beri persetujuan dan tanda
-          tangan Anda.
+          Tinjau kembali isi dialog di atas, lalu beri persetujuan Anda.
         </p>
       </div>
 
@@ -69,12 +66,6 @@ export function ValidationPanel({
           </span>
         </label>
 
-        <SignaturePadField
-          onChange={setTtdDataUrl}
-          disabled={pending}
-          label="Tanda Tangan Pegawai"
-        />
-
         <div className="flex justify-end">
           <Button
             type="button"
@@ -84,7 +75,7 @@ export function ValidationPanel({
             onClick={handleSubmit}
           >
             <SealCheckIcon size={16} weight="bold" />
-            Validasi &amp; Tanda Tangani
+            Validasi
           </Button>
         </div>
       </div>

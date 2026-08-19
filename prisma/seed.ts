@@ -632,9 +632,47 @@ async function main() {
         id_atasan: idAtasan,
         periode_tahun: seed.periodeTahun,
       },
-      select: { id: true },
+      select: { id: true, aspek: { select: { item: { select: { id: true } } } } },
     });
-    if (existing) continue;
+    if (existing) {
+      if (seed.aspek.length > 0 && existing.aspek.every((aspek) => aspek.item.length === 0)) {
+        for (const aspek of seed.aspek) {
+          const existingAspek = await prisma.dialogKinerjaAspek.upsert({
+            where: {
+              id_dialog_jenis_aspek: {
+                id_dialog: existing.id,
+                jenis_aspek: aspek.jenis_aspek,
+              },
+            },
+            update: {},
+            create: {
+              id_dialog: existing.id,
+              jenis_aspek: aspek.jenis_aspek,
+              tanggung_jawab_pegawai: aspek.tanggung_jawab_pegawai,
+              tanggung_jawab_atasan: aspek.tanggung_jawab_atasan,
+            },
+            select: { id: true },
+          });
+
+          for (const item of aspek.items) {
+            await prisma.dialogKinerjaItem.create({
+              data: {
+                id_aspek: existingAspek.id,
+                dialog_evaluasi: item.dialog_evaluasi,
+                kompetensi_dikembangkan: item.kompetensi_dikembangkan,
+                id_metode_pengembangan: item.metodeNama
+                  ? metodeById.get(item.metodeNama) ?? null
+                  : null,
+                waktu_pelaksanaan:
+                  item.waktu_pelaksanaan ??
+                  new Date(Date.UTC(seed.periodeTahun, 5, 15)),
+              },
+            });
+          }
+        }
+      }
+      continue;
+    }
 
     const dialog = await prisma.dialogKinerja.create({
       data: {

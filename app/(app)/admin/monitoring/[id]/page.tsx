@@ -17,20 +17,6 @@ export async function generateMetadata({ params }: PageProps) {
   return { title: `Monitoring Dialog #${id}` };
 }
 
-function TtdImage({ url, alt }: { url: string; alt: string }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-        {alt}
-      </span>
-      <div className="w-56 overflow-hidden rounded-md border border-outline bg-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={alt} className="h-28 w-full object-contain" />
-      </div>
-    </div>
-  );
-}
-
 export default async function AdminMonitoringDetailPage({
   params,
 }: PageProps) {
@@ -101,7 +87,7 @@ export default async function AdminMonitoringDetailPage({
               </span>
               <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
                 {dialog.deskripsi_kinerja}
-              </p>
+              </p> 
             </div>
           ) : null}
         </header>
@@ -114,23 +100,6 @@ export default async function AdminMonitoringDetailPage({
       <Separator />
       
       {dialog.reviu.length > 0 ? <ReviuList reviu={dialog.reviu} /> : null}
-
-      {dialog.ttd_pegawai_path || dialog.ttd_atasan_path ? (
-        <section
-          aria-label="Tanda tangan"
-          className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
-        >
-          <h2 className="text-sm font-semibold text-ink">Tanda Tangan</h2>
-          <div className="flex flex-wrap gap-6">
-            {dialog.ttd_pegawai_path ? (
-              <TtdImage url={dialog.ttd_pegawai_path} alt="Tanda tangan pegawai" />
-            ) : null}
-            {dialog.ttd_atasan_path ? (
-              <TtdImage url={dialog.ttd_atasan_path} alt="Tanda tangan atasan" />
-            ) : null}
-          </div>
-        </section>
-      ) : null}
     </div>
   );
 }

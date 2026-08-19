@@ -38,7 +38,6 @@ export default async function AdminNotifikasiPage({
         ...n,
         created_at: n.created_at.toISOString(),
       }))}
-      role="admin"
     />
   );
 }

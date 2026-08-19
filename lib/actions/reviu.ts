@@ -8,6 +8,12 @@ import { assertActiveActor } from "@/lib/auth/guards";
 import { flashRedirect } from "@/lib/utils/flash";
 import { createNotification } from "@/lib/notifications";
 
+export interface ReviuCapaianItem {
+  id: number;
+  is_tercapai: boolean;
+  keterangan?: string;
+}
+
 export interface ReviuInput {
   is_tercapai: boolean;
   is_tidak_tercapai: boolean;
@@ -15,6 +21,7 @@ export interface ReviuInput {
   penjelasan_tidak_tercapai?: string;
   rencana_tindak_lanjut?: string;
   tanggal_next_reviu?: string | null;
+  itemCapaian?: ReviuCapaianItem[];
 }
 
 export interface ReviuSaveState {
@@ -39,20 +46,26 @@ function toNullableDate(value: string | null | undefined): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function validateSubmitInput(input: ReviuInput): string | null {
+function validateSubmitInput(
+  input: ReviuInput,
+  itemIds: number[],
+): string | null {
   const problems: string[] = [];
-  const tercapai = Boolean(input.is_tercapai);
-  const tidakTercapai = Boolean(input.is_tidak_tercapai);
-
-  if (!tercapai && !tidakTercapai) {
-    problems.push("Pilih minimal satu status tindak lanjut");
+  const capaianMap = new Map(
+    (input.itemCapaian ?? []).map((c) => [c.id, c.is_tercapai]),
+  );
+  const allAssessed =
+    itemIds.length > 0 && itemIds.every((id) => capaianMap.has(id));
+  if (!allAssessed) {
+    problems.push("Semua item evaluasi harus ditandai tercapai atau tidak");
   }
-  if (tercapai && !input.penjelasan_tercapai?.trim()) {
-    problems.push("Penjelasan status tercapai wajib diisi");
+  const anyTidakTercapai = itemIds.some((id) => capaianMap.get(id) === false);
+  if (!anyTidakTercapai && !input.penjelasan_tercapai?.trim()) {
+    problems.push("Penjelasan singkat hasilnya wajib diisi");
   }
-  if (tidakTercapai) {
+  if (anyTidakTercapai) {
     if (!input.penjelasan_tidak_tercapai?.trim()) {
-      problems.push("Penjelasan status tidak tercapai wajib diisi");
+      problems.push("Deskripsi penyebab tidak tercapai wajib diisi");
     }
     if (!input.rencana_tindak_lanjut?.trim()) {
       problems.push("Rencana tindak lanjut ke depan wajib diisi");
@@ -62,6 +75,43 @@ function validateSubmitInput(input: ReviuInput): string | null {
     }
   }
   return problems.length > 0 ? problems.join("; ") : null;
+}
+
+function deriveGlobalFlags(
+  itemIds: number[],
+  itemCapaian: ReviuCapaianItem[] | undefined,
+): { is_tercapai: boolean; is_tidak_tercapai: boolean } {
+  const capaianMap = new Map((itemCapaian ?? []).map((c) => [c.id, c]));
+  const assessed = itemIds.filter((id) => capaianMap.has(id));
+  const allTercapai =
+    assessed.length > 0 && assessed.every((id) => capaianMap.get(id)!.is_tercapai);
+  const anyTidakTercapai = assessed.some((id) => !capaianMap.get(id)!.is_tercapai);
+  return { is_tercapai: allTercapai, is_tidak_tercapai: anyTidakTercapai };
+}
+
+async function applyItemCapaian(
+  dialogId: number,
+  itemCapaian: ReviuCapaianItem[] | undefined,
+): Promise<void> {
+  if (!itemCapaian || itemCapaian.length === 0) return;
+  const items = await prisma.dialogKinerjaItem.findMany({
+    where: { aspek: { id_dialog: dialogId } },
+    select: { id: true },
+  });
+  const validIds = new Set(items.map((i) => i.id));
+  const toUpdate = itemCapaian.filter((c) => validIds.has(c.id));
+  if (toUpdate.length === 0) return;
+  await prisma.$transaction(
+    toUpdate.map((c) =>
+      prisma.dialogKinerjaItem.update({
+        where: { id: c.id },
+        data: {
+          is_tercapai: Boolean(c.is_tercapai),
+          capaian_keterangan: toNullable(c.keterangan),
+        },
+      }),
+    ),
+  );
 }
 
 export async function createReviu(
@@ -75,7 +125,13 @@ export async function createReviu(
 
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_pegawai: session.id },
-    select: { id: true, status: true, id_atasan: true, periode_tahun: true },
+    select: {
+      id: true,
+      status: true,
+      id_atasan: true,
+      periode_tahun: true,
+      aspek: { select: { item: { select: { id: true } } } },
+    },
   });
   if (!dialog) {
     return { error: "Dialog tidak ditemukan." };
@@ -84,20 +140,27 @@ export async function createReviu(
     return { error: "Reviu hanya dapat dibuat setelah dialog kinerja selesai." };
   }
 
+  const itemIds = dialog.aspek.flatMap((a) => a.item.map((i) => i.id));
+
   if (mode === "submit") {
-    const validationError = validateSubmitInput(input);
+    const validationError = validateSubmitInput(input, itemIds);
     if (validationError) {
       return { error: `Lengkapi isian sebelum mengirim: ${validationError}` };
     }
   }
+
+  const { is_tercapai, is_tidak_tercapai } = deriveGlobalFlags(
+    itemIds,
+    input.itemCapaian,
+  );
 
   let reviuId: number;
   try {
     const reviu = await prisma.reviu.create({
       data: {
         id_dialog: dialog.id,
-        is_tercapai: Boolean(input.is_tercapai),
-        is_tidak_tercapai: Boolean(input.is_tidak_tercapai),
+        is_tercapai,
+        is_tidak_tercapai,
         penjelasan_tercapai: toNullable(input.penjelasan_tercapai),
         penjelasan_tidak_tercapai: toNullable(input.penjelasan_tidak_tercapai),
         rencana_tindak_lanjut: toNullable(input.rencana_tindak_lanjut),
@@ -111,6 +174,7 @@ export async function createReviu(
     return { error: "Gagal menyimpan reviu. Silakan coba lagi." };
   }
 
+  await applyItemCapaian(dialog.id, input.itemCapaian);
   revalidatePath("/pegawai/dialog");
   revalidatePath("/pegawai/reviu");
 
@@ -143,7 +207,18 @@ export async function saveReviu(
 
   const reviu = await prisma.reviu.findFirst({
     where: { id: reviuId, dialog: { id_pegawai: session.id } },
-    select: { id: true, status: true, dialog: { select: { id: true, id_atasan: true, periode_tahun: true } } },
+    select: {
+      id: true,
+      status: true,
+      dialog: {
+        select: {
+          id: true,
+          id_atasan: true,
+          periode_tahun: true,
+          aspek: { select: { item: { select: { id: true } } } },
+        },
+      },
+    },
   });
   if (!reviu) {
     return { error: "Reviu tidak ditemukan." };
@@ -152,19 +227,26 @@ export async function saveReviu(
     return { error: "Reviu sudah dikirim dan tidak dapat diubah." };
   }
 
+  const itemIds = reviu.dialog.aspek.flatMap((a) => a.item.map((i) => i.id));
+
   if (mode === "submit") {
-    const validationError = validateSubmitInput(input);
+    const validationError = validateSubmitInput(input, itemIds);
     if (validationError) {
       return { error: `Lengkapi isian sebelum mengirim: ${validationError}` };
     }
   }
 
+  const { is_tercapai, is_tidak_tercapai } = deriveGlobalFlags(
+    itemIds,
+    input.itemCapaian,
+  );
+
   try {
     await prisma.reviu.update({
       where: { id: reviu.id },
       data: {
-        is_tercapai: Boolean(input.is_tercapai),
-        is_tidak_tercapai: Boolean(input.is_tidak_tercapai),
+        is_tercapai,
+        is_tidak_tercapai,
         penjelasan_tercapai: toNullable(input.penjelasan_tercapai),
         penjelasan_tidak_tercapai: toNullable(input.penjelasan_tidak_tercapai),
         rencana_tindak_lanjut: toNullable(input.rencana_tindak_lanjut),
@@ -176,6 +258,7 @@ export async function saveReviu(
     return { error: "Gagal menyimpan reviu. Silakan coba lagi." };
   }
 
+  await applyItemCapaian(reviu.dialog.id, input.itemCapaian);
   revalidatePath("/pegawai/reviu");
   revalidatePath(`/pegawai/reviu/${reviu.id}`);
 
@@ -227,9 +310,6 @@ export async function submitReviuAtasan(
   if (!input.setuju) {
     return { error: "Centang persetujuan untuk melanjutkan." };
   }
-  if (!input.ttdDataUrl) {
-    return { error: "Tanda tangan wajib diisi." };
-  }
 
   const reviu = await prisma.reviu.findFirst({
     where: { id: reviuId, dialog: { id_atasan: session.id } },
@@ -242,11 +322,13 @@ export async function submitReviuAtasan(
     return { error: "Reviu belum siap untuk direviu atasan." };
   }
 
-  let ttdUrl: string;
-  try {
-    ttdUrl = await saveTtdFile(input.ttdDataUrl, reviu.dialog.id, "atasan");
-  } catch {
-    return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
+  let ttdUrl: string | null = null;
+  if (input.ttdDataUrl) {
+    try {
+      ttdUrl = await saveTtdFile(input.ttdDataUrl, reviu.dialog.id, "atasan");
+    } catch {
+      return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
+    }
   }
 
   try {
@@ -260,7 +342,7 @@ export async function submitReviuAtasan(
       },
     });
   } catch {
-    return { error: "Gagal menyimpan tanda tangan. Silakan coba lagi." };
+    return { error: "Gagal menyimpan evaluasi. Silakan coba lagi." };
   }
 
   await createNotification({
@@ -290,9 +372,6 @@ export async function validateReviu(
   if (!input.setuju) {
     return { error: "Centang persetujuan untuk melanjutkan." };
   }
-  if (!input.ttdDataUrl) {
-    return { error: "Tanda tangan wajib diisi." };
-  }
 
   const reviu = await prisma.reviu.findFirst({
     where: { id: reviuId, dialog: { id_pegawai: session.id } },
@@ -313,11 +392,13 @@ export async function validateReviu(
     return { error: "Anda sudah melakukan validasi." };
   }
 
-  let ttdUrl: string;
-  try {
-    ttdUrl = await saveTtdFile(input.ttdDataUrl, reviu.dialog.id, "pegawai");
-  } catch {
-    return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
+  let ttdUrl: string | null = null;
+  if (input.ttdDataUrl) {
+    try {
+      ttdUrl = await saveTtdFile(input.ttdDataUrl, reviu.dialog.id, "pegawai");
+    } catch {
+      return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
+    }
   }
 
   try {

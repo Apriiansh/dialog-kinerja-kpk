@@ -38,7 +38,6 @@ export default async function PegawaiNotifikasiPage({
         ...n,
         created_at: n.created_at.toISOString(),
       }))}
-      role="pegawai"
     />
   );
 }

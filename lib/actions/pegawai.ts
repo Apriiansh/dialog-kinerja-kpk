@@ -266,9 +266,6 @@ export async function validateDialog(
   if (!input.setuju) {
     return { error: "Centang persetujuan untuk melanjutkan." };
   }
-  if (!input.ttdDataUrl) {
-    return { error: "Tanda tangan wajib diisi." };
-  }
 
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_pegawai: session.id },
@@ -291,11 +288,13 @@ export async function validateDialog(
     return { error: "Anda sudah melakukan validasi." };
   }
 
-  let ttdUrl: string;
-  try {
-    ttdUrl = await saveTtdFile(input.ttdDataUrl, dialog.id, "pegawai");
-  } catch {
-    return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
+  let ttdUrl: string | null = null;
+  if (input.ttdDataUrl) {
+    try {
+      ttdUrl = await saveTtdFile(input.ttdDataUrl, dialog.id, "pegawai");
+    } catch {
+      return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
+    }
   }
 
   try {

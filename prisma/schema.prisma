@@ -99,8 +99,13 @@ model DialogKinerja {
   atasan  User @relation("DialogAtasan", fields: [id_atasan], references: [id], onDelete: Restrict)
   pegawai User @relation("DialogPegawai", fields: [id_pegawai], references: [id], onDelete: Restrict)
 
+  id_dialog_induk Int?
+
   aspek DialogKinerjaAspek[]
   reviu Reviu[]
+
+  dialog_induk    DialogKinerja? @relation("DialogLanjutan", fields: [id_dialog_induk], references: [id], onDelete: SetNull)
+  dialog_lanjutan DialogKinerja[] @relation("DialogLanjutan")
 
   @@map("dialog_kinerja")
 }
@@ -130,6 +135,8 @@ model DialogKinerjaItem {
   id_metode_pengembangan      Int?
   metode_pengembangan_lainnya String?   @db.VarChar(255)
   waktu_pelaksanaan           DateTime?   @default(now())
+  is_tercapai                 Boolean?   // null = belum direviu
+  capaian_keterangan          String?    @db.Text
   created_at                  DateTime  @default(now())
   updated_at                  DateTime  @updatedAt
 

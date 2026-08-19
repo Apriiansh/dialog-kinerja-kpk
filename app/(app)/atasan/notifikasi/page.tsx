@@ -38,7 +38,6 @@ export default async function AtasanNotifikasiPage({
         ...n,
         created_at: n.created_at.toISOString(),
       }))}
-      role="atasan"
     />
   );
 }

@@ -12,6 +12,7 @@ import {
   type SessionData,
 } from "@/lib/auth/session";
 import { flashRedirect } from "@/lib/utils/flash";
+import { checkUpcomingReviuReminders } from "@/lib/actions/recurring-notifications";
 
 export interface LoginState {
   error?: string;
@@ -71,6 +72,8 @@ export async function loginAction(
   session.role = activeRole;
   session.roles = roles;
   await session.save();
+
+  await checkUpcomingReviuReminders().catch(() => {});
 
   const unreadCount = await prisma.notification.count({
     where: { id_user: user.id, is_read: false },

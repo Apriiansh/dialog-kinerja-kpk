@@ -46,8 +46,36 @@ const SUMMARY_SECTIONS: SummarySection[] = [
 ];
 
 export function DialogSummary({ aspek }: { aspek: AspekPegawaiRow[] }) {
+  const allItems = aspek.flatMap((group) => group.item);
+  const tercapaiCount = allItems.filter((item) => item.is_tercapai === true).length;
+  const tidakTercapaiCount = allItems.filter(
+    (item) => item.is_tercapai === false,
+  ).length;
+  const belumDinilaiCount = allItems.filter(
+    (item) => item.is_tercapai === null,
+  ).length;
+  const hasAssessment = tercapaiCount > 0 || tidakTercapaiCount > 0;
+
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-outline bg-surface px-5 py-3">
+        <span className="text-xs font-semibold text-ink">Status Item Evaluasi:</span>
+        {hasAssessment ? (
+          <>
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+              {tercapaiCount} tercapai
+            </span>
+            <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
+              {tidakTercapaiCount} tidak tercapai
+            </span>
+          </>
+        ) : (
+          <span className="rounded-full bg-surface-muted px-2.5 py-1 text-xs font-semibold text-ink-muted">
+            {belumDinilaiCount} belum dinilai
+          </span>
+        )}
+      </div>
+
       {SUMMARY_SECTIONS.map(({ letter, title, desc, groups }) => (
         <section
           key={letter}

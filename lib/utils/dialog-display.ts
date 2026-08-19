@@ -3,6 +3,7 @@ import type { JenisAspek } from "@/generated/prisma/enums";
 export interface AspekPegawaiItem {
   dialog_evaluasi: string | null;
   kompetensi_dikembangkan: string | null;
+  is_tercapai: boolean | null;
   metode_pengembangan_lainnya: string | null;
   waktu_pelaksanaan: Date | null;
   metode: { nama_metode: string } | null;

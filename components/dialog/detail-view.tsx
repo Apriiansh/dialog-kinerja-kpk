@@ -126,77 +126,14 @@ function TanggungJawabBlock({
   );
 }
 
-function TtdBlock({
-  tanggal,
-  atasanPath,
-  atasanNama,
-  atasanJabatan,
-  pegawaiPath,
-  pegawaiNama,
-  pegawaiJabatan,
-}: {
-  tanggal: Date;
-  atasanPath: string | null;
-  atasanNama?: string | null;
-  atasanJabatan?: string | null;
-  pegawaiPath: string | null;
-  pegawaiNama?: string | null;
-  pegawaiJabatan?: string | null;
-}) {
-  return (
-    <div className="mt-10 break-inside-avoid">
-      <p className="text-center">Jakarta, {formatWaktuPelaksanaan(tanggal)}</p>
-      <div className="mt-8 flex justify-between text-center">
-        <div className="w-1/2">
-          <p className="font-semibold">Atasan Pegawai,</p>
-          {atasanPath ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={atasanPath}
-              alt="Tanda tangan atasan"
-              className="mx-auto mt-3 h-16 object-contain"
-            />
-          ) : (
-            <div className="h-16" />
-          )}
-          <div className="mx-auto mt-2 w-48 border-b-2 border-black" />
-          <p className="mt-1 font-semibold">{atasanNama ?? "—"}</p>
-          <p>{atasanJabatan ?? "Jabatan"}</p>
-        </div>
-        <div className="w-1/2">
-          <p className="font-semibold">Pegawai,</p>
-          {pegawaiPath ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={pegawaiPath}
-              alt="Tanda tangan pegawai"
-              className="mx-auto mt-3 h-16 object-contain"
-            />
-          ) : (
-            <div className="h-16" />
-          )}
-          <div className="mx-auto mt-2 w-48 border-b-2 border-black" />
-          <p className="mt-1 font-semibold">{pegawaiNama ?? "—"}</p>
-          <p>{pegawaiJabatan ?? "Jabatan"}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function FormulirDialogKinerja({
   dialog,
   pegawai,
-  atasan,
 }: {
   dialog: FormulirDialog;
   pegawai?: ActorProfile;
-  atasan?: ActorProfile;
 }) {
   if (dialog.status !== "selesai") return null;
-
-  const tanggalValidasi =
-    dialog.waktu_validasi_atasan ?? dialog.waktu_validasi_pegawai ?? new Date();
 
   const dataRows = [
     { label: "Nama Pegawai", value: pegawai?.nama_pegawai ?? null },
@@ -291,21 +228,6 @@ export function FormulirDialogKinerja({
           })}
         </section>
       ))}
-
-      <div className="mt-8">
-        <p className="text-center font-bold uppercase tracking-wide">
-          Tanda Tangan Dialog Kinerja
-        </p>
-        <TtdBlock
-          tanggal={tanggalValidasi}
-          atasanPath={dialog.ttd_atasan_path}
-          atasanNama={atasan?.nama_pegawai}
-          atasanJabatan={atasan?.nama_jabatan}
-          pegawaiPath={dialog.ttd_pegawai_path}
-          pegawaiNama={pegawai?.nama_pegawai}
-          pegawaiJabatan={pegawai?.nama_jabatan}
-        />
-      </div>
     </div>
   );
 }

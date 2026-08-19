@@ -18,10 +18,8 @@ interface NotificationItem {
 
 export function NotificationList({
   initialNotifications,
-  role,
 }: {
   initialNotifications: NotificationItem[];
-  role: string;
 }) {
   const [notifications, setNotifications] = useState(initialNotifications);
   const unreadCount = notifications.filter((n) => !n.is_read).length;

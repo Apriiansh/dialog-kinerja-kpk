@@ -16,7 +16,7 @@ export function AspekPegawaiInput({ aspek }: { aspek: AspekPegawaiRow }) {
           {items.map((item, itemIndex) => (
             <li
               key={itemIndex}
-              className="flex flex-col gap-2.5 px-4 py-3 text-sm"
+              className="relative flex flex-col gap-2.5 px-4 py-3 pr-32 text-sm"
             >
               <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -54,6 +54,19 @@ export function AspekPegawaiInput({ aspek }: { aspek: AspekPegawaiRow }) {
                   </span>
                 </div>
               </div>
+              {item.is_tercapai === null ? (
+                <span className="absolute right-3 top-3 rounded-full bg-surface-muted px-2 py-0.5 text-[11px] font-semibold text-ink-muted">
+                  Belum dinilai
+                </span>
+              ) : item.is_tercapai ? (
+                <span className="absolute right-3 top-3 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                  Tercapai
+                </span>
+              ) : (
+                <span className="absolute right-3 top-3 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700">
+                  Tidak tercapai
+                </span>
+              )}
             </li>
           ))}
         </ol>

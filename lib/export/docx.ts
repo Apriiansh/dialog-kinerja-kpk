@@ -23,7 +23,6 @@ import {
   isEmptyItem,
   metodeLabel,
 } from "@/lib/utils/dialog-display";
-import { resolveTtdFile } from "@/lib/export/ttd";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
 /* ------------------------------------------------------------------ */
@@ -41,13 +40,6 @@ async function getImageBuffer(filePath: string): Promise<Buffer | null> {
 async function getLogoBuffer(): Promise<Buffer | null> {
   const logoPath = path.join(process.cwd(), "public", "logo-kpk.png");
   return getImageBuffer(logoPath);
-}
-
-async function getTtdBuffer(ttdUrl: string | null): Promise<Buffer | null> {
-  if (!ttdUrl) return null;
-  const filePath = resolveTtdFile(ttdUrl);
-  if (!filePath) return null;
-  return getImageBuffer(filePath);
 }
 
 function txt(text: string, options?: Partial<IRunOptions>): TextRun {
@@ -287,10 +279,8 @@ export async function generateDialogKinerjaDocx(
   if (!isAuthorized)
     throw new Error("Anda tidak memiliki akses ke dokumen dialog ini.");
 
-  const [logoBuf, ttdAtasanBuf, ttdPegawaiBuf] = await Promise.all([
+  const [logoBuf] = await Promise.all([
     getLogoBuffer(),
-    getTtdBuffer(dialog.ttd_atasan_path),
-    getTtdBuffer(dialog.ttd_pegawai_path),
   ]);
 
   const tanggalValidasi =
@@ -410,8 +400,8 @@ export async function generateDialogKinerjaDocx(
     pegawaiName: dialog.pegawai.nama_pegawai || "—",
     pegawaiNpp: dialog.pegawai.npp,
     pegawaiJabatan: dialog.pegawai.nama_jabatan || "Jabatan",
-    ttdAtasanBuf,
-    ttdPegawaiBuf,
+    ttdAtasanBuf: null,
+    ttdPegawaiBuf: null,
   });
 
   /* ---- Assemble document ---- */
@@ -524,10 +514,8 @@ export async function generateReviuDocx(
   if (!isAuthorized)
     throw new Error("Anda tidak memiliki akses ke dokumen reviu ini.");
 
-  const [logoBuf, ttdAtasanBuf, ttdPegawaiBuf] = await Promise.all([
+  const [logoBuf] = await Promise.all([
     getLogoBuffer(),
-    getTtdBuffer(reviu.ttd_atasan_path),
-    getTtdBuffer(reviu.ttd_pegawai_path),
   ]);
 
   const tanggalDialog =
@@ -616,8 +604,8 @@ const sigTable = signatureTable({
     pegawaiName: reviu.dialog.pegawai.nama_pegawai || "—",
     pegawaiNpp: reviu.dialog.pegawai.npp,
     pegawaiJabatan: reviu.dialog.pegawai.nama_jabatan || "Jabatan",
-    ttdAtasanBuf,
-    ttdPegawaiBuf,
+    ttdAtasanBuf: null,
+    ttdPegawaiBuf: null,
   });
 
   /* ---- Assemble ---- */

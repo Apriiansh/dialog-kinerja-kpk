@@ -16,6 +16,7 @@ import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { FormulirDialogKinerja } from "@/components/dialog/detail-view";
 import { ReviuList } from "@/components/reviu/list";
 import { Separator } from "@/components/ui/separator";
+import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -74,20 +75,6 @@ function StatusNote({
   return null;
 }
 
-function TtdImage({ url, alt }: { url: string; alt: string }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-        {alt}
-      </span>
-      <div className="w-56 overflow-hidden rounded-md border border-outline bg-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={alt} className="h-28 w-full object-contain" />
-      </div>
-    </div>
-  );
-}
-
 export default async function DialogDetailPage({
   params,
   searchParams,
@@ -110,7 +97,10 @@ export default async function DialogDetailPage({
   const isSelesai = dialog.status === "selesai";
   const showValidation =
     canValidateDialog(dialog.status) && !dialog.is_valid_pegawai;
-  const latestReviu = dialog.reviu[dialog.reviu.length - 1];
+  const selesaiReviuIds = dialog.reviu
+    .filter((r) => r.status === "selesai")
+    .map((r) => r.id);
+  const latestSelesaiReviuId = selesaiReviuIds[selesaiReviuIds.length - 1];
 
   return (
     <div className="flex flex-col gap-8">
@@ -146,6 +136,9 @@ export default async function DialogDetailPage({
                   <>
                     <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />
                     <UnduhWordLink href={`/api/unduh/dialog/${dialog.id}/docx`} />
+                    {latestSelesaiReviuId ? (
+                      <EvaluasiLanjutanButton reviuId={latestSelesaiReviuId} />
+                    ) : null}
                   </>
                 ) : null}
               </div>
@@ -192,31 +185,6 @@ export default async function DialogDetailPage({
           <ValidationPanel dialogId={dialog.id} roleLabel="Pegawai" />
         ) : null}
 
-        {dialog.ttd_pegawai_path || dialog.ttd_atasan_path ? (
-          <section
-            aria-label="Tanda tangan dialog kinerja"
-            className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
-          >
-            <h2 className="text-sm font-semibold text-ink">
-              Tanda Tangan Dialog Kinerja
-            </h2>
-            <div className="flex flex-wrap gap-6">
-              {dialog.ttd_pegawai_path ? (
-                <TtdImage
-                  url={dialog.ttd_pegawai_path}
-                  alt="Tanda tangan pegawai"
-                />
-              ) : null}
-              {dialog.ttd_atasan_path ? (
-                <TtdImage
-                  url={dialog.ttd_atasan_path}
-                  alt="Tanda tangan atasan"
-                />
-              ) : null}
-            </div>
-          </section>
-        ) : null}
-
         {isSelesai && dialog.reviu.length > 0 ? (
           <div className="flex flex-col gap-8">
             <Separator />
@@ -224,31 +192,6 @@ export default async function DialogDetailPage({
               reviu={dialog.reviu}
               href={(id) => `/pegawai/reviu/${id}`}
             />
-
-            {latestReviu?.ttd_pegawai_path || latestReviu?.ttd_atasan_path ? (
-              <section
-                aria-label="Tanda tangan reviu dialog kinerja"
-                className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
-              >
-                <h2 className="text-sm font-semibold text-ink">
-                  Tanda Tangan Reviu Dialog Kinerja
-                </h2>
-                <div className="flex flex-wrap gap-6">
-                  {latestReviu.ttd_pegawai_path ? (
-                    <TtdImage
-                      url={latestReviu.ttd_pegawai_path}
-                      alt="Tanda tangan pegawai"
-                    />
-                  ) : null}
-                  {latestReviu.ttd_atasan_path ? (
-                    <TtdImage
-                      url={latestReviu.ttd_atasan_path}
-                      alt="Tanda tangan atasan"
-                    />
-                  ) : null}
-                </div>
-              </section>
-            ) : null}
           </div>
         ) : null}
       </div>
@@ -257,7 +200,6 @@ export default async function DialogDetailPage({
         <FormulirDialogKinerja
           dialog={dialog}
           pegawai={pegawai ?? { nama_pegawai: session.nama }}
-          atasan={dialog.atasan}
         />
       ) : null}
     </div>

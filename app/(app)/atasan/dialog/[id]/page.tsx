@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, PencilSimple, PaperPlaneTilt } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/auth/session";
 import { getAtasanDialog } from "@/lib/queries/atasan";
-import { getDialogActor } from "@/lib/queries/dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DeleteDialogButton } from "@/components/dialog/delete-button";
 import { DialogSummary } from "@/components/dialog/summary";
@@ -16,6 +15,7 @@ import { ReviuSignForm } from "@/components/reviu/sign-form";
 import { ScrollToAnchor } from "@/components/shared/scroll-to-anchor";
 import { Separator } from "@/components/ui/separator";
 import { submitDialog } from "@/lib/actions/atasan";
+import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -69,20 +69,6 @@ function StatusNote({ status }: { status: string }) {
   return null;
 }
 
-function TtdImage({ url, alt }: { url: string; alt: string }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-        {alt}
-      </span>
-      <div className="w-56 overflow-hidden rounded-md border border-outline bg-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={alt} className="h-28 w-full object-contain" />
-      </div>
-    </div>
-  );
-}
-
 export default async function DialogDetailPage({
   params,
   searchParams,
@@ -95,17 +81,17 @@ export default async function DialogDetailPage({
   const dialogId = Number(id);
   if (Number.isNaN(dialogId)) notFound();
 
-  const [dialog, atasan] = await Promise.all([
-    getAtasanDialog(dialogId, session.id),
-    getDialogActor(session.id),
-  ]);
+  const dialog = await getAtasanDialog(dialogId, session.id);
   if (!dialog) notFound();
 
   const status = dialog.status;
   const isDraft = status === "draft_atasan";
   const isReview = status === "menunggu_atasan";
   const isSelesai = status === "selesai";
-  const latestReviu = dialog.reviu[dialog.reviu.length - 1];
+  const selesaiReviuIds = dialog.reviu
+    .filter((r) => r.status === "selesai")
+    .map((r) => r.id);
+  const latestSelesaiReviuId = selesaiReviuIds[selesaiReviuIds.length - 1];
 
   return (
     <div className="flex flex-col gap-8">
@@ -142,6 +128,9 @@ export default async function DialogDetailPage({
                   <>
                     <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />
                     <UnduhWordLink href={`/api/unduh/dialog/${dialog.id}/docx`} />
+                    {latestSelesaiReviuId ? (
+                      <EvaluasiLanjutanButton reviuId={latestSelesaiReviuId} />
+                    ) : null}
                   </>
                 ) : null}
                 {isDraft ? (
@@ -218,60 +207,10 @@ export default async function DialogDetailPage({
               </p>
             ) : null}
 
-            {dialog.ttd_pegawai_path || dialog.ttd_atasan_path ? (
-              <section
-                aria-label="Tanda tangan dialog kinerja"
-                className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
-              >
-                <h2 className="text-sm font-semibold text-ink">
-                  Tanda Tangan Dialog Kinerja
-                </h2>
-                <div className="flex flex-wrap gap-6">
-                  {dialog.ttd_pegawai_path ? (
-                    <TtdImage
-                      url={dialog.ttd_pegawai_path}
-                      alt="Tanda tangan pegawai"
-                    />
-                  ) : null}
-                  {dialog.ttd_atasan_path ? (
-                    <TtdImage
-                      url={dialog.ttd_atasan_path}
-                      alt="Tanda tangan atasan"
-                    />
-                  ) : null}
-                </div>
-              </section>
-            ) : null}
-
             {isSelesai && dialog.reviu.length > 0 ? (
               <div id="reviu" className="flex scroll-mt-14 flex-col gap-8">
                 <Separator />
                 <ReviuList reviu={dialog.reviu} />
-
-                {latestReviu?.ttd_pegawai_path || latestReviu?.ttd_atasan_path ? (
-                  <section
-                    aria-label="Tanda tangan reviu dialog kinerja"
-                    className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
-                  >
-                    <h2 className="text-sm font-semibold text-ink">
-                      Tanda Tangan Reviu Dialog Kinerja
-                    </h2>
-                    <div className="flex flex-wrap gap-6">
-                      {latestReviu.ttd_pegawai_path ? (
-                        <TtdImage
-                          url={latestReviu.ttd_pegawai_path}
-                          alt="Tanda tangan pegawai"
-                        />
-                      ) : null}
-                      {latestReviu.ttd_atasan_path ? (
-                        <TtdImage
-                          url={latestReviu.ttd_atasan_path}
-                          alt="Tanda tangan atasan"
-                        />
-                      ) : null}
-                    </div>
-                  </section>
-                ) : null}
 
                 {dialog.reviu.some(
                   (r) => r.status === "menunggu_atasan" && !r.is_valid_atasan,
@@ -296,7 +235,6 @@ export default async function DialogDetailPage({
         <FormulirDialogKinerja
           dialog={dialog}
           pegawai={dialog.pegawai}
-          atasan={atasan ?? { nama_pegawai: session.nama }}
         />
       ) : null}
     </div>

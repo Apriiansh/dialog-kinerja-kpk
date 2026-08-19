@@ -6,7 +6,6 @@ import { SealCheckIcon } from "@phosphor-icons/react";
 import { submitReviuAtasan, validateReviu } from "@/lib/actions/reviu";
 import { Button } from "@/components/ui/button";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
-import { SignaturePadField } from "@/components/shared/signature-pad";
 
 export function ReviuSignForm({
   reviuId,
@@ -17,16 +16,15 @@ export function ReviuSignForm({
 }) {
   const router = useRouter();
   const [setuju, setSetuju] = useState(false);
-  const [ttdDataUrl, setTtdDataUrl] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
-  const canSubmit = setuju && ttdDataUrl !== null && !pending;
+  const canSubmit = setuju && !pending;
   const label = role === "atasan" ? "Atasan" : "Pegawai";
 
   async function handleSubmit() {
     setPending(true);
 
-    const input = { setuju, ttdDataUrl };
+    const input = { setuju, ttdDataUrl: null };
     const result =
       role === "atasan"
         ? await submitReviuAtasan(reviuId, input)
@@ -40,7 +38,7 @@ export function ReviuSignForm({
 
     showSuccess(
       role === "atasan"
-        ? "Reviu berhasil ditandatangani, menunggu validasi pegawai"
+        ? "Reviu berhasil disetujui, menunggu validasi pegawai"
         : "Reviu berhasil divalidasi dan selesai",
     );
     router.refresh();
@@ -56,11 +54,10 @@ export function ReviuSignForm({
           id="reviu-sign-heading"
           className="text-sm font-semibold text-ink"
         >
-          Reviu &amp; Tanda Tangan ({label})
+          Reviu ({label})
         </h2>
         <p className="mt-0.5 text-xs leading-4 text-ink-muted">
-          Tinjau kembali isi reviu di atas, lalu beri persetujuan dan tanda
-          tangan Anda.
+          Tinjau kembali isi reviu di atas, lalu beri persetujuan Anda.
         </p>
       </div>
 
@@ -78,12 +75,6 @@ export function ReviuSignForm({
           </span>
         </label>
 
-        <SignaturePadField
-          onChange={setTtdDataUrl}
-          disabled={pending}
-          label={`Tanda Tangan ${label}`}
-        />
-
         <div className="flex justify-end">
           <Button
             type="button"
@@ -93,9 +84,7 @@ export function ReviuSignForm({
             onClick={handleSubmit}
           >
             <SealCheckIcon size={16} weight="bold" />
-            {role === "atasan"
-              ? "Reviu & Tanda Tangani"
-              : "Validasi & Tanda Tangani"}
+            {role === "atasan" ? "Setujui Reviu" : "Validasi Reviu"}
           </Button>
         </div>
       </div>
