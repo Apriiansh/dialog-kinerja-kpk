@@ -56,6 +56,12 @@ const PEGAWAI_NAV_GROUPS: NavGroup[] = [
         label: "Reviu Dialog Kinerja",
         icon: ArrowsClockwiseIcon,
       },
+      {
+        href: "/pegawai/notifikasi",
+        label: "Notifikasi",
+        icon: BellIcon,
+        exact: true,
+      },
     ],
   },
 ];
@@ -90,6 +96,12 @@ const ATASAN_NAV_GROUPS: NavGroup[] = [
         label: "Riwayat",
         icon: ClockCounterClockwiseIcon,
       },
+      {
+        href: "/atasan/notifikasi",
+        label: "Notifikasi",
+        icon: BellIcon,
+        exact: true,
+      },
     ],
   },
 ];
@@ -119,7 +131,12 @@ const ADMIN_NAV_GROUPS: NavGroup[] = [
         label: "Metode Pengembangan",
         icon: ListChecksIcon,
       },
-      
+      {
+        href: "/admin/notifikasi",
+        label: "Notifikasi",
+        icon: BellIcon,
+        exact: true,
+      },
     ],
   },
 ];

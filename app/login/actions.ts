@@ -72,9 +72,16 @@ export async function loginAction(
   session.roles = roles;
   await session.save();
 
+  const unreadCount = await prisma.notification.count({
+    where: { id_user: user.id, is_read: false },
+  });
+
   flashRedirect(homePathForRole(activeRole), {
     type: "success",
     title: `Selamat datang, ${user.nama_pegawai}`,
-    description: `Anda masuk sebagai ${activeRole === "ADMIN" ? "Admin" : activeRole === "ATASAN" ? "Atasan" : "Pegawai"}.`,
+    description:
+      unreadCount > 0
+        ? `Anda memiliki ${unreadCount} notifikasi yang belum dibaca.`
+        : `Anda masuk sebagai ${activeRole === "ADMIN" ? "Admin" : activeRole === "ATASAN" ? "Atasan" : "Pegawai"}.`,
   });
 }

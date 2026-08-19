@@ -4,8 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { BellIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getUnreadCountAction, markAsRead } from "@/lib/actions/notification";
-import { getRecentNotifications } from "@/lib/queries/notification";
+import { getUnreadCountAction, markAsRead, getRecentNotificationsAction } from "@/lib/actions/notification";
 import { formatDistanceToNow } from "@/lib/utils/format";
 
 interface NotificationItem {
@@ -52,7 +51,7 @@ export function NotificationBell({ role }: { role: string }) {
       const count = await getUnreadCountAction();
       setUnreadCount(count);
       if (count > 0) {
-        const notifications = await getRecentNotifications(0, 5);
+        const notifications = await getRecentNotificationsAction(5);
         setRecent(
           notifications.map((n) => ({
             ...n,

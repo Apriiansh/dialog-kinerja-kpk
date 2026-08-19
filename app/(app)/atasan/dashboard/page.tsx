@@ -4,6 +4,7 @@ import {
   CheckCircleIcon,
   HourglassIcon,
   ArrowRightIcon,
+  BellIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -15,6 +16,7 @@ import {
 } from "@/components/dashboard/charts";
 import { ChartCard } from "@/components/dashboard/chart-card";
 import { DIALOG_STATUS_CHART } from "@/lib/utils/chart-colors";
+import { formatDistanceToNow } from "@/lib/utils/format";
 import type { StatusDialog } from "@/generated/prisma/enums";
 
 const STATUS_ORDER: StatusDialog[] = [
@@ -36,7 +38,7 @@ function greeting() {
 export default async function AtasanDashboardPage() {
   const session = await requireAuth();
 
-  const [pegawai, dialogs] = await Promise.all([
+  const [pegawai, dialogs, recentNotifications] = await Promise.all([
     prisma.user.findMany({
       where: { id_atasan: session.id, is_active: true },
       select: {
@@ -61,6 +63,19 @@ export default async function AtasanDashboardPage() {
         },
       },
       orderBy: { updated_at: "desc" },
+    }),
+    prisma.notification.findMany({
+      where: { id_user: session.id },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        link: true,
+        is_read: true,
+        created_at: true,
+      },
+      orderBy: { created_at: "desc" },
+      take: 5,
     }),
   ]);
 
@@ -291,6 +306,49 @@ export default async function AtasanDashboardPage() {
           )}
         </ChartCard>
       </section>
+
+      {/* Recent Notifications */}
+      {recentNotifications.length > 0 && (
+        <section aria-label="Notifikasi terbaru" className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-ink">Notifikasi Terbaru</h2>
+            <Link
+              href="/atasan/notifikasi"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-primary-strong"
+            >
+              Lihat Semua
+              <ArrowRightIcon size={14} weight="bold" />
+            </Link>
+          </div>
+          <ul className="flex flex-col gap-2">
+            {recentNotifications.map((n) => (
+              <li key={n.id}>
+                <Link
+                  href={n.link}
+                  className={`flex gap-4 rounded-lg border bg-surface px-5 py-3 transition-colors hover:border-outline-strong hover:shadow-ambient ${
+                    n.is_read ? "border-outline" : "border-l-primary border-l-2 border-outline"
+                  }`}
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
+                    <BellIcon size={16} weight="bold" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-sm ${n.is_read ? "font-medium text-ink" : "font-semibold text-ink"}`}>
+                      {n.title}
+                    </p>
+                    <p className="mt-0.5 text-xs text-ink-muted line-clamp-1">
+                      {n.description}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-[10px] text-ink-muted">
+                    {formatDistanceToNow(n.created_at)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

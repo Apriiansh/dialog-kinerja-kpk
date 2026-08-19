@@ -9,6 +9,7 @@ import {
   PencilSimpleIcon,
   ShieldCheckIcon,
   ArrowRightIcon,
+  BellIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/session";
@@ -17,6 +18,7 @@ import { StatusBars, Donut, type ChartDatum } from "@/components/dashboard/chart
 import { ChartCard } from "@/components/dashboard/chart-card";
 import { DIALOG_STATUS_CHART } from "@/lib/utils/chart-colors";
 import { ASPEK_ORDER } from "@/lib/constants/aspek";
+import { formatDistanceToNow } from "@/lib/utils/format";
 import type { StatusDialog } from "@/generated/prisma/enums";
 
 const STATUS_ORDER: StatusDialog[] = [
@@ -86,7 +88,7 @@ export default async function PegawaiDashboardPage({
 
   const session = await requireAuth();
 
-  const [user, dialogs, reviu] = await Promise.all([
+  const [user, dialogs, reviu, recentNotifications] = await Promise.all([
     prisma.user.findUnique({
       where: { id: session.id },
       select: { npp: true, nama_jabatan: true, unit_kerja: true },
@@ -104,6 +106,19 @@ export default async function PegawaiDashboardPage({
     prisma.reviu.findMany({
       where: { dialog: { id_pegawai: session.id } },
       select: { is_tercapai: true, is_tidak_tercapai: true },
+    }),
+    prisma.notification.findMany({
+      where: { id_user: session.id },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        link: true,
+        is_read: true,
+        created_at: true,
+      },
+      orderBy: { created_at: "desc" },
+      take: 5,
     }),
   ]);
 
@@ -353,6 +368,49 @@ export default async function PegawaiDashboardPage({
           </ul>
         )}
       </section>
+
+      {/* Recent Notifications */}
+      {recentNotifications.length > 0 && (
+        <section aria-label="Notifikasi terbaru" className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-ink">Notifikasi Terbaru</h2>
+            <Link
+              href="/pegawai/notifikasi"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-primary-strong"
+            >
+              Lihat Semua
+              <ArrowRightIcon size={14} weight="bold" />
+            </Link>
+          </div>
+          <ul className="flex flex-col gap-2">
+            {recentNotifications.map((n) => (
+              <li key={n.id}>
+                <Link
+                  href={n.link}
+                  className={`flex gap-4 rounded-lg border bg-surface px-5 py-3 transition-colors hover:border-outline-strong hover:shadow-ambient ${
+                    n.is_read ? "border-outline" : "border-l-primary border-l-2 border-outline"
+                  }`}
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
+                    <BellIcon size={16} weight="bold" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className={`text-sm ${n.is_read ? "font-medium text-ink" : "font-semibold text-ink"}`}>
+                      {n.title}
+                    </p>
+                    <p className="mt-0.5 text-xs text-ink-muted line-clamp-1">
+                      {n.description}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-[10px] text-ink-muted">
+                    {formatDistanceToNow(n.created_at)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
