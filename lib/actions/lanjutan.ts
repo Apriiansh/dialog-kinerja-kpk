@@ -73,13 +73,6 @@ export async function createDialogLanjutan(
     return { error: "Dialog lanjutan untuk reviu ini sudah dibuat." };
   }
 
-  const hasBelumTercapai = parent.aspek.some((aspek) =>
-    aspek.item.some((item) => item.is_tercapai === false),
-  );
-  if (!hasBelumTercapai) {
-    return { error: "Tidak ada item evaluasi yang belum tercapai." };
-  }
-
   const now = new Date();
   const tahunBerjalan = customPeriode?.periode_tahun ?? now.getFullYear();
   const triwulan = customPeriode?.triwulan ?? getTriwulanFromDate(now);

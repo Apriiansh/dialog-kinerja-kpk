@@ -47,6 +47,9 @@ export const REVIU_INCLUDE = {
         },
         orderBy: { id: "asc" },
       },
+      dialog_lanjutan: {
+        select: { id: true },
+      },
       dialog_induk: {
         select: {
           aspek: {

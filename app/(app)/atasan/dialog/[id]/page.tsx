@@ -143,7 +143,7 @@ export default async function DialogDetailPage({
                   <>
                     <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />
                     <UnduhWordLink href={`/api/unduh/dialog/${dialog.id}/docx`} />
-                    {latestSelesaiReviuId && !hasLanjutan && hasBelumTercapai ? (
+                    {latestSelesaiReviuId && !hasLanjutan ? (
                       <EvaluasiLanjutanButton reviuId={latestSelesaiReviuId} />
                     ) : null}
                   </>

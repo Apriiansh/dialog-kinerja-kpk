@@ -1,17 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowSquareRightIcon, XIcon } from "@phosphor-icons/react";
+import { PlusIcon, XIcon } from "@phosphor-icons/react";
 import { createDialogLanjutan } from "@/lib/actions/lanjutan";
 import { error as showError } from "@/components/ui/toast";
 import type { Triwulan } from "@/generated/prisma/enums";
 
 export function EvaluasiLanjutanButton({
   reviuId,
+  label = "Buat Evaluasi",
   defaultTahun = new Date().getFullYear(),
   defaultTriwulan = "TW3",
 }: {
   reviuId: number;
+  label?: string;
   defaultTahun?: number;
   defaultTriwulan?: Triwulan;
 }) {
@@ -43,8 +45,8 @@ export function EvaluasiLanjutanButton({
         onClick={() => setOpen(true)}
         className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-outline bg-surface px-3.5 text-xs font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted"
       >
-        <ArrowSquareRightIcon size={15} weight="bold" />
-        Evaluasi Lanjutan
+        <PlusIcon size={14} weight="bold" />
+        {label}
       </button>
 
       {open ? (
@@ -66,7 +68,7 @@ export function EvaluasiLanjutanButton({
               Buat Dialog Kinerja Lanjutan
             </h3>
             <p className="mt-1 text-xs leading-5 text-ink-muted">
-              Pilih periode tahun dan triwulan untuk dialog kinerja lanjutan ini. Item evaluasi yang belum tercapai dari dialog sebelumnya akan otomatis disalin.
+              Pilih periode tahun dan triwulan untuk dialog kinerja lanjutan ini. Item yang belum tercapai akan otomatis disalin, atau siklus target baru dapat diisi jika semua target sebelumnya telah tercapai.
             </p>
 
             <form onSubmit={handleCreate} className="mt-5 flex flex-col gap-4">

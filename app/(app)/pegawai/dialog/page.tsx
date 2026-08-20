@@ -432,9 +432,10 @@ export default async function PegawaiDialogListPage({
                     <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-outline/50 pt-3 sm:border-t-0 sm:pt-0">
                       {d.status === "selesai" ? (
                         <>
-                           {latestSelesaiReviu && !hasLanjutan && hasBelumTercapai ? (
+                           {latestSelesaiReviu && !hasLanjutan ? (
                              <EvaluasiLanjutanButton
                                reviuId={latestSelesaiReviu.id}
+                               label={hasBelumTercapai ? 'Evaluasi Lanjutan' : 'Ajukan Evaluasi'}
                              />
                            ) : null}
                            {d.reviu.length === 0 ? (

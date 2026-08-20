@@ -220,33 +220,24 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
                           Dialog Pertama (Baru)
                         </span>
                       );
-                      let canStart = true;
-                      let startLabel = "Mulai Dialog";
-                      let disabledReason = "";
 
                       if (lastDialog) {
                         if (lastDialog.status !== "selesai") {
-                          canStart = false;
-                          disabledReason = "Dialog periode sebelumnya belum selesai divalidasi";
                           statusBadge = (
                             <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200">
                               Masih Berjalan ({formatPeriode(lastDialog.triwulan, lastDialog.periode_tahun)})
                             </span>
                           );
                         } else if (!lastReviu || lastReviu.status !== "selesai") {
-                          canStart = false;
-                          disabledReason = "Evaluasi dialog sebelumnya belum selesai";
                           statusBadge = (
                             <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200">
                               Menunggu Evaluasi ({formatPeriode(lastDialog.triwulan, lastDialog.periode_tahun)})
                             </span>
                           );
                         } else {
-                          canStart = true;
-                          startLabel = "Buat Lanjutan";
                           statusBadge = (
                             <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
-                              Lanjutan dari {formatPeriode(lastDialog.triwulan, lastDialog.periode_tahun)}
+                              Selesai ({formatPeriode(lastDialog.triwulan, lastDialog.periode_tahun)})
                             </span>
                           );
                         }
@@ -280,14 +271,13 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
                             <button
                               type="button"
                               onClick={() => handleStartDialog(p.id)}
-                              disabled={creatingId !== null || !canStart}
-                              title={disabledReason || undefined}
+                              disabled={creatingId !== null}
                               className="inline-flex h-8 items-center gap-1 rounded-md bg-primary px-3 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-40"
                             >
                               {creatingId === p.id ? (
                                 <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                               ) : (
-                                startLabel
+                                "Mulai Dialog"
                               )}
                             </button>
                           </td>

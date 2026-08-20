@@ -159,8 +159,11 @@ export default async function DialogDetailPage({
                         Isi Evaluasi Kinerja
                       </Link>
                     ) : null}
-                    {latestSelesaiReviuId && !hasLanjutan && hasBelumTercapai ? (
-                      <EvaluasiLanjutanButton reviuId={latestSelesaiReviuId} />
+                    {latestSelesaiReviuId && !hasLanjutan ? (
+                      <EvaluasiLanjutanButton
+                        reviuId={latestSelesaiReviuId}
+                        label={hasBelumTercapai ? "Evaluasi Lanjutan" : "Ajukan Evaluasi"}
+                      />
                     ) : null}
                   </>
                 ) : null}
