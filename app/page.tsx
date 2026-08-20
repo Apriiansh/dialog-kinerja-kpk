@@ -5,75 +5,76 @@ import { LandingHeroCarousel } from "@/components/landing-carousel";
 import { LandingSections } from "@/components/landing-sections";
 import { ThemeToggle } from "@/components/theme-toggle";
 
+const TAHOMA = { fontFamily: "Tahoma, 'Segoe UI', Verdana, sans-serif" };
+
 export default async function LandingPage() {
   const session = await getSession();
   const isLoggedIn = Boolean(session?.id);
   const userHomePath = session?.role ? homePathForRole(session.role) : "/login";
 
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-[#070B14] text-slate-800 dark:text-slate-200 font-sans transition-colors duration-200 selection:bg-[#d61a20] selection:text-white overflow-x-hidden scroll-smooth">
-      {/* Top Red-Amber Accent Line */}
-      <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-[#9e1318] via-amber-500 to-[#d61a20]" />
-
+    <div
+      style={TAHOMA}
+      className="min-h-screen flex flex-col bg-[#F6F3EE] dark:bg-[#15120D] text-[#1B1712] dark:text-[#F2EEE7] transition-colors duration-200 selection:bg-[#C8102E] selection:text-white overflow-x-hidden scroll-smooth"
+    >
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#0B101E]/95 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto flex h-16 sm:h-20 items-center justify-between px-3.5 sm:px-6 lg:px-8">
-          {/* Left: KPK Logo & Official Branding */}
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3.5 group min-w-0">
-            <div className="relative h-9 w-7.5 sm:h-12 sm:w-10 shrink-0 drop-shadow-xs transition-transform duration-200 group-hover:scale-105">
+      <header className="sticky top-0 z-50 w-full bg-[#F6F3EE]/80 dark:bg-[#15120D]/80 backdrop-blur-xl supports-[backdrop-filter]:bg-[#F6F3EE]/60 dark:supports-[backdrop-filter]:bg-[#15120D]/60">
+        <div className="max-w-7xl mx-auto flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+          {/* Left: Logo & Brand */}
+          <Link href="/" className="flex items-center gap-2.5 group min-w-0">
+            <div className="relative h-8 w-6.5 sm:h-10 sm:w-8 shrink-0 transition-transform duration-200 group-hover:scale-105">
               <Image
                 src="/images/logo-kpk-badge.png"
-                alt="Logo Komisi Pemberantasan Korupsi"
+                alt="Logo KPK"
                 fill
                 priority
                 className="object-contain"
               />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[9px] sm:text-xs font-bold tracking-wider text-[#d61a20] dark:text-red-400 uppercase truncate">
-                Komisi Pemberantasan Korupsi
+              <span className="text-[10px] sm:text-xs font-bold tracking-widest text-[#C8102E] dark:text-[#FF7A86] uppercase leading-none">
+                KPK
               </span>
-              <span className="text-sm sm:text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none truncate">
-                DIALOG KINERJA
-              </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-normal mt-0.5 hidden lg:block">
-                Sistem Terintegrasi Pengelolaan Capaian & IDP Pegawai
+              <span className="text-xs sm:text-base md:text-lg font-bold tracking-tight text-[#1B1712] dark:text-white leading-tight">
+                Dialog Kinerja
               </span>
             </div>
           </Link>
 
-          {/* Middle: Navigation Anchor Links (Desktop) */}
-          <nav className="hidden md:flex items-center gap-6 text-xs lg:text-sm font-semibold text-slate-600 dark:text-slate-300">
-            <a href="#aspek" className="hover:text-[#d61a20] dark:hover:text-white transition-colors">
-              Aspek Evaluasi (A–D)
-            </a>
-            <a href="#alur" className="hover:text-[#d61a20] dark:hover:text-white transition-colors">
-              Alur Pengesahan
-            </a>
-            <a href="#tentang" className="hover:text-[#d61a20] dark:hover:text-white transition-colors">
-              Tentang Sistem
-            </a>
+          {/* Center: Nav */}
+          <nav className="hidden md:flex items-center gap-1 text-[13px] font-medium text-[#5A544A] dark:text-[#C9C2B6]">
+            {[
+              { href: "#aspek", label: "Aspek Evaluasi" },
+              { href: "#alur", label: "Alur Pengesahan" },
+              { href: "#tentang", label: "Tentang" },
+            ].map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="px-3 py-1.5 rounded-md hover:bg-[#1B1712]/5 dark:hover:bg-white/5 hover:text-[#C8102E] dark:hover:text-white transition-colors"
+              >
+                {item.label}
+              </a>
+            ))}
           </nav>
 
-          {/* Right: Theme Toggle & Login CTA */}
-          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
+          {/* Right: Actions */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <ThemeToggle />
 
             {isLoggedIn ? (
               <Link
                 href={userHomePath}
-                className="inline-flex items-center gap-1.5 sm:gap-2 h-9 sm:h-11 px-3 sm:px-5 rounded-lg sm:rounded-xl bg-[#d61a20] hover:bg-[#a51318] text-white text-xs sm:text-sm font-bold transition-all shadow-sm hover:scale-[1.02] cursor-pointer"
+                className="inline-flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-4 rounded-lg bg-[#C8102E] hover:bg-[#A80D26] text-white text-xs font-semibold transition-colors cursor-pointer"
               >
-                <span>Dashboard ({session.nama.split(" ")[0]})</span>
-                <span className="hidden sm:inline">→</span>
+                Dashboard
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 sm:gap-2 h-9 sm:h-11 px-3 sm:px-6 rounded-lg sm:rounded-xl bg-[#d61a20] hover:bg-[#a51318] text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-red-950/20 hover:scale-[1.02] cursor-pointer"
+                className="inline-flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-4 rounded-lg bg-[#C8102E] hover:bg-[#A80D26] text-white text-xs font-semibold transition-colors cursor-pointer"
               >
-                <span>Masuk ke Sistem</span>
-                <span className="hidden sm:inline">→</span>
+                Masuk
               </Link>
             )}
           </div>
@@ -82,7 +83,6 @@ export default async function LandingPage() {
 
       {/* Main Content */}
       <main className="flex-1 w-full overflow-hidden">
-        {/* CAROUSEL DIRECTLY BELOW HEADER */}
         <section className="w-full">
           <LandingHeroCarousel
             isLoggedIn={isLoggedIn}
@@ -91,73 +91,56 @@ export default async function LandingPage() {
           />
         </section>
 
-        {/* 5 ASPEK & ALUR SECTIONS WITH ABSTRACT BACKGROUNDS */}
-        <LandingSections
-          isLoggedIn={isLoggedIn}
-          userHomePath={userHomePath}
-        />
+        <LandingSections isLoggedIn={isLoggedIn} userHomePath={userHomePath} />
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#05080F] text-slate-600 dark:text-slate-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 items-start">
-            {/* Col 1: Instansi */}
-            <div className="space-y-3 sm:space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="relative h-9 w-7.5 sm:h-11 sm:w-9 shrink-0">
-                  <Image
-                    src="/images/logo-kpk-badge.png"
-                    alt="Logo KPK"
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-                <div>
-                  <h5 className="font-extrabold text-slate-900 dark:text-slate-100 text-sm sm:text-base">
-                    KOMISI PEMBERANTASAN KORUPSI
-                  </h5>
-                  <p className="text-xs text-slate-500 font-medium">Republik Indonesia</p>
-                </div>
+      <footer className="border-t border-[#DCD5C9]/60 dark:border-white/5 bg-[#F6F3EE] dark:bg-[#15120D]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Main footer */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 sm:py-10">
+            {/* Left: Brand */}
+            <div className="flex items-center gap-2.5">
+              <div className="relative h-7 w-5.5 shrink-0">
+                <Image
+                  src="/images/logo-kpk-badge.png"
+                  alt="Logo KPK"
+                  fill
+                  className="object-contain"
+                />
               </div>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
-                Gedung Merah Putih KPK, Jl. Kuningan Persada Kav. 4, Setiabudi, Jakarta Selatan 12950
-              </p>
-            </div>
-
-            {/* Col 2: Info Aplikasi */}
-            <div className="space-y-2">
-              <h5 className="font-bold text-slate-900 dark:text-slate-100 text-sm sm:text-base">
-                Tentang Sistem
-              </h5>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
-                Aplikasi Dialog Kinerja KPK digunakan untuk memfasilitasi dialog kerja berkala, evaluasi kesenjangan kompetensi, dan penyusunan rencana pengembangan karir pegawai di lingkungan KPK RI.
-              </p>
-            </div>
-
-            {/* Col 3: Akses Cepat */}
-            <div className="space-y-2 md:text-right">
-              <h5 className="font-bold text-slate-900 dark:text-slate-100 text-sm sm:text-base">
-                Bantuan & Layanan
-              </h5>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-normal">
-                Hubungi Biro SDM / Pengelola Kinerja untuk bantuan administrasi akun.
-              </p>
-              <div className="pt-1">
-                <Link
-                  href="/login"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-[#d61a20] dark:text-red-400 hover:underline font-bold"
-                >
-                  <span>Halaman Login Pegawai, Atasan, & Admin</span>
-                  <span>→</span>
-                </Link>
+              <div>
+                <p className="text-xs font-bold tracking-wider text-[#1B1712] dark:text-white uppercase leading-none">
+                  KPK
+                </p>
+                <p className="text-[10px] font-medium text-[#8C8478] dark:text-[#6B6560] leading-tight">
+                  Dialog Kinerja
+                </p>
               </div>
             </div>
+
+            {/* Center: Nav */}
+            <nav className="flex items-center gap-4 text-[11px] sm:text-xs font-medium text-[#8C8478] dark:text-[#6B6560]">
+              <a href="#aspek" className="hover:text-[#1B1712] dark:hover:text-white transition-colors">Aspek Evaluasi</a>
+              <span className="w-px h-3 bg-[#DCD5C9] dark:bg-white/10" />
+              <a href="#alur" className="hover:text-[#1B1712] dark:hover:text-white transition-colors">Alur Pengesahan</a>
+              <span className="w-px h-3 bg-[#DCD5C9] dark:bg-white/10" />
+              <a href="#tentang" className="hover:text-[#1B1712] dark:hover:text-white transition-colors">Tentang</a>
+            </nav>
+
+            {/* Right: Login link */}
+            <Link
+              href="/login"
+              className="text-[11px] sm:text-xs font-semibold text-[#C8102E] dark:text-[#FF7A86] hover:underline"
+            >
+              Masuk →
+            </Link>
           </div>
 
-          <div className="mt-8 sm:mt-10 pt-6 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm text-slate-500 gap-2 font-normal">
-            <p>© {new Date().getFullYear()} Komisi Pemberantasan Korupsi Republik Indonesia.</p>
-            <p className="font-mono text-[11px] text-slate-400">SISTEM DIALOG KINERJA v2.0</p>
+          {/* Bottom bar */}
+          <div className="border-t border-[#DCD5C9]/60 dark:border-white/5 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] sm:text-[11px] text-[#A09889] dark:text-[#5A544A]">
+            <p>© {new Date().getFullYear()} Komisi Pemberantasan Korupsi RI</p>
+            <p>Gedung Merah Putih KPK, Jakarta Selatan</p>
           </div>
         </div>
       </footer>

@@ -149,7 +149,7 @@ export default async function AdminMetodePage({
                       {isLainnya ? (
                         <span className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline/60 px-3 text-xs font-semibold text-ink-muted/50">
                           <LockSimpleIcon size={14} weight="bold" />
-                          Bawaan Sistem
+                          locked
                         </span>
                       ) : (
                         <div className="flex items-center justify-end gap-2">
