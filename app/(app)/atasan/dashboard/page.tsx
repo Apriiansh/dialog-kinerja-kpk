@@ -9,16 +9,13 @@ import {
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/session";
-import {
-  StatusBars,
-  HorizontalBars,
-  type ChartDatum,
-} from "@/components/dashboard/charts";
 import { ChartCard } from "@/components/dashboard/chart-card";
 import { DIALOG_STATUS_CHART } from "@/lib/utils/chart-colors";
 import { formatDistanceToNow } from "@/lib/utils/format";
 import type { StatusDialog } from "@/generated/prisma/enums";
 import { formatPeriode } from "@/lib/constants/triwulan";
+import { EvaluationCalendar, type CalendarEvent } from "@/components/dashboard/evaluation-calendar";
+import { AchievementList } from "@/components/dashboard/achievement-list";
 
 const STATUS_ORDER: StatusDialog[] = [
   "draft_atasan",
@@ -39,7 +36,13 @@ function greeting() {
 export default async function AtasanDashboardPage() {
   const session = await requireAuth();
 
-  const [pegawai, dialogs, recentNotifications] = await Promise.all([
+  const [
+    pegawai, 
+    dialogs, 
+    recentNotifications, 
+    upcomingReviu, 
+    analyticsByPegawai,
+  ] = await Promise.all([
     prisma.user.findMany({
       where: { id_atasan: session.id, is_active: true },
       select: {
@@ -79,6 +82,56 @@ export default async function AtasanDashboardPage() {
       orderBy: { created_at: "desc" },
       take: 5,
     }),
+    prisma.reviu.findMany({
+      where: {
+        dialog: { id_atasan: session.id },
+        status: "selesai",
+        tanggal_next_evaluasi: { not: null }
+      },
+      select: {
+        id: true,
+        tanggal_next_evaluasi: true,
+        dialog: {
+          select: {
+            id: true,
+            periode_tahun: true,
+            triwulan: true,
+            pegawai: { select: { nama_pegawai: true, npp: true } }
+          }
+        }
+      },
+      orderBy: { tanggal_next_evaluasi: "asc" }
+    }),
+    prisma.user.findMany({
+      where: { id_atasan: session.id, is_active: true },
+      select: {
+        id: true,
+        nama_pegawai: true,
+        npp: true,
+        dialogAsPegawai: {
+          where: { status: "selesai", periode_tahun: new Date().getFullYear() },
+          select: {
+            id: true,
+            triwulan: true,
+            aspek: {
+              select: {
+                jenis_aspek: true,
+                item: {
+                  where: { is_tercapai: { not: null } },
+                  select: {
+                    id: true,
+                    dialog_evaluasi: true,
+                    is_tercapai: true,
+                  }
+                }
+              }
+            }
+          },
+          orderBy: { created_at: "desc" }
+        }
+      },
+      orderBy: { nama_pegawai: "asc" }
+    }),
   ]);
 
   const recent = dialogs.slice(0, 5);
@@ -88,30 +141,75 @@ export default async function AtasanDashboardPage() {
     (d) => d.status === "menunggu_atasan",
   ).length;
 
-  const statusData: ChartDatum[] = STATUS_ORDER.map((status) => {
-    const cfg = DIALOG_STATUS_CHART[status];
-    return {
-      label: cfg.short,
-      tooltipLabel: cfg.label,
-      value: dialogs.filter((d) => d.status === status).length,
-      color: cfg.color,
-    };
-  }).filter((d) => d.value > 0);
+  const calendarEvents: CalendarEvent[] = upcomingReviu.map(r => ({
+    id: r.id,
+    dialogId: r.dialog.id,
+    date: r.tanggal_next_evaluasi!.toISOString(),
+    pegawaiName: r.dialog.pegawai.nama_pegawai,
+    npp: r.dialog.pegawai.npp,
+    triwulan: r.dialog.triwulan,
+    tahun: r.dialog.periode_tahun
+  }));
 
-  const perPegawaiMap = new Map<number, ChartDatum>();
-  for (const d of dialogs) {
-    const name = d.pegawai?.nama_pegawai ?? `Pegawai #${d.id_pegawai}`;
-    const entry = perPegawaiMap.get(d.id_pegawai) ?? {
-      label: name,
-      value: 0,
-      color: "#1e3a8a",
+  const achievementStats = analyticsByPegawai.map(p => {
+    const items = p.dialogAsPegawai.flatMap(d => d.aspek.flatMap(a => a.item.map(i => ({
+      id: i.id,
+      jenis_aspek: a.jenis_aspek,
+      dialog_evaluasi: i.dialog_evaluasi || "",
+      is_tercapai: i.is_tercapai!
+    }))));
+    const tercapaiCount = items.filter(i => i.is_tercapai).length;
+    const tidakTercapaiCount = items.filter(i => !i.is_tercapai).length;
+    
+    return {
+      pegawaiId: p.id,
+      nama_pegawai: p.nama_pegawai,
+      npp: p.npp,
+      tercapaiCount,
+      tidakTercapaiCount,
+      items
     };
-    entry.value += 1;
-    perPegawaiMap.set(d.id_pegawai, entry);
-  }
-  const perPegawaiData = [...perPegawaiMap.values()].sort(
-    (a, b) => b.value - a.value,
-  );
+  }).filter(p => p.items.length > 0);
+
+  const totalTercapai = achievementStats.reduce((sum, emp) => sum + emp.tercapaiCount, 0);
+  const totalTidakTercapai = achievementStats.reduce((sum, emp) => sum + emp.tidakTercapaiCount, 0);
+
+  const evalMap = new Map<string, { evaluasi: string; tercapai: number; tidakTercapai: number }>();
+  
+  analyticsByPegawai.forEach(p => {
+    p.dialogAsPegawai.forEach(d => {
+      d.aspek.forEach(a => {
+        a.item.forEach(i => {
+          const key = `${a.jenis_aspek}:::${i.dialog_evaluasi?.trim() || "Target tidak memiliki nama"}`;
+          if (!evalMap.has(key)) {
+            evalMap.set(key, { evaluasi: i.dialog_evaluasi?.trim() || "Target tidak memiliki nama", tercapai: 0, tidakTercapai: 0 });
+          }
+          const stat = evalMap.get(key)!;
+          if (i.is_tercapai) stat.tercapai++;
+          else stat.tidakTercapai++;
+        });
+      });
+    });
+  });
+
+  const rawEvalStats = Array.from(evalMap.entries()).map(([key, stat]) => {
+    const [jenis_aspek, _] = key.split(":::");
+    return { jenis_aspek, ...stat };
+  });
+
+  // Group by jenis_aspek
+  const aspectGroups = new Map<string, typeof rawEvalStats>();
+  rawEvalStats.forEach(stat => {
+    if (!aspectGroups.has(stat.jenis_aspek)) {
+      aspectGroups.set(stat.jenis_aspek, []);
+    }
+    aspectGroups.get(stat.jenis_aspek)!.push(stat);
+  });
+
+  const analyticsByEvaluasi = Array.from(aspectGroups.entries()).map(([jenis_aspek, items]) => ({
+    jenis_aspek,
+    items: items.sort((a, b) => (b.tercapai + b.tidakTercapai) - (a.tercapai + a.tidakTercapai))
+  }));
 
   const dialogCountByPegawai = new Map<number, number>();
   for (const d of dialogs) {
@@ -187,21 +285,29 @@ export default async function AtasanDashboardPage() {
       </section>
 
       <section
-        aria-label="Analitik tim"
-        className="grid gap-4 lg:grid-cols-2"
+        aria-label="Jadwal dan Analitik"
+        className="grid gap-4 xl:grid-cols-2"
       >
         <ChartCard
-          title="Status Dialog Tim Anda"
-          subtitle={`${dialogCount} dialog kinerja di bawah pengelolaan Anda`}
+          title="Jadwal Evaluasi"
+          subtitle="Kalender evaluasi target pegawai di bawah Anda"
         >
-          <StatusBars data={statusData} />
+          <div className="w-full">
+            <EvaluationCalendar events={calendarEvents} />
+          </div>
         </ChartCard>
+        
         <ChartCard
-          title="Dialog per Pegawai"
-          subtitle="Jumlah dialog yang dibuat untuk masing-masing pegawai"
+          title="Analisis Capaian Kinerja"
+          subtitle={`Statistik capaian target tim Anda di tahun ${new Date().getFullYear()}`}
         >
-          <div className="w-full min-w-0">
-            <HorizontalBars data={perPegawaiData} />
+          <div className="w-full flex flex-col gap-4">
+            <AchievementList 
+              analytics={achievementStats} 
+              evalAnalytics={analyticsByEvaluasi}
+              totalTercapai={totalTercapai}
+              totalTidakTercapai={totalTidakTercapai}
+            />
           </div>
         </ChartCard>
       </section>
