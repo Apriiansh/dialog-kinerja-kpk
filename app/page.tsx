@@ -17,62 +17,56 @@ export default async function LandingPage() {
       style={TAHOMA}
       className="min-h-screen flex flex-col bg-[#F6F3EE] dark:bg-[#15120D] text-[#1B1712] dark:text-[#F2EEE7] transition-colors duration-200 selection:bg-[#C8102E] selection:text-white overflow-x-hidden scroll-smooth"
     >
+      {/* Top accent line — institutional red, no amber */}
+      <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-[#7A0B1F] via-[#C8102E] to-[#7A0B1F]" />
+
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full bg-[#F6F3EE]/80 dark:bg-[#15120D]/80 backdrop-blur-xl supports-[backdrop-filter]:bg-[#F6F3EE]/60 dark:supports-[backdrop-filter]:bg-[#15120D]/60">
-        <div className="max-w-7xl mx-auto flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Left: Logo & Brand */}
-          <Link href="/" className="flex items-center gap-2.5 group min-w-0">
-            <div className="relative h-8 w-6.5 sm:h-10 sm:w-8 shrink-0 transition-transform duration-200 group-hover:scale-105">
+      <header className="sticky top-0 z-50 w-full border-b border-[#DCD5C9] dark:border-white/10 bg-[#F6F3EE]/95 dark:bg-[#15120D]/95 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto flex h-16 sm:h-18 items-center justify-between px-4 sm:px-6 lg:px-8 gap-6">
+          {/* Left: KPK Logo & Branding */}
+          <Link href="/" className="flex items-center gap-2.5 min-w-0 shrink-0">
+            <div className="relative h-8 w-6.5 shrink-0">
               <Image
                 src="/images/logo-kpk-badge.png"
-                alt="Logo KPK"
+                alt="Logo Komisi Pemberantasan Korupsi"
                 fill
                 priority
                 className="object-contain"
               />
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-[10px] sm:text-xs font-bold tracking-widest text-[#C8102E] dark:text-[#FF7A86] uppercase leading-none">
-                KPK
-              </span>
-              <span className="text-xs sm:text-base md:text-lg font-bold tracking-tight text-[#1B1712] dark:text-white leading-tight">
-                Dialog Kinerja
-              </span>
-            </div>
+            <span className="text-base sm:text-lg font-bold tracking-tight text-[#1B1712] dark:text-white truncate">
+              Dialog Kinerja
+            </span>
           </Link>
 
-          {/* Center: Nav */}
-          <nav className="hidden md:flex items-center gap-1 text-[13px] font-medium text-[#5A544A] dark:text-[#C9C2B6]">
-            {[
-              { href: "#aspek", label: "Aspek Evaluasi" },
-              { href: "#alur", label: "Alur Pengesahan" },
-              { href: "#tentang", label: "Tentang" },
-            ].map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="px-3 py-1.5 rounded-md hover:bg-[#1B1712]/5 dark:hover:bg-white/5 hover:text-[#C8102E] dark:hover:text-white transition-colors"
-              >
-                {item.label}
-              </a>
-            ))}
+          {/* Middle: Navigation */}
+          <nav className="hidden md:flex items-center gap-8 text-sm text-[#5A544A] dark:text-[#C9C2B6]">
+            <a href="#aspek" className="hover:text-[#1B1712] dark:hover:text-white transition-colors">
+              Aspek Evaluasi
+            </a>
+            <a href="#alur" className="hover:text-[#1B1712] dark:hover:text-white transition-colors">
+              Alur Pengesahan
+            </a>
+            <a href="#tentang" className="hover:text-[#1B1712] dark:hover:text-white transition-colors">
+              Tentang Sistem
+            </a>
           </nav>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Right: Theme Toggle & Login CTA */}
+          <div className="flex items-center gap-3 shrink-0">
             <ThemeToggle />
 
             {isLoggedIn ? (
               <Link
                 href={userHomePath}
-                className="inline-flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-4 rounded-lg bg-[#C8102E] hover:bg-[#A80D26] text-white text-xs font-semibold transition-colors cursor-pointer"
+                className="inline-flex items-center h-9 px-4 rounded-full bg-[#C8102E] hover:bg-[#A80D26] text-white text-sm font-semibold transition-colors cursor-pointer"
               >
                 Dashboard
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 h-8 sm:h-9 px-3 sm:px-4 rounded-lg bg-[#C8102E] hover:bg-[#A80D26] text-white text-xs font-semibold transition-colors cursor-pointer"
+                className="inline-flex items-center h-9 px-4 rounded-full bg-[#C8102E] hover:bg-[#A80D26] text-white text-sm font-semibold transition-colors cursor-pointer"
               >
                 Masuk
               </Link>
@@ -95,52 +89,80 @@ export default async function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#DCD5C9]/60 dark:border-white/5 bg-[#F6F3EE] dark:bg-[#15120D]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Main footer */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-8 sm:py-10">
-            {/* Left: Brand */}
-            <div className="flex items-center gap-2.5">
-              <div className="relative h-7 w-5.5 shrink-0">
-                <Image
-                  src="/images/logo-kpk-badge.png"
-                  alt="Logo KPK"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <div>
-                <p className="text-xs font-bold tracking-wider text-[#1B1712] dark:text-white uppercase leading-none">
-                  KPK
-                </p>
-                <p className="text-[10px] font-medium text-[#8C8478] dark:text-[#6B6560] leading-tight">
+      <footer className="border-t border-[#DCD5C9] dark:border-white/10 bg-[#EFEAE1] dark:bg-[#100D09] text-[#5A544A] dark:text-[#A89F91]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+            {/* Left: identity + address */}
+            <div className="lg:col-span-6 space-y-4">
+              <div className="flex items-center gap-2.5">
+                <div className="relative h-7 w-5.5 shrink-0">
+                  <Image src="/images/logo-kpk-badge.png" alt="Logo KPK" fill className="object-contain" />
+                </div>
+                <span className="text-base font-bold text-[#1B1712] dark:text-[#F2EEE7]">
                   Dialog Kinerja
-                </p>
+                </span>
               </div>
+
+              <p className="text-sm leading-relaxed max-w-sm">
+                Memfasilitasi dialog kerja berkala, evaluasi kesenjangan
+                kompetensi, dan rencana pengembangan karir pegawai di
+                lingkungan KPK RI.
+              </p>
+
+              <p className="text-xs leading-relaxed max-w-sm text-[#8C8478]">
+                Gedung Merah Putih KPK, Jl. Kuningan Persada Kav. 4, Setiabudi,
+                Jakarta Selatan 12950
+              </p>
             </div>
 
-            {/* Center: Nav */}
-            <nav className="flex items-center gap-4 text-[11px] sm:text-xs font-medium text-[#8C8478] dark:text-[#6B6560]">
-              <a href="#aspek" className="hover:text-[#1B1712] dark:hover:text-white transition-colors">Aspek Evaluasi</a>
-              <span className="w-px h-3 bg-[#DCD5C9] dark:bg-white/10" />
-              <a href="#alur" className="hover:text-[#1B1712] dark:hover:text-white transition-colors">Alur Pengesahan</a>
-              <span className="w-px h-3 bg-[#DCD5C9] dark:bg-white/10" />
-              <a href="#tentang" className="hover:text-[#1B1712] dark:hover:text-white transition-colors">Tentang</a>
-            </nav>
+            {/* Right: two plain link lists */}
+            <div className="lg:col-span-6 grid grid-cols-2 gap-8 lg:justify-items-end lg:text-right">
+              <div className="space-y-3">
+                <h5 className="text-xs font-bold uppercase tracking-[0.08em] text-[#1B1712] dark:text-[#F2EEE7]">
+                  Bantuan
+                </h5>
+                <ul className="space-y-2 text-sm">
+                  <li>
+                    <Link href="/login" className="hover:text-[#C8102E] dark:hover:text-[#FF7A86] transition-colors">
+                      Masuk ke Sistem
+                    </Link>
+                  </li>
+                  <li>Biro SDM KPK</li>
+                </ul>
+              </div>
 
-            {/* Right: Login link */}
-            <Link
-              href="/login"
-              className="text-[11px] sm:text-xs font-semibold text-[#C8102E] dark:text-[#FF7A86] hover:underline"
-            >
-              Masuk →
-            </Link>
+              <div className="space-y-3">
+                <h5 className="text-xs font-bold uppercase tracking-[0.08em] text-[#1B1712] dark:text-[#F2EEE7]">
+                  Sistem Terkait
+                </h5>
+                <ul className="space-y-2 text-sm">
+                  <li>
+                    <a
+                      href="https://idp.kpk.go.id"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[#C8102E] dark:hover:text-[#FF7A86] transition-colors"
+                    >
+                      idp.kpk.go.id
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://hris.kpk.go.id"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-[#C8102E] dark:hover:text-[#FF7A86] transition-colors"
+                    >
+                      hris.kpk.go.id
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
 
-          {/* Bottom bar */}
-          <div className="border-t border-[#DCD5C9]/60 dark:border-white/5 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] sm:text-[11px] text-[#A09889] dark:text-[#5A544A]">
-            <p>© {new Date().getFullYear()} Komisi Pemberantasan Korupsi RI</p>
-            <p>Gedung Merah Putih KPK, Jakarta Selatan</p>
+          <div className="mt-12 pt-6 border-t border-[#DCD5C9] dark:border-white/10 flex items-center justify-center text-xs">
+            <p>© {new Date().getFullYear()} Komisi Pemberantasan Korupsi Republik Indonesia.</p>
           </div>
         </div>
       </footer>
