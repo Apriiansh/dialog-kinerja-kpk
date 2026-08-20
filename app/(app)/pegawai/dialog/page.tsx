@@ -373,7 +373,7 @@ export default async function PegawaiDialogListPage({
                     (counts, group) => {
                       for (const item of group.item) {
                         if (item.is_tercapai === true) counts.tercapai += 1;
-                        else counts.tidakTercapai += 1;
+                        else if (item.is_tercapai === false) counts.tidakTercapai += 1;
                       }
                       return counts;
                     },
@@ -411,8 +411,8 @@ export default async function PegawaiDialogListPage({
                         <CapaianBadge
                           statusDialog={d.status}
                           filledAspekCount={filledAspekCount(d.aspek)}
-                          reviu={d.reviu.at(-1)}
-                          items={d.aspek.flatMap((a) => a.item)}
+                          reviu={isLanjutan ? null : d.reviu.at(-1)}
+                          items={sourceAspek.flatMap((a) => a.item)}
                         />
                       </div>
                       {itemCounts ? (

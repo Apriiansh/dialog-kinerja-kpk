@@ -85,7 +85,7 @@ function deriveGlobalFlags(
   const assessed = itemIds.filter((id) => capaianMap.has(id));
   const allTercapai =
     assessed.length > 0 && assessed.every((id) => capaianMap.get(id)!.is_tercapai);
-  const anyTidakTercapai = assessed.some((id) => !capaianMap.get(id)!.is_tercapai);
+  const anyTidakTercapai = assessed.some((id) => capaianMap.get(id)!.is_tercapai === false);
   return { is_tercapai: allTercapai, is_tidak_tercapai: anyTidakTercapai };
 }
 
