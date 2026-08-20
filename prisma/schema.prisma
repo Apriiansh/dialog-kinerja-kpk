@@ -73,6 +73,7 @@ model User {
   dialogAsPegawai DialogKinerja[] @relation("DialogPegawai")
 
   notifications Notification[]
+  importedItems ImportStagingItem[] @relation("ImportedBy")
 
   @@map("users")
 }
@@ -193,4 +194,25 @@ model Notification {
   @@index([id_user, is_read])
   @@index([id_user, created_at])
   @@map("notifications")
+}
+
+model ImportStagingItem {
+  id            Int        @id @default(autoincrement())
+  jenis_aspek   JenisAspek              // SKP | GAP_ASESMEN | PERILAKU
+  periode_tahun Int
+  triwulan      Triwulan               // TW1 | TW3
+  npp           String     @db.VarChar(50)
+  narasi        String     @db.Text    // teks yang masuk ke dialog_evaluasi
+  metadata      Json?                   // data mentah (target, capaian, nilai, dll.)
+  is_consumed   Boolean    @default(false)
+  id_dialog     Int?
+  batch_id      String     @db.VarChar(100)
+  imported_by   Int
+  imported_at   DateTime   @default(now())
+
+  importer User @relation("ImportedBy", fields: [imported_by], references: [id])
+
+  @@index([npp, jenis_aspek, periode_tahun, triwulan])
+  @@index([batch_id])
+  @@map("import_staging_items")
 }

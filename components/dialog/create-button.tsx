@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { startDialog } from "@/lib/actions/atasan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
-import { formatPeriode, triwulanLabel } from "@/lib/constants/triwulan";
+import { formatPeriode, triwulanLabel, getAvailableYears } from "@/lib/constants/triwulan";
 
 export interface PegawaiOption {
   id: number;
@@ -147,7 +147,7 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
                     onChange={(e) => setTahun(Number(e.target.value))}
                     className="h-9 rounded-lg border border-outline bg-surface px-3 text-xs font-bold text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
                   >
-                    {[2024, 2025, 2026, 2027, 2028].map((y) => (
+                    {getAvailableYears(3, 3).map((y) => (
                       <option key={y} value={y}>
                         {y}
                       </option>

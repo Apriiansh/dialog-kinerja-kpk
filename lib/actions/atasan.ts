@@ -19,7 +19,7 @@ export async function startDialog(
   if (err) return { error: err };
   const user = await prisma.user.findFirst({
     where: { id: pegawaiId, id_atasan: session.id, is_active: true },
-    select: { id: true },
+    select: { id: true, npp: true },
   });
   if (!user) return { error: "Pegawai tidak ditemukan" };
 
@@ -141,6 +141,51 @@ export async function startDialog(
     },
     select: { id: true },
   });
+
+  // Pull imported staging items for this employee if available
+  const stagingItems = await prisma.importStagingItem.findMany({
+    where: {
+      npp: user.npp,
+      periode_tahun: periodeTahun,
+      triwulan,
+      is_consumed: false,
+    },
+  });
+
+  if (stagingItems.length > 0) {
+    const dialogAspeks = await prisma.dialogKinerjaAspek.findMany({
+      where: { id_dialog: dialog.id },
+      select: { id: true, jenis_aspek: true },
+    });
+    const aspekIdByJenis = new Map(dialogAspeks.map((a) => [a.jenis_aspek, a.id]));
+
+    const itemsToCreate: { id_aspek: number; dialog_evaluasi: string }[] = [];
+    const consumedIds: number[] = [];
+
+    for (const item of stagingItems) {
+      const aspekId = aspekIdByJenis.get(item.jenis_aspek);
+      if (aspekId) {
+        itemsToCreate.push({
+          id_aspek: aspekId,
+          dialog_evaluasi: item.narasi,
+        });
+        consumedIds.push(item.id);
+      }
+    }
+
+    if (itemsToCreate.length > 0) {
+      await prisma.dialogKinerjaItem.createMany({
+        data: itemsToCreate,
+      });
+      await prisma.importStagingItem.updateMany({
+        where: { id: { in: consumedIds } },
+        data: {
+          is_consumed: true,
+          id_dialog: dialog.id,
+        },
+      });
+    }
+  }
 
   revalidatePath("/atasan/dialog");
   return { dialogId: dialog.id };

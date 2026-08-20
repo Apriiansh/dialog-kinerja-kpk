@@ -13,6 +13,7 @@ import {
   ArrowsClockwiseIcon,
   ListChecksIcon,
   BellIcon,
+  FileArrowUpIcon,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -119,6 +120,11 @@ const ADMIN_NAV_GROUPS: NavGroup[] = [
         href: "/admin/users",
         label: "Kelola Pengguna",
         icon: UserListIcon,
+      },
+      {
+        href: "/admin/import-data",
+        label: "Impor Data Evaluasi",
+        icon: FileArrowUpIcon,
       },
       {
         href: "/admin/metode",

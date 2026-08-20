@@ -49,3 +49,12 @@ export function formatPeriode(triwulan: Triwulan, tahun: number): string {
 export function formatPeriodeLengkap(triwulan: Triwulan, tahun: number): string {
   return `${TRIWULAN_KONTEKS[triwulan] || TRIWULAN_LABEL[triwulan]} ${tahun}`;
 }
+
+export function getAvailableYears(pastYears = 2, futureYears = 2): number[] {
+  const current = new Date().getFullYear();
+  const years: number[] = [];
+  for (let y = current - pastYears; y <= current + futureYears; y++) {
+    years.push(y);
+  }
+  return years;
+}
