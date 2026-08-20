@@ -1,11 +1,20 @@
 import Image from "next/image";
 import { LoginForm } from "./login-form";
+import Link from "next/link";
+import {
+  ArrowLeftIcon,
+} from "@phosphor-icons/react/dist/ssr";
 
 export default function LoginPage() {
   return (
     <main className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
+        
         <div className="rounded-lg border border-outline bg-surface p-8 shadow-ambient sm:p-10">
+          <Link href="/" className="flex items-center gap-1.5 rounded-md text-sm font-medium text-ink transition-colors hover:text-amber-400">
+            <ArrowLeftIcon size={16} weight="bold" />
+            Kembali
+          </Link>
           <div className="mb-8 flex flex-col items-center gap-4 text-center">
             <Image
               src="/logo-kpk.png"
