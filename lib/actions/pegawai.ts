@@ -116,9 +116,9 @@ async function validateSubmitInput(
     );
     if (nonEmptyItems.length === 0) {
       if (isLanjutan) {
-        if (!aspek.tanggung_jawab_pegawai?.trim()) {
-          problems.push(`${label} tanggung jawab pegawai wajib diisi`);
-        }
+        // if (!aspek.tanggung_jawab_pegawai?.trim()) {
+        //   problems.push(`${label} tanggung jawab pegawai wajib diisi`);
+        // }
         continue;
       }
       problems.push(`${label} belum memiliki rincian`);

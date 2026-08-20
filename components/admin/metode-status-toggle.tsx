@@ -9,10 +9,12 @@ export function AdminMetodeStatusToggle({
   id,
   nama,
   isActive,
+  disabled: locked,
 }: {
   id: number;
   nama: string;
   isActive: boolean;
+  disabled?: boolean;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -58,7 +60,7 @@ export function AdminMetodeStatusToggle({
         aria-checked={isActive}
         aria-disabled={pending}
         onClick={handleToggle}
-        disabled={pending}
+        disabled={pending || locked}
         className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full outline-none transition-colors duration-200 focus-visible:shadow-focus disabled:cursor-not-allowed disabled:opacity-50 ${
           isActive ? "bg-status-green" : "bg-ink-muted/30"
         }`}

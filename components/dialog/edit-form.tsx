@@ -186,9 +186,9 @@ function validateSubmit(
     const nonEmptyItems = draft.items.filter((item) => !isItemEmpty(item));
     if (nonEmptyItems.length === 0) {
       if (isLanjutan) {
-        if (!draft.tanggung_jawab_pegawai.trim()) {
-          problems.push(`${label} tanggung jawab pegawai wajib diisi`);
-        }
+        // if (!draft.tanggung_jawab_pegawai.trim()) {
+        //   problems.push(`${label} tanggung jawab pegawai wajib diisi`);
+        // }
         continue;
       }
       problems.push(`${label} belum memiliki rincian`);

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { startDialog } from "@/lib/actions/atasan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
-import { getTriwulanFromDate, triwulanLabel } from "@/lib/constants/triwulan";
+import { formatPeriode, getTriwulanFromDate, triwulanLabel } from "@/lib/constants/triwulan";
 
 export interface PegawaiOption {
   id: number;
@@ -13,6 +13,13 @@ export interface PegawaiOption {
   nama_pegawai: string;
   nama_jabatan: string | null;
   unit_kerja: string | null;
+  dialogAsPegawai?: {
+    id: number;
+    periode_tahun: number;
+    triwulan: import("@/generated/prisma/enums").Triwulan;
+    status: string;
+    reviu: { id: number; status: string }[];
+  }[];
 }
 
 export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
@@ -102,16 +109,16 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
           onClick={() => setOpen(false)}
         >
           <div
-            className="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-lg bg-surface shadow-ambient"
+            className="flex max-h-[85vh] w-full max-w-4xl flex-col rounded-lg bg-surface shadow-ambient"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-outline px-6 py-4">
               <div className="flex flex-col gap-0.5">
                 <h2 className="text-base font-semibold text-ink">
-                  Mulai Dialog Kinerja
+                  Mulai Dialog Kinerja Pegawai
                 </h2>
                 <p className="text-xs leading-4 text-ink-muted">
-                  Pilih pegawai yang akan diajak berdialog.
+                  Pilih pegawai untuk memulai dialog kinerja baru atau membuat dialog kinerja lanjutan.
                 </p>
               </div>
               <button
@@ -198,46 +205,95 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
                   <thead className="sticky top-0 border-b border-outline bg-surface">
                     <tr className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
                       <th className="px-6 py-3">Pegawai</th>
-                      <th className="px-6 py-3">NPP</th>
-                      <th className="px-6 py-3">Jabatan</th>
-                      <th className="px-6 py-3">Unit Kerja</th>
+                      <th className="px-6 py-3">NPP / Unit Kerja</th>
+                      <th className="px-6 py-3">Status Riwayat Dialog</th>
                       <th className="px-6 py-3 text-right">Aksi</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-outline">
-                    {filtered.map((p) => (
-                      <tr
-                        key={p.id}
-                        className="transition-colors hover:bg-surface-muted"
-                      >
-                        <td className="px-6 py-3.5 text-sm font-medium text-ink">
-                          {p.nama_pegawai}
-                        </td>
-                        <td className="px-6 py-3.5 text-sm text-ink-muted">
-                          {p.npp}
-                        </td>
-                        <td className="px-6 py-3.5 text-sm text-ink-muted">
-                          {p.nama_jabatan ?? "—"}
-                        </td>
-                        <td className="px-6 py-3.5 text-sm text-ink-muted">
-                          {p.unit_kerja ?? "—"}
-                        </td>
-                        <td className="px-6 py-3.5 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleStartDialog(p.id)}
-                            disabled={creatingId !== null}
-                            className="inline-flex h-8 items-center gap-1 rounded-md bg-primary-soft px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-faint disabled:opacity-50"
-                          >
-                            {creatingId === p.id ? (
-                              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary-strong/40 border-t-primary-strong" />
-                            ) : (
-                              "Mulai Dialog"
-                            )}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {filtered.map((p) => {
+                      const lastDialog = p.dialogAsPegawai?.[0];
+                      const lastReviu = lastDialog?.reviu?.[0];
+
+                      let statusBadge = (
+                        <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 border border-blue-200">
+                          Dialog Pertama (Baru)
+                        </span>
+                      );
+                      let canStart = true;
+                      let startLabel = "Mulai Dialog";
+                      let disabledReason = "";
+
+                      if (lastDialog) {
+                        if (lastDialog.status !== "selesai") {
+                          canStart = false;
+                          disabledReason = "Dialog periode sebelumnya belum selesai divalidasi";
+                          statusBadge = (
+                            <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200">
+                              Masih Berjalan ({formatPeriode(lastDialog.triwulan, lastDialog.periode_tahun)})
+                            </span>
+                          );
+                        } else if (!lastReviu || lastReviu.status !== "selesai") {
+                          canStart = false;
+                          disabledReason = "Evaluasi dialog sebelumnya belum selesai";
+                          statusBadge = (
+                            <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200">
+                              Menunggu Evaluasi ({formatPeriode(lastDialog.triwulan, lastDialog.periode_tahun)})
+                            </span>
+                          );
+                        } else {
+                          canStart = true;
+                          startLabel = "Buat Lanjutan";
+                          statusBadge = (
+                            <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
+                              Lanjutan dari {formatPeriode(lastDialog.triwulan, lastDialog.periode_tahun)}
+                            </span>
+                          );
+                        }
+                      }
+
+                      return (
+                        <tr
+                          key={p.id}
+                          className="transition-colors hover:bg-surface-muted"
+                        >
+                          <td className="px-6 py-3.5">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-sm font-medium text-ink">
+                                {p.nama_pegawai}
+                              </span>
+                              <span className="text-xs text-ink-muted">
+                                {p.nama_jabatan ?? "—"}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-3.5">
+                            <div className="flex flex-col gap-0.5 text-xs text-ink-muted">
+                              <span>NPP: {p.npp}</span>
+                              <span>{p.unit_kerja ?? "—"}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-3.5">
+                            {statusBadge}
+                          </td>
+                          <td className="px-6 py-3.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => handleStartDialog(p.id)}
+                              disabled={creatingId !== null || !canStart}
+                              title={disabledReason || undefined}
+                              className="inline-flex h-8 items-center gap-1 rounded-md bg-primary px-3 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              {creatingId === p.id ? (
+                                <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                              ) : (
+                                startLabel
+                              )}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}

@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/auth/session";
 import { assertActiveActor } from "@/lib/auth/guards";
 import { flashRedirect } from "@/lib/utils/flash";
 import { createNotification } from "@/lib/notifications";
-import type { JenisAspek } from "@/generated/prisma/enums";
+import type { JenisAspek, Triwulan } from "@/generated/prisma/enums";
 import { getTriwulanFromDate } from "@/lib/constants/triwulan";
 
 export interface DialogLanjutanState {
@@ -23,6 +23,7 @@ const VALID_JENIS: JenisAspek[] = [
 
 export async function createDialogLanjutan(
   reviuId: number,
+  customPeriode?: { periode_tahun: number; triwulan: Triwulan },
 ): Promise<DialogLanjutanState> {
   const session = await requireRole("PEGAWAI", "ATASAN", "ADMIN");
   const err = await assertActiveActor(session.id);
@@ -80,8 +81,8 @@ export async function createDialogLanjutan(
   }
 
   const now = new Date();
-  const tahunBerjalan = now.getFullYear();
-  const triwulan = getTriwulanFromDate(now);
+  const tahunBerjalan = customPeriode?.periode_tahun ?? now.getFullYear();
+  const triwulan = customPeriode?.triwulan ?? getTriwulanFromDate(now);
 
   let newDialog: number;
   try {

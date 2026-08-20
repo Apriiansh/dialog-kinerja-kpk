@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { FormulirReviu } from "@/components/reviu/detail-view";
 import { DeleteReviuButton } from "@/components/reviu/delete-button";
 import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
+import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { formatPeriode } from "@/lib/constants/triwulan";
 
 type PageProps = {
@@ -62,7 +63,7 @@ export default async function PegawaiReviuDetailPage({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-                  Reviu Dialog Kinerja {formatPeriode(reviu.dialog.triwulan, reviu.dialog.periode_tahun)}
+                  Hasil Evaluasi Kinerja {formatPeriode(reviu.dialog.triwulan, reviu.dialog.periode_tahun)}
                 </h1>
                 <p className="text-sm leading-5 text-ink-muted">
                   Atasan: {reviu.dialog.atasan.nama_pegawai}
@@ -73,6 +74,15 @@ export default async function PegawaiReviuDetailPage({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <ReviuStatusBadge status={reviu.status} />
+                <CapaianBadge
+                  statusDialog={reviu.dialog.status}
+                  filledAspekCount={5}
+                  reviu={{
+                    status: reviu.status,
+                    is_tercapai: reviu.is_tercapai,
+                    is_tidak_tercapai: reviu.is_tidak_tercapai,
+                  }}
+                />
                 {reviu.dialog.id_dialog_induk ? (
                   <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
                     Dialog Lanjutan

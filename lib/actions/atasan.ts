@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/auth/session";
 import { saveTtdFile } from "@/lib/export/ttd";
 import { assertActiveActor } from "@/lib/auth/guards";
 import { flashRedirect } from "@/lib/utils/flash";
-import { JenisAspek } from "@/generated/prisma/client";
+import { JenisAspek, Triwulan } from "@/generated/prisma/client";
 import { createNotification } from "@/lib/notifications";
 import { getTriwulanFromDate } from "@/lib/constants/triwulan";
 
@@ -170,6 +170,8 @@ export interface SaveDeskripsiState {
 export async function saveDeskripsiKinerja(
   dialogId: number,
   value: string,
+  periode_tahun?: number,
+  triwulan?: Triwulan,
 ): Promise<SaveDeskripsiState> {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
@@ -182,12 +184,24 @@ export async function saveDeskripsiKinerja(
     return { error: "Dialog tidak ditemukan atau sudah dikirim." };
   }
 
+  const updateData: Record<string, unknown> = {
+    deskripsi_kinerja: value.trim() || null,
+  };
+  if (periode_tahun) {
+    updateData.periode_tahun = periode_tahun;
+  }
+  if (triwulan) {
+    updateData.triwulan = triwulan;
+  }
+
   await prisma.dialogKinerja.update({
     where: { id: dialog.id },
-    data: { deskripsi_kinerja: value.trim() || null },
+    data: updateData,
   });
 
   revalidatePath(`/atasan/dialog/${dialog.id}`);
+  revalidatePath(`/atasan/dialog/${dialog.id}/edit`);
+  revalidatePath("/atasan/dialog");
   return {};
 }
 

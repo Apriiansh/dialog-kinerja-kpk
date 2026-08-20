@@ -1,13 +1,20 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, EyeIcon } from "@phosphor-icons/react/dist/ssr";
+import {
+  ArrowLeftIcon,
+  UserIcon,
+  CheckCircleIcon,
+  HourglassIcon,
+  FileTextIcon,
+  ArrowSquareOutIcon,
+  ArrowsClockwiseIcon,
+} from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { DialogSummary } from "@/components/dialog/summary";
-import { ReviuList } from "@/components/reviu/list";
-import { Separator } from "@/components/ui/separator";
+import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { formatPeriode } from "@/lib/constants/triwulan";
+import { formatTanggal } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
 
@@ -15,41 +22,90 @@ type PageProps = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
-  return { title: `Monitoring Dialog #${id}` };
+  const user = await prisma.user.findUnique({
+    where: { id: Number(id) || 0 },
+    select: { nama_pegawai: true },
+  });
+  return {
+    title: user
+      ? `Riwayat Dialog: ${user.nama_pegawai} - Monitoring Admin`
+      : "Monitoring Pegawai",
+  };
 }
 
-export default async function AdminMonitoringDetailPage({
+export default async function AdminPegawaiMonitoringPage({
   params,
 }: PageProps) {
   const { id } = await params;
   await requireRole("ADMIN");
 
-  const dialogId = Number(id);
-  if (Number.isNaN(dialogId)) notFound();
+  const pegawaiId = Number(id);
+  if (Number.isNaN(pegawaiId)) notFound();
 
-  const dialog = await prisma.dialogKinerja.findUnique({
-    where: { id: dialogId },
+  const pegawai = await prisma.user.findUnique({
+    where: { id: pegawaiId },
     include: {
-      pegawai: {
-        select: { id: true, npp: true, nama_pegawai: true, nama_jabatan: true },
-      },
       atasan: {
-        select: { npp: true, nama_pegawai: true, nama_jabatan: true },
+        select: {
+          id: true,
+          npp: true,
+          nama_pegawai: true,
+          nama_jabatan: true,
+          unit_kerja: true,
+        },
       },
-      aspek: { include: { item: { include: { metode: true } } } },
-      dialog_induk: {
-        include: { aspek: { include: { item: { include: { metode: true } } } } },
-      },
-      reviu: {
-        orderBy: { created_at: "asc" as const },
+      dialogAsPegawai: {
+        orderBy: { id: "asc" },
+        include: {
+          atasan: {
+            select: {
+              nama_pegawai: true,
+              nama_jabatan: true,
+            },
+          },
+          dialog_induk: {
+            select: {
+              id: true,
+              periode_tahun: true,
+              triwulan: true,
+            },
+          },
+          dialog_lanjutan: {
+            select: { id: true },
+          },
+          aspek: {
+            include: {
+              item: {
+                select: {
+                  id: true,
+                  is_tercapai: true,
+                  dialog_evaluasi: true,
+                },
+              },
+            },
+          },
+          reviu: {
+            orderBy: { created_at: "asc" as const },
+            select: {
+              id: true,
+              status: true,
+              is_tercapai: true,
+              is_tidak_tercapai: true,
+              tanggal_next_evaluasi: true,
+            },
+          },
+        },
       },
     },
   });
-  if (!dialog) notFound();
 
-  const sequenceNum = await prisma.dialogKinerja.count({
-    where: { id_pegawai: dialog.pegawai.id, id: { lte: dialogId } },
-  });
+  if (!pegawai) notFound();
+
+  const totalDialogs = pegawai.dialogAsPegawai.length;
+  const selesaiCount = pegawai.dialogAsPegawai.filter(
+    (d) => d.status === "selesai",
+  ).length;
+  const berjalanCount = totalDialogs - selesaiCount;
 
   return (
     <div className="flex flex-col gap-8">
@@ -59,64 +115,198 @@ export default async function AdminMonitoringDetailPage({
           className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
         >
           <ArrowLeftIcon size={16} weight="bold" />
-          Kembali ke Monitoring
+          Kembali ke Daftar Monitoring
         </Link>
 
-        <header className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-col gap-1">
-                <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-                  Dialog Kinerja Ke-{sequenceNum} ({formatPeriode(dialog.triwulan, dialog.periode_tahun)})
-                </h1>
-              <p className="text-sm leading-5 text-ink-muted">
-                Pegawai: {dialog.pegawai.nama_pegawai} (
-                {dialog.pegawai.npp})
-                {dialog.pegawai.nama_jabatan
-                  ? ` · ${dialog.pegawai.nama_jabatan}`
-                  : ""}
-              </p>
-              <p className="text-sm leading-5 text-ink-muted">
-                Atasan: {dialog.atasan.nama_pegawai} ({dialog.atasan.npp})
-              </p>
+        {/* Header Profil Pegawai */}
+        <header className="flex flex-col gap-4 rounded-xl border border-outline bg-surface p-6 shadow-xs">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary-strong">
+                <UserIcon size={24} weight="bold" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h1 className="text-xl font-bold text-ink">
+                    {pegawai.nama_pegawai}
+                  </h1>
+                  <span className="rounded-md bg-surface-muted px-2 py-0.5 text-xs font-semibold text-ink-muted">
+                    NPP: {pegawai.npp}
+                  </span>
+                  {pegawai.nip ? (
+                    <span className="rounded-md bg-surface-muted px-2 py-0.5 text-xs font-semibold text-ink-muted">
+                      NIP: {pegawai.nip}
+                    </span>
+                  ) : null}
+                </div>
+                <p className="text-sm font-medium text-ink-muted">
+                  {pegawai.nama_jabatan ?? "Jabatan belum diatur"} ·{" "}
+                  {pegawai.unit_kerja ?? "Unit Kerja belum diatur"}
+                </p>
+                <div className="mt-1 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-muted">
+                  {pegawai.atasan ? (
+                    <span>
+                      Atasan Langsung:{" "}
+                      <strong className="font-semibold text-ink">
+                        {pegawai.atasan.nama_pegawai}
+                      </strong>
+                    </span>
+                  ) : null}
+                  {pegawai.tanggal_bergabung ? (
+                    <span>
+                      Tgl Bergabung:{" "}
+                      <strong className="font-semibold text-ink">
+                        {formatTanggal(pegawai.tanggal_bergabung)}
+                      </strong>
+                    </span>
+                  ) : null}
+                  {pegawai.masa_kerja_unit_terakhir ? (
+                    <span>
+                      Masa Kerja Unit:{" "}
+                      <strong className="font-semibold text-ink">
+                        {pegawai.masa_kerja_unit_terakhir}
+                      </strong>
+                    </span>
+                  ) : null}
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-surface-muted px-2.5 py-1 text-xs font-semibold text-ink-muted">
-                <EyeIcon size={14} weight="bold" />
-                Read-only
-              </span>
-              <StatusBadge status={dialog.status} />
-              {dialog.id_dialog_induk ? (
-                <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                  Dialog Lanjutan
+
+            {/* Stat Ringkasan */}
+            <div className="flex flex-wrap items-center gap-3 sm:flex-col sm:items-end">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-outline bg-surface-soft px-3 py-1.5 text-xs font-semibold text-ink">
+                  <FileTextIcon size={16} className="text-primary" weight="bold" />
+                  {totalDialogs} Total Dialog
                 </span>
-              ) : null}
+                <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800">
+                  <CheckCircleIcon size={16} weight="bold" />
+                  {selesaiCount} Selesai
+                </span>
+                {berjalanCount > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800">
+                    <HourglassIcon size={16} weight="bold" />
+                    {berjalanCount} Berjalan
+                  </span>
+                ) : null}
+              </div>
             </div>
           </div>
-
-          {dialog.deskripsi_kinerja?.trim() ? (
-            <div className="rounded-lg border border-outline bg-surface px-5 py-4">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-                Deskripsi Kinerja (dari Atasan)
-              </span>
-              <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
-                {dialog.deskripsi_kinerja}
-              </p> 
-            </div>
-          ) : null}
         </header>
       </div>
 
-      <section aria-label="Aspek dialog kinerja">
-        <DialogSummary
-          aspek={dialog.aspek}
-          isLanjutan={dialog.id_dialog_induk !== null}
-          previousItems={dialog.dialog_induk?.aspek.flatMap((aspek) => aspek.item)}
-        />
-      </section>
+      {/* Daftar Dialog Kinerja Pegawai */}
+      <section className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-ink">
+              Daftar Riwayat Dialog Kinerja
+            </h2>
+            <p className="text-xs text-ink-muted">
+              Seluruh tahapan dialog dan evaluasi kinerja yang dimiliki oleh pegawai ini.
+            </p>
+          </div>
+          <span className="text-xs font-medium text-ink-muted">
+            Menampilkan {totalDialogs} dokumen
+          </span>
+        </div>
 
-      <Separator />
-      
-      {dialog.reviu.length > 0 ? <ReviuList reviu={dialog.reviu} /> : null}
+        {totalDialogs === 0 ? (
+          <div className="flex flex-col items-center gap-2 rounded-xl border border-outline bg-surface p-12 text-center">
+            <FileTextIcon size={32} className="text-ink-muted/50" />
+            <h3 className="text-sm font-semibold text-ink">
+              Belum Ada Dialog Kinerja
+            </h3>
+            <p className="text-xs text-ink-muted">
+              Pegawai ini belum memiliki dokumen dialog kinerja dari atasan.
+            </p>
+          </div>
+        ) : (
+          <ul className="flex flex-col gap-3.5">
+            {pegawai.dialogAsPegawai.map((dialog, index) => {
+              const sequenceNum = index + 1;
+              const filledCount = dialog.aspek.filter(
+                (a) =>
+                  (a.tanggung_jawab_pegawai?.trim() ?? "") !== "" ||
+                  a.item.length > 0,
+              ).length;
+              const totalItems = dialog.aspek.reduce(
+                (acc, curr) => acc + curr.item.length,
+                0,
+              );
+              const latestReviu = dialog.reviu.at(-1);
+
+              return (
+                <li
+                  key={dialog.id}
+                  className="flex flex-col gap-4 rounded-xl border border-outline bg-surface p-5 transition-all hover:border-outline-strong hover:shadow-xs md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="flex min-w-0 flex-col gap-2.5">
+                    {/* Header baris */}
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <span className="text-base font-bold text-ink">
+                        Dialog Ke-{sequenceNum} ({formatPeriode(dialog.triwulan, dialog.periode_tahun)})
+                      </span>
+                      <StatusBadge status={dialog.status} />
+                      <CapaianBadge
+                        statusDialog={dialog.status}
+                        filledAspekCount={filledCount}
+                        reviu={latestReviu}
+                        items={dialog.aspek.flatMap((a) => a.item)}
+                      />
+                      {dialog.id_dialog_induk ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200">
+                          <ArrowsClockwiseIcon size={12} weight="bold" />
+                          Lanjutan dari {formatPeriode(dialog.dialog_induk!.triwulan, dialog.dialog_induk!.periode_tahun)}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {/* Metadata baris */}
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ink-muted">
+                      <span>
+                        Atasan:{" "}
+                        <strong className="font-semibold text-ink">
+                          {dialog.atasan.nama_pegawai}
+                        </strong>
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Total Rencana:{" "}
+                        <strong className="font-semibold text-ink">
+                          {totalItems} Target Kegiatan
+                        </strong>
+                      </span>
+                      {latestReviu?.tanggal_next_evaluasi ? (
+                        <>
+                          <span>•</span>
+                          <span>
+                            Jadwal Evaluasi Berikutnya:{" "}
+                            <strong className="font-semibold text-ink">
+                              {formatTanggal(latestReviu.tanggal_next_evaluasi)}
+                            </strong>
+                          </span>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {/* Tombol aksi */}
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Link
+                      href={`/admin/monitoring/dialog/${dialog.id}`}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
+                    >
+                      <span>Lihat Detail Dokumen</span>
+                      <ArrowSquareOutIcon size={14} weight="bold" />
+                    </Link>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

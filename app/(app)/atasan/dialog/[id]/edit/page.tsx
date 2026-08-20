@@ -62,6 +62,8 @@ export default async function EditDialogPage({
       <DeskripsiKinerjaForm
         dialogId={dialog.id}
         initialValue={dialog.deskripsi_kinerja ?? ""}
+        initialTahun={dialog.periode_tahun}
+        initialTriwulan={dialog.triwulan}
       />
     </div>
   );

@@ -6,7 +6,7 @@ import {
   HourglassIcon,
   CheckCircleIcon,
   AlarmIcon,
-  DownloadSimpleIcon,
+  MagnifyingGlassIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
@@ -17,7 +17,6 @@ import {
 import { NewReviuButton } from "@/components/reviu/create-button";
 import { ReviuStatusBadge } from "@/components/reviu/status-badge";
 import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
-import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
@@ -87,16 +86,44 @@ export default async function PegawaiReviuListPage({
     rawStatus && (VALID_STATUSES as string[]).includes(rawStatus)
       ? (rawStatus as StatusReviu)
       : "semua";
-  const { page, skip, existingParams } = getPageParams(sp, ["status"]);
+  const { page, skip, existingParams } = getPageParams(sp, ["status", "q", "tahun", "triwulan"]);
+
+  const q = typeof sp.q === "string" ? sp.q.trim() : "";
+  const tahun = typeof sp.tahun === "string" ? sp.tahun.trim() : "";
+  const triwulan = typeof sp.triwulan === "string" ? sp.triwulan.trim() : "";
 
   const baseWhere = { dialog: { id_pegawai: session.id } };
-  const listWhere =
-    activeStatus !== "semua"
-      ? { ...baseWhere, status: activeStatus }
-      : baseWhere;
 
-  const today = new Date();
-  const todayInput = toDateInput(today);
+  const dialogFilters: Record<string, unknown> = { id_pegawai: session.id };
+  if (tahun) dialogFilters.periode_tahun = Number(tahun);
+  if (triwulan) dialogFilters.triwulan = triwulan;
+
+  const listWhere: Record<string, unknown> = {
+    dialog: dialogFilters,
+  };
+  if (activeStatus !== "semua") {
+    listWhere.status = activeStatus;
+  }
+  if (q) {
+    listWhere.OR = [
+      { penjelasan_tercapai: { contains: q } },
+      { penjelasan_tidak_tercapai: { contains: q } },
+      { rencana_tindak_lanjut: { contains: q } },
+      {
+        dialog: {
+          aspek: {
+            some: {
+              item: {
+                some: {
+                  dialog_evaluasi: { contains: q },
+                },
+              },
+            },
+          },
+        },
+      },
+    ];
+  }
 
   const [
     visible,
@@ -106,6 +133,7 @@ export default async function PegawaiReviuListPage({
     menungguValidasiCount,
     selesaiCount,
     selesaiDialogs,
+    allDialogsForYears,
   ] = await Promise.all([
     prisma.reviu.findMany({
       where: listWhere,
@@ -120,10 +148,16 @@ export default async function PegawaiReviuListPage({
     prisma.reviu.count({ where: { ...baseWhere, status: "menunggu_validasi" } }),
     prisma.reviu.count({ where: { ...baseWhere, status: "selesai" } }),
     getPegawaiSelesaiDialogOptions(session.id),
+    prisma.dialogKinerja.findMany({
+      where: { id_pegawai: session.id },
+      select: { periode_tahun: true },
+      distinct: ["periode_tahun"],
+    }),
   ]);
 
   const allTotal = draftCount + menungguAtasanCount + menungguValidasiCount + selesaiCount;
   const totalPages = Math.ceil(filteredTotal / PAGE_SIZE);
+  const availableYears = allDialogsForYears.map((d) => d.periode_tahun).sort((a, b) => b - a);
 
   const stats = [
     {
@@ -197,6 +231,67 @@ export default async function PegawaiReviuListPage({
           </Link>
         ))}
       </section>
+
+      {/* Filter & Search Bar */}
+      <form method="GET" className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex-1">
+          <MagnifyingGlassIcon
+            size={16}
+            weight="bold"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted"
+          />
+          <input
+            type="search"
+            name="q"
+            defaultValue={q}
+            placeholder="Cari berdasarkan catatan evaluasi atau kata kunci..."
+            className="h-10 w-full rounded-lg border border-outline bg-surface pl-9 pr-3 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          {activeStatus !== "semua" ? (
+            <input type="hidden" name="status" value={activeStatus} />
+          ) : null}
+          <select
+            name="tahun"
+            defaultValue={tahun}
+            className="h-10 rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+          >
+            <option value="">Semua Tahun</option>
+            {availableYears.map((y) => (
+              <option key={y} value={y}>
+                Tahun {y}
+              </option>
+            ))}
+          </select>
+          <select
+            name="triwulan"
+            defaultValue={triwulan}
+            className="h-10 rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+          >
+            <option value="">Semua Triwulan</option>
+            <option value="TW1">Triwulan I</option>
+            <option value="TW2">Triwulan II</option>
+            <option value="TW3">Triwulan III</option>
+            <option value="TW4">Triwulan IV</option>
+          </select>
+          <button
+            type="submit"
+            className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
+          >
+            Terapkan
+          </button>
+          {q || tahun || triwulan ? (
+            <Link
+              href={activeStatus !== "semua" ? `/pegawai/reviu?status=${activeStatus}` : "/pegawai/reviu"}
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline px-3 text-xs font-semibold text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
+            >
+              Reset
+            </Link>
+          ) : null}
+        </div>
+      </form>
 
       <section aria-label="Daftar reviu" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline pb-3">
@@ -273,21 +368,6 @@ export default async function PegawaiReviuListPage({
                     </div>
 
                     <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-outline/50 pt-3 sm:border-t-0 sm:pt-0">
-                      {r.status === "selesai" ? (
-                        <>
-                          <Link
-                            href={`/pegawai/reviu/${r.id}?cetak=1`}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted"
-                          >
-                            <DownloadSimpleIcon size={14} weight="bold" />
-                            Unduh PDF
-                          </Link>
-                          <UnduhWordLink
-                            href={`/api/unduh/reviu/${r.id}/docx`}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted"
-                          />
-                        </>
-                      ) : null}
                       <Link
                         href={cta.href(r.id)}
                         className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-xs font-semibold transition-colors ${cta.variant === "primary"

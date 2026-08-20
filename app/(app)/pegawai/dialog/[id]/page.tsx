@@ -48,7 +48,7 @@ function StatusNote({
   if (status === "menunggu_atasan") {
     return (
       <p className="text-sm leading-5 text-ink-muted">
-        Isian Anda telah dikirim. Menunggu reviu dan tanggung jawab dari atasan.
+        Isian Anda telah dikirim. Menunggu tanggapan dan pembagian tanggung jawab dari atasan.
       </p>
     );
   }
@@ -63,8 +63,8 @@ function StatusNote({
     }
     return (
       <p className="text-sm leading-5 text-ink-muted">
-        Reviu atasan telah selesai. Lakukan persetujuan dan tanda tangan di
-        bawah untuk melanjutkan.
+        Tanggapan atasan telah selesai. Lakukan persetujuan dan tanda tangan di
+        bawah untuk mengesahkan target.
       </p>
     );
   }
@@ -156,7 +156,7 @@ export default async function DialogDetailPage({
                         href={`/pegawai/reviu/new?dialog=${dialog.id}`}
                         className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
                       >
-                        Buat Reviu
+                        Isi Evaluasi Kinerja
                       </Link>
                     ) : null}
                     {latestSelesaiReviuId && !hasLanjutan && hasBelumTercapai ? (

@@ -155,7 +155,7 @@ export default async function DialogDetailPage({
                       className="inline-flex h-8 items-center gap-1 rounded-md bg-primary-soft px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-faint"
                     >
                       <PencilSimple size={12} weight="bold" />
-                      Edit
+                      {dialog.id_dialog_induk ? "Isi Dialog Lanjutan" : "Isi Dialog"}
                     </Link>
                     <DeleteDialogButton dialogId={dialog.id} />
                     <form action={submitDialog.bind(null, dialog.id)}>

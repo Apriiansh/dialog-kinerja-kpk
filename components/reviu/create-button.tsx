@@ -61,10 +61,10 @@ export function NewReviuButton({ dialogs }: { dialogs: SelesaiDialogOption[] }) 
             <div className="flex items-center justify-between border-b border-outline px-6 py-4">
               <div className="flex flex-col gap-0.5">
                 <h2 className="text-base font-semibold text-ink">
-                  Buat Evaluasi Tindak Lanjut
+                  Pilih Dialog untuk Dievaluasi
                 </h2>
                 <p className="text-xs leading-4 text-ink-muted">
-                  Pilih dialog kinerja yang sudah selesai untuk dievaluasi tindak lanjutnya.
+                  Pilih dokumen dialog kinerja selesai yang belum memiliki formulir evaluasi.
                 </p>
               </div>
               <button
@@ -98,7 +98,7 @@ export function NewReviuButton({ dialogs }: { dialogs: SelesaiDialogOption[] }) 
               {filtered.length === 0 ? (
                 <div className="px-6 py-12 text-center">
                   <p className="text-sm font-medium text-ink-muted">
-                    Tidak ada dialog kinerja yang cocok.
+                    Tidak ada dialog kinerja yang siap dievaluasi. Seluruh dialog yang selesai telah memiliki formulir evaluasi.
                   </p>
                 </div>
               ) : (
@@ -107,7 +107,7 @@ export function NewReviuButton({ dialogs }: { dialogs: SelesaiDialogOption[] }) 
                     <tr className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
                       <th className="px-6 py-3">Dialog Kinerja</th>
                       <th className="px-6 py-3">Atasan Penilai</th>
-                      <th className="px-6 py-3 text-center">Evaluasi</th>
+                      <th className="px-6 py-3 text-center">Status</th>
                       <th className="px-6 py-3 text-right">Aksi</th>
                     </tr>
                   </thead>
@@ -124,21 +124,16 @@ export function NewReviuButton({ dialogs }: { dialogs: SelesaiDialogOption[] }) 
                           {d.atasan.nama_pegawai}
                         </td>
                         <td className="px-6 py-3.5 text-center">
-                          <span className="inline-flex items-center gap-1 text-sm text-ink-muted">
-                            <ArrowsClockwiseIcon
-                              size={14}
-                              weight="bold"
-                              className="text-primary"
-                            />
-                            {d._count.reviu}x
+                          <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 border border-blue-200">
+                            Belum Dievaluasi
                           </span>
                         </td>
                         <td className="px-6 py-3.5 text-right">
                           <Link
                             href={`/pegawai/reviu/new?dialog=${d.id}`}
-                            className="inline-flex h-8 items-center gap-1 rounded-md bg-primary-soft px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-faint"
+                            className="inline-flex h-8 items-center gap-1 rounded-md bg-primary px-3 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
                           >
-                            Buat Evaluasi
+                            Isi Evaluasi →
                           </Link>
                         </td>
                       </tr>

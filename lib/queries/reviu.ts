@@ -157,7 +157,11 @@ export async function getPegawaiSelesaiDialogOptions(
   pegawaiId: number,
 ): Promise<SelesaiDialogOption[]> {
   return prisma.dialogKinerja.findMany({
-    where: { id_pegawai: pegawaiId, status: "selesai" },
+    where: {
+      id_pegawai: pegawaiId,
+      status: "selesai",
+      reviu: { none: {} },
+    },
     select: {
       id: true,
       id_dialog_induk: true,
