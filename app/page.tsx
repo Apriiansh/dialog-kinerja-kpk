@@ -11,12 +11,12 @@ export default async function LandingPage() {
   const userHomePath = session?.role ? homePathForRole(session.role) : "/login";
 
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-[#070B14] text-slate-800 dark:text-slate-200 font-['Tahoma',Verdana,Segoe_UI,sans-serif] transition-colors duration-200 selection:bg-red-600 selection:text-white overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-[#070B14] text-slate-800 dark:text-slate-200 font-sans transition-colors duration-200 selection:bg-[#d61a20] selection:text-white overflow-x-hidden scroll-smooth">
       {/* Top Red-Amber Accent Line */}
-      <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-red-700 via-amber-500 to-red-600" />
+      <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-[#9e1318] via-amber-500 to-[#d61a20]" />
 
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#0B101E]/95 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#0B101E]/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto flex h-16 sm:h-20 items-center justify-between px-3.5 sm:px-6 lg:px-8">
           {/* Left: KPK Logo & Official Branding */}
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3.5 group min-w-0">
@@ -30,17 +30,30 @@ export default async function LandingPage() {
               />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[9px] sm:text-xs font-bold tracking-wider text-red-700 dark:text-red-500 uppercase truncate">
+              <span className="text-[9px] sm:text-xs font-bold tracking-wider text-[#d61a20] dark:text-red-400 uppercase truncate">
                 Komisi Pemberantasan Korupsi
               </span>
               <span className="text-sm sm:text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none truncate">
                 DIALOG KINERJA
               </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-normal mt-0.5 hidden md:block">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-normal mt-0.5 hidden lg:block">
                 Sistem Terintegrasi Pengelolaan Capaian & IDP Pegawai
               </span>
             </div>
           </Link>
+
+          {/* Middle: Navigation Anchor Links (Desktop) */}
+          <nav className="hidden md:flex items-center gap-6 text-xs lg:text-sm font-semibold text-slate-600 dark:text-slate-300">
+            <a href="#aspek" className="hover:text-[#d61a20] dark:hover:text-white transition-colors">
+              Aspek Evaluasi (A–D)
+            </a>
+            <a href="#alur" className="hover:text-[#d61a20] dark:hover:text-white transition-colors">
+              Alur Pengesahan
+            </a>
+            <a href="#tentang" className="hover:text-[#d61a20] dark:hover:text-white transition-colors">
+              Tentang Sistem
+            </a>
+          </nav>
 
           {/* Right: Theme Toggle & Login CTA */}
           <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
@@ -49,7 +62,7 @@ export default async function LandingPage() {
             {isLoggedIn ? (
               <Link
                 href={userHomePath}
-                className="inline-flex items-center gap-1.5 sm:gap-2 h-9 sm:h-11 px-3 sm:px-5 rounded-lg sm:rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs sm:text-sm font-bold transition-all shadow-sm hover:scale-[1.02]"
+                className="inline-flex items-center gap-1.5 sm:gap-2 h-9 sm:h-11 px-3 sm:px-5 rounded-lg sm:rounded-xl bg-[#d61a20] hover:bg-[#a51318] text-white text-xs sm:text-sm font-bold transition-all shadow-sm hover:scale-[1.02] cursor-pointer"
               >
                 <span>Dashboard ({session.nama.split(" ")[0]})</span>
                 <span className="hidden sm:inline">→</span>
@@ -57,7 +70,7 @@ export default async function LandingPage() {
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 sm:gap-2 h-9 sm:h-11 px-3 sm:px-6 rounded-lg sm:rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-red-950/20 hover:scale-[1.02]"
+                className="inline-flex items-center gap-1.5 sm:gap-2 h-9 sm:h-11 px-3 sm:px-6 rounded-lg sm:rounded-xl bg-[#d61a20] hover:bg-[#a51318] text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-red-950/20 hover:scale-[1.02] cursor-pointer"
               >
                 <span>Masuk ke Sistem</span>
                 <span className="hidden sm:inline">→</span>
@@ -78,7 +91,7 @@ export default async function LandingPage() {
           />
         </section>
 
-        {/* 4 ASPEK & ALUR SECTIONS WITH FRAMER MOTION */}
+        {/* 5 ASPEK & ALUR SECTIONS WITH ABSTRACT BACKGROUNDS */}
         <LandingSections
           isLoggedIn={isLoggedIn}
           userHomePath={userHomePath}
@@ -86,7 +99,7 @@ export default async function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#05080F] text-slate-600 dark:text-slate-400">
+      <footer className="border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#05080F] text-slate-600 dark:text-slate-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10 items-start">
             {/* Col 1: Instansi */}
@@ -133,7 +146,7 @@ export default async function LandingPage() {
               <div className="pt-1">
                 <Link
                   href="/login"
-                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-red-700 dark:text-red-400 hover:underline font-bold"
+                  className="inline-flex items-center gap-1 text-xs sm:text-sm text-[#d61a20] dark:text-red-400 hover:underline font-bold"
                 >
                   <span>Halaman Login Pegawai, Atasan, & Admin</span>
                   <span>→</span>
@@ -142,9 +155,9 @@ export default async function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-8 sm:mt-10 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm text-slate-500 gap-2 font-normal">
+          <div className="mt-8 sm:mt-10 pt-6 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm text-slate-500 gap-2 font-normal">
             <p>© {new Date().getFullYear()} Komisi Pemberantasan Korupsi Republik Indonesia.</p>
-            <p>Sistem Dialog Kinerja Terintegrasi</p>
+            <p className="font-mono text-[11px] text-slate-400">SISTEM DIALOG KINERJA v2.0</p>
           </div>
         </div>
       </footer>

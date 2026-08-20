@@ -4,7 +4,6 @@ import { Suspense, useState } from "react";
 import {
   SquaresFourIcon,
   ChatCircleDotsIcon,
-  ClockCounterClockwiseIcon,
   ClipboardTextIcon,
   SignOutIcon,
   XIcon,
@@ -90,11 +89,6 @@ const ATASAN_NAV_GROUPS: NavGroup[] = [
         href: "/atasan/pegawai",
         label: "Pegawai",
         icon: UsersIcon,
-      },
-      {
-        href: "/atasan/history",
-        label: "Riwayat",
-        icon: ClockCounterClockwiseIcon,
       },
       {
         href: "/atasan/notifikasi",

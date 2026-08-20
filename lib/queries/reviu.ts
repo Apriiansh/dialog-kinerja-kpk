@@ -215,7 +215,7 @@ export async function getActiveEvaluasiReminders(
           id_pegawai: userId,
           dialog_lanjutan: { none: {} },
         },
-        tanggal_next_evaluasi: { lte: maxDate },
+        tanggal_next_evaluasi: { gte: today, lte: maxDate },
       },
       select: {
         id: true,
@@ -252,7 +252,7 @@ export async function getActiveEvaluasiReminders(
           id_atasan: userId,
           dialog_lanjutan: { none: {} },
         },
-        tanggal_next_evaluasi: { lte: maxDate },
+        tanggal_next_evaluasi: { gte: today, lte: maxDate },
       },
       select: {
         id: true,

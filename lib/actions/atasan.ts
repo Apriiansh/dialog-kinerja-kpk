@@ -114,6 +114,19 @@ export async function startDialog(
   const periodeTahun = periodeDate.getFullYear();
   const triwulan = getTriwulanFromDate(periodeDate);
 
+  const existingSameTriwulan = await prisma.dialogKinerja.findFirst({
+    where: {
+      id_pegawai: pegawaiId,
+      periode_tahun: periodeTahun,
+      triwulan,
+    },
+  });
+  if (existingSameTriwulan) {
+    return {
+      error: `Dialog kinerja untuk ${triwulan} Tahun ${periodeTahun} sudah pernah dibuat.`,
+    };
+  }
+
   const dialog = await prisma.dialogKinerja.create({
     data: {
       id_atasan: session.id,
@@ -298,7 +311,6 @@ export async function submitEvaluasi(
 
   revalidatePath(`/atasan/dialog/${dialog.id}`);
   revalidatePath("/atasan/dashboard");
-  revalidatePath("/atasan/history");
   return {};
 }
 

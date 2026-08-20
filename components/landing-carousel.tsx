@@ -220,7 +220,7 @@ export function LandingHeroCarousel({
                           >
                             <Link
                               href={isLoggedIn ? userHomePath : "/login"}
-                              className="inline-flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto h-11 sm:h-12 px-5 sm:px-7 rounded-xl bg-gradient-to-r from-red-600 via-red-700 to-red-800 hover:from-red-500 hover:to-red-700 text-white text-xs sm:text-sm md:text-base font-bold shadow-xl shadow-black/40 border border-red-500/40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                              className="inline-flex items-center justify-center gap-2 sm:gap-3 w-full sm:w-auto h-11 sm:h-12 px-5 sm:px-7 rounded-xl bg-[#d61a20] hover:bg-[#a51318] text-white text-xs sm:text-sm md:text-base font-bold shadow-xl shadow-black/40 border border-white/20 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             >
                               <span>
                                 {isLoggedIn

@@ -11,7 +11,6 @@ export async function getAtasanPegawaiOptions(atasanId: number) {
       unit_kerja: true,
       dialogAsPegawai: {
         orderBy: { id: "desc" },
-        take: 1,
         select: {
           id: true,
           periode_tahun: true,

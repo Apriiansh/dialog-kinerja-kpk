@@ -270,11 +270,9 @@ export default async function PegawaiReviuListPage({
             defaultValue={triwulan}
             className="h-10 rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
           >
-            <option value="">Semua Triwulan</option>
-            <option value="TW1">Triwulan I</option>
-            <option value="TW2">Triwulan II</option>
-            <option value="TW3">Triwulan III</option>
-            <option value="TW4">Triwulan IV</option>
+            <option value="">Semua Periode</option>
+            <option value="TW1">Triwulan I (Perencanaan & Evaluasi)</option>
+            <option value="TW3">Triwulan III (Monitoring Progres)</option>
           </select>
           <button
             type="submit"

@@ -65,10 +65,10 @@ export function EvaluasiLanjutanButton({
             </button>
 
             <h3 className="text-lg font-bold text-ink">
-              Buat Dialog Kinerja Lanjutan
+              Mulai Dialog Kinerja Lanjutan
             </h3>
             <p className="mt-1 text-xs leading-5 text-ink-muted">
-              Pilih periode tahun dan triwulan untuk dialog kinerja lanjutan ini. Item yang belum tercapai akan otomatis disalin, atau siklus target baru dapat diisi jika semua target sebelumnya telah tercapai.
+              Siklus monitoring 6-bulanan. Pilih periode TW1 (Perencanaan & Evaluasi) atau TW3 (Monitoring Progres). Butir target yang belum tercapai otomatis diteruskan.
             </p>
 
             <form onSubmit={handleCreate} className="mt-5 flex flex-col gap-4">
@@ -98,7 +98,7 @@ export function EvaluasiLanjutanButton({
                   htmlFor="modal_triwulan"
                   className="text-xs font-semibold uppercase tracking-[0.05em] text-ink-muted"
                 >
-                  Triwulan
+                  Tahap Triwulan
                 </label>
                 <select
                   id="modal_triwulan"
@@ -106,10 +106,8 @@ export function EvaluasiLanjutanButton({
                   onChange={(e) => setTriwulan(e.target.value as Triwulan)}
                   className="h-10 rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
                 >
-                  <option value="TW1">Triwulan I</option>
-                  <option value="TW2">Triwulan II</option>
-                  <option value="TW3">Triwulan III</option>
-                  <option value="TW4">Triwulan IV</option>
+                  <option value="TW1">Triwulan I (Perencanaan & Evaluasi)</option>
+                  <option value="TW3">Triwulan III (Monitoring Progres)</option>
                 </select>
               </div>
 

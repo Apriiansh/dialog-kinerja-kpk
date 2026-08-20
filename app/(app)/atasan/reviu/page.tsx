@@ -191,7 +191,7 @@ export default async function AtasanReviuListPage({
 
       {/* Filter & Search Bar */}
       <form method="GET" className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1">
+        <div className="relative min-w-0 flex-1">
           <MagnifyingGlassIcon
             size={16}
             weight="bold"
@@ -213,25 +213,23 @@ export default async function AtasanReviuListPage({
           <select
             name="tahun"
             defaultValue={tahun}
-            className="h-10 rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+            className="h-10 w-[110px] shrink-0 rounded-lg border border-outline bg-surface px-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
           >
             <option value="">Semua Tahun</option>
             {availableYears.map((y) => (
               <option key={y} value={y}>
-                Tahun {y}
+                {y}
               </option>
             ))}
           </select>
           <select
             name="triwulan"
             defaultValue={triwulan}
-            className="h-10 rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+            className="h-10 w-[130px] shrink-0 rounded-lg border border-outline bg-surface px-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
           >
-            <option value="">Semua Triwulan</option>
-            <option value="TW1">Triwulan I</option>
-            <option value="TW2">Triwulan II</option>
-            <option value="TW3">Triwulan III</option>
-            <option value="TW4">Triwulan IV</option>
+            <option value="">Semua Periode</option>
+            <option value="TW1">TW I</option>
+            <option value="TW3">TW III</option>
           </select>
           <button
             type="submit"

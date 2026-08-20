@@ -7,6 +7,18 @@ export const TRIWULAN_LABEL: Record<Triwulan, string> = {
   TW4: "Triwulan IV",
 };
 
+export const TRIWULAN_KONTEKS: Record<Triwulan, string> = {
+  TW1: "Triwulan I (Perencanaan & Evaluasi)",
+  TW2: "Triwulan II",
+  TW3: "Triwulan III (Monitoring Progres)",
+  TW4: "Triwulan IV",
+};
+
+export const SIKLUS_TRIWULAN_OPTIONS = [
+  { value: "TW1" as Triwulan, label: "Triwulan I (Perencanaan & Evaluasi)", shortLabel: "TW1 — Perencanaan" },
+  { value: "TW3" as Triwulan, label: "Triwulan III (Monitoring Progres)", shortLabel: "TW3 — Monitoring" },
+];
+
 export const TRIWULAN_BULAN: Record<Triwulan, number[]> = {
   TW1: [0, 1, 2],
   TW2: [3, 4, 5],
@@ -26,6 +38,14 @@ export function triwulanLabel(tw: Triwulan): string {
   return TRIWULAN_LABEL[tw];
 }
 
+export function triwulanKonteks(tw: Triwulan): string {
+  return TRIWULAN_KONTEKS[tw] || TRIWULAN_LABEL[tw];
+}
+
 export function formatPeriode(triwulan: Triwulan, tahun: number): string {
   return `${TRIWULAN_LABEL[triwulan]} ${tahun}`;
+}
+
+export function formatPeriodeLengkap(triwulan: Triwulan, tahun: number): string {
+  return `${TRIWULAN_KONTEKS[triwulan] || TRIWULAN_LABEL[triwulan]} ${tahun}`;
 }

@@ -2,8 +2,9 @@
 
 import { prisma } from "@/lib/prisma";
 import { createNotifications } from "@/lib/notifications";
+import { formatPeriodeLengkap } from "@/lib/constants/triwulan";
 
-const HARI_DEADLINE = 30;
+const HARI_DEADLINE = 7;
 const MS_PER_HARI = 24 * 60 * 60 * 1000;
 
 function startOfDay(date: Date): Date {
@@ -59,7 +60,8 @@ export async function checkUpcomingReviuReminders(): Promise<void> {
           year: "numeric",
         })
       : "";
-    const base = `Evaluasi dialog kinerja tahun ${r.dialog.periode_tahun} (${r.dialog.triwulan}) dijadwalkan pada ${tanggal}.`;
+    const periode = formatPeriodeLengkap(r.dialog.triwulan as "TW1" | "TW3", r.dialog.periode_tahun);
+    const base = `Dialog kinerja ${periode} dijadwalkan pada ${tanggal}.`;
     const result: {
       userId: number;
       type: "evaluasi_reminder";
@@ -71,7 +73,7 @@ export async function checkUpcomingReviuReminders(): Promise<void> {
       result.push({
         userId: r.dialog.id_pegawai,
         type: "evaluasi_reminder",
-        title: "Waktunya Evaluasi Dialog Kinerja",
+        title: "Jadwal Dialog Kinerja Mendatang",
         description: `${base} Cek apakah atasan sudah membuat dialog kinerja lanjutan.`,
         link: pegawaiLink,
       });
@@ -80,8 +82,8 @@ export async function checkUpcomingReviuReminders(): Promise<void> {
       result.push({
         userId: r.dialog.id_atasan,
         type: "evaluasi_reminder",
-        title: "Jadwal Evaluasi Dialog Kinerja Mendekat",
-        description: `${base} Segera buat dialog kinerja lanjutan untuk pegawai.`,
+        title: "Jadwal Dialog Kinerja Mendatang",
+        description: `${base} Segera buat dialog kinerja lanjutan untuk pegawai Anda.`,
         link: atasanLink,
       });
     }

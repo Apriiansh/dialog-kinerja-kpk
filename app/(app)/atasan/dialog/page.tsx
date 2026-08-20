@@ -1,15 +1,32 @@
-import { ChartLineUpIcon, MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr";
+import { ChartLineUpIcon } from "@phosphor-icons/react/dist/ssr";
+import {
+  ArrowClockwiseIcon,
+  CheckCircleIcon,
+  HourglassIcon,
+  PencilSimpleIcon,
+  SealCheckIcon,
+} from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { getAtasanPegawaiOptions } from "@/lib/queries/atasan";
 import { DialogList } from "@/components/dialog/list";
 import { NewDialogButton } from "@/components/dialog/create-button";
+import { DialogFilterBar } from "@/components/dialog/dialog-filter-bar";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
 import { getDialogSequenceMap } from "@/lib/queries/dialog";
+import type { StatusDialog } from "@/generated/prisma/enums";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+const VALID_STATUSES: StatusDialog[] = [
+  "draft_atasan",
+  "menunggu_pegawai",
+  "menunggu_atasan",
+  "menunggu_validasi",
+  "selesai",
+];
 
 export default async function DialogIndexPage({
   searchParams,
@@ -23,11 +40,14 @@ export default async function DialogIndexPage({
   const q = typeof sp.q === "string" ? sp.q.trim() : "";
   const tahun = typeof sp.tahun === "string" ? sp.tahun.trim() : "";
   const triwulan = typeof sp.triwulan === "string" ? sp.triwulan.trim() : "";
-  const status = typeof sp.status === "string" ? sp.status.trim() : "";
+  const activeStatus: StatusDialog | "semua" =
+    typeof sp.status === "string" && (VALID_STATUSES as string[]).includes(sp.status)
+      ? (sp.status as StatusDialog)
+      : "semua";
 
   const where: Record<string, unknown> = { id_atasan: session.id };
-  if (status) {
-    where.status = status;
+  if (activeStatus !== "semua") {
+    where.status = activeStatus;
   }
   if (tahun) {
     where.periode_tahun = Number(tahun);
@@ -45,7 +65,7 @@ export default async function DialogIndexPage({
     };
   }
 
-  const [dialogs, pegawai, total, allDialogsForYears] = await Promise.all([
+  const [dialogs, pegawai, total, statusCounts, allDialogsForYears] = await Promise.all([
     prisma.dialogKinerja.findMany({
       where,
       select: {
@@ -84,6 +104,11 @@ export default async function DialogIndexPage({
     }),
     getAtasanPegawaiOptions(session.id),
     prisma.dialogKinerja.count({ where }),
+    prisma.dialogKinerja.groupBy({
+      by: ["status"],
+      where: { id_atasan: session.id },
+      _count: { _all: true },
+    }),
     prisma.dialogKinerja.findMany({
       where: { id_atasan: session.id },
       select: { periode_tahun: true },
@@ -101,6 +126,61 @@ export default async function DialogIndexPage({
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const availableYears = allDialogsForYears.map((d) => d.periode_tahun).sort((a, b) => b - a);
 
+  const countByStatus = (status: StatusDialog) =>
+    statusCounts.find((s) => s.status === status)?._count._all ?? 0;
+  const allTotal = statusCounts.reduce((sum, s) => sum + s._count._all, 0);
+
+  const stats: {
+    key: StatusDialog | "semua";
+    label: string;
+    count: number;
+    icon: typeof PencilSimpleIcon;
+    className: string;
+  }[] = [
+    {
+      key: "semua",
+      label: "Semua",
+      count: allTotal,
+      icon: ChartLineUpIcon,
+      className: "bg-surface-soft text-primary",
+    },
+    {
+      key: "draft_atasan",
+      label: "Draft",
+      count: countByStatus("draft_atasan"),
+      icon: PencilSimpleIcon,
+      className: "bg-slate-100 text-slate-700",
+    },
+    {
+      key: "selesai",
+      label: "Selesai",
+      count: countByStatus("selesai"),
+      icon: CheckCircleIcon,
+      className: "bg-status-green-soft text-status-green",
+    },
+    {
+      key: "menunggu_pegawai",
+      label: "Pegawai Melengkapi",
+      count: countByStatus("menunggu_pegawai"),
+      icon: HourglassIcon,
+      className: "bg-status-amber-soft text-status-amber",
+    },
+    {
+      key: "menunggu_atasan",
+      label: "Atasan Memvalidasi",
+      count: countByStatus("menunggu_atasan"),
+      icon: CheckCircleIcon,
+      className: "bg-status-blue-soft text-status-blue",
+    },
+    {
+      key: "menunggu_validasi",
+      label: "Validasi Akhir",
+      count: countByStatus("menunggu_validasi"),
+      icon: SealCheckIcon,
+      className: "bg-status-indigo-soft text-status-indigo",
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -115,75 +195,37 @@ export default async function DialogIndexPage({
         <NewDialogButton pegawai={pegawai} />
       </header>
 
-      {/* Filter & Search Bar */}
-      <form method="GET" className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1">
-          <MagnifyingGlassIcon
-            size={16}
-            weight="bold"
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted"
-          />
-          <input
-            type="search"
-            name="q"
-            defaultValue={q}
-            placeholder="Cari berdasarkan nama pegawai atau NPP..."
-            className="h-10 w-full rounded-lg border border-outline bg-surface pl-9 pr-3 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus"
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <select
-            name="status"
-            defaultValue={status}
-            className="h-10 rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
-          >
-            <option value="">Semua Status</option>
-            <option value="draft_atasan">Draft</option>
-            <option value="menunggu_pegawai">Menunggu Pegawai</option>
-            <option value="menunggu_atasan">Menunggu Atasan</option>
-            <option value="menunggu_validasi">Menunggu Validasi</option>
-            <option value="selesai">Selesai</option>
-          </select>
-          <select
-            name="tahun"
-            defaultValue={tahun}
-            className="h-10 rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
-          >
-            <option value="">Semua Tahun</option>
-            {availableYears.map((y) => (
-              <option key={y} value={y}>
-                Tahun {y}
-              </option>
-            ))}
-          </select>
-          <select
-            name="triwulan"
-            defaultValue={triwulan}
-            className="h-10 rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
-          >
-            <option value="">Semua Triwulan</option>
-            <option value="TW1">Triwulan I</option>
-            <option value="TW2">Triwulan II</option>
-            <option value="TW3">Triwulan III</option>
-            <option value="TW4">Triwulan IV</option>
-          </select>
-          <button
-            type="submit"
-            className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
-          >
-            Terapkan
-          </button>
-          {q || tahun || triwulan || status ? (
+      {/* Stats by Status */}
+      <section aria-label="Ringkasan status dialog" className="grid grid-cols-3 gap-3">
+        {stats.map(({ key, label, count, icon: Icon, className }) => {
+          const active = key === activeStatus;
+          return (
             <Link
-              href="/atasan/dialog"
-              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline px-3 text-xs font-semibold text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
+              key={key}
+              href={key === "semua" ? "/atasan/dialog" : `/atasan/dialog?status=${key}`}
+              aria-current={active ? "page" : undefined}
+              className={`flex items-center gap-3 rounded-lg border bg-surface px-4 py-3 transition-all hover:border-outline-strong hover:shadow-ambient ${active ? "border-primary ring-1 ring-primary/20" : "border-outline"}`}
             >
-              Reset
+              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${className}`}>
+                <Icon size={18} weight="bold" />
+              </span>
+              <div className="flex min-w-0 flex-col">
+                <span className="text-xl font-semibold leading-6 text-ink">{count}</span>
+                <span className="truncate text-xs font-medium text-ink-muted">{label}</span>
+              </div>
             </Link>
-          ) : null}
-        </div>
-      </form>
+          );
+        })}
+      </section>
+
+      {/* Filter & Search Bar */}
+      <DialogFilterBar
+        q={q}
+        tahun={tahun}
+        triwulan={triwulan}
+        availableYears={availableYears}
+        resetHref="/atasan/dialog"
+      />
 
       {dialogs.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-12 text-center">
@@ -194,7 +236,7 @@ export default async function DialogIndexPage({
             Belum ada dialog kinerja yang cocok
           </h2>
           <p className="max-w-sm text-sm leading-5 text-ink-muted">
-            {q || tahun || triwulan || status
+            {q || tahun || triwulan || activeStatus !== "semua"
               ? "Coba ubah filter atau kata kunci pencarian Anda."
               : "Mulai dialog kinerja baru menggunakan tombol Mulai Dialog untuk pegawai Anda."}
           </p>
