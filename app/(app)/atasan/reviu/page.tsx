@@ -16,6 +16,7 @@ import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
 import type { StatusReviu } from "@/generated/prisma/enums";
+import { formatPeriode } from "@/lib/constants/triwulan";
 import { checkUpcomingReviuReminders } from "@/lib/actions/recurring-notifications";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -220,7 +221,7 @@ export default async function AtasanReviuListPage({
                         />
                       </div>
                       <span className="truncate text-xs leading-4 text-ink-muted">
-                        Dialog Kinerja Tahun {r.dialog.periode_tahun}
+                        Dialog Kinerja {formatPeriode(r.dialog.triwulan, r.dialog.periode_tahun)}
                         {r.dialog.pegawai.nama_jabatan
                           ? ` · ${r.dialog.pegawai.nama_jabatan}`
                           : ""}

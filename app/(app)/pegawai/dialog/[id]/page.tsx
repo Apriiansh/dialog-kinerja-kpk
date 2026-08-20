@@ -8,6 +8,7 @@ import {
   getDialogActor,
   getPegawaiDialog,
 } from "@/lib/queries/dialog";
+import { prisma } from "@/lib/prisma";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DialogSummary } from "@/components/dialog/summary";
 import { ValidationPanel } from "@/components/shared/validation-panel";
@@ -17,6 +18,8 @@ import { FormulirDialogKinerja } from "@/components/dialog/detail-view";
 import { ReviuList } from "@/components/reviu/list";
 import { Separator } from "@/components/ui/separator";
 import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
+import { formatPeriode } from "@/lib/constants/triwulan";
+import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -101,12 +104,12 @@ export default async function DialogDetailPage({
   const showValidation =
     canValidateDialog(dialog.status) && !dialog.is_valid_pegawai;
   const selesaiReviuIds = dialog.reviu
-    .filter((r) => r.status === "selesai")
-    .map((r) => r.id);
+    .filter((r: { status: string; id: number }) => r.status === "selesai")
+    .map((r: { id: number }) => r.id);
   const latestSelesaiReviuId = selesaiReviuIds[selesaiReviuIds.length - 1];
   const hasLanjutan = dialog.dialog_lanjutan.length > 0;
-  const hasBelumTercapai = dialog.aspek.some((aspek) =>
-    aspek.item.some((item) => item.is_tercapai === false),
+  const hasBelumTercapai = dialog.aspek.some((aspek: { item: { is_tercapai: boolean | null }[] }) =>
+    aspek.item.some((item: { is_tercapai: boolean | null }) => item.is_tercapai === false),
   );
 
   return (
@@ -125,7 +128,7 @@ export default async function DialogDetailPage({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-                  Dialog Kinerja Ke-{sequenceNum} (Tahun {dialog.periode_tahun})
+                  Dialog Kinerja Ke-{sequenceNum} ({formatPeriode(dialog.triwulan, dialog.periode_tahun)})
                 </h1>
                 <p className="text-sm leading-5 text-ink-muted">
                   Atasan: {dialog.atasan.nama_pegawai}
@@ -201,7 +204,7 @@ export default async function DialogDetailPage({
           <DialogSummary
             aspek={dialog.aspek}
             isLanjutan={dialog.id_dialog_induk !== null}
-            previousItems={dialog.dialog_induk?.aspek.flatMap((aspek) => aspek.item)}
+            previousItems={dialog.dialog_induk?.aspek.flatMap((aspek: AspekPegawaiRow) => aspek.item)}
           />
         </section>
 

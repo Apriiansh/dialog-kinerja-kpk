@@ -13,7 +13,7 @@ interface ReviuListRow {
   penjelasan_tercapai: string | null;
   penjelasan_tidak_tercapai: string | null;
   rencana_tindak_lanjut: string | null;
-  tanggal_next_reviu: Date | null;
+  tanggal_next_evaluasi: Date | null;
 }
 
 export function ReviuList({
@@ -94,11 +94,11 @@ export function ReviuList({
               ) : null}
               <div className="flex flex-col gap-1 px-5 py-3 sm:grid sm:grid-cols-[220px_1fr] sm:gap-4">
                 <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-                  Tanggal Reviu Berikutnya
+                  Tanggal Evaluasi Berikutnya
                 </dt>
                 <dd className="text-sm leading-5 text-ink">
-                  {r.tanggal_next_reviu
-                    ? formatTanggal(r.tanggal_next_reviu)
+                  {r.tanggal_next_evaluasi
+                    ? formatTanggal(r.tanggal_next_evaluasi)
                     : "—"}
                 </dd>
               </div>

@@ -1,6 +1,7 @@
 import { formatTanggal } from "@/lib/utils/format";
 import { formatWaktuPelaksanaan } from "@/lib/utils/dialog-display";
 import { tindakLanjutLabel } from "@/lib/constants/reviu-status";
+import type { Triwulan } from "@/generated/prisma/enums";
 
 interface ActorProfile {
   nama_pegawai?: string | null;
@@ -31,7 +32,7 @@ interface FormulirReviuData {
   penjelasan_tercapai: string | null;
   penjelasan_tidak_tercapai: string | null;
   rencana_tindak_lanjut: string | null;
-  tanggal_next_reviu: Date | null;
+  tanggal_next_evaluasi: Date | null;
   ttd_pegawai_path: string | null;
   ttd_atasan_path: string | null;
   waktu_validasi_pegawai: Date | null;
@@ -39,6 +40,7 @@ interface FormulirReviuData {
   status: string;
   dialog: {
     periode_tahun: number;
+    triwulan: Triwulan;
     waktu_validasi_atasan: Date | null;
     pegawai: ActorProfile;
     atasan: ActorProfile;
@@ -234,10 +236,10 @@ export function FormulirReviu({ reviu }: { reviu: FormulirReviuData }) {
 
             <p className="mt-1">
               <span className="font-semibold">
-                Tanggal reviu berikutnya:
+                Tanggal evaluasi berikutnya:
               </span>{" "}
-              {tidakTercapai && reviu.tanggal_next_reviu
-                ? formatTanggal(reviu.tanggal_next_reviu)
+              {tidakTercapai && reviu.tanggal_next_evaluasi
+                ? formatTanggal(reviu.tanggal_next_evaluasi)
                 : BLANK}
             </p>
           </div>

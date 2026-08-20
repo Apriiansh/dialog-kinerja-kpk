@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DeskripsiKinerjaForm } from "@/components/dialog/deskripsi-form";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 export default async function EditDialogPage({
   params,
@@ -21,6 +22,7 @@ export default async function EditDialogPage({
       deskripsi_kinerja: true,
       status: true,
       periode_tahun: true,
+      triwulan: true,
       pegawai: {
         select: {
           nama_pegawai: true,
@@ -51,7 +53,7 @@ export default async function EditDialogPage({
             {dialog.pegawai.nama_pegawai}
             {dialog.pegawai.nama_jabatan ? ` · ${dialog.pegawai.nama_jabatan}` : ""}
             {dialog.pegawai.unit_kerja ? ` · ${dialog.pegawai.unit_kerja}` : ""} ·{" "}
-            Periode {dialog.periode_tahun}
+            {formatPeriode(dialog.triwulan, dialog.periode_tahun)}
           </p>
         </div>
         <StatusBadge status={dialog.status} />

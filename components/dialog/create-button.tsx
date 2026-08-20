@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { startDialog } from "@/lib/actions/atasan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
+import { getTriwulanFromDate, triwulanLabel } from "@/lib/constants/triwulan";
 
 export interface PegawaiOption {
   id: number;
@@ -21,6 +22,9 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
   const [unit, setUnit] = useState("");
   const [jabatan, setJabatan] = useState("");
   const [creatingId, setCreatingId] = useState<number | null>(null);
+  const [tanggalPeriode, setTanggalPeriode] = useState(
+    new Date().toISOString().split("T")[0],
+  );
 
   const units = useMemo(
     () =>
@@ -62,9 +66,11 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
+  const triwulanPreview = getTriwulanFromDate(new Date(tanggalPeriode));
+
   async function handleStartDialog(pegawaiId: number) {
     setCreatingId(pegawaiId);
-    const result = await startDialog(pegawaiId);
+    const result = await startDialog(pegawaiId, tanggalPeriode);
     setCreatingId(null);
 
     if (result?.error) {
@@ -116,6 +122,27 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
               >
                 <XIcon size={16} weight="bold" />
               </button>
+            </div>
+
+            <div className="flex flex-col gap-3 border-b border-outline px-6 py-4 sm:flex-row sm:items-center">
+              <div className="flex items-center gap-3">
+                <label
+                  htmlFor="tanggal-periode"
+                  className="whitespace-nowrap text-xs font-semibold text-ink-muted"
+                >
+                  Tanggal Periode:
+                </label>
+                <input
+                  id="tanggal-periode"
+                  type="date"
+                  value={tanggalPeriode}
+                  onChange={(e) => setTanggalPeriode(e.target.value)}
+                  className="h-10 rounded-md border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+                />
+                <span className="whitespace-nowrap rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary-strong">
+                  {triwulanLabel(triwulanPreview)} {new Date(tanggalPeriode).getFullYear()}
+                </span>
+              </div>
             </div>
 
             <div className="flex flex-col gap-3 border-b border-outline px-6 py-4 sm:flex-row">

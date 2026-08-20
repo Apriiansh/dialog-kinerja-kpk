@@ -24,6 +24,7 @@ import {
   metodeLabel,
 } from "@/lib/utils/dialog-display";
 import type { JenisAspek } from "@/generated/prisma/enums";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
@@ -448,7 +449,7 @@ export async function generateDialogKinerjaDocx(
             alignment: AlignmentType.CENTER,
             spacing: { after: 240 },
             children: [
-              txt(`Tahun Periode: ${dialog.periode_tahun}`, { size: 20 }),
+              txt(`Periode: ${formatPeriode(dialog.triwulan, dialog.periode_tahun)}`, { size: 20 }),
             ],
           }),
           pegawaiTable,
@@ -484,7 +485,7 @@ export async function generateDialogKinerjaDocx(
 
   const buffer = await Packer.toBuffer(doc);
   const safeNpp = dialog.pegawai.npp.replace(/[^a-zA-Z0-9]/g, "");
-  const filename = `Formulir_Dialog_Kinerja_${safeNpp}_${dialog.periode_tahun}.docx`;
+  const filename = `Formulir_Dialog_Kinerja_${safeNpp}_${dialog.triwulan}_${dialog.periode_tahun}.docx`;
 
   return { filename, buffer };
 }
@@ -647,7 +648,7 @@ const sigTable = signatureTable({
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { after: 240 },
-            children: [txt(`Tahun Periode: ${reviu.dialog.periode_tahun}`, { size: 20 })],
+            children: [txt(`Periode: ${formatPeriode(reviu.dialog.triwulan, reviu.dialog.periode_tahun)}`, { size: 20 })],
           }),
           pegawaiTable,
           new Paragraph({
@@ -692,10 +693,10 @@ const sigTable = signatureTable({
                   : null,
             },
             {
-              label: "Tanggal reviu berikutnya:",
+              label: "Tanggal evaluasi berikutnya:",
               value:
-                !tercapai && reviu.tanggal_next_reviu
-                  ? formatTanggal(reviu.tanggal_next_reviu)
+                !tercapai && reviu.tanggal_next_evaluasi
+                  ? formatTanggal(reviu.tanggal_next_evaluasi)
                   : null,
             },
           ]),
@@ -707,7 +708,7 @@ const sigTable = signatureTable({
 
   const buffer = await Packer.toBuffer(doc);
   const safeNpp = reviu.dialog.pegawai.npp.replace(/[^a-zA-Z0-9]/g, "");
-  const filename = `Formulir_Reviu_Dialog_Kinerja_${safeNpp}_${reviu.dialog.periode_tahun}.docx`;
+  const filename = `Formulir_Reviu_Dialog_Kinerja_${safeNpp}_${reviu.dialog.triwulan}_${reviu.dialog.periode_tahun}.docx`;
 
   return { filename, buffer };
 }

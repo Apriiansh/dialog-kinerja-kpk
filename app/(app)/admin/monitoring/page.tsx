@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 import { getDialogSequenceMap } from "@/lib/queries/dialog";
 
@@ -30,9 +31,10 @@ export default async function AdminMonitoringPage({
         id: true,
         id_pegawai: true,
         periode_tahun: true,
+        triwulan: true,
         status: true,
         id_dialog_induk: true,
-        dialog_induk: { select: { periode_tahun: true } },
+        dialog_induk: { select: { periode_tahun: true, triwulan: true } },
         updated_at: true,
         pegawai: { select: { npp: true, nama_pegawai: true } },
         atasan: { select: { nama_pegawai: true } },
@@ -105,20 +107,21 @@ export default async function AdminMonitoringPage({
                     <span className="flex flex-col gap-1 text-sm text-ink">
                       <span>
                         {seq ? `Dialog Ke-${seq} ` : ""}
-                        (Tahun {d.periode_tahun})
+                        {formatPeriode(d.triwulan, d.periode_tahun)}
                       </span>
                       {d.dialog_induk ? (
                         <span className="w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
-                          Lanjutan dari {d.dialog_induk.periode_tahun}
+                          Lanjutan dari {formatPeriode(d.dialog_induk.triwulan, d.dialog_induk.periode_tahun)}
                         </span>
                       ) : null}
                     </span>
-                  <span className="flex justify-start lg:justify-end">
-                    <StatusBadge status={d.status} />
-                  </span>
-                </Link>
-              </li>
-            ))}
+                    <span className="flex justify-start lg:justify-end">
+                      <StatusBadge status={d.status} />
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

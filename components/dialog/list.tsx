@@ -1,19 +1,21 @@
 import { EyeIcon, PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
-import type { StatusDialog } from "@/generated/prisma/client";
+import type { StatusDialog, Triwulan } from "@/generated/prisma/client";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DeleteDialogButton } from "@/components/dialog/delete-button";
 import { UnduhBuktiLink } from "@/components/shared/unduh-bukti-link";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 export interface DialogRow {
   id: number;
   periode_tahun: number;
+  triwulan: Triwulan;
   status: StatusDialog;
   is_valid_pegawai: boolean;
   is_valid_atasan: boolean;
   id_dialog_induk: number | null;
-  dialog_induk: { periode_tahun: number } | null;
+  dialog_induk: { periode_tahun: number; triwulan: Triwulan } | null;
   dialog_lanjutan: { id: number }[];
   pegawai: {
     nama_pegawai: string;
@@ -64,11 +66,11 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                   <div className="flex flex-col gap-1">
                     <span>
                       {dialog.sequence_number ? `Dialog Ke-${dialog.sequence_number} ` : ""}
-                      (Tahun {dialog.periode_tahun})
+                      {formatPeriode(dialog.triwulan, dialog.periode_tahun)}
                     </span>
                     {dialog.dialog_induk ? (
                       <span className="w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
-                        Lanjutan dari {dialog.dialog_induk.periode_tahun}
+                        Lanjutan dari {formatPeriode(dialog.dialog_induk.triwulan, dialog.dialog_induk.periode_tahun)}
                       </span>
                     ) : null}
                   </div>

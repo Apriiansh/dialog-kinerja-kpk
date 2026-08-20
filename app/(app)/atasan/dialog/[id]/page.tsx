@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, PencilSimple, PaperPlaneTilt } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/auth/session";
+import { prisma } from "@/lib/prisma";
 import { getAtasanDialog } from "@/lib/queries/atasan";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DeleteDialogButton } from "@/components/dialog/delete-button";
@@ -16,6 +17,7 @@ import { ScrollToAnchor } from "@/components/shared/scroll-to-anchor";
 import { Separator } from "@/components/ui/separator";
 import { submitDialog } from "@/lib/actions/atasan";
 import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -118,7 +120,7 @@ export default async function DialogDetailPage({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-                  Dialog Kinerja Ke-{sequenceNum} (Tahun {dialog.periode_tahun})
+                  Dialog Kinerja Ke-{sequenceNum} ({formatPeriode(dialog.triwulan, dialog.periode_tahun)})
                 </h1>
                 <p className="text-sm leading-5 text-ink-muted">
                   Pegawai: {dialog.pegawai.nama_pegawai}

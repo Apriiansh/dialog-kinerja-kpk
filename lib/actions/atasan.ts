@@ -8,8 +8,12 @@ import { assertActiveActor } from "@/lib/auth/guards";
 import { flashRedirect } from "@/lib/utils/flash";
 import { JenisAspek } from "@/generated/prisma/client";
 import { createNotification } from "@/lib/notifications";
+import { getTriwulanFromDate } from "@/lib/constants/triwulan";
 
-export async function startDialog(pegawaiId: number): Promise<{ error?: string; dialogId?: number }> {
+export async function startDialog(
+  pegawaiId: number,
+  tanggalPeriode?: string,
+): Promise<{ error?: string; dialogId?: number }> {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
   if (err) return { error: err };
@@ -31,7 +35,22 @@ export async function startDialog(pegawaiId: number): Promise<{ error?: string; 
   });
 
   let idDialogInduk: number | null = null;
-  let aspekData: any = null;
+  let aspekData:
+    | {
+        jenis_aspek: JenisAspek;
+        tanggung_jawab_pegawai?: string | null;
+        tanggung_jawab_atasan?: string | null;
+        item?: {
+          create: {
+            dialog_evaluasi?: string | null;
+            kompetensi_dikembangkan?: string | null;
+            id_metode_pengembangan?: number | null;
+            metode_pengembangan_lainnya?: string | null;
+            waktu_pelaksanaan?: Date | null;
+          }[];
+        };
+      }[]
+    | undefined = undefined;
 
   if (latestDialog) {
     if (latestDialog.status !== "selesai") {
@@ -91,11 +110,16 @@ export async function startDialog(pegawaiId: number): Promise<{ error?: string; 
     }));
   }
 
+  const periodeDate = tanggalPeriode ? new Date(tanggalPeriode) : new Date();
+  const periodeTahun = periodeDate.getFullYear();
+  const triwulan = getTriwulanFromDate(periodeDate);
+
   const dialog = await prisma.dialogKinerja.create({
     data: {
       id_atasan: session.id,
       id_pegawai: pegawaiId,
-      periode_tahun: new Date().getFullYear(),
+      periode_tahun: periodeTahun,
+      triwulan,
       id_dialog_induk: idDialogInduk,
       status: "draft_atasan",
       aspek: {
@@ -176,7 +200,7 @@ export async function submitDialog(dialogId: number) {
   });
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_atasan: session.id, status: "draft_atasan" },
-    select: { id: true, id_pegawai: true, periode_tahun: true },
+    select: { id: true, id_pegawai: true, periode_tahun: true, triwulan: true },
   });
   if (!dialog) flashRedirect("/atasan/dashboard", {
     type: "error",
@@ -192,7 +216,7 @@ export async function submitDialog(dialogId: number) {
     userId: dialog.id_pegawai,
     type: "dialog_status",
     title: "Dialog Kinerja Baru",
-    description: `Anda memiliki dialog kinerja baru tahun ${dialog.periode_tahun} yang perlu dilengkapi.`,
+    description: `Anda memiliki dialog kinerja baru tahun ${dialog.periode_tahun} (${dialog.triwulan}) yang perlu dilengkapi.`,
     link: `/pegawai/dialog/${dialog.id}`,
   });
 
@@ -221,7 +245,7 @@ export async function submitEvaluasi(
 
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_atasan: session.id, status: "menunggu_atasan" },
-    select: { id: true, id_pegawai: true, periode_tahun: true },
+    select: { id: true, id_pegawai: true, periode_tahun: true, triwulan: true },
   });
   if (!dialog) {
     return { error: "Dialog tidak ditemukan atau belum siap dievaluasi." };
@@ -254,7 +278,7 @@ export async function submitEvaluasi(
     userId: dialog.id_pegawai,
     type: "dialog_status",
     title: "Evaluasi Atasan Selesai",
-    description: `Evaluasi atasan untuk dialog kinerja tahun ${dialog.periode_tahun} telah selesai. Silakan validasi dan tanda tangani.`,
+    description: `Evaluasi atasan untuk dialog kinerja tahun ${dialog.periode_tahun} (${dialog.triwulan}) telah selesai. Silakan validasi dan tanda tangani.`,
     link: `/pegawai/dialog/${dialog.id}`,
   });
 

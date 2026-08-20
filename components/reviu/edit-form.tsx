@@ -34,7 +34,7 @@ interface ReviuFormProps {
     penjelasan_tercapai?: string | null;
     penjelasan_tidak_tercapai?: string | null;
     rencana_tindak_lanjut?: string | null;
-    tanggal_next_reviu?: string;
+    tanggal_next_evaluasi?: string;
   };
 }
 
@@ -68,7 +68,7 @@ export function ReviuForm({
     initial?.penjelasan_tidak_tercapai ?? "",
   );
   const [rencana, setRencana] = useState(initial?.rencana_tindak_lanjut ?? "");
-  const [tanggal, setTanggal] = useState(initial?.tanggal_next_reviu ?? "");
+  const [tanggal, setTanggal] = useState(initial?.tanggal_next_evaluasi ?? "");
   const [pending, setPending] = useState(false);
 
   const isEdit = reviuId !== undefined;
@@ -103,7 +103,7 @@ export function ReviuForm({
       penjelasan_tercapai: penjelasanTercapai,
       penjelasan_tidak_tercapai: penjelasanTidakTercapai,
       rencana_tindak_lanjut: rencana,
-      tanggal_next_reviu: tanggal,
+      tanggal_next_evaluasi: tanggal,
       itemCapaian,
     };
 
@@ -267,13 +267,13 @@ export function ReviuForm({
               />
             </Field>
             <Field
-              htmlFor="tanggal_next_reviu"
-              label="Tanggal Reviu Berikutnya"
+              htmlFor="tanggal_next_evaluasi"
+              label="Tanggal Evaluasi Berikutnya"
               required
-              hint="Kapan reviu berikutnya akan dilakukan."
+              hint="Kapan dialog kinerja / evaluasi berikutnya dijadwalkan."
             >
               <input
-                id="tanggal_next_reviu"
+                id="tanggal_next_evaluasi"
                 type="date"
                 value={tanggal}
                 onChange={(event) => setTanggal(event.target.value)}

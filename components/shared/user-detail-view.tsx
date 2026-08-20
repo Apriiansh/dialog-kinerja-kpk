@@ -22,10 +22,11 @@ import {
   XCircleIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import type { StatusDialog } from "@/generated/prisma/enums";
+import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
 import { RoleTag } from "@/components/shared/role-tag";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 export interface UserDetailData {
   id: number;
@@ -57,6 +58,7 @@ export interface UserDetailData {
   dialogs?: {
     id: number;
     periode_tahun: number;
+    triwulan: Triwulan;
     status: StatusDialog;
     deskripsi_kinerja: string | null;
     updated_at: string | null;
@@ -339,7 +341,7 @@ export function UserDetailView({
                     >
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-ink">Periode {d.periode_tahun}</span>
+                          <span className="font-semibold text-ink">{formatPeriode(d.triwulan, d.periode_tahun)}</span>
                           <StatusBadge status={d.status} />
                         </div>
                         <p className="text-xs text-ink-muted line-clamp-1">

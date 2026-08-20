@@ -15,6 +15,7 @@ import {
   ROLE_CHART,
 } from "@/lib/utils/chart-colors";
 import type { Role, StatusDialog } from "@/generated/prisma/enums";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 const PRIMARY = "#1e3a8a";
 const STATUS_ORDER: StatusDialog[] = [
@@ -64,7 +65,7 @@ export default async function AdminDashboardPage() {
       _count: { _all: true },
     }),
     prisma.dialogKinerja.groupBy({
-      by: ["periode_tahun"],
+      by: ["periode_tahun", "triwulan"],
       _count: { _all: true },
     }),
     prisma.user.groupBy({
@@ -76,6 +77,7 @@ export default async function AdminDashboardPage() {
       select: {
         id: true,
         periode_tahun: true,
+        triwulan: true,
         status: true,
         updated_at: true,
         pegawai: { select: { nama_pegawai: true, npp: true } },
@@ -99,11 +101,11 @@ export default async function AdminDashboardPage() {
 
   const periodData: ChartDatum[] = periodGroups
     .map((g) => ({
-      label: String(g.periode_tahun),
+      label: `${formatPeriode(g.triwulan, g.periode_tahun)}`,
       value: g._count._all,
       color: PRIMARY,
     }))
-    .sort((a, b) => Number(a.label) - Number(b.label));
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   const nonAdminActiveUserCount = roleGroups.reduce(
     (total, group) => total + group._count._all,
@@ -290,7 +292,7 @@ export default async function AdminDashboardPage() {
                         {d.pegawai?.nama_pegawai}
                       </Link>
                       <span className="text-xs text-ink-muted">
-                        {d.pegawai?.npp} · Tahun {d.periode_tahun} · Atasan:{" "}
+                        {d.pegawai?.npp} · {formatPeriode(d.triwulan, d.periode_tahun)} · Atasan:{" "}
                         {d.atasan?.nama_pegawai}
                       </span>
                     </div>

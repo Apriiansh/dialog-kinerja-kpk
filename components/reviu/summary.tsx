@@ -24,7 +24,7 @@ interface ReviuSummaryRow {
   penjelasan_tercapai: string | null;
   penjelasan_tidak_tercapai: string | null;
   rencana_tindak_lanjut: string | null;
-  tanggal_next_reviu: Date | null;
+  tanggal_next_evaluasi: Date | null;
   waktu_validasi_pegawai: Date | null;
   waktu_validasi_atasan: Date | null;
   dialog?: {
@@ -39,8 +39,8 @@ export function ReviuSummary({
   reviu: ReviuSummaryRow;
   showHeader?: boolean;
 }) {
-  const tanggalNext = reviu.tanggal_next_reviu
-    ? formatTanggal(reviu.tanggal_next_reviu)
+  const tanggalNext = reviu.tanggal_next_evaluasi
+    ? formatTanggal(reviu.tanggal_next_evaluasi)
     : "—";
 
   const aspek = [...(reviu.dialog?.aspek ?? [])].sort(
@@ -63,7 +63,7 @@ export function ReviuSummary({
       label: "Rencana Tindak Lanjut",
       value: reviu.rencana_tindak_lanjut,
     },
-    { label: "Tanggal Reviu Berikutnya", value: tanggalNext },
+    { label: "Tanggal Evaluasi Berikutnya", value: tanggalNext },
     {
       label: "Tanggal divalidasi Atasan",
       value: reviu.waktu_validasi_atasan

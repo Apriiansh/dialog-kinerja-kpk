@@ -23,15 +23,16 @@ export default async function HistoryPage({
   const [dialogs, total] = await Promise.all([
     prisma.dialogKinerja.findMany({
       where,
-      select: {
-        id: true,
-        periode_tahun: true,
-        status: true,
-        is_valid_pegawai: true,
-        is_valid_atasan: true,
-        id_dialog_induk: true,
-        dialog_induk: { select: { periode_tahun: true } },
-        dialog_lanjutan: { select: { id: true } },
+        select: {
+          id: true,
+          periode_tahun: true,
+          triwulan: true,
+          status: true,
+          is_valid_pegawai: true,
+          is_valid_atasan: true,
+          id_dialog_induk: true,
+          dialog_induk: { select: { periode_tahun: true, triwulan: true } },
+          dialog_lanjutan: { select: { id: true } },
         pegawai: {
           select: {
             id: true,

@@ -39,6 +39,7 @@ export default async function DialogEditPage({ params }: PageProps) {
     <DialogForm
       dialogId={dialog.id}
       periodeTahun={dialog.periode_tahun}
+      triwulan={dialog.triwulan}
       deskripsiKinerja={dialog.deskripsi_kinerja}
       atasanNama={dialog.atasan.nama_pegawai}
       aspek={dialog.aspek}

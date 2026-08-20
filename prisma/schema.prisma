@@ -32,6 +32,13 @@ enum JenisAspek {
   KARIR_MENENGAH
 }
 
+enum Triwulan {
+  TW1
+  TW2
+  TW3
+  TW4
+}
+
 enum StatusReviu {
   draft_pegawai
   menunggu_atasan
@@ -85,6 +92,7 @@ model DialogKinerja {
   id_atasan              Int
   id_pegawai             Int
   periode_tahun          Int
+  triwulan               Triwulan
   deskripsi_kinerja      String?      @db.Text
   status                 StatusDialog @default(draft_atasan)
   is_valid_pegawai       Boolean      @default(false)
@@ -154,7 +162,7 @@ model Reviu {
   penjelasan_tercapai    String?            @db.Text
   penjelasan_tidak_tercapai String?          @db.Text
   rencana_tindak_lanjut  String?            @db.Text
-  tanggal_next_reviu     DateTime?          @db.Date
+  tanggal_next_evaluasi  DateTime?          @db.Date @map("tanggal_next_reviu")
   status                 StatusReviu        @default(draft_pegawai)
   is_valid_pegawai       Boolean            @default(false)
   is_valid_atasan        Boolean            @default(false)

@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
@@ -20,7 +20,7 @@ export interface ReviuInput {
   penjelasan_tercapai?: string;
   penjelasan_tidak_tercapai?: string;
   rencana_tindak_lanjut?: string;
-  tanggal_next_reviu?: string | null;
+  tanggal_next_evaluasi?: string | null;
   itemCapaian?: ReviuCapaianItem[];
 }
 
@@ -70,8 +70,8 @@ function validateSubmitInput(
     if (!input.rencana_tindak_lanjut?.trim()) {
       problems.push("Rencana tindak lanjut ke depan wajib diisi");
     }
-    if (!input.tanggal_next_reviu?.trim()) {
-      problems.push("Tanggal reviu berikutnya wajib diisi");
+    if (!input.tanggal_next_evaluasi?.trim()) {
+      problems.push("Tanggal evaluasi berikutnya wajib diisi");
     }
   }
   return problems.length > 0 ? problems.join("; ") : null;
@@ -130,6 +130,7 @@ export async function createReviu(
       status: true,
       id_atasan: true,
       periode_tahun: true,
+      triwulan: true,
       aspek: { select: { item: { select: { id: true } } } },
     },
   });
@@ -164,7 +165,7 @@ export async function createReviu(
         penjelasan_tercapai: toNullable(input.penjelasan_tercapai),
         penjelasan_tidak_tercapai: toNullable(input.penjelasan_tidak_tercapai),
         rencana_tindak_lanjut: toNullable(input.rencana_tindak_lanjut),
-        tanggal_next_reviu: toNullableDate(input.tanggal_next_reviu),
+        tanggal_next_evaluasi: toNullableDate(input.tanggal_next_evaluasi),
         status: mode === "submit" ? "menunggu_atasan" : "draft_pegawai",
       },
       select: { id: true },
@@ -183,7 +184,7 @@ export async function createReviu(
       userId: dialog.id_atasan,
       type: "reviu_status",
       title: "Reviu Baru",
-      description: `Reviu untuk dialog kinerja tahun ${dialog.periode_tahun} telah dikirim dan menunggu review Anda.`,
+      description: `Reviu untuk dialog kinerja tahun ${dialog.periode_tahun} (${dialog.triwulan}) telah dikirim dan menunggu review Anda.`,
       link: `/atasan/reviu/${reviuId}`,
     });
   }
@@ -215,6 +216,7 @@ export async function saveReviu(
           id: true,
           id_atasan: true,
           periode_tahun: true,
+          triwulan: true,
           aspek: { select: { item: { select: { id: true } } } },
         },
       },
@@ -250,7 +252,7 @@ export async function saveReviu(
         penjelasan_tercapai: toNullable(input.penjelasan_tercapai),
         penjelasan_tidak_tercapai: toNullable(input.penjelasan_tidak_tercapai),
         rencana_tindak_lanjut: toNullable(input.rencana_tindak_lanjut),
-        tanggal_next_reviu: toNullableDate(input.tanggal_next_reviu),
+        tanggal_next_evaluasi: toNullableDate(input.tanggal_next_evaluasi),
         status: mode === "submit" ? "menunggu_atasan" : "draft_pegawai",
       },
     });
@@ -267,7 +269,7 @@ export async function saveReviu(
       userId: reviu.dialog.id_atasan,
       type: "reviu_status",
       title: "Reviu Baru",
-      description: `Reviu untuk dialog kinerja tahun ${reviu.dialog.periode_tahun} telah dikirim dan menunggu review Anda.`,
+      description: `Reviu untuk dialog kinerja tahun ${reviu.dialog.periode_tahun} (${reviu.dialog.triwulan}) telah dikirim dan menunggu review Anda.`,
       link: `/atasan/reviu/${reviu.id}`,
     });
   }
@@ -313,7 +315,7 @@ export async function submitReviuAtasan(
 
   const reviu = await prisma.reviu.findFirst({
     where: { id: reviuId, dialog: { id_atasan: session.id } },
-    select: { id: true, status: true, dialog: { select: { id: true, id_pegawai: true, periode_tahun: true } } },
+    select: { id: true, status: true, dialog: { select: { id: true, id_pegawai: true, periode_tahun: true, triwulan: true } } },
   });
   if (!reviu) {
     return { error: "Reviu tidak ditemukan." };
@@ -349,7 +351,7 @@ export async function submitReviuAtasan(
     userId: reviu.dialog.id_pegawai,
     type: "reviu_status",
     title: "Reviu Perlu Validasi",
-    description: `Reviu untuk dialog kinerja tahun ${reviu.dialog.periode_tahun} telah ditandatangani atasan. Silakan validasi.`,
+    description: `Reviu untuk dialog kinerja tahun ${reviu.dialog.periode_tahun} (${reviu.dialog.triwulan}) telah ditandatangani atasan. Silakan validasi.`,
     link: `/pegawai/reviu/${reviu.id}`,
   });
 
@@ -379,7 +381,7 @@ export async function validateReviu(
       id: true,
       status: true,
       is_valid_pegawai: true,
-      dialog: { select: { id: true, id_atasan: true, periode_tahun: true } },
+      dialog: { select: { id: true, id_atasan: true, periode_tahun: true, triwulan: true } },
     },
   });
   if (!reviu) {
@@ -419,7 +421,7 @@ export async function validateReviu(
     userId: reviu.dialog.id_atasan,
     type: "reviu_status",
     title: "Reviu Selesai",
-    description: `Reviu untuk dialog kinerja tahun ${reviu.dialog.periode_tahun} telah divalidasi oleh pegawai dan selesai.`,
+    description: `Reviu untuk dialog kinerja tahun ${reviu.dialog.periode_tahun} (${reviu.dialog.triwulan}) telah divalidasi oleh pegawai dan selesai.`,
     link: `/atasan/reviu/${reviu.id}`,
   });
 

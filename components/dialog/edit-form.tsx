@@ -16,8 +16,9 @@ import {
   type AspekInput,
 } from "@/lib/actions/pegawai";
 import { ASPEK_DESC, ASPEK_LABEL, ASPEK_ORDER } from "@/lib/constants/aspek";
+import { formatPeriode } from "@/lib/constants/triwulan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
-import type { JenisAspek } from "@/generated/prisma/enums";
+import type { JenisAspek, Triwulan } from "@/generated/prisma/enums";
 
 interface MetodeOption {
   id: number;
@@ -206,6 +207,7 @@ function validateSubmit(
 export function DialogForm({
   dialogId,
   periodeTahun,
+  triwulan,
   deskripsiKinerja,
   atasanNama,
   aspek,
@@ -214,6 +216,7 @@ export function DialogForm({
 }: {
   dialogId: number;
   periodeTahun: number;
+  triwulan: Triwulan;
   deskripsiKinerja: string | null;
   atasanNama: string;
   aspek: ExistingAspek[];
@@ -353,7 +356,7 @@ export function DialogForm({
         </Link>
         <div className="flex flex-col gap-1">
           <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-            Isi Dialog Kinerja Tahun {periodeTahun}
+            Isi Dialog Kinerja {formatPeriode(triwulan, periodeTahun)}
           </h1>
           <p className="text-sm leading-5 text-ink-muted">
             Atasan: {atasanNama} · Lengkapi empat aspek evaluasi di bawah ini.

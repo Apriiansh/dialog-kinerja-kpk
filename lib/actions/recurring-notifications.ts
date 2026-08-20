@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { createNotifications } from "@/lib/notifications";
 
-const HARI_SEMBILAN = 5;
+const HARI_DEADLINE = 30;
 const MS_PER_HARI = 24 * 60 * 60 * 1000;
 
 function startOfDay(date: Date): Date {
@@ -12,22 +12,26 @@ function startOfDay(date: Date): Date {
 
 export async function checkUpcomingReviuReminders(): Promise<void> {
   const today = startOfDay(new Date());
-  const plusFive = new Date(today.getTime() + HARI_SEMBILAN * MS_PER_HARI);
+  const maxDate = new Date(today.getTime() + HARI_DEADLINE * MS_PER_HARI);
 
   const revius = await prisma.reviu.findMany({
     where: {
       status: "selesai",
-      tanggal_next_reviu: { gte: today, lte: plusFive },
+      dialog: {
+        dialog_lanjutan: { none: {} },
+      },
+      tanggal_next_evaluasi: { gte: today, lte: maxDate },
     },
     select: {
       id: true,
-      tanggal_next_reviu: true,
+      tanggal_next_evaluasi: true,
       dialog: {
         select: {
           id: true,
           id_pegawai: true,
           id_atasan: true,
           periode_tahun: true,
+          triwulan: true,
         },
       },
     },
@@ -35,30 +39,30 @@ export async function checkUpcomingReviuReminders(): Promise<void> {
   if (revius.length === 0) return;
 
   const links = revius.flatMap((r) => [
-    `/pegawai/reviu/new?dialog=${r.dialog.id}&reviu=${r.id}`,
-    `/atasan/reviu/${r.id}`,
+    `/pegawai/dialog?reviu=${r.id}`,
+    `/atasan/dialog?reviu=${r.id}`,
   ]);
 
   const existing = await prisma.notification.findMany({
-    where: { type: "reviu_reminder", link: { in: links } },
+    where: { type: "evaluasi_reminder", link: { in: links } },
     select: { link: true },
   });
   const existingSet = new Set(existing.map((n) => n.link));
 
   const inputs = revius.flatMap((r) => {
-    const pegawaiLink = `/pegawai/reviu/new?dialog=${r.dialog.id}&reviu=${r.id}`;
-    const atasanLink = `/atasan/reviu/${r.id}`;
-    const tanggal = r.tanggal_next_reviu
-      ? r.tanggal_next_reviu.toLocaleDateString("id-ID", {
+    const pegawaiLink = `/pegawai/dialog?reviu=${r.id}`;
+    const atasanLink = `/atasan/dialog?reviu=${r.id}`;
+    const tanggal = r.tanggal_next_evaluasi
+      ? r.tanggal_next_evaluasi.toLocaleDateString("id-ID", {
           day: "numeric",
           month: "long",
           year: "numeric",
         })
       : "";
-    const base = `Reviu dialog kinerja tahun ${r.dialog.periode_tahun} dijadwalkan pada ${tanggal}.`;
+    const base = `Evaluasi dialog kinerja tahun ${r.dialog.periode_tahun} (${r.dialog.triwulan}) dijadwalkan pada ${tanggal}.`;
     const result: {
       userId: number;
-      type: "reviu_reminder";
+      type: "evaluasi_reminder";
       title: string;
       description: string;
       link: string;
@@ -66,18 +70,18 @@ export async function checkUpcomingReviuReminders(): Promise<void> {
     if (!existingSet.has(pegawaiLink)) {
       result.push({
         userId: r.dialog.id_pegawai,
-        type: "reviu_reminder",
-        title: "Saatnya Reviu Dialog Kinerja",
-        description: `${base} Segera buat reviu tindak lanjut.`,
+        type: "evaluasi_reminder",
+        title: "Waktunya Evaluasi Dialog Kinerja",
+        description: `${base} Cek apakah atasan sudah membuat dialog kinerja lanjutan.`,
         link: pegawaiLink,
       });
     }
     if (!existingSet.has(atasanLink)) {
       result.push({
         userId: r.dialog.id_atasan,
-        type: "reviu_reminder",
-        title: "Reviu Dialog Kinerja Mendekat",
-        description: `${base} Menunggu reviu tindak lanjut dari pegawai.`,
+        type: "evaluasi_reminder",
+        title: "Jadwal Evaluasi Dialog Kinerja Mendekat",
+        description: `${base} Segera buat dialog kinerja lanjutan untuk pegawai.`,
         link: atasanLink,
       });
     }
@@ -88,3 +92,4 @@ export async function checkUpcomingReviuReminders(): Promise<void> {
     await createNotifications(inputs);
   }
 }
+

@@ -12,6 +12,7 @@ import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { Separator } from "@/components/ui/separator";
 import { FormulirReviu } from "@/components/reviu/detail-view";
 import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -60,7 +61,7 @@ export default async function AtasanReviuDetailPage({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-                  Reviu Dialog Kinerja Tahun {reviu.dialog.periode_tahun}
+                  Reviu Dialog Kinerja {formatPeriode(reviu.dialog.triwulan, reviu.dialog.periode_tahun)}
                 </h1>
                 <p className="text-sm leading-5 text-ink-muted">
                   Pegawai: {reviu.dialog.pegawai.nama_pegawai}

@@ -17,7 +17,8 @@ import { Progress } from "@/components/ui/progress";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
 import { ASPEK_ORDER } from "@/lib/constants/aspek";
-import type { StatusDialog } from "@/generated/prisma/enums";
+import { formatPeriode } from "@/lib/constants/triwulan";
+import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
 import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -118,6 +119,7 @@ export default async function PegawaiDialogListPage({
           dialog_induk: {
             select: {
               periode_tahun: true,
+              triwulan: true,
               aspek: { select: { item: { select: { is_tercapai: true } } } },
             },
           },
@@ -304,12 +306,12 @@ export default async function PegawaiDialogListPage({
                     <div className="flex min-w-0 flex-col gap-2">
                       <div className="flex flex-wrap items-center gap-3">
                         <span className="text-base font-semibold text-ink">
-                          Dialog Kinerja Ke-{sequenceNum} (Tahun {d.periode_tahun})
+                          Dialog Kinerja Ke-{sequenceNum} ({formatPeriode(d.triwulan, d.periode_tahun)})
                         </span>
                         <StatusBadge status={d.status} />
                         {d.dialog_induk ? (
                           <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
-                            Lanjutan dari {d.dialog_induk.periode_tahun}
+                            Lanjutan dari {formatPeriode(d.dialog_induk.triwulan, d.dialog_induk.periode_tahun)}
                           </span>
                         ) : null}
                       </div>

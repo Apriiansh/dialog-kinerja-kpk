@@ -62,6 +62,7 @@ export default async function AtasanPegawaiDetailPage({
         select: {
           id: true,
           periode_tahun: true,
+          triwulan: true,
           status: true,
           deskripsi_kinerja: true,
           updated_at: true,
@@ -93,6 +94,7 @@ export default async function AtasanPegawaiDetailPage({
     dialogs: user.dialogAsPegawai.map((d) => ({
       id: d.id,
       periode_tahun: d.periode_tahun,
+      triwulan: d.triwulan,
       status: d.status,
       deskripsi_kinerja: d.deskripsi_kinerja,
       updated_at: d.updated_at ? formatTanggal(d.updated_at) : null,

@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { DialogSummary } from "@/components/dialog/summary";
 import { ReviuList } from "@/components/reviu/list";
 import { Separator } from "@/components/ui/separator";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 export const dynamic = "force-dynamic";
 
@@ -64,9 +65,9 @@ export default async function AdminMonitoringDetailPage({
         <header className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-                Dialog Kinerja Ke-{sequenceNum} (Tahun {dialog.periode_tahun})
-              </h1>
+                <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
+                  Dialog Kinerja Ke-{sequenceNum} ({formatPeriode(dialog.triwulan, dialog.periode_tahun)})
+                </h1>
               <p className="text-sm leading-5 text-ink-muted">
                 Pegawai: {dialog.pegawai.nama_pegawai} (
                 {dialog.pegawai.npp})

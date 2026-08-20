@@ -10,6 +10,7 @@ import {
   StatusDialog,
   StatusReviu,
   JenisAspek,
+  Triwulan,
 } from "../generated/prisma/client";
 
 const adapter = new PrismaMariaDb({
@@ -320,6 +321,8 @@ interface AspekItemSeed {
   kompetensi_dikembangkan: string;
   metodeNama?: string;
   waktu_pelaksanaan?: Date;
+  is_tercapai?: boolean;
+  capaian_keterangan?: string;
 }
 
 interface AspekSeed {
@@ -336,13 +339,16 @@ interface ReviuSeed {
   penjelasan_tercapai?: string;
   penjelasan_tidak_tercapai?: string;
   rencana_tindak_lanjut?: string;
-  tanggal_next_reviu?: Date;
+  tanggal_next_evaluasi?: Date;
 }
 
 interface DialogSeed {
+  refId?: string;
+  parentRefId?: string;
   pegawaiNpp: string;
   atasanNpp: string;
   periodeTahun: number;
+  triwulan: Triwulan;
   status: StatusDialog;
   deskripsiKinerja?: string;
   aspek: AspekSeed[];
@@ -351,222 +357,172 @@ interface DialogSeed {
   reviu?: ReviuSeed;
 }
 
-const STANDARD_ASPEK: AspekSeed[] = [
+const ASPEK_BERVARIASI: AspekSeed[] = [
   {
     jenis_aspek: "SKP",
-    tanggung_jawab_pegawai:
-      "Menyusun dan melaksanakan rencana kerja tahunan sesuai target",
-    tanggung_jawab_atasan:
-      "Memantau capaian kinerja dan memberikan arahan perbaikan",
+    tanggung_jawab_pegawai: "Menyelesaikan tugas utama sesuai dengan target kinerja bulanan dan triwulanan.",
+    tanggung_jawab_atasan: "Memantau progres penyelesaian tugas dan memberikan masukan teknis.",
     items: [
       {
-        dialog_evaluasi:
-          "Capaian sasaran kinerja sesuai target yang ditetapkan pada awal tahun.",
-        kompetensi_dikembangkan: "Manajemen waktu dan prioritas",
+        dialog_evaluasi: "Menyelesaikan penyusunan 5 laporan administrasi dengan akurasi 100%.",
+        kompetensi_dikembangkan: "Manajemen data dan akurasi",
         metodeNama: "Penugasan",
+        is_tercapai: true,
+        capaian_keterangan: "Kelima laporan berhasil diselesaikan tepat waktu tanpa kesalahan.",
       },
-    ],
-  },
-  {
-    jenis_aspek: "GAP_ASESMEN",
-    tanggung_jawab_pegawai:
-      "Mengikuti asesmen kompetensi dan menindaklanjuti hasilnya",
-    tanggung_jawab_atasan:
-      "Membahas hasil asesmen dan menyusun rencana pengembangan",
-    items: [
       {
-        dialog_evaluasi:
-          "Kesenjangan kompetensi teknis teridentifikasi dari hasil asesmen.",
-        kompetensi_dikembangkan: "Kompetensi teknis bidang",
-        metodeNama: "Pendidikan dan Pelatihan",
+        dialog_evaluasi: "Mengadakan 3 kali sosialisasi SOP baru kepada seluruh staf.",
+        kompetensi_dikembangkan: "Komunikasi publik",
+        metodeNama: "Penugasan",
+        is_tercapai: false,
+        capaian_keterangan: "Hanya terlaksana 1 kali karena jadwal staf yang padat.",
       },
+      {
+        dialog_evaluasi: "Menyusun draft awal modul pelatihan internal.",
+        kompetensi_dikembangkan: "Penulisan teknis",
+        metodeNama: "Lainnya...",
+        is_tercapai: true,
+        capaian_keterangan: "Draft telah disetujui atasan pada bulan kedua.",
+      },
+      {
+        dialog_evaluasi: "Meningkatkan kepuasan layanan internal hingga 90%.",
+        kompetensi_dikembangkan: "Pelayanan Prima",
+        metodeNama: "Pendidikan dan Pelatihan",
+        is_tercapai: false,
+        capaian_keterangan: "Survei menunjukkan kepuasan di angka 82%.",
+      }
     ],
   },
   {
     jenis_aspek: "PERILAKU",
-    tanggung_jawab_pegawai:
-      "Menjaga integritas, disiplin, dan etika dalam pelaksanaan tugas",
-    tanggung_jawab_atasan: "Memberikan umpan balik perilaku kerja",
+    tanggung_jawab_pegawai: "Menjaga sikap profesional dan kolaboratif dalam tim.",
+    tanggung_jawab_atasan: "Mengevaluasi kerja sama tim dan kedisiplinan pegawai.",
     items: [
       {
-        dialog_evaluasi:
-          "Perilaku kerja menunjukkan integritas dan profesionalisme.",
-        kompetensi_dikembangkan: "Integritas dan etika kerja",
+        dialog_evaluasi: "Hadir rapat tepat waktu 100%.",
+        kompetensi_dikembangkan: "Kedisiplinan",
         metodeNama: "Penugasan",
+        is_tercapai: true,
+        capaian_keterangan: "Tercatat selalu hadir tepat waktu dalam 15 kali rapat.",
       },
+      {
+        dialog_evaluasi: "Aktif memberikan ide inovatif pada sesi brainstorming.",
+        kompetensi_dikembangkan: "Berpikir Kreatif",
+        metodeNama: "Lainnya...",
+        is_tercapai: true,
+        capaian_keterangan: "Menyumbangkan 3 ide yang diimplementasikan unit.",
+      },
+      {
+        dialog_evaluasi: "Tidak ada keluhan dari rekan kerja terkait komunikasi.",
+        kompetensi_dikembangkan: "Komunikasi Interpersonal",
+        metodeNama: "Penugasan",
+        is_tercapai: true,
+        capaian_keterangan: "Tidak ada keluhan yang masuk selama triwulan ini.",
+      }
     ],
   },
   {
     jenis_aspek: "KARIR_PENDEK",
-    tanggung_jawab_pegawai:
-      "Menyusun rencana pengembangan karier jangka pendek",
-    tanggung_jawab_atasan:
-      "Memberikan arahan jenjang karier jangka pendek",
+    tanggung_jawab_pegawai: "Menyiapkan sertifikasi dasar untuk bidang terkait.",
+    tanggung_jawab_atasan: "Memberikan rekomendasi pelatihan yang relevan.",
     items: [
       {
-        dialog_evaluasi:
-          "Rencana pengembangan karier 1 tahun ke depan tersusun.",
-        kompetensi_dikembangkan: "Perencanaan karier",
-        metodeNama: "Mutasi",
-      },
-    ],
-  },
-  {
-    jenis_aspek: "KARIR_MENENGAH",
-    tanggung_jawab_pegawai:
-      "Menyiapkan diri untuk jenjang karier jangka menengah",
-    tanggung_jawab_atasan:
-      "Memberikan arahan jenjang karier jangka menengah",
-    items: [
-      {
-        dialog_evaluasi:
-          "Arah pengembangan karier 3-5 tahun ke depan terpetakan.",
-        kompetensi_dikembangkan: "Kepemimpinan",
+        dialog_evaluasi: "Lulus sertifikasi dasar kepegawaian.",
+        kompetensi_dikembangkan: "Pengembangan Karier",
         metodeNama: "Pendidikan dan Pelatihan",
-      },
+        is_tercapai: false,
+        capaian_keterangan: "Ujian sertifikasi ditunda ke triwulan depan oleh panitia.",
+      }
     ],
-  },
+  }
 ];
 
 const DIALOG_SEEDS: DialogSeed[] = [
+  // Siklus untuk Pegawai NPP 2000001 (Siti Rahayu) dengan Atasan NPP 1000001
   {
-    pegawaiNpp: "2000001",
-    atasanNpp: "1000001",
-    periodeTahun: 2024,
-    status: "draft_atasan",
-    aspek: [],
-  },
-  {
+    refId: "siti_2025_tw1",
     pegawaiNpp: "2000001",
     atasanNpp: "1000001",
     periodeTahun: 2025,
-    status: "menunggu_pegawai",
-    deskripsiKinerja:
-      "Peningkatan kualitas layanan kearsipan dan ketertiban administrasi kepegawaian.",
-    aspek: [],
-  },
-  {
-    pegawaiNpp: "2000002",
-    atasanNpp: "1000001",
-    periodeTahun: 2025,
-    status: "menunggu_atasan",
-    deskripsiKinerja:
-      "Penguatan pengelolaan data kepegawaian dan dukungan sistem informasi.",
-    aspek: STANDARD_ASPEK,
-  },
-  {
-    pegawaiNpp: "2000001",
-    atasanNpp: "1000001",
-    periodeTahun: 2023,
-    status: "menunggu_validasi",
-    deskripsiKinerja:
-      "Tertib administrasi arsip aktif dan pasif di lingkungan Biro SDM.",
-    aspek: STANDARD_ASPEK,
-    ttdAtasan: true,
-  },
-  {
-    pegawaiNpp: "2000007",
-    atasanNpp: "1000002",
-    periodeTahun: 2025,
+    triwulan: "TW1",
     status: "selesai",
-    deskripsiKinerja:
-      "Optimalisasi layanan administrasi umum dan tata usaha perkantoran.",
-    aspek: STANDARD_ASPEK,
-    ttdAtasan: true,
-    ttdPegawai: true,
-    reviu: {
-      status: "menunggu_validasi",
-      is_tercapai: true,
-      is_tidak_tercapai: false,
-      penjelasan_tercapai:
-        "Seluruh target layanan administrasi umum tercapai sesuai jadwal.",
-    },
-  },
-  {
-    pegawaiNpp: "2000008",
-    atasanNpp: "1000002",
-    periodeTahun: 2024,
-    status: "selesai",
-    deskripsiKinerja:
-      "Pengelolaan barang milik negara yang akurat dan tepat waktu.",
-    aspek: STANDARD_ASPEK,
+    deskripsiKinerja: "Peningkatan kualitas layanan kearsipan TW 1",
+    aspek: ASPEK_BERVARIASI,
     ttdAtasan: true,
     ttdPegawai: true,
     reviu: {
       status: "selesai",
       is_tercapai: true,
-      is_tidak_tercapai: false,
-      penjelasan_tercapai:
-        "Pengelolaan BMN berjalan baik dan seluruh aset terdata dengan benar.",
+      is_tidak_tercapai: true,
+      penjelasan_tercapai: "Banyak target berhasil dipenuhi secara tepat waktu (Tercapai Sebagian).",
+      penjelasan_tidak_tercapai: "Namun ada beberapa kendala pada sosialisasi dan kepuasan layanan.",
+      tanggal_next_evaluasi: new Date("2025-04-15"),
     },
   },
   {
-    pegawaiNpp: "2000007",
-    atasanNpp: "1000002",
-    periodeTahun: 2023,
+    refId: "siti_2025_tw3",
+    parentRefId: "siti_2025_tw1",
+    pegawaiNpp: "2000001",
+    atasanNpp: "1000001",
+    periodeTahun: 2025,
+    triwulan: "TW3",
     status: "selesai",
-    deskripsiKinerja:
-      "Digitalisasi arsip dan surat-menyurat unit kerja.",
-    aspek: STANDARD_ASPEK,
+    deskripsiKinerja: "Lanjutan penataan arsip pasif TW 3",
+    aspek: ASPEK_BERVARIASI,
     ttdAtasan: true,
     ttdPegawai: true,
     reviu: {
       status: "selesai",
       is_tercapai: false,
       is_tidak_tercapai: true,
-      penjelasan_tidak_tercapai:
-        "Digitalisasi belum tuntas karena kendala infrastruktur jaringan.",
-      rencana_tindak_lanjut:
-        "Menjadwalkan ulang digitalisasi dengan dukungan tim TIK.",
-      tanggal_next_reviu: new Date("2025-06-30"),
+      penjelasan_tidak_tercapai: "Target gagal tercapai karena mutasi dadakan dan kurangnya SDM (Tidak Tercapai).",
+      rencana_tindak_lanjut: "Perlu bimbingan teknis lebih lanjut dan tambahan SDM.",
+      tanggal_next_evaluasi: new Date("2025-10-15"),
     },
   },
+  
+  // Kasus Dialog Baru (Belum selesai) untuk Pegawai NPP 2000002 (Ahmad Fauzi)
   {
+    refId: "ahmad_2025_tw3",
     pegawaiNpp: "2000002",
     atasanNpp: "1000001",
-    periodeTahun: 2024,
+    periodeTahun: 2025,
+    triwulan: "TW3",
     status: "selesai",
-    deskripsiKinerja:
-      "Pemeliharaan dan pembaruan data kepegawaian.",
-    aspek: STANDARD_ASPEK,
-    ttdAtasan: true,
-    ttdPegawai: true,
-  },
-  {
-    pegawaiNpp: "2000001",
-    atasanNpp: "1000001",
-    periodeTahun: 2022,
-    status: "selesai",
-    deskripsiKinerja:
-      "Penyusunan arsip statis dan inventarisasi arsip.",
-    aspek: STANDARD_ASPEK,
+    deskripsiKinerja: "Penguatan pengelolaan data kepegawaian TW 3",
+    aspek: ASPEK_BERVARIASI,
     ttdAtasan: true,
     ttdPegawai: true,
     reviu: {
-      status: "draft_pegawai",
+      status: "selesai",
       is_tercapai: true,
       is_tidak_tercapai: false,
-      penjelasan_tercapai:
-        "Draft reviu sedang disusun oleh pegawai.",
+      penjelasan_tercapai: "Luar biasa, semua evaluasi dan target dipenuhi (Tercapai Penuh).",
+      tanggal_next_evaluasi: new Date("2025-10-15"),
     },
   },
+
+  // Kasus Dialog tahun 2026 untuk Pegawai NPP 2000007 (Bayu Pratama) Atasan 1000002
   {
-    pegawaiNpp: "2000002",
-    atasanNpp: "1000001",
-    periodeTahun: 2023,
+    refId: "bayu_2026_tw1",
+    pegawaiNpp: "2000007",
+    atasanNpp: "1000002",
+    periodeTahun: 2026,
+    triwulan: "TW1",
     status: "selesai",
-    deskripsiKinerja:
-      "Pengembangan modul pengelolaan kinerja pada sistem informasi.",
-    aspek: STANDARD_ASPEK,
+    deskripsiKinerja: "Optimalisasi layanan administrasi umum 2026 (TW 1)",
+    aspek: ASPEK_BERVARIASI,
     ttdAtasan: true,
     ttdPegawai: true,
     reviu: {
-      status: "menunggu_atasan",
+      status: "selesai",
       is_tercapai: true,
-      is_tidak_tercapai: false,
-      penjelasan_tercapai:
-        "Modul selesai dikembangkan dan menunggu reviu atasan.",
-    },
+      is_tidak_tercapai: true,
+      penjelasan_tercapai: "Kinerja administrasi berjalan cukup baik.",
+      penjelasan_tidak_tercapai: "Sertifikasi tertunda.",
+      rencana_tindak_lanjut: "Daftar ulang sertifikasi TW berikutnya.",
+      tanggal_next_evaluasi: new Date("2026-04-15"),
+    }
   },
 ];
 
@@ -620,71 +576,34 @@ async function main() {
     ]),
   );
 
+  // Bersihkan data Dialog Kinerja dan turunannya agar seed bersih (cascade berjalan)
+  await prisma.dialogKinerja.deleteMany({});
+  
+  const dialogIdByRef = new Map<string, number>();
   let seededDialogs = 0;
+  
   for (const seed of DIALOG_SEEDS) {
     const idPegawai = idByNpp.get(seed.pegawaiNpp);
     const idAtasan = idByNpp.get(seed.atasanNpp);
     if (!idPegawai || !idAtasan) continue;
-
-    const existing = await prisma.dialogKinerja.findFirst({
-      where: {
-        id_pegawai: idPegawai,
-        id_atasan: idAtasan,
-        periode_tahun: seed.periodeTahun,
-      },
-      select: { id: true, aspek: { select: { item: { select: { id: true } } } } },
-    });
-    if (existing) {
-      if (seed.aspek.length > 0 && existing.aspek.every((aspek) => aspek.item.length === 0)) {
-        for (const aspek of seed.aspek) {
-          const existingAspek = await prisma.dialogKinerjaAspek.upsert({
-            where: {
-              id_dialog_jenis_aspek: {
-                id_dialog: existing.id,
-                jenis_aspek: aspek.jenis_aspek,
-              },
-            },
-            update: {},
-            create: {
-              id_dialog: existing.id,
-              jenis_aspek: aspek.jenis_aspek,
-              tanggung_jawab_pegawai: aspek.tanggung_jawab_pegawai,
-              tanggung_jawab_atasan: aspek.tanggung_jawab_atasan,
-            },
-            select: { id: true },
-          });
-
-          for (const item of aspek.items) {
-            await prisma.dialogKinerjaItem.create({
-              data: {
-                id_aspek: existingAspek.id,
-                dialog_evaluasi: item.dialog_evaluasi,
-                kompetensi_dikembangkan: item.kompetensi_dikembangkan,
-                id_metode_pengembangan: item.metodeNama
-                  ? metodeById.get(item.metodeNama) ?? null
-                  : null,
-                waktu_pelaksanaan:
-                  item.waktu_pelaksanaan ??
-                  new Date(Date.UTC(seed.periodeTahun, 5, 15)),
-              },
-            });
-          }
-        }
-      }
-      continue;
-    }
 
     const dialog = await prisma.dialogKinerja.create({
       data: {
         id_pegawai: idPegawai,
         id_atasan: idAtasan,
         periode_tahun: seed.periodeTahun,
+        triwulan: seed.triwulan,
         status: seed.status,
         deskripsi_kinerja: seed.deskripsiKinerja ?? null,
+        id_dialog_induk: seed.parentRefId ? dialogIdByRef.get(seed.parentRefId) : null,
       },
       select: { id: true },
     });
     const dialogId = dialog.id;
+    
+    if (seed.refId) {
+      dialogIdByRef.set(seed.refId, dialogId);
+    }
 
     for (const aspek of seed.aspek) {
       const createdAspek = await prisma.dialogKinerjaAspek.create({
@@ -708,6 +627,8 @@ async function main() {
             waktu_pelaksanaan:
               item.waktu_pelaksanaan ??
               new Date(Date.UTC(seed.periodeTahun, 5, 15)),
+            is_tercapai: item.is_tercapai ?? null,
+            capaian_keterangan: item.capaian_keterangan ?? null,
           },
         });
       }
@@ -745,7 +666,7 @@ async function main() {
           penjelasan_tercapai: r.penjelasan_tercapai ?? null,
           penjelasan_tidak_tercapai: r.penjelasan_tidak_tercapai ?? null,
           rencana_tindak_lanjut: r.rencana_tindak_lanjut ?? null,
-          tanggal_next_reviu: r.tanggal_next_reviu ?? null,
+          tanggal_next_evaluasi: r.tanggal_next_evaluasi ?? null,
         },
         select: { id: true },
       });

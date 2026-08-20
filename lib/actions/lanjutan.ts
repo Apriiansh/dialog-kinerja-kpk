@@ -7,6 +7,7 @@ import { assertActiveActor } from "@/lib/auth/guards";
 import { flashRedirect } from "@/lib/utils/flash";
 import { createNotification } from "@/lib/notifications";
 import type { JenisAspek } from "@/generated/prisma/enums";
+import { getTriwulanFromDate } from "@/lib/constants/triwulan";
 
 export interface DialogLanjutanState {
   error?: string;
@@ -78,7 +79,9 @@ export async function createDialogLanjutan(
     return { error: "Tidak ada item evaluasi yang belum tercapai." };
   }
 
-  const tahunBerjalan = new Date().getFullYear();
+  const now = new Date();
+  const tahunBerjalan = now.getFullYear();
+  const triwulan = getTriwulanFromDate(now);
 
   let newDialog: number;
   try {
@@ -88,6 +91,7 @@ export async function createDialogLanjutan(
           id_atasan: parent.id_atasan,
           id_pegawai: parent.id_pegawai,
           periode_tahun: tahunBerjalan,
+          triwulan,
           id_dialog_induk: parent.id,
           status: "draft_atasan",
           aspek: {
@@ -127,7 +131,7 @@ export async function createDialogLanjutan(
     userId: isPegawai ? parent.id_atasan : parent.id_pegawai,
     type: "dialog_status",
     title: "Dialog Kinerja Lanjutan",
-    description: `Dialog kinerja lanjutan tahun ${tahunBerjalan} telah dibuat dari reviu dialog tahun ${parent.periode_tahun}. Item yang belum tercapai otomatis disalin.`,
+    description: `Dialog kinerja lanjutan tahun ${tahunBerjalan} (${triwulan}) telah dibuat dari reviu dialog tahun ${parent.periode_tahun}. Item yang belum tercapai otomatis disalin.`,
     link: isPegawai
       ? `/atasan/dialog/${newDialog}`
       : `/pegawai/dialog/${newDialog}`,

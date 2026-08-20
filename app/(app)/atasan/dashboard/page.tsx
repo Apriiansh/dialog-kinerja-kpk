@@ -18,6 +18,7 @@ import { ChartCard } from "@/components/dashboard/chart-card";
 import { DIALOG_STATUS_CHART } from "@/lib/utils/chart-colors";
 import { formatDistanceToNow } from "@/lib/utils/format";
 import type { StatusDialog } from "@/generated/prisma/enums";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 const STATUS_ORDER: StatusDialog[] = [
   "draft_atasan",
@@ -56,6 +57,7 @@ export default async function AtasanDashboardPage() {
         id: true,
         id_pegawai: true,
         periode_tahun: true,
+        triwulan: true,
         status: true,
         updated_at: true,
         pegawai: {
@@ -287,7 +289,7 @@ export default async function AtasanDashboardPage() {
                         {d.pegawai?.nama_pegawai}
                       </Link>
                       <span className="text-xs text-ink-muted">
-                        {d.pegawai?.npp} · Tahun {d.periode_tahun}
+                        {d.pegawai?.npp} · {formatPeriode(d.triwulan, d.periode_tahun)}
                       </span>
                     </div>
                     <span

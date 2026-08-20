@@ -1,5 +1,8 @@
 import { AppShell } from "@/components/shared/app-shell";
+import { EvaluasiReminderBanner } from "@/components/shared/evaluasi-reminder-banner";
 import { requireRole } from "@/lib/auth/session";
+import { getActiveEvaluasiReminders } from "@/lib/queries/reviu";
+import { checkUpcomingReviuReminders } from "@/lib/actions/recurring-notifications";
 
 export default async function AtasanLayout({
   children,
@@ -7,6 +10,9 @@ export default async function AtasanLayout({
   children: React.ReactNode;
 }) {
   const session = await requireRole("ATASAN");
+  checkUpcomingReviuReminders().catch(() => {});
+  const reminders = await getActiveEvaluasiReminders(session.id, "ATASAN");
+
   return (
     <AppShell
       session={{
@@ -17,6 +23,7 @@ export default async function AtasanLayout({
         roles: session.roles,
       }}
     >
+      <EvaluasiReminderBanner reminders={reminders} role="ATASAN" />
       {children}
     </AppShell>
   );

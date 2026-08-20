@@ -153,6 +153,7 @@ export async function saveDialogForm(
       id_dialog_induk: true,
       id_atasan: true,
       periode_tahun: true,
+      triwulan: true,
     },
   });
   if (!dialog) {
@@ -259,7 +260,7 @@ export async function saveDialogForm(
       userId: dialog.id_atasan,
       type: "dialog_status",
       title: "Dialog Kinerja Perlu Review",
-      description: `Dialog kinerja tahun ${dialog.periode_tahun} telah dikirim oleh pegawai dan menunggu review Anda.`,
+      description: `Dialog kinerja tahun ${dialog.periode_tahun} (${dialog.triwulan}) telah dikirim oleh pegawai dan menunggu review Anda.`,
       link: `/atasan/dialog/${dialog.id}`,
     });
 
@@ -294,6 +295,7 @@ export async function validateDialog(
       is_valid_atasan: true,
       id_atasan: true,
       periode_tahun: true,
+      triwulan: true,
     },
   });
   if (!dialog) {
@@ -334,7 +336,7 @@ export async function validateDialog(
       userId: dialog.id_atasan,
       type: "dialog_status",
       title: "Dialog Kinerja Selesai",
-      description: `Dialog kinerja tahun ${dialog.periode_tahun} telah divalidasi oleh pegawai dan selesai.`,
+      description: `Dialog kinerja tahun ${dialog.periode_tahun} (${dialog.triwulan}) telah divalidasi oleh pegawai dan selesai.`,
       link: `/atasan/dialog/${dialog.id}`,
     });
   }

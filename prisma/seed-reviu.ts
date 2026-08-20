@@ -89,7 +89,7 @@ interface ReviuSeed {
   penjelasan_tercapai: string | null;
   penjelasan_tidak_tercapai: string | null;
   rencana_tindak_lanjut: string | null;
-  tanggal_next_reviu: Date | null;
+  tanggal_next_evaluasi: Date | null;
 }
 
 const REVIU_SEEDS: ReviuSeed[] = [
@@ -100,7 +100,7 @@ const REVIU_SEEDS: ReviuSeed[] = [
       "Seluruh sasaran kinerja pada Dialog Kinerja telah tercapai sesuai target yang disepakati bersama atasan. Hasil pekerjaan diselesaikan tepat waktu, sesuai prosedur, dan kualitasnya memenuhi standar yang diharapkan.",
     penjelasan_tidak_tercapai: null,
     rencana_tindak_lanjut: null,
-    tanggal_next_reviu: null,
+    tanggal_next_evaluasi: null,
   },
 ];
 
@@ -120,6 +120,7 @@ async function createSelesaiDialog(pegawai: {
       id_atasan: pegawai.id_atasan!,
       id_pegawai: pegawai.id,
       periode_tahun: periodeTahun,
+      triwulan: "TW1",
       deskripsi_kinerja:
         "Pegawai melaksanakan tugas pengelolaan data dan sistem informasi kepegawaian dengan sasaran kerja sesuai SKP. Selama periode dialog, pegawai telah menunjukkan kinerja, perilaku, dan komitmen yang baik dalam mendukung tugas unit kerja.",
       status: "selesai",
@@ -202,7 +203,7 @@ async function main() {
       penjelasan_tercapai: reviuSeed.penjelasan_tercapai,
       penjelasan_tidak_tercapai: reviuSeed.penjelasan_tidak_tercapai,
       rencana_tindak_lanjut: reviuSeed.rencana_tindak_lanjut,
-      tanggal_next_reviu: reviuSeed.tanggal_next_reviu,
+      tanggal_next_evaluasi: reviuSeed.tanggal_next_evaluasi,
       status: "draft_pegawai",
     },
     select: { id: true },

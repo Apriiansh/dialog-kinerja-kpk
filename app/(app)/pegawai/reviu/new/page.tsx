@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { getDialogAspekItems } from "@/lib/queries/reviu";
 import { ReviuForm } from "@/components/reviu/edit-form";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -43,6 +44,7 @@ export default async function NewReviuPage({
         },
       },
       periode_tahun: true,
+      triwulan: true,
       atasan: { select: { nama_pegawai: true, nama_jabatan: true } },
     },
     orderBy: { updated_at: "desc" },
@@ -70,11 +72,10 @@ export default async function NewReviuPage({
           Kembali ke Reviu
         </Link>
         <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-          Buat Reviu Hasil Dialog Kinerja
+          Buat Evaluasi Tindak Lanjut Dialog Kinerja
         </h1>
         <p className="text-sm leading-5 text-ink-muted">
-          Reviu dibuat sebagai tindak lanjut dari dialog kinerja yang telah
-          selesai.
+          Evaluasi tindak lanjut dibuat untuk menilai capaian item dari dialog kinerja yang telah selesai.
         </p>
       </div>
 
@@ -105,7 +106,7 @@ export default async function NewReviuPage({
                     className="flex flex-col gap-1 rounded-lg border border-outline bg-surface px-5 py-4 transition-colors hover:border-outline-strong hover:shadow-ambient"
                   >
                     <span className="text-sm font-semibold text-ink">
-                      Dialog Kinerja Tahun {d.periode_tahun}
+                      Dialog Kinerja {formatPeriode(d.triwulan, d.periode_tahun)}
                     </span>
                     {d.id_dialog_induk ? (
                       <span className="w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
@@ -131,7 +132,7 @@ export default async function NewReviuPage({
         <div className="flex flex-col gap-4">
           <div className="rounded-lg border border-outline bg-surface px-5 py-4">
             <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-              Dialog Kinerja Tahun {selected?.periode_tahun}
+              Dialog Kinerja {selected ? formatPeriode(selected.triwulan, selected.periode_tahun) : ""}
             </span>
             <p className="mt-1 text-sm leading-5 text-ink">
               Atasan Penilai: {selected?.atasan.nama_pegawai}

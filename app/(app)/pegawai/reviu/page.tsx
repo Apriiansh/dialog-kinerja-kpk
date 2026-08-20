@@ -18,6 +18,7 @@ import { NewReviuButton } from "@/components/reviu/create-button";
 import { ReviuStatusBadge } from "@/components/reviu/status-badge";
 import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
+import { formatPeriode } from "@/lib/constants/triwulan";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
 import { formatTanggal, toDateInput } from "@/lib/utils/format";
@@ -105,7 +106,6 @@ export default async function PegawaiReviuListPage({
     menungguValidasiCount,
     selesaiCount,
     selesaiDialogs,
-    allReviuForReminders,
   ] = await Promise.all([
     prisma.reviu.findMany({
       where: listWhere,
@@ -120,37 +120,10 @@ export default async function PegawaiReviuListPage({
     prisma.reviu.count({ where: { ...baseWhere, status: "menunggu_validasi" } }),
     prisma.reviu.count({ where: { ...baseWhere, status: "selesai" } }),
     getPegawaiSelesaiDialogOptions(session.id),
-    prisma.reviu.findMany({
-      where: { ...baseWhere, status: "selesai" },
-      select: { dialog: { select: { id: true, periode_tahun: true } }, tanggal_next_reviu: true },
-      orderBy: { created_at: "desc" },
-    }),
   ]);
 
   const allTotal = draftCount + menungguAtasanCount + menungguValidasiCount + selesaiCount;
   const totalPages = Math.ceil(filteredTotal / PAGE_SIZE);
-
-  const seenDialogIds = new Set<number>();
-  const reminders: {
-    dialogId: number;
-    periodeTahun: number;
-    tanggal: Date;
-  }[] = [];
-  for (const r of allReviuForReminders) {
-    if (seenDialogIds.has(r.dialog.id)) continue;
-    seenDialogIds.add(r.dialog.id);
-    if (
-      r.tanggal_next_reviu &&
-      toDateInput(r.tanggal_next_reviu) <= todayInput
-    ) {
-      reminders.push({
-        dialogId: r.dialog.id,
-        periodeTahun: r.dialog.periode_tahun,
-        tanggal: r.tanggal_next_reviu,
-      });
-    }
-  }
-  reminders.sort((a, b) => a.tanggal.getTime() - b.tanggal.getTime());
 
   const stats = [
     {
@@ -197,45 +170,6 @@ export default async function PegawaiReviuListPage({
         </div>
         <NewReviuButton dialogs={selesaiDialogs} />
       </header>
-
-      {reminders.length > 0 ? (
-        <section
-          aria-label="Pengingat reviu dialog kinerja"
-          className="rounded-lg border border-status-amber/40 bg-status-amber-soft px-5 py-4"
-        >
-          <div className="flex items-start gap-3">
-            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-status-amber/15 text-status-amber">
-              <AlarmIcon size={18} weight="bold" />
-            </span>
-            <div className="flex min-w-0 flex-col gap-2">
-              <h2 className="text-sm font-semibold text-ink">
-                Saatnya melakukan reviu dialog kinerja
-              </h2>
-              <ul className="flex flex-col gap-1.5">
-                {reminders.map((r) => (
-                  <li key={`${r.dialogId}-${toDateInput(r.tanggal)}`}>
-                    <Link
-                      href={`/pegawai/reviu/new?dialog=${r.dialogId}`}
-                      className="group inline-flex flex-wrap items-center gap-x-1.5 text-sm leading-5 text-ink"
-                    >
-                      <span className="font-medium text-ink">
-                        Dialog Kinerja Tahun {r.periodeTahun}
-                      </span>
-                      <span className="text-ink-muted">— tanggal</span>
-                      <strong className="font-semibold text-status-amber">
-                        {formatTanggal(r.tanggal)}
-                      </strong>
-                      <span className="text-primary transition-colors group-hover:text-primary-strong">
-                        sudah tiba. Buat reviu sekarang →
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-      ) : null}
 
       <section aria-label="Ringkasan status reviu" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map(({ key, label, count, icon: Icon, className }) => (
@@ -319,7 +253,7 @@ export default async function PegawaiReviuListPage({
                     <div className="flex min-w-0 flex-col gap-2">
                       <div className="flex flex-wrap items-center gap-3">
                         <span className="text-base font-semibold text-ink">
-                          Dialog Kinerja Tahun {r.dialog.periode_tahun}
+                          Dialog Kinerja {formatPeriode(r.dialog.triwulan, r.dialog.periode_tahun)}
                         </span>
                         <ReviuStatusBadge status={r.status} />
                         <TindakLanjutBadge

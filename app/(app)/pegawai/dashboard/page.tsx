@@ -18,6 +18,7 @@ import { StatusBars, Donut, type ChartDatum } from "@/components/dashboard/chart
 import { ChartCard } from "@/components/dashboard/chart-card";
 import { DIALOG_STATUS_CHART } from "@/lib/utils/chart-colors";
 import { ASPEK_ORDER } from "@/lib/constants/aspek";
+import { formatPeriode } from "@/lib/constants/triwulan";
 import { formatDistanceToNow } from "@/lib/utils/format";
 import type { StatusDialog } from "@/generated/prisma/enums";
 
@@ -328,7 +329,7 @@ export default async function PegawaiDashboardPage({
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex min-w-0 flex-col gap-1">
                         <span className="text-sm font-semibold text-ink">
-                          Dialog Kinerja Tahun {d.periode_tahun}
+                          Dialog Kinerja {formatPeriode(d.triwulan, d.periode_tahun)}
                         </span>
                         <span className="truncate text-xs text-ink-muted">
                           Atasan: {d.atasan.nama_pegawai}
