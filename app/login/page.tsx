@@ -13,16 +13,16 @@ export default function LoginPage() {
   return (
     <main style={TAHOMA} className="flex min-h-screen">
       {/* ---------- LEFT: brand / motif panel ---------- */}
-      <div className="relative hidden w-1/2 overflow-hidden bg-[#8C0E24] lg:block">
+      <div className="relative hidden w-1/2 overflow-hidden bg-primary-strong lg:block">
         <Image
           src="/images/n/gedung-1-side.jpg"
           alt=""
           fill
           sizes="(min-width: 1024px) 50vw, 100vw"
           priority
-          className="object-cover opacity-30 mix-blend-luminosity"
+          className="object-cover opacity-40 mix-blend-luminosity"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#8C0E24] via-[#7A0B1F] to-[#4E0713]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-strong/75 via-[#a30d24]/60 to-[#6f0814]/85" />
 
         {/* decorative duality rings — cyan + violet, echoes landing page motif */}
         <svg
