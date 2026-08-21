@@ -224,7 +224,7 @@ export default async function PegawaiReviuListPage({
               <span className="text-2xl font-semibold leading-8 text-ink">
                 {count}
               </span>
-              <span className="truncate text-xs font-medium text-ink-muted">
+              <span className="text-xs font-medium text-ink-muted">
                 {label}
               </span>
             </div>

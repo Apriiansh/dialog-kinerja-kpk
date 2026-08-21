@@ -96,6 +96,31 @@
   }
 }
 
+@keyframes ambient-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(3%, -4%, 0) scale(1.08);
+  }
+}
+
+@keyframes ambient-drift-reverse {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+
+  to {
+    transform: translate3d(-4%, 3%, 0) scale(1);
+  }
+}
+
+.dot-grid {
+  background-image: radial-gradient(rgb(8 145 178 / 0.14) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-ink);

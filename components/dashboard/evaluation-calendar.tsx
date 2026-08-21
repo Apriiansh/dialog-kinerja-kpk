@@ -5,6 +5,7 @@ import { CalendarBlank } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { Calendar } from "@/components/ui/calendar";
+import { EmptyState } from "@/components/shared/empty-state";
 
 export type CalendarEvent = {
   id: number; // reviu id
@@ -99,9 +100,12 @@ export function EvaluationCalendar({ events }: EvaluationCalendarProps) {
         </div>
         
         {displayedEvents.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center text-sm text-ink-muted py-8 text-center">
-            Tidak ada jadwal evaluasi pada {selectedDate ? 'tanggal' : 'bulan'} ini.
-          </div>
+          <EmptyState
+            variant="calendar"
+            title="Tidak ada jadwal evaluasi"
+            description={`Belum ada jadwal evaluasi pada ${selectedDate ? "tanggal" : "bulan"} ini.`}
+            className="flex-1 border-none bg-transparent py-6"
+          />
         ) : (
           <ul className="flex flex-col gap-3">
             {displayedEvents.map((ev) => {

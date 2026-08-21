@@ -10,7 +10,6 @@ import {
   UserCircleIcon,
   ShieldCheckIcon,
   UsersIcon,
-  ChatCircleDotsIcon,
   CalendarIcon,
   IdentificationCardIcon,
   BriefcaseIcon,
@@ -22,6 +21,7 @@ import {
   XCircleIcon,
   XIcon,
 } from "@phosphor-icons/react";
+import { EmptyState } from "@/components/shared/empty-state";
 import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
 import { RoleTag } from "@/components/shared/role-tag";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -328,10 +328,11 @@ export function UserDetailView({
               </div>
 
               {user.dialogs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-outline py-8 text-center">
-                  <ChatCircleDotsIcon size={28} className="text-ink-muted mb-2" />
-                  <p className="text-sm font-medium text-ink-muted">Belum ada riwayat dialog kinerja</p>
-                </div>
+                <EmptyState
+                  variant="dialog"
+                  title="Belum ada riwayat dialog kinerja"
+                  className="border-dashed py-8"
+                />
               ) : (
                 <div className="divide-y divide-outline rounded-lg border border-outline overflow-hidden">
                   {user.dialogs.map((d) => (

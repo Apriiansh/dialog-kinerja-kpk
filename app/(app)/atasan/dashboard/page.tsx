@@ -16,6 +16,8 @@ import type { StatusDialog } from "@/generated/prisma/enums";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { EvaluationCalendar, type CalendarEvent } from "@/components/dashboard/evaluation-calendar";
 import { AchievementList } from "@/components/dashboard/achievement-list";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { GreetingCard } from "@/components/dashboard/greeting-card";
 
 const STATUS_ORDER: StatusDialog[] = [
   "draft_atasan",
@@ -37,11 +39,12 @@ export default async function AtasanDashboardPage() {
   const session = await requireAuth();
 
   const [
-    pegawai, 
-    dialogs, 
-    recentNotifications, 
-    upcomingReviu, 
+    pegawai,
+    dialogs,
+    recentNotifications,
+    upcomingReviu,
     analyticsByPegawai,
+    atasanProfile,
   ] = await Promise.all([
     prisma.user.findMany({
       where: { id_atasan: session.id, is_active: true },
@@ -131,6 +134,10 @@ export default async function AtasanDashboardPage() {
         }
       },
       orderBy: { nama_pegawai: "asc" }
+    }),
+    prisma.user.findUnique({
+      where: { id: session.id },
+      select: { npp: true, nama_jabatan: true, unit_kerja: true },
     }),
   ]);
 
@@ -248,39 +255,30 @@ export default async function AtasanDashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-[28px] font-semibold leading-9 tracking-[-0.01em] text-ink">
-            {greeting()}, {session.nama}
-          </h1>
-          <p className="text-sm leading-5 text-ink-muted">
-            Pantau dialog kinerja pegawai di bawah Anda.
-          </p>
-        </div>
-      </header>
+      <GreetingCard
+        greeting={`${greeting()}, ${session.nama}`}
+        subtitle="Pantau dialog kinerja pegawai di bawah Anda."
+        user={{
+          role: "ATASAN",
+          npp: atasanProfile?.npp ?? session.npp,
+          jabatan: atasanProfile?.nama_jabatan,
+          unitKerja: atasanProfile?.unit_kerja,
+        }}
+      />
 
       <section
         aria-label="Ringkasan kinerja"
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
-        {stats.map(({ label, value, hint, icon: Icon }) => (
-          <div
+        {stats.map(({ label, value, hint, icon }, index) => (
+          <StatCard
             key={label}
-            className="flex flex-col gap-3 rounded-lg border border-outline bg-surface p-5"
-          >
-            <div className="flex items-start justify-between">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
-                <Icon size={18} weight="bold" />
-              </span>
-              <span className="text-2xl font-semibold leading-8 text-ink">
-                {value}
-              </span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-sm font-semibold text-ink">{label}</span>
-              <span className="text-xs leading-4 text-ink-muted">{hint}</span>
-            </div>
-          </div>
+            label={label}
+            value={value}
+            hint={hint}
+            icon={icon}
+            tone={index % 2 === 0 ? "cyan" : "red"}
+          />
         ))}
       </section>
 

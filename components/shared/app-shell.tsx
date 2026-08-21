@@ -12,7 +12,6 @@ import {
   MonitorPlayIcon,
   ArrowsClockwiseIcon,
   ListChecksIcon,
-  BellIcon,
   FileArrowUpIcon,
 } from "@phosphor-icons/react";
 import Image from "next/image";
@@ -57,12 +56,7 @@ const PEGAWAI_NAV_GROUPS: NavGroup[] = [
         label: "Reviu Dialog Kinerja",
         icon: ArrowsClockwiseIcon,
       },
-      {
-        href: "/pegawai/notifikasi",
-        label: "Notifikasi",
-        icon: BellIcon,
-        exact: true,
-      },
+    
     ],
   },
 ];
@@ -91,12 +85,6 @@ const ATASAN_NAV_GROUPS: NavGroup[] = [
         href: "/atasan/pegawai",
         label: "Pegawai",
         icon: UsersIcon,
-      },
-      {
-        href: "/atasan/notifikasi",
-        label: "Notifikasi",
-        icon: BellIcon,
-        exact: true,
       },
     ],
   },
@@ -131,12 +119,6 @@ const ADMIN_NAV_GROUPS: NavGroup[] = [
         href: "/admin/metode",
         label: "Metode Pengembangan",
         icon: ListChecksIcon,
-      },
-      {
-        href: "/admin/notifikasi",
-        label: "Notifikasi",
-        icon: BellIcon,
-        exact: true,
       },
     ],
   },
@@ -255,6 +237,19 @@ function LogoutButton({ collapsed = false }: { collapsed?: boolean }) {
   );
 }
 
+function AmbientBackground() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden print:hidden"
+    >
+      <div className="dot-grid absolute inset-0 [mask-image:radial-gradient(ellipse_75%_60%_at_50%_0%,black,transparent)]" />
+      <div className="absolute -top-36 -right-28 h-[26rem] w-[26rem] animate-[ambient-drift_24s_ease-in-out_infinite_alternate] rounded-full bg-primary/15 blur-3xl" />
+      <div className="absolute -bottom-44 -left-32 h-[28rem] w-[28rem] animate-[ambient-drift-reverse_30s_ease-in-out_infinite_alternate] rounded-full bg-[#DB1514]/8 blur-3xl" />
+    </div>
+  );
+}
+
 export function AppShell({
   session,
   children,
@@ -266,7 +261,9 @@ export function AppShell({
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen">
+      <AmbientBackground />
+
       {/* Desktop Sidebar */}
       <aside
         className={cn(

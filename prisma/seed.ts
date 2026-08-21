@@ -431,6 +431,82 @@ const ASPEK_BERVARIASI: AspekSeed[] = [
   }
 ];
 
+// Dialog lanjutan Siti (TW3): hanya item belum-tercapai TW1 yang diulang + evaluasi tambahan baru,
+// meniru alur createDialogLanjutan (lihat lib/actions/lanjutan.ts).
+const ASPEK_LANJUTAN_SITI: AspekSeed[] = [
+  {
+    jenis_aspek: "SKP",
+    tanggung_jawab_pegawai:
+      "Menyelesaikan tugas utama sesuai dengan target kinerja bulanan dan triwulanan.",
+    tanggung_jawab_atasan:
+      "Memantau progres penyelesaian tugas dan memberikan masukan teknis.",
+    items: [
+      {
+        dialog_evaluasi:
+          "Mengadakan 3 kali sosialisasi SOP baru kepada seluruh staf.",
+        kompetensi_dikembangkan: "Komunikasi publik",
+        metodeNama: "Penugasan",
+        is_tercapai: true,
+        capaian_keterangan:
+          "Ulangan dari TW1: sosialisasi berhasil dilaksanakan 3 kali dengan jadwal yang lebih terencana.",
+      },
+      {
+        dialog_evaluasi:
+          "Meningkatkan kepuasan layanan internal hingga 90%.",
+        kompetensi_dikembangkan: "Pelayanan Prima",
+        metodeNama: "Pendidikan dan Pelatihan",
+        is_tercapai: false,
+        capaian_keterangan:
+          "Ulangan dari TW1: survei mencapai 86%, meningkat namun belum menyentuh target 90%.",
+      },
+      {
+        dialog_evaluasi:
+          "Menyelesaikan digitalisasi 50 box arsip pasif.",
+        kompetensi_dikembangkan: "Manajemen data dan akurasi",
+        metodeNama: "Penugasan",
+        is_tercapai: true,
+        capaian_keterangan:
+          "Evaluasi tambahan TW3: digitalisasi tuntas 100% sebelum batas triwulan.",
+      },
+    ],
+  },
+  {
+    jenis_aspek: "PERILAKU",
+    tanggung_jawab_pegawai:
+      "Menjaga sikap profesional dan kolaboratif dalam tim.",
+    tanggung_jawab_atasan:
+      "Mengevaluasi kerja sama tim dan kedisiplinan pegawai.",
+    items: [
+      {
+        dialog_evaluasi:
+          "Menjadi pemateri internal sharing session kearsipan.",
+        kompetensi_dikembangkan: "Komunikasi Interpersonal",
+        metodeNama: "Lainnya...",
+        is_tercapai: true,
+        capaian_keterangan:
+          "Evaluasi tambahan TW3: materi dipresentasikan pada bulan kedua triwulan.",
+      },
+    ],
+  },
+  {
+    jenis_aspek: "KARIR_PENDEK",
+    tanggung_jawab_pegawai:
+      "Menyiapkan sertifikasi dasar untuk bidang terkait.",
+    tanggung_jawab_atasan:
+      "Memberikan rekomendasi pelatihan yang relevan.",
+    items: [
+      {
+        dialog_evaluasi: "Lulus sertifikasi dasar kepegawaian.",
+        kompetensi_dikembangkan: "Pengembangan Karier",
+        metodeNama: "Pendidikan dan Pelatihan",
+        is_tercapai: true,
+        capaian_keterangan:
+          "Ulangan dari TW1: dinyatakan lulus pada ujian ulang.",
+      },
+    ],
+  },
+];
+
 const DIALOG_SEEDS: DialogSeed[] = [
   // Siklus untuk Pegawai NPP 2000001 (Siti Rahayu) dengan Atasan NPP 1000001
   {
@@ -462,16 +538,19 @@ const DIALOG_SEEDS: DialogSeed[] = [
     triwulan: "TW3",
     status: "selesai",
     deskripsiKinerja: "Lanjutan penataan arsip pasif TW 3",
-    aspek: ASPEK_BERVARIASI,
+    aspek: ASPEK_LANJUTAN_SITI,
     ttdAtasan: true,
     ttdPegawai: true,
     reviu: {
       status: "selesai",
       is_tercapai: true,
       is_tidak_tercapai: true,
-      penjelasan_tercapai: "Sebagian besar target kinerja TW3 berhasil dipenuhi, terutama pada aspek perilaku dan sebagian SKP.",
-      penjelasan_tidak_tercapai: "Sosialisasi SOP dan target kepuasan layanan belum terpenuhi akibat mutasi dadakan dan kurangnya SDM.",
-      rencana_tindak_lanjut: "Perlu bimbingan teknis lebih lanjut dan tambahan SDM pada TW1 berikutnya.",
+      penjelasan_tercapai:
+        "Dua item yang diulang dari TW1 berhasil diselesaikan, ditambah evaluasi tambahan digitalisasi arsip dan sharing session.",
+      penjelasan_tidak_tercapai:
+        "Target kepuasan layanan 90% belum terpenuhi (survei 86%), langkah perbaikan diteruskan ke triwulan berikutnya.",
+      rencana_tindak_lanjut:
+        "Fokus meningkatkan indeks kepuasan layanan melalui perbaikan alur antrian layanan internal.",
       tanggal_next_evaluasi: new Date("2025-10-15"),
     },
   },
@@ -622,7 +701,7 @@ async function main() {
             waktu_pelaksanaan:
               item.waktu_pelaksanaan ??
               new Date(Date.UTC(seed.periodeTahun, 5, 15)),
-            is_tercapai: Math.random() > 0.3,
+            is_tercapai: item.is_tercapai ?? Math.random() > 0.3,
             capaian_keterangan: item.capaian_keterangan ?? null,
           },
         });

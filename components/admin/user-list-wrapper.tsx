@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { EmptyState } from "@/components/shared/empty-state";
 
 interface UserRow {
   id: number;
@@ -124,11 +125,11 @@ export function UserListWrapper({ users, stats }: UserListWrapperProps) {
 
       {/* Table */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-12 text-center">
-          <p className="text-sm text-ink-muted">
-            Tidak ada pengguna yang cocok dengan filter.
-          </p>
-        </div>
+        <EmptyState
+          variant="search"
+          title="Tidak ada pengguna ditemukan"
+          description="Tidak ada pengguna yang cocok dengan filter. Coba ubah kata kunci atau reset filter."
+        />
       ) : (
         <div className="overflow-hidden rounded-lg border border-outline bg-surface">
           <Table>

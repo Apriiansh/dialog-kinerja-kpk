@@ -2,6 +2,7 @@
 
 import { CheckCircleIcon, XCircleIcon, ChartPieSliceIcon, CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react/dist/ssr";
 import { useState } from "react";
+import { EmptyState } from "@/components/shared/empty-state";
 
 export type AnalyticsItem = {
   id: number;
@@ -111,9 +112,12 @@ export function AchievementList({ analytics, evalAnalytics, totalTercapai, total
         <div>
         <h4 className="font-semibold text-sm text-ink mb-3">Analisis per Pegawai</h4>
         {analytics.length === 0 ? (
-          <div className="py-6 flex items-center justify-center text-sm text-ink-muted border border-dashed border-outline rounded-lg">
-            Belum ada evaluasi kinerja pegawai di tahun ini.
-          </div>
+          <EmptyState
+            variant="document"
+            title="Belum ada data evaluasi"
+            description="Belum ada evaluasi kinerja pegawai di tahun ini."
+            className="border-dashed py-8"
+          />
         ) : (
           <ul className="flex flex-col gap-3">
             {analytics.map((emp) => {

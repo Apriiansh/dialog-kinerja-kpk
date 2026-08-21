@@ -5,6 +5,8 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  Line,
+  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -18,6 +20,7 @@ export interface ChartDatum {
   value: number;
   color?: string;
   tooltipLabel?: string;
+  hint?: string;
 }
 
 const AXIS_STYLE = {
@@ -32,12 +35,14 @@ const PRIMARY = "#0e7490";
 function TooltipCard({
   active,
   payload,
+  suffix,
 }: {
   active?: boolean;
   payload?: {
     value: number;
-    payload?: { tooltipLabel?: string; label?: string };
+    payload?: { tooltipLabel?: string; label?: string; hint?: string };
   }[];
+  suffix?: string;
 }) {
   if (!active || !payload || payload.length === 0) return null;
   const item = payload[0];
@@ -46,7 +51,13 @@ function TooltipCard({
       <p className="font-semibold text-ink">
         {item.payload?.tooltipLabel ?? item.payload?.label ?? ""}
       </p>
-      <p className="text-ink-muted">{item.value}</p>
+      <p className="text-ink-muted">
+        {item.value}
+        {suffix ?? ""}
+      </p>
+      {item.payload?.hint && (
+        <p className="text-ink-muted">{item.payload.hint}</p>
+      )}
     </div>
   );
 }
@@ -90,6 +101,54 @@ export function StatusBars({
           ))}
         </Bar>
       </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+export function TrendLine({
+  data,
+  height = 240,
+}: {
+  data: ChartDatum[];
+  height?: number;
+}) {
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <LineChart
+        data={data}
+        margin={{ top: 8, right: 12, left: 0, bottom: 0 }}
+      >
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke={GRID_STROKE}
+          vertical={false}
+        />
+        <XAxis
+          dataKey="label"
+          tickLine={false}
+          axisLine={false}
+          tick={AXIS_STYLE}
+          interval={0}
+        />
+        <YAxis
+          domain={[0, 100]}
+          tickFormatter={(v) => `${v}%`}
+          allowDecimals={false}
+          tickLine={false}
+          axisLine={false}
+          tick={AXIS_STYLE}
+          width={44}
+        />
+        <Tooltip content={<TooltipCard suffix="%" />} />
+        <Line
+          type="monotone"
+          dataKey="value"
+          stroke={PRIMARY}
+          strokeWidth={2.5}
+          dot={{ r: 4, fill: PRIMARY, strokeWidth: 0 }}
+          activeDot={{ r: 5 }}
+        />
+      </LineChart>
     </ResponsiveContainer>
   );
 }
