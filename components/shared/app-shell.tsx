@@ -13,6 +13,8 @@ import {
   ArrowsClockwiseIcon,
   ListChecksIcon,
   FileArrowUpIcon,
+  CaretDoubleLeftIcon,
+  CaretDoubleRightIcon,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -271,7 +273,28 @@ export function AppShell({
           collapsed ? "lg:w-[76px]" : "lg:w-64"
         )}
       >
-        <nav className="sidebar-scroll flex-1 overflow-x-hidden overflow-y-auto pb-3 pt-4">
+        <div
+          className={cn(
+            "flex shrink-0 px-3 pt-3",
+            collapsed ? "justify-center" : "justify-end"
+          )}
+        >
+          <button
+            type="button"
+            onClick={() => setCollapsed((c) => !c)}
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
+            aria-expanded={!collapsed}
+          >
+            {collapsed ? (
+              <CaretDoubleRightIcon size={16} weight="bold" />
+            ) : (
+              <CaretDoubleLeftIcon size={16} weight="bold" />
+            )}
+          </button>
+        </div>
+
+        <nav className="sidebar-scroll flex-1 overflow-x-hidden overflow-y-auto pb-3 pt-2">
           <Suspense fallback={<div className="p-4 text-xs text-white/40">Memuat navigasi...</div>}>
             <NavItemsList role={session.role} collapsed={collapsed} />
           </Suspense>
@@ -323,12 +346,7 @@ export function AppShell({
       )}
 
       {/* Top Bar (Unified Desktop & Mobile) */}
-      <TopBar
-        session={session}
-        onOpenMobile={() => setMobileOpen(true)}
-        collapsed={collapsed}
-        onToggleCollapse={() => setCollapsed((c) => !c)}
-      />
+      <TopBar session={session} onOpenMobile={() => setMobileOpen(true)} />
 
       {/* Main Content Area */}
       <div

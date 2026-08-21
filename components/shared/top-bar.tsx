@@ -1,6 +1,6 @@
 "use client";
 
-import { ListIcon, CaretDoubleLeftIcon, CaretDoubleRightIcon } from "@phosphor-icons/react";
+import { ListIcon } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
 import type { SessionData } from "@/lib/auth/session";
@@ -21,13 +21,9 @@ function initials(name: string) {
 export function TopBar({
   session,
   onOpenMobile,
-  collapsed = false,
-  onToggleCollapse,
 }: {
   session: SessionData;
   onOpenMobile: () => void;
-  collapsed?: boolean;
-  onToggleCollapse?: () => void;
 }) {
   return (
     <header
@@ -35,23 +31,8 @@ export function TopBar({
         "fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-white/10 bg-primary-strong/90 px-4 shadow-sm backdrop-blur-md sm:px-6 print:hidden",
       )}
     >
-      {/* Sisi Kiri: Toggle Sidebar + Hamburger + Brand Logo KPK + Konteks Portal */}
+      {/* Sisi Kiri: Hamburger + Brand Logo KPK + Konteks Portal */}
       <div className="flex items-center gap-2">
-        {/* Toggle collapse (Desktop) */}
-        <button
-          type="button"
-          onClick={onToggleCollapse}
-          className="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-white/75 transition-colors hover:bg-white/10 hover:text-white lg:flex"
-          aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
-          aria-expanded={!collapsed}
-        >
-          {collapsed ? (
-            <CaretDoubleRightIcon size={16} weight="bold" />
-          ) : (
-            <CaretDoubleLeftIcon size={16} weight="bold" />
-          )}
-        </button>
-
         {/* Hamburger (Mobile) */}
         <button
           type="button"
