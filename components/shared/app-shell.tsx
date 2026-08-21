@@ -155,10 +155,12 @@ function NavItemsList({
   role,
   collapsed = false,
   onItemClick,
+  onToggleCollapse,
 }: {
   role: Role;
   collapsed?: boolean;
   onItemClick?: () => void;
+  onToggleCollapse?: () => void;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -170,18 +172,42 @@ function NavItemsList({
     <div className="space-y-6 px-3">
       {groups.map((group, idx) => (
         <div key={group.title ?? idx} className="space-y-1">
-          {collapsed ? (
-            <div
-              role="presentation"
-              className="mx-auto mb-2 h-px w-8 rounded-full bg-white/15"
-            />
-          ) : (
-            group.title && (
-              <div className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-white/50">
-                {group.title}
-              </div>
-            )
-          )}
+          <div
+            className={cn(
+              "flex items-center gap-2 pb-1.5 pr-1",
+              collapsed ? "justify-center px-0" : "px-3"
+            )}
+          >
+            {collapsed ? (
+              idx === 0 && onToggleCollapse ? null : (
+                <div
+                  role="presentation"
+                  className="h-px w-8 rounded-full bg-white/15"
+                />
+              )
+            ) : (
+              group.title && (
+                <span className="flex-1 text-[10px] font-bold uppercase tracking-widest text-white/50">
+                  {group.title}
+                </span>
+              )
+            )}
+            {idx === 0 && onToggleCollapse && (
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                className="-mr-1.5 flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-lg text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+                aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
+                aria-expanded={!collapsed}
+              >
+                {collapsed ? (
+                  <CaretDoubleRightIcon size={15} weight="bold" />
+                ) : (
+                  <CaretDoubleLeftIcon size={15} weight="bold" />
+                )}
+              </button>
+            )}
+          </div>
           {group.items.map(({ href, label, icon: Icon, statusQuery, exact }) => {
             let active = false;
             if (statusQuery !== undefined) {
@@ -273,39 +299,13 @@ export function AppShell({
           collapsed ? "lg:w-[76px]" : "lg:w-64"
         )}
       >
-        <div
-          className={cn(
-            "flex shrink-0 items-center gap-2 border-b border-white/10 px-4 py-3",
-            collapsed && "justify-center px-0"
-          )}
-        >
-          {!collapsed && (
-            <Link
-              href="/"
-              aria-label="Ke halaman depan"
-              className="min-w-0 flex-1 truncate text-sm font-bold tracking-tight text-white"
-            >
-              Dialog Kinerja
-            </Link>
-          )}
-          <button
-            type="button"
-            onClick={() => setCollapsed((c) => !c)}
-            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-            aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
-            aria-expanded={!collapsed}
-          >
-            {collapsed ? (
-              <CaretDoubleRightIcon size={16} weight="bold" />
-            ) : (
-              <CaretDoubleLeftIcon size={16} weight="bold" />
-            )}
-          </button>
-        </div>
-
         <nav className="sidebar-scroll flex-1 overflow-x-hidden overflow-y-auto pb-3 pt-4">
           <Suspense fallback={<div className="p-4 text-xs text-white/40">Memuat navigasi...</div>}>
-            <NavItemsList role={session.role} collapsed={collapsed} />
+            <NavItemsList
+              role={session.role}
+              collapsed={collapsed}
+              onToggleCollapse={() => setCollapsed((c) => !c)}
+            />
           </Suspense>
         </nav>
 
