@@ -10,9 +10,14 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/session";
 import { ChartCard } from "@/components/dashboard/chart-card";
+import {
+  TrendLine,
+  type ChartDatum,
+} from "@/components/dashboard/charts";
+import { EmptyState } from "@/components/shared/empty-state";
 import { DIALOG_STATUS_CHART } from "@/lib/utils/chart-colors";
 import { formatDistanceToNow } from "@/lib/utils/format";
-import type { StatusDialog } from "@/generated/prisma/enums";
+import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { EvaluationCalendar, type CalendarEvent } from "@/components/dashboard/evaluation-calendar";
 import { AchievementList } from "@/components/dashboard/achievement-list";
@@ -148,6 +153,32 @@ export default async function AtasanDashboardPage() {
     (d) => d.status === "menunggu_atasan",
   ).length;
 
+  const teamTahun = new Date().getFullYear();
+  const teamPeriodMap = new Map<Triwulan, { tercapai: number; tidakTercapai: number }>();
+  for (const p of analyticsByPegawai) {
+    for (const d of p.dialogAsPegawai) {
+      const reviewed = d.aspek
+        .flatMap((a) => a.item)
+        .filter((it) => (it.dialog_evaluasi?.trim() ?? "") !== "");
+      if (reviewed.length === 0) continue;
+      const entry =
+        teamPeriodMap.get(d.triwulan) ?? { tercapai: 0, tidakTercapai: 0 };
+      for (const it of reviewed) {
+        if (it.is_tercapai) entry.tercapai += 1;
+        else entry.tidakTercapai += 1;
+      }
+      teamPeriodMap.set(d.triwulan, entry);
+    }
+  }
+  const teamTrendData: ChartDatum[] = [...teamPeriodMap.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([tw, acc]) => ({
+      label: `${tw} '${String(teamTahun).slice(2)}`,
+      tooltipLabel: formatPeriode(tw, teamTahun),
+      value: Math.round((acc.tercapai / (acc.tercapai + acc.tidakTercapai)) * 100),
+      hint: `${acc.tercapai} tercapai · ${acc.tidakTercapai} tidak tercapai`,
+    }));
+
   const calendarEvents: CalendarEvent[] = upcomingReviu.map(r => ({
     id: r.id,
     dialogId: r.dialog.id,
@@ -280,6 +311,24 @@ export default async function AtasanDashboardPage() {
             tone={index % 2 === 0 ? "cyan" : "red"}
           />
         ))}
+      </section>
+
+      <section aria-label="Tren pencapaian tim">
+        <ChartCard
+          title="Tren Pencapaian Evaluasi Tim"
+          subtitle={`Rata-rata persentase capaian evaluasi seluruh pegawai per triwulan (${teamTahun})`}
+        >
+          {teamTrendData.length === 0 ? (
+            <EmptyState
+              variant="document"
+              title="Belum ada reviu selesai"
+              description="Grafik tren akan tampil setelah ada reviu evaluasi yang selesai di tahun ini."
+              className="border-none bg-transparent py-10"
+            />
+          ) : (
+            <TrendLine data={teamTrendData} />
+          )}
+        </ChartCard>
       </section>
 
       <section

@@ -116,7 +116,7 @@ export function TrendLine({
     <ResponsiveContainer width="100%" height={height}>
       <LineChart
         data={data}
-        margin={{ top: 8, right: 12, left: 0, bottom: 0 }}
+        margin={{ top: 8, right: 32, left: 0, bottom: 0 }}
       >
         <CartesianGrid
           strokeDasharray="3 3"
