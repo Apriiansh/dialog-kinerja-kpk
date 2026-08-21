@@ -15,7 +15,7 @@ export default function LoginPage() {
       {/* ---------- LEFT: brand / motif panel ---------- */}
       <div className="relative hidden w-1/2 overflow-hidden bg-[#8C0E24] lg:block">
         <Image
-          src={"/images/gedung-kpk-1.jpg"}
+          src="/images/n/gedung-1-side.jpg"
           alt=""
           fill
           sizes="(min-width: 1024px) 50vw, 100vw"
@@ -76,17 +76,8 @@ export default function LoginPage() {
       </div>
 
       {/* ---------- RIGHT: form panel ---------- */}
-      <div className="relative flex w-full items-center justify-center overflow-hidden bg-background px-4 py-12 lg:w-1/2">
-        <Image
-          src="/images/n/gedung-1-side.jpg"
-          alt=""
-          fill
-          sizes="(min-width: 1024px) 50vw, 100vw"
-          className="object-cover opacity-20 mix-blend-luminosity"
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-background/90 via-background/75 to-surface-muted/60" />
-
-        <div className="relative w-full max-w-sm">
+      <div className="flex w-full items-center justify-center bg-background px-4 py-12 lg:w-1/2">
+        <div className="w-full max-w-sm">
           <Link
             href="/"
             className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-[#1B1712] transition-colors hover:text-[#C8102E]"
