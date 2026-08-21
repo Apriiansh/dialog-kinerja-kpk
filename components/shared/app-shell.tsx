@@ -267,20 +267,11 @@ export function AppShell({
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-30 hidden flex-col overflow-hidden bg-gradient-to-b from-primary-strong to-primary shadow-xl shadow-primary/25 ring-1 ring-black/5 transition-[width] duration-300 ease-in-out lg:flex print:hidden",
+          "fixed left-0 top-14 bottom-0 z-20 hidden flex-col overflow-hidden bg-gradient-to-b from-primary-strong to-primary shadow-xl shadow-primary/25 ring-1 ring-black/5 transition-[width] duration-300 ease-in-out lg:flex print:hidden",
           collapsed ? "lg:w-[76px]" : "lg:w-64"
         )}
       >
-        <div
-          className={cn(
-            "flex shrink-0 items-center px-5 pb-4 pt-6",
-            collapsed && "justify-center px-0"
-          )}
-        >
-          <Brand collapsed={collapsed} />
-        </div>
-
-        <nav className="sidebar-scroll flex-1 overflow-x-hidden overflow-y-auto py-3">
+        <nav className="sidebar-scroll flex-1 overflow-x-hidden overflow-y-auto pb-3 pt-4">
           <Suspense fallback={<div className="p-4 text-xs text-white/40">Memuat navigasi...</div>}>
             <NavItemsList role={session.role} collapsed={collapsed} />
           </Suspense>

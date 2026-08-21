@@ -32,11 +32,10 @@ export function TopBar({
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-20 flex h-14 items-center justify-between border-b border-white/10 bg-primary-strong/90 px-4 shadow-sm backdrop-blur-md transition-[left] duration-300 ease-in-out sm:px-6 print:hidden",
-        collapsed ? "lg:left-[76px]" : "lg:left-64"
+        "fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-white/10 bg-primary-strong/90 px-4 shadow-sm backdrop-blur-md sm:px-6 print:hidden",
       )}
     >
-      {/* Sisi Kiri: Toggle Sidebar + Mobile Hamburger + Brand / Desktop Title Context */}
+      {/* Sisi Kiri: Toggle Sidebar + Hamburger + Brand Logo KPK + Konteks Portal */}
       <div className="flex items-center gap-2">
         {/* Toggle collapse (Desktop) */}
         <button
@@ -63,21 +62,28 @@ export function TopBar({
           <ListIcon size={18} weight="bold" />
         </button>
 
-        {/* Brand khusus Mobile */}
-        <div className="flex items-center gap-2 lg:hidden">
+        {/* Brand: Logo KPK + Nama Aplikasi */}
+        <Link
+          href="/"
+          aria-label="Ke halaman depan"
+          className="flex items-center gap-2 rounded-lg px-1 py-0.5 transition-colors hover:bg-white/10"
+        >
           <Image
             src="/logo-kpk.png"
             alt="Logo KPK"
-            width={64}
-            height={26}
+            width={280}
+            height={83}
             priority
-            className="h-6 w-auto"
+            className="h-7 w-auto"
           />
-          <span className="text-xs font-semibold text-white">Dialog Kinerja</span>
-        </div>
+          <span className="text-sm font-bold tracking-tight text-white">
+            Dialog Kinerja
+          </span>
+        </Link>
 
-        {/* Portal Breadcrumb / Info khusus Desktop */}
+        {/* Pemisah + Konteks Portal (Desktop) */}
         <div className="hidden items-center gap-2 text-white lg:flex">
+          <span className="h-4 w-px bg-white/20" />
           <span className="text-xs font-semibold tracking-tight text-white">
             Portal Dialog Kinerja
           </span>
