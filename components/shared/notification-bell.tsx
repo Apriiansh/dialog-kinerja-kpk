@@ -100,7 +100,7 @@ export function NotificationBell({ role }: { role: string }) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="relative flex h-8 w-8 items-center justify-center rounded-md text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        className="relative flex h-8 w-8 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
         aria-label="Notifikasi"
       >
         <BellIcon size={18} weight="bold" />

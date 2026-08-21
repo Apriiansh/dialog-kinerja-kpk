@@ -177,7 +177,7 @@ function NavItemsList({
             />
           ) : (
             group.title && (
-              <div className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-white/40">
+              <div className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-white/50">
                 {group.title}
               </div>
             )
@@ -206,7 +206,7 @@ function NavItemsList({
                   "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200",
                   collapsed && "justify-center px-0",
                   active
-                    ? "bg-white font-semibold text-primary-strong shadow-md shadow-black/10"
+                    ? "bg-white font-semibold text-primary-strong shadow-lg shadow-black/15 ring-1 ring-black/5"
                     : "text-white/70 hover:bg-white/10 hover:text-white"
                 )}
               >
@@ -228,7 +228,7 @@ function LogoutButton({ collapsed = false }: { collapsed?: boolean }) {
         type="submit"
         title="Keluar"
         className={cn(
-          "flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/75 transition-colors hover:bg-red-500/25 hover:text-white",
+          "flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white",
           collapsed && "justify-center px-0"
         )}
       >
@@ -269,20 +269,29 @@ export function AppShell({
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-14 bottom-0 z-20 hidden flex-col overflow-hidden bg-gradient-to-b from-primary-strong to-primary shadow-xl shadow-primary/25 ring-1 ring-black/5 transition-[width] duration-300 ease-in-out lg:flex print:hidden",
+          "fixed left-0 top-14 bottom-0 z-20 hidden flex-col overflow-hidden bg-gradient-to-b from-primary via-primary-strong to-[#8e0b1f] shadow-xl shadow-black/20 transition-[width] duration-300 ease-in-out lg:flex print:hidden",
           collapsed ? "lg:w-[76px]" : "lg:w-64"
         )}
       >
         <div
           className={cn(
-            "flex shrink-0 px-3 pt-3",
-            collapsed ? "justify-center" : "justify-end"
+            "flex shrink-0 items-center gap-2 border-b border-white/10 px-4 py-3",
+            collapsed && "justify-center px-0"
           )}
         >
+          {!collapsed && (
+            <Link
+              href="/"
+              aria-label="Ke halaman depan"
+              className="min-w-0 flex-1 truncate text-sm font-bold tracking-tight text-white"
+            >
+              Dialog Kinerja
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setCollapsed((c) => !c)}
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-white/70 transition-colors hover:bg-white/10 hover:text-white"
             aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
             aria-expanded={!collapsed}
           >
@@ -294,7 +303,7 @@ export function AppShell({
           </button>
         </div>
 
-        <nav className="sidebar-scroll flex-1 overflow-x-hidden overflow-y-auto pb-3 pt-2">
+        <nav className="sidebar-scroll flex-1 overflow-x-hidden overflow-y-auto pb-3 pt-4">
           <Suspense fallback={<div className="p-4 text-xs text-white/40">Memuat navigasi...</div>}>
             <NavItemsList role={session.role} collapsed={collapsed} />
           </Suspense>
@@ -320,7 +329,7 @@ export function AppShell({
 
       {/* Mobile Sidebar Drawer */}
       {mobileOpen && (
-        <aside className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] animate-in slide-in-from-left flex-col bg-gradient-to-b from-primary-strong to-primary shadow-2xl duration-300 ease-out lg:hidden print:hidden">
+        <aside className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] animate-in slide-in-from-left flex-col bg-gradient-to-b from-primary via-primary-strong to-[#8e0b1f] shadow-2xl duration-300 ease-out lg:hidden print:hidden">
           <div className="flex items-center justify-between px-5 pb-4 pt-5">
             <Brand />
             <button
