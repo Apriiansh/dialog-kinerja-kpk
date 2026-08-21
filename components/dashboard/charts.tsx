@@ -25,9 +25,9 @@ const AXIS_STYLE = {
   fill: "#444651",
 } as const;
 
-const GRID_STROKE = "#e5eef5";
-const CURSOR_FILL = "rgba(30, 58, 138, 0.06)";
-const PRIMARY = "#1e3a8a";
+const GRID_STROKE = "#e5f2f5";
+const CURSOR_FILL = "rgba(14, 116, 144, 0.06)";
+const PRIMARY = "#0e7490";
 
 function TooltipCard({
   active,

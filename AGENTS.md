@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # dialog-kinerja
 
-Next.js 16.3 + React 19 + Tailwind v4 + Prisma 7 (MySQL/MariaDB) app for a performance-review ("Dialog Kinerja") workflow. Indonesian domain: roles are `ADMIN`, `ATASAN` (manager), `PEGAWAI` (employee).
+Next.js 16.3 + React 19 + Tailwind v4 + Prisma 7 (PostgreSQL) app for a performance-review ("Dialog Kinerja") workflow. Indonesian domain: roles are `ADMIN`, `ATASAN` (manager), `PEGAWAI` (employee).
 
 ## Commands
 
@@ -23,7 +23,7 @@ Next.js 16.3 + React 19 + Tailwind v4 + Prisma 7 (MySQL/MariaDB) app for a perfo
 ## Prisma (v7, breaking changes apply)
 
 - Client is generated to `generated/prisma` (gitignored). **Run `npx prisma generate` after any schema change** — imports resolve from `../generated/prisma/client`, not `@prisma/client`.
-- Prisma 7 requires a **driver adapter**: `lib/prisma.ts` and `prisma/seed.ts` construct `PrismaClient` with `@prisma/adapter-mariadb`. Never drop the adapter or you'll get "driver adapter is required" errors.
+- Prisma 7 requires a **driver adapter**: `lib/prisma.ts` and `prisma/seed*.ts` construct `PrismaClient` with `@prisma/adapter-pg` (driver `pg`). Never drop the adapter or you'll get "driver adapter is required" errors.
 - Config lives in `prisma.config.ts` (schema path, migrations dir, seed `tsx prisma/seed.ts`); env loaded via `dotenv`. `prisma/schema.prisma` uses `@@map` to snake_case table names.
 - Migration flow: `npx prisma migrate dev`; seed via `npx prisma db seed`. Seed users: `admin123` / `atasan123` / `pegawai123`.
 
@@ -45,4 +45,4 @@ Next.js 16.3 + React 19 + Tailwind v4 + Prisma 7 (MySQL/MariaDB) app for a perfo
 
 ## Env
 
-`.env` is required and gitignored: `DATABASE_URL`, plus `DATABASE_HOST/USER/PASSWORD/NAME` (used by the MariaDB adapter), and `SESSION_SECRET`. Domain/app logic uses the individual `DATABASE_*` vars, not the URL.
+`.env` is required and gitignored: `DATABASE_URL` (PostgreSQL connection string, e.g. `postgresql://postgres:PASSWORD@localhost:5432/dialog_kinerja_db?schema=public`) and `SESSION_SECRET`.

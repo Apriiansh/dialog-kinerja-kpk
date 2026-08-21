@@ -5,18 +5,18 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", sans-serif;
+  --font-sans: Tahoma, "Segoe UI", ui-sans-serif, system-ui, -apple-system,
+    sans-serif;
 
-  --color-background: #f8f9ff;
+  --color-background: #f2fbfd;
   --color-surface: #ffffff;
-  --color-surface-muted: #eff4ff;
-  --color-surface-soft: #e5eeff;
+  --color-surface-muted: #e8f8fb;
+  --color-surface-soft: #dcf4f8;
 
-  --color-primary: #1e3a8a;
-  --color-primary-strong: #00236f;
-  --color-primary-soft: #dce1ff;
-  --color-primary-faint: #b6c4ff;
+  --color-primary: #06b6d4;
+  --color-primary-strong: #0891b2;
+  --color-primary-soft: #cffafe;
+  --color-primary-faint: #a5f3fc;
   --color-on-primary: #ffffff;
 
   --color-secondary: #006c49;
@@ -42,8 +42,8 @@
   --color-status-green: #15803d;
   --color-status-green-soft: #dcfce7;
 
-  --shadow-ambient: 0 20px 30px -12px rgb(30 58 138 / 0.08);
-  --shadow-focus: 0 0 0 3px rgb(30 58 138 / 0.14);
+  --shadow-ambient: 0 20px 30px -12px rgb(6 182 212 / 0.1);
+  --shadow-focus: 0 0 0 3px rgb(6 182 212 / 0.18);
   --animate-toast-in: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
   --font-heading: var(--font-mono);
   --font-mono: var(--font-mono);
@@ -100,6 +100,28 @@ body {
   background: var(--color-background);
   color: var(--color-ink);
   font-feature-settings: "cv02", "cv03";
+}
+
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.25) transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.2);
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(255 255 255 / 0.35);
 }
 
 @media print {

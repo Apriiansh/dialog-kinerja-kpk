@@ -17,7 +17,7 @@ import {
 import type { Role, StatusDialog } from "@/generated/prisma/enums";
 import { formatPeriode } from "@/lib/constants/triwulan";
 
-const PRIMARY = "#1e3a8a";
+const PRIMARY = "#0e7490";
 const STATUS_ORDER: StatusDialog[] = [
   "draft_atasan",
   "menunggu_pegawai",

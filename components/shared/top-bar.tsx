@@ -1,9 +1,10 @@
 "use client";
 
-import { ListIcon } from "@phosphor-icons/react";
+import { ListIcon, CaretDoubleLeftIcon, CaretDoubleRightIcon } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
 import type { SessionData } from "@/lib/auth/session";
+import { cn } from "@/lib/utils";
 import { RoleTag } from "./role-tag";
 import { RoleSwitcher } from "./role-switcher";
 import { NotificationBell } from "./notification-bell";
@@ -20,18 +21,43 @@ function initials(name: string) {
 export function TopBar({
   session,
   onOpenMobile,
+  collapsed = false,
+  onToggleCollapse,
 }: {
   session: SessionData;
   onOpenMobile: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }) {
   return (
-    <header className="fixed inset-x-0 top-0 z-20 flex h-13 items-center justify-between border-b border-white/10 bg-primary-strong px-4 shadow-sm transition-all sm:px-6 lg:left-60 lg:px-8 print:hidden">
-      {/* Sisi Kiri: Mobile Hamburger + Brand / Desktop Title Context */}
-      <div className="flex items-center gap-3">
+    <header
+      className={cn(
+        "fixed inset-x-0 top-0 z-20 flex h-14 items-center justify-between border-b border-white/10 bg-primary-strong/90 px-4 shadow-sm backdrop-blur-md transition-[left] duration-300 ease-in-out sm:px-6 print:hidden",
+        collapsed ? "lg:left-[76px]" : "lg:left-64"
+      )}
+    >
+      {/* Sisi Kiri: Toggle Sidebar + Mobile Hamburger + Brand / Desktop Title Context */}
+      <div className="flex items-center gap-2">
+        {/* Toggle collapse (Desktop) */}
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          className="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-white/75 transition-colors hover:bg-white/10 hover:text-white lg:flex"
+          aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
+          aria-expanded={!collapsed}
+        >
+          {collapsed ? (
+            <CaretDoubleRightIcon size={16} weight="bold" />
+          ) : (
+            <CaretDoubleLeftIcon size={16} weight="bold" />
+          )}
+        </button>
+
+        {/* Hamburger (Mobile) */}
         <button
           type="button"
           onClick={onOpenMobile}
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-white/20 text-white/80 transition-colors hover:bg-white/10 hover:text-white lg:hidden"
+          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-white/20 text-white/80 transition-colors hover:bg-white/10 hover:text-white lg:hidden"
           aria-label="Buka menu navigasi"
         >
           <ListIcon size={18} weight="bold" />
@@ -77,13 +103,13 @@ export function TopBar({
         <Link
           href={`/${session.role.toLowerCase()}/profil`}
           title="Buka Profil Pengguna"
-          className="group flex items-center gap-2 rounded-md p-1 transition-colors hover:bg-white/10"
+          className="group flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-white/10"
         >
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white shadow-2xs ring-1 ring-white/30 transition-all group-hover:ring-white/60">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-600 text-[10px] font-bold text-white shadow-2xs ring-1 ring-white/30 transition-all group-hover:ring-white/60">
             {initials(session.nama)}
           </div>
           <div className="hidden flex-col text-left leading-tight sm:flex">
-            <span className="max-w-[130px] truncate text-xs font-medium text-white transition-colors group-hover:text-blue-200 md:max-w-[170px]">
+            <span className="max-w-[130px] truncate text-xs font-medium text-white transition-colors group-hover:text-cyan-200 md:max-w-[170px]">
               {session.nama}
             </span>
             <div className="scale-90 origin-left -mt-0.5">

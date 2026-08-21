@@ -20,6 +20,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { logoutAction } from "@/lib/actions/auth";
 import type { Role, SessionData } from "@/lib/auth/session";
+import { cn } from "@/lib/utils";
 import { TopBar } from "./top-bar";
 import { AppFooter } from "./footer";
 
@@ -147,26 +148,32 @@ const NAV_GROUPS: Record<Role, NavGroup[]> = {
   PEGAWAI: PEGAWAI_NAV_GROUPS,
 };
 
-function Brand() {
+function Brand({ collapsed = false }: { collapsed?: boolean }) {
   return (
-    <div className="flex flex-row gap-3">
+    <Link
+      href="/"
+      aria-label="Ke halaman depan"
+      className={cn("block shrink-0", collapsed && "w-full")}
+    >
       <Image
         src="/logo-kpk.png"
         alt="Logo KPK"
         width={170}
         height={64}
         priority
-        className="h-auto w-30"
+        className={cn("h-auto", collapsed ? "mx-auto w-10" : "w-30")}
       />
-    </div>
+    </Link>
   );
 }
 
 function NavItemsList({
   role,
+  collapsed = false,
   onItemClick,
 }: {
   role: Role;
+  collapsed?: boolean;
   onItemClick?: () => void;
 }) {
   const pathname = usePathname();
@@ -176,13 +183,20 @@ function NavItemsList({
   const groups = NAV_GROUPS[role];
 
   return (
-    <div className="space-y-5 px-3">
+    <div className="space-y-6 px-3">
       {groups.map((group, idx) => (
         <div key={group.title ?? idx} className="space-y-1">
-          {group.title && (
-            <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-white/40">
-              {group.title}
-            </div>
+          {collapsed ? (
+            <div
+              role="presentation"
+              className="mx-auto mb-2 h-px w-8 rounded-full bg-white/15"
+            />
+          ) : (
+            group.title && (
+              <div className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-white/40">
+                {group.title}
+              </div>
+            )
           )}
           {group.items.map(({ href, label, icon: Icon, statusQuery, exact }) => {
             let active = false;
@@ -202,15 +216,18 @@ function NavItemsList({
                 key={href + (statusQuery ?? "")}
                 href={href}
                 onClick={onItemClick}
+                title={label}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200",
+                  collapsed && "justify-center px-0",
                   active
-                    ? "bg-white/15 font-semibold text-white shadow-xs"
-                    : "text-white/60 hover:bg-white/5 hover:text-white"
-                }`}
+                    ? "bg-white font-semibold text-primary-strong shadow-md shadow-black/10"
+                    : "text-white/70 hover:bg-white/10 hover:text-white"
+                )}
               >
-                <Icon size={18} weight={active ? "fill" : "regular"} />
-                {label}
+                <Icon size={19} weight={active ? "fill" : "regular"} className="shrink-0" />
+                {!collapsed && <span className="truncate">{label}</span>}
               </Link>
             );
           })}
@@ -220,18 +237,19 @@ function NavItemsList({
   );
 }
 
-function LogoutButton({ className }: { className?: string }) {
+function LogoutButton({ collapsed = false }: { collapsed?: boolean }) {
   return (
     <form action={logoutAction}>
       <button
         type="submit"
-        className={
-          className ??
-          "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-red-600/50 hover:text-white cursor-pointer"
-        }
+        title="Keluar"
+        className={cn(
+          "flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/75 transition-colors hover:bg-red-500/25 hover:text-white",
+          collapsed && "justify-center px-0"
+        )}
       >
-        <SignOutIcon size={18} weight="bold" />
-        Keluar
+        <SignOutIcon size={18} weight="bold" className="shrink-0" />
+        {!collapsed && "Keluar"}
       </button>
     </form>
   );
@@ -245,50 +263,66 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-background">
       {/* Desktop Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-primary-strong lg:flex print:hidden shadow-lg border-r border-white/5">
-        <div className="px-5 pb-6 pt-6">
-          <Brand />
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-30 hidden flex-col overflow-hidden bg-gradient-to-b from-primary-strong to-primary shadow-xl shadow-primary/25 ring-1 ring-black/5 transition-[width] duration-300 ease-in-out lg:flex print:hidden",
+          collapsed ? "lg:w-[76px]" : "lg:w-64"
+        )}
+      >
+        <div
+          className={cn(
+            "flex shrink-0 items-center px-5 pb-4 pt-6",
+            collapsed && "justify-center px-0"
+          )}
+        >
+          <Brand collapsed={collapsed} />
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-2">
+        <nav className="sidebar-scroll flex-1 overflow-x-hidden overflow-y-auto py-3">
           <Suspense fallback={<div className="p-4 text-xs text-white/40">Memuat navigasi...</div>}>
-            <NavItemsList role={session.role} />
+            <NavItemsList role={session.role} collapsed={collapsed} />
           </Suspense>
         </nav>
 
-        <div className="mt-auto border-t border-white/10 p-4">
-          <LogoutButton />
+        <div
+          className={cn(
+            "mt-auto border-t border-white/10 p-4 transition-[padding] duration-300 ease-in-out",
+            collapsed && "px-3"
+          )}
+        >
+          <LogoutButton collapsed={collapsed} />
         </div>
       </aside>
 
       {/* Mobile Drawer Backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-xs lg:hidden print:hidden"
+          className="fixed inset-0 z-40 animate-in fade-in bg-ink/60 backdrop-blur-sm duration-200 lg:hidden print:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Mobile Sidebar Drawer */}
       {mobileOpen && (
-        <aside className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-primary-strong shadow-2xl lg:hidden print:hidden">
+        <aside className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] animate-in slide-in-from-left flex-col bg-gradient-to-b from-primary-strong to-primary shadow-2xl duration-300 ease-out lg:hidden print:hidden">
           <div className="flex items-center justify-between px-5 pb-4 pt-5">
             <Brand />
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
-              className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white cursor-pointer"
+              className="cursor-pointer rounded-lg p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
               aria-label="Tutup menu"
             >
               <XIcon size={20} weight="bold" />
             </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto py-2">
+          <nav className="sidebar-scroll flex-1 overflow-x-hidden overflow-y-auto py-2">
             <Suspense fallback={<div className="p-4 text-xs text-white/40">Memuat navigasi...</div>}>
               <NavItemsList role={session.role} onItemClick={() => setMobileOpen(false)} />
             </Suspense>
@@ -301,10 +335,20 @@ export function AppShell({
       )}
 
       {/* Top Bar (Unified Desktop & Mobile) */}
-      <TopBar session={session} onOpenMobile={() => setMobileOpen(true)} />
+      <TopBar
+        session={session}
+        onOpenMobile={() => setMobileOpen(true)}
+        collapsed={collapsed}
+        onToggleCollapse={() => setCollapsed((c) => !c)}
+      />
 
       {/* Main Content Area */}
-      <div className="flex min-h-screen w-full flex-col lg:pl-60 print:pl-0">
+      <div
+        className={cn(
+          "flex min-h-screen w-full flex-col transition-[padding] duration-300 ease-in-out print:pl-0",
+          collapsed ? "lg:pl-[76px]" : "lg:pl-64"
+        )}
+      >
         <div className="flex flex-1 flex-col px-4 pb-6 pt-16 sm:px-6 lg:px-8 lg:pt-18 print:p-0">
           <div className="mx-auto w-full max-w-6xl flex-1">{children}</div>
           <AppFooter />

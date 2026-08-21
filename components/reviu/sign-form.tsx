@@ -107,7 +107,7 @@ export function ReviuSignForm({
                   checked={setuju}
                   onChange={(e) => setSetuju(e.target.checked)}
                   disabled={pending}
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-outline-strong accent-[#1e3a8a]"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-outline-strong accent-[#0e7490]"
                 />
                 <span>
                   Saya telah membaca dan menyetujui seluruh isi reviu ini.
