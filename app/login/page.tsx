@@ -18,6 +18,7 @@ export default function LoginPage() {
           src={"/images/gedung-kpk-1.jpg"}
           alt=""
           fill
+          sizes="(min-width: 1024px) 50vw, 100vw"
           priority
           className="object-cover opacity-30 mix-blend-luminosity"
         />
@@ -35,9 +36,14 @@ export default function LoginPage() {
 
         <div className="relative flex h-full flex-col justify-between p-10 text-white">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#C8102E]">
-              <Image src="/logo-kpk.png" alt="Logo KPK" width={40} height={40} className="object-cover" />
-            </span>
+            <Image
+              src="/logo-kpk.png"
+              alt="Logo KPK"
+              width={280}
+              height={83}
+              priority
+              className="h-10 w-auto"
+            />
             <div className="leading-tight">
               <p className="text-sm font-bold">Dialog Kinerja</p>
               <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/70">

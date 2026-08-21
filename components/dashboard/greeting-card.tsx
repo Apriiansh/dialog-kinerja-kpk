@@ -15,7 +15,7 @@ const IMAGES = [
   "/images/n/gedung-3.jpg",
 ];
 
-const SLIDE_INTERVAL = 5000;
+const SLIDE_INTERVAL = 3000;
 
 export type GreetingCardUser = {
   role?: string;
@@ -122,7 +122,7 @@ export function GreetingCard({
             priority={i === 0}
             aria-hidden={i !== active}
             className={cn(
-              "object-cover transition-opacity duration-700 ease-out",
+              "object-fit transition-opacity duration-700 ease-out",
               i === active ? "opacity-100" : "opacity-0"
             )}
           />

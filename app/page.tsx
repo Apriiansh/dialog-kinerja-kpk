@@ -30,6 +30,7 @@ export default async function LandingPage() {
                 src="/images/logo-kpk-badge.png"
                 alt="Logo Komisi Pemberantasan Korupsi"
                 fill
+                sizes="32px"
                 priority
                 className="object-contain"
               />
@@ -96,7 +97,7 @@ export default async function LandingPage() {
             <div className="lg:col-span-6 space-y-4">
               <div className="flex items-center gap-2.5">
                 <div className="relative h-7 w-5.5 shrink-0">
-                  <Image src="/images/logo-kpk-badge.png" alt="Logo KPK" fill className="object-contain" />
+                  <Image src="/images/logo-kpk-badge.png" alt="Logo KPK" fill sizes="28px" className="object-contain" />
                 </div>
                 <span className="text-base font-bold text-[#1B1712] dark:text-[#F2EEE7]">
                   Dialog Kinerja
