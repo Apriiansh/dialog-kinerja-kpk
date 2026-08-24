@@ -87,7 +87,6 @@ model MasterMetodePengembangan {
 
   @@map("master_metode_pengembangan")
 }
-
 model DialogKinerja {
   id                     Int          @id @default(autoincrement())
   id_atasan              Int
