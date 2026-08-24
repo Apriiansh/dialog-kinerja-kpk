@@ -17,6 +17,7 @@ import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { FormulirDialogKinerja } from "@/components/dialog/detail-view";
 import { ReviuList } from "@/components/reviu/list";
 import { Separator } from "@/components/ui/separator";
+import { ChatHeader } from "@/components/chat/ChatHeader";
 import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
@@ -142,6 +143,12 @@ export default async function DialogDetailPage({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={dialog.status} />
+                <ChatHeader
+                  dialogId={dialog.id}
+                  userRole="pegawai"
+                  partnerName={dialog.atasan.nama_pegawai}
+                  partnerRoleLabel="Atasan Langsung"
+                />
                 {dialog.id_dialog_induk ? (
                   <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
                     Dialog Lanjutan

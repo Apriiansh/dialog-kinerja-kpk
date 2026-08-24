@@ -16,6 +16,7 @@ import { ReviuSignForm } from "@/components/reviu/sign-form";
 import { ScrollToAnchor } from "@/components/shared/scroll-to-anchor";
 import { Separator } from "@/components/ui/separator";
 import { submitDialog } from "@/lib/actions/atasan";
+import { ChatHeader } from "@/components/chat/ChatHeader";
 import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
 import { formatPeriode } from "@/lib/constants/triwulan";
 
@@ -137,6 +138,12 @@ export default async function DialogDetailPage({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={status} />
+                <ChatHeader
+                  dialogId={dialog.id}
+                  userRole="atasan"
+                  partnerName={dialog.pegawai.nama_pegawai}
+                  partnerRoleLabel="Pegawai"
+                />
                 {dialog.id_dialog_induk ? (
                   <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
                     Dialog Lanjutan
