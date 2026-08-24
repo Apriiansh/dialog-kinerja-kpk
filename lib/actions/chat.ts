@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
+import { publishDialogUpdate } from "@/lib/realtime/bus";
 
 export interface ChatMessageItem {
   id: number;
@@ -194,6 +195,8 @@ export async function sendChatMessage(
     } else {
       role = "admin";
     }
+
+    publishDialogUpdate(dialogId, { kind: "chat", byUserId: session.id });
 
     return {
       success: true,

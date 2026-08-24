@@ -9,13 +9,13 @@ import {
   PaperPlaneTiltIcon,
   SpinnerIcon,
 } from "@phosphor-icons/react";
-import { useChat } from "./use-chat";
+import { useChat } from "@/lib/hooks/use-chat";
 
 interface ChatWidgetProps {
   dialogId: number;
   userRole: "atasan" | "pegawai" | "admin";
-  defaultOpen?: boolean;
-  onClose?: () => void;
+  open: boolean;
+  onOpenChange?: (open: boolean) => void;
   partnerName?: string;
   partnerRoleLabel?: string;
 }
@@ -23,12 +23,13 @@ interface ChatWidgetProps {
 export function ChatWidget({
   dialogId,
   userRole,
-  defaultOpen = false,
-  onClose,
+  open,
+  onOpenChange,
   partnerName,
   partnerRoleLabel,
 }: ChatWidgetProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const isOpen = open;
+  const setOpen = (next: boolean) => onOpenChange?.(next);
   const [isMinimized, setIsMinimized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -103,7 +104,7 @@ export function ChatWidget({
         <button
           type="button"
           onClick={() => {
-            setIsOpen(true);
+            setOpen(true);
             setIsMinimized(false);
           }}
           className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2.5 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-on-primary shadow-xl ring-4 ring-primary/20 transition-all duration-200 hover:scale-105 hover:bg-primary-strong active:scale-95"
@@ -167,8 +168,7 @@ export function ChatWidget({
             <button
               type="button"
               onClick={() => {
-                setIsOpen(false);
-                onClose?.();
+                setOpen(false);
               }}
               className="rounded-lg p-1.5 text-ink-muted transition-colors hover:bg-surface-sunken hover:text-ink"
               title="Tutup"
@@ -228,8 +228,7 @@ export function ChatWidget({
             <button
               type="button"
               onClick={() => {
-                setIsOpen(false);
-                onClose?.();
+                setOpen(false);
               }}
               className="rounded-lg p-1.5 text-ink-muted transition-colors hover:bg-surface hover:text-ink"
               title="Tutup Chat"

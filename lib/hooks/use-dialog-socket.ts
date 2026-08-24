@@ -1,69 +1,46 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import {
-  getDialogLiveState,
-  type DialogLiveState,
-} from "@/lib/actions/dialog-live";
 
 export type LiveTransport = "connecting" | "live" | "polling";
 
-interface UseDialogLiveOptions {
+interface UseDialogSocketOptions {
   dialogId: number;
   enabled?: boolean;
   pollIntervalMs?: number;
-  onState: (state: DialogLiveState) => void;
+  onOpen?: () => void;
+  onMessage: (updateKind: string | undefined) => void;
+  onPoll: () => void;
 }
 
-export function useDialogLive({
+export function useDialogSocket({
   dialogId,
   enabled = true,
   pollIntervalMs = 3_000,
-  onState,
-}: UseDialogLiveOptions): { transport: LiveTransport } {
-  const router = useRouter();
+  onOpen,
+  onMessage,
+  onPoll,
+}: UseDialogSocketOptions): LiveTransport {
   const [transport, setTransport] = useState<LiveTransport>("connecting");
 
-  const onStateRef = useRef(onState);
+  const onMessageRef = useRef(onMessage);
+  const onPollRef = useRef(onPoll);
+  const onOpenRef = useRef(onOpen);
+
   useEffect(() => {
-    onStateRef.current = onState;
-  }, [onState]);
+    onMessageRef.current = onMessage;
+    onPollRef.current = onPoll;
+    onOpenRef.current = onOpen;
+  });
 
   useEffect(() => {
     if (!enabled) return;
 
     let disposed = false;
     let attempts = 0;
-    let inFlight = false;
-    let lastJson = "";
     let ws: WebSocket | null = null;
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
     let pollTimer: ReturnType<typeof setTimeout> | null = null;
-    let refetchTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const fetchSnapshot = async () => {
-      if (inFlight) return;
-      inFlight = true;
-      try {
-        const state = await getDialogLiveState(dialogId);
-        if (disposed || !state) return;
-        const json = JSON.stringify(state);
-        if (json !== lastJson) {
-          lastJson = json;
-          onStateRef.current(state);
-        }
-      } catch {
-        // diam: sesi mungkin berakhir atau jaringan putus
-      } finally {
-        inFlight = false;
-      }
-    };
-
-    const scheduleRefetch = () => {
-      if (refetchTimer) clearTimeout(refetchTimer);
-      refetchTimer = setTimeout(() => void fetchSnapshot(), 300);
-    };
 
     const stopPolling = () => {
       if (pollTimer !== null) {
@@ -76,10 +53,20 @@ export function useDialogLive({
       if (pollTimer !== null) return;
       setTransport("polling");
       const tick = () => {
-        if (document.visibilityState === "visible") void fetchSnapshot();
+        if (document.visibilityState === "visible") {
+          onPollRef.current();
+        }
         pollTimer = setTimeout(tick, pollIntervalMs);
       };
       pollTimer = setTimeout(tick, pollIntervalMs);
+    };
+
+    const scheduleReconnect = () => {
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      const delay =
+        Math.min(30_000, 1_000 * 2 ** Math.min(attempts, 5)) +
+        Math.random() * 500;
+      reconnectTimer = setTimeout(connectWs, delay);
     };
 
     const connectWs = () => {
@@ -101,7 +88,7 @@ export function useDialogLive({
         attempts = 0;
         setTransport("live");
         stopPolling();
-        void fetchSnapshot();
+        onOpenRef.current?.();
       };
 
       ws.onmessage = (event) => {
@@ -112,10 +99,7 @@ export function useDialogLive({
             update?: { kind?: string };
           };
           if (data.kind !== "dialog_update") return;
-          if (data.update?.kind === "status") {
-            router.refresh();
-          }
-          scheduleRefetch();
+          onMessageRef.current(data.update?.kind);
         } catch {
           // pesan tidak valid: abaikan
         }
@@ -130,25 +114,17 @@ export function useDialogLive({
       };
     };
 
-    const scheduleReconnect = () => {
-      if (reconnectTimer) clearTimeout(reconnectTimer);
-      const delay =
-        Math.min(30_000, 1_000 * 2 ** Math.min(attempts, 5)) +
-        Math.random() * 500;
-      reconnectTimer = setTimeout(connectWs, delay);
-    };
-
     const handleVisibility = () => {
       if (
         document.visibilityState === "visible" &&
         ws?.readyState !== WebSocket.OPEN
       ) {
-        void fetchSnapshot();
+        onPollRef.current();
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibility);
-    void fetchSnapshot();
+    onPollRef.current();
     connectWs();
 
     return () => {
@@ -156,22 +132,13 @@ export function useDialogLive({
       document.removeEventListener("visibilitychange", handleVisibility);
       if (reconnectTimer) clearTimeout(reconnectTimer);
       if (pollTimer) clearTimeout(pollTimer);
-      if (refetchTimer) clearTimeout(refetchTimer);
       if (ws && ws.readyState <= WebSocket.OPEN) {
         ws.onclose = null;
         ws.onerror = null;
         ws.close();
       }
     };
-  }, [dialogId, enabled, pollIntervalMs, router]);
+  }, [dialogId, enabled, pollIntervalMs]);
 
-  return { transport: enabled ? transport : "connecting" };
-}
-
-export function formatClock(date = new Date()): string {
-  return date.toLocaleTimeString("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  return enabled ? transport : "connecting";
 }

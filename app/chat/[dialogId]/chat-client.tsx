@@ -8,7 +8,7 @@ import {
   PaperPlaneTiltIcon,
   SpinnerIcon,
 } from "@phosphor-icons/react";
-import { useChat } from "@/components/chat/use-chat";
+import { useChat } from "@/lib/hooks/use-chat";
 
 type ChatClientProps = {
   dialogId: string;

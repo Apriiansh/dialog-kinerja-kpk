@@ -1,6 +1,10 @@
 import { EventEmitter } from "node:events";
 
-export type DialogUpdateKind = "aspek_pegawai" | "aspek_atasan" | "status";
+export type DialogUpdateKind =
+  | "aspek_pegawai"
+  | "aspek_atasan"
+  | "status"
+  | "chat";
 
 export interface DialogUpdateEvent {
   kind: DialogUpdateKind;

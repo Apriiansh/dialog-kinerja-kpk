@@ -18,7 +18,7 @@ import { buildDialogSections } from "@/lib/constants/dialog-sections";
 import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
 import { error, success } from "@/components/ui/toast";
 import { AspekPegawaiInput } from "@/components/pegawai/aspek-input";
-import { useDialogLive } from "@/components/dialog/use-dialog-live";
+import { useDialogLive } from "@/lib/hooks/use-dialog-live";
 
 const SECTION_ICONS = [ChartBarIcon, GaugeIcon, UserFocusIcon, TrendUpIcon] as const;
 

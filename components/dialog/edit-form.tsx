@@ -25,7 +25,7 @@ import { error as showError, success as showSuccess } from "@/components/ui/toas
 import {
   useDialogLive,
   formatClock,
-} from "@/components/dialog/use-dialog-live";
+} from "@/lib/hooks/use-dialog-live";
 import type {
   JenisAspek,
   Triwulan,

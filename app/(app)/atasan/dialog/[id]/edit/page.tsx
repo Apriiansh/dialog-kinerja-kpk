@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { ChatHeader } from "@/components/chat/ChatHeader";
 import { DeskripsiKinerjaForm } from "@/components/dialog/deskripsi-form";
 import { formatPeriode } from "@/lib/constants/triwulan";
 
@@ -56,7 +57,15 @@ export default async function EditDialogPage({
             {formatPeriode(dialog.triwulan, dialog.periode_tahun)}
           </p>
         </div>
-        <StatusBadge status={dialog.status} />
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusBadge status={dialog.status} />
+          <ChatHeader
+            dialogId={dialog.id}
+            userRole="atasan"
+            partnerName={dialog.pegawai.nama_pegawai}
+            partnerRoleLabel="Pegawai"
+          />
+        </div>
       </header>
 
       <DeskripsiKinerjaForm

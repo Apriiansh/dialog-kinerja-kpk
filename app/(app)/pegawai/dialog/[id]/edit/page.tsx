@@ -6,6 +6,7 @@ import {
   getPegawaiDialog,
 } from "@/lib/queries/dialog";
 import { DialogForm } from "@/components/dialog/edit-form";
+import { ChatHeader } from "@/components/chat/ChatHeader";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -36,15 +37,24 @@ export default async function DialogEditPage({ params }: PageProps) {
   }
 
   return (
-    <DialogForm
-      dialogId={dialog.id}
-      periodeTahun={dialog.periode_tahun}
-      triwulan={dialog.triwulan}
-      deskripsiKinerja={dialog.deskripsi_kinerja}
-      atasanNama={dialog.atasan.nama_pegawai}
-      aspek={dialog.aspek}
-      isLanjutan={dialog.id_dialog_induk !== null}
-      metodeList={metodeList}
-    />
+    <>
+      <DialogForm
+        dialogId={dialog.id}
+        periodeTahun={dialog.periode_tahun}
+        triwulan={dialog.triwulan}
+        deskripsiKinerja={dialog.deskripsi_kinerja}
+        atasanNama={dialog.atasan.nama_pegawai}
+        aspek={dialog.aspek}
+        isLanjutan={dialog.id_dialog_induk !== null}
+        metodeList={metodeList}
+      />
+      <ChatHeader
+        dialogId={dialog.id}
+        userRole="pegawai"
+        variant="floating-only"
+        partnerName={dialog.atasan.nama_pegawai}
+        partnerRoleLabel="Atasan Langsung"
+      />
+    </>
   );
 }

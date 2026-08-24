@@ -38,9 +38,8 @@ export function ChatHeader({
       <ChatWidget
         dialogId={dialogId}
         userRole={userRole}
-        defaultOpen={isOpen}
-        key={`${dialogId}-${isOpen}`}
-        onClose={() => setIsOpen(false)}
+        open={isOpen}
+        onOpenChange={setIsOpen}
         partnerName={partnerName}
         partnerRoleLabel={partnerRoleLabel}
       />

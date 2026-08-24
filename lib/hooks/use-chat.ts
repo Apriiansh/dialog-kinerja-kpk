@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getChatMessages,
   sendChatMessage,
   type ChatMessageItem,
   type ChatDialogInfo,
 } from "@/lib/actions/chat";
+import { useDialogSocket } from "./use-dialog-socket";
 
 export type { ChatMessageItem, ChatDialogInfo };
 
@@ -23,12 +24,13 @@ export function useChat(dialogId: number, options: UseChatOptions = {}) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
-  const [isConnected, setIsConnected] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const isMountedRef = useRef(true);
   const latestMessageIdRef = useRef<number>(0);
-
+  const fetchMessagesRef = useRef<(isInitial?: boolean) => Promise<void>>(
+    async () => {},
+  );
   // Update latest ID ref whenever messages change
   useEffect(() => {
     if (messages.length > 0) {
@@ -44,7 +46,6 @@ export function useChat(dialogId: number, options: UseChatOptions = {}) {
   const fetchMessages = useCallback(
     async (isInitial = false) => {
       if (!dialogId) return;
-      if (isInitial) setIsLoading(true);
 
       try {
         // For incremental polling, only fetch messages after latest ID
@@ -71,7 +72,6 @@ export function useChat(dialogId: number, options: UseChatOptions = {}) {
             });
           }
 
-          setIsConnected(true);
           setError(null);
         } else {
           setError(res.error || "Gagal memuat pesan");
@@ -79,7 +79,6 @@ export function useChat(dialogId: number, options: UseChatOptions = {}) {
       } catch (err) {
         if (!isMountedRef.current) return;
         console.error("Gagal mengambil pesan chat:", err);
-        setIsConnected(false);
       } finally {
         if (isMountedRef.current && isInitial) {
           setIsLoading(false);
@@ -89,6 +88,9 @@ export function useChat(dialogId: number, options: UseChatOptions = {}) {
     [dialogId],
   );
 
+  useEffect(() => {
+    fetchMessagesRef.current = fetchMessages;
+  }, [fetchMessages]);
   // Initial load
   useEffect(() => {
     isMountedRef.current = true;
@@ -99,34 +101,16 @@ export function useChat(dialogId: number, options: UseChatOptions = {}) {
     };
   }, [fetchMessages]);
 
-  // Smart background polling with Page Visibility API
-  useEffect(() => {
-    if (!enabled || !dialogId) return;
-
-    const interval = setInterval(() => {
-      // Don't waste server resources if browser tab is in background
-      if (typeof document !== "undefined" && document.hidden) {
-        return;
-      }
-      fetchMessages(false);
-    }, pollIntervalMs);
-
-    // Sync immediately when tab becomes visible again
-    const handleVisibilityChange = () => {
-      if (typeof document !== "undefined" && !document.hidden) {
-        fetchMessages(false);
-      }
-    };
-
-    window.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleVisibilityChange);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleVisibilityChange);
-    };
-  }, [enabled, dialogId, fetchMessages, pollIntervalMs]);
+  // Realtime via shared WebSocket; polling hanya fallback saat koneksi putus.
+  const transport = useDialogSocket({
+    dialogId,
+    enabled,
+    pollIntervalMs,
+    onOpen: () => void fetchMessagesRef.current(false),
+    onMessage: () => void fetchMessagesRef.current(false),
+    onPoll: () => void fetchMessagesRef.current(false),
+  });
+  const isConnected = transport === "live";
 
   const sendMessage = async (customContent?: string) => {
     const textToSend = (customContent !== undefined ? customContent : input).trim();
@@ -162,7 +146,7 @@ export function useChat(dialogId: number, options: UseChatOptions = {}) {
           latestMessageIdRef.current,
           res.message.id,
         );
-        setIsConnected(true);
+        setError(null);
         return true;
       } else {
         // Rollback optimistic message on failure
