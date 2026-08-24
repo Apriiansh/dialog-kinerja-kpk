@@ -13,6 +13,7 @@ import {
   CloudArrowUpIcon,
   CloudCheckIcon,
   SpinnerGapIcon,
+  WarningCircleIcon,
 } from "@phosphor-icons/react";
 import {
   saveDialogForm,
@@ -235,7 +236,7 @@ function SaveStateMeta({
   saveState,
   savedAt,
 }: {
-  saveState: "idle" | "saving" | "saved";
+  saveState: "idle" | "saving" | "saved" | "error";
   savedAt: string;
 }) {
   if (saveState === "saving") {
@@ -243,6 +244,14 @@ function SaveStateMeta({
       <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-ink-muted">
         <SpinnerGapIcon size={14} weight="bold" className="animate-spin" />
         Menyimpan…
+      </span>
+    );
+  }
+  if (saveState === "error") {
+    return (
+      <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-[#C8102E]">
+        <WarningCircleIcon size={14} weight="fill" />
+        Gagal menyimpan — coba lagi
       </span>
     );
   }
@@ -303,7 +312,9 @@ export function DialogForm({
   const [pending, setPending] = useState<"draft" | "submit" | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved">("idle");
+  const [saveState, setSaveState] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
   const [savedAt, setSavedAt] = useState("");
   const draftsRef = useRef(drafts);
   const savedJsonRef = useRef<string | null>(null);
@@ -338,19 +349,24 @@ export function DialogForm({
     const json = JSON.stringify(draftsRef.current);
     if (json === savedJsonRef.current) return;
     setSaveState("saving");
-    const result = await saveDialogForm(
-      dialogId,
-      "draft",
-      buildAspekPayload(draftsRef.current),
-    );
-    if (result?.error) {
-      showError(result.error);
-      setSaveState("idle");
-      return;
+    try {
+      const result = await saveDialogForm(
+        dialogId,
+        "draft",
+        buildAspekPayload(draftsRef.current),
+      );
+      if (result?.error) {
+        showError(result.error);
+        setSaveState("error");
+        return;
+      }
+      savedJsonRef.current = json;
+      setSaveState("saved");
+      setSavedAt(formatClock());
+    } catch {
+      showError("Gagal menyimpan otomatis. Periksa koneksi lalu lanjutkan mengetik.");
+      setSaveState("error");
     }
-    savedJsonRef.current = json;
-    setSaveState("saved");
-    setSavedAt(formatClock());
   }, [dialogId]);
 
   const flushPersist = useCallback(async () => {

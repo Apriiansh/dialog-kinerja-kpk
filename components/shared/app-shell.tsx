@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import {
   SquaresFourIcon,
   ChatCircleDotsIcon,
@@ -18,7 +18,7 @@ import {
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { logoutAction } from "@/lib/actions/auth";
 import type { Role, SessionData } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,6 @@ type NavItem = {
   href: string;
   label: string;
   icon: React.ElementType;
-  statusQuery?: string;
   exact?: boolean;
 };
 
@@ -163,8 +162,6 @@ function NavItemsList({
   onToggleCollapse?: () => void;
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const currentStatus = searchParams.get("status");
 
   const groups = NAV_GROUPS[role];
 
@@ -208,22 +205,14 @@ function NavItemsList({
               </button>
             )}
           </div>
-          {group.items.map(({ href, label, icon: Icon, statusQuery, exact }) => {
-            let active = false;
-            if (statusQuery !== undefined) {
-              active =
-                pathname === "/pegawai/dashboard" &&
-                (currentStatus === statusQuery ||
-                  (statusQuery === "semua" && !currentStatus));
-            } else if (exact) {
-              active = pathname === href && !currentStatus;
-            } else {
-              active = pathname === href || pathname.startsWith(`${href}/`);
-            }
+          {group.items.map(({ href, label, icon: Icon, exact }) => {
+            const active = exact
+              ? pathname === href
+              : pathname === href || pathname.startsWith(`${href}/`);
 
             return (
               <Link
-                key={href + (statusQuery ?? "")}
+                key={href}
                 href={href}
                 onClick={onItemClick}
                 title={label}
@@ -278,6 +267,49 @@ function AmbientBackground() {
   );
 }
 
+const SIDEBAR_COLLAPSED_KEY = "sidebar-collapsed";
+
+const collapsedListeners = new Set<() => void>();
+
+function persistCollapsed(value: boolean): boolean {
+  try {
+    window.localStorage.setItem(SIDEBAR_COLLAPSED_KEY, value ? "1" : "0");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const collapsedStore = {
+  subscribe(listener: () => void) {
+    collapsedListeners.add(listener);
+    return () => {
+      collapsedListeners.delete(listener);
+    };
+  },
+  read(): boolean {
+    try {
+      return window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1";
+    } catch {
+      return false;
+    }
+  },
+  write(value: boolean) {
+    persistCollapsed(value);
+    for (const listener of collapsedListeners) {
+      listener();
+    }
+  },
+};
+
+function useSidebarCollapsed() {
+  return useSyncExternalStore(
+    collapsedStore.subscribe,
+    collapsedStore.read,
+    () => false,
+  );
+}
+
 export function AppShell({
   session,
   children,
@@ -286,7 +318,11 @@ export function AppShell({
   children: React.ReactNode;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const collapsed = useSidebarCollapsed();
+
+  const toggleCollapsed = useCallback(() => {
+    collapsedStore.write(!collapsedStore.read());
+  }, []);
 
   return (
     <div className="flex min-h-screen">
@@ -300,13 +336,11 @@ export function AppShell({
         )}
       >
         <nav className="sidebar-scroll flex-1 overflow-x-hidden overflow-y-auto pb-3 pt-4">
-          <Suspense fallback={<div className="p-4 text-xs text-white/40">Memuat navigasi...</div>}>
-            <NavItemsList
-              role={session.role}
-              collapsed={collapsed}
-              onToggleCollapse={() => setCollapsed((c) => !c)}
-            />
-          </Suspense>
+          <NavItemsList
+            role={session.role}
+            collapsed={collapsed}
+            onToggleCollapse={toggleCollapsed}
+          />
         </nav>
 
         <div
@@ -343,9 +377,7 @@ export function AppShell({
           </div>
 
           <nav className="sidebar-scroll flex-1 overflow-x-hidden overflow-y-auto py-2">
-            <Suspense fallback={<div className="p-4 text-xs text-white/40">Memuat navigasi...</div>}>
-              <NavItemsList role={session.role} onItemClick={() => setMobileOpen(false)} />
-            </Suspense>
+            <NavItemsList role={session.role} onItemClick={() => setMobileOpen(false)} />
           </nav>
 
           <div className="mt-auto border-t border-white/10 p-4">

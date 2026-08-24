@@ -152,7 +152,11 @@ export function setupWebSocketHub({
 
     const dialogId = Number(rawId);
     if (pathname !== WS_PATH || !Number.isInteger(dialogId)) {
-      getNextUpgradeHandler()(req, socket, head);
+      try {
+        getNextUpgradeHandler()(req, socket, head);
+      } catch {
+        if (!socket.destroyed) socket.destroy();
+      }
       return;
     }
 
@@ -206,7 +210,9 @@ export function setupWebSocketHub({
         continue;
       }
       live.isAlive = false;
-      live.ping();
+      if (live.readyState === WebSocket.OPEN) {
+        live.ping();
+      }
     }
   }, HEARTBEAT_INTERVAL_MS);
 
