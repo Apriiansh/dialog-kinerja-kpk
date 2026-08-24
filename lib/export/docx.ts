@@ -23,8 +23,8 @@ import {
   isEmptyItem,
   metodeLabel,
 } from "@/lib/utils/dialog-display";
-import { resolveTtdFile } from "@/lib/export/ttd";
 import type { JenisAspek } from "@/generated/prisma/enums";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                           */
@@ -41,13 +41,6 @@ async function getImageBuffer(filePath: string): Promise<Buffer | null> {
 async function getLogoBuffer(): Promise<Buffer | null> {
   const logoPath = path.join(process.cwd(), "public", "logo-kpk.png");
   return getImageBuffer(logoPath);
-}
-
-async function getTtdBuffer(ttdUrl: string | null): Promise<Buffer | null> {
-  if (!ttdUrl) return null;
-  const filePath = resolveTtdFile(ttdUrl);
-  if (!filePath) return null;
-  return getImageBuffer(filePath);
 }
 
 function txt(text: string, options?: Partial<IRunOptions>): TextRun {
@@ -287,10 +280,8 @@ export async function generateDialogKinerjaDocx(
   if (!isAuthorized)
     throw new Error("Anda tidak memiliki akses ke dokumen dialog ini.");
 
-  const [logoBuf, ttdAtasanBuf, ttdPegawaiBuf] = await Promise.all([
+  const [logoBuf] = await Promise.all([
     getLogoBuffer(),
-    getTtdBuffer(dialog.ttd_atasan_path),
-    getTtdBuffer(dialog.ttd_pegawai_path),
   ]);
 
   const tanggalValidasi =
@@ -410,8 +401,8 @@ export async function generateDialogKinerjaDocx(
     pegawaiName: dialog.pegawai.nama_pegawai || "—",
     pegawaiNpp: dialog.pegawai.npp,
     pegawaiJabatan: dialog.pegawai.nama_jabatan || "Jabatan",
-    ttdAtasanBuf,
-    ttdPegawaiBuf,
+    ttdAtasanBuf: null,
+    ttdPegawaiBuf: null,
   });
 
   /* ---- Assemble document ---- */
@@ -458,7 +449,7 @@ export async function generateDialogKinerjaDocx(
             alignment: AlignmentType.CENTER,
             spacing: { after: 240 },
             children: [
-              txt(`Tahun Periode: ${dialog.periode_tahun}`, { size: 20 }),
+              txt(`Periode: ${formatPeriode(dialog.triwulan, dialog.periode_tahun)}`, { size: 20 }),
             ],
           }),
           pegawaiTable,
@@ -494,7 +485,7 @@ export async function generateDialogKinerjaDocx(
 
   const buffer = await Packer.toBuffer(doc);
   const safeNpp = dialog.pegawai.npp.replace(/[^a-zA-Z0-9]/g, "");
-  const filename = `Formulir_Dialog_Kinerja_${safeNpp}_${dialog.periode_tahun}.docx`;
+  const filename = `Formulir_Dialog_Kinerja_${safeNpp}_${dialog.triwulan}_${dialog.periode_tahun}.docx`;
 
   return { filename, buffer };
 }
@@ -524,10 +515,8 @@ export async function generateReviuDocx(
   if (!isAuthorized)
     throw new Error("Anda tidak memiliki akses ke dokumen reviu ini.");
 
-  const [logoBuf, ttdAtasanBuf, ttdPegawaiBuf] = await Promise.all([
+  const [logoBuf] = await Promise.all([
     getLogoBuffer(),
-    getTtdBuffer(reviu.ttd_atasan_path),
-    getTtdBuffer(reviu.ttd_pegawai_path),
   ]);
 
   const tanggalDialog =
@@ -616,8 +605,8 @@ const sigTable = signatureTable({
     pegawaiName: reviu.dialog.pegawai.nama_pegawai || "—",
     pegawaiNpp: reviu.dialog.pegawai.npp,
     pegawaiJabatan: reviu.dialog.pegawai.nama_jabatan || "Jabatan",
-    ttdAtasanBuf,
-    ttdPegawaiBuf,
+    ttdAtasanBuf: null,
+    ttdPegawaiBuf: null,
   });
 
   /* ---- Assemble ---- */
@@ -659,7 +648,7 @@ const sigTable = signatureTable({
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { after: 240 },
-            children: [txt(`Tahun Periode: ${reviu.dialog.periode_tahun}`, { size: 20 })],
+            children: [txt(`Periode: ${formatPeriode(reviu.dialog.triwulan, reviu.dialog.periode_tahun)}`, { size: 20 })],
           }),
           pegawaiTable,
           new Paragraph({
@@ -704,10 +693,10 @@ const sigTable = signatureTable({
                   : null,
             },
             {
-              label: "Tanggal reviu berikutnya:",
+              label: "Tanggal evaluasi berikutnya:",
               value:
-                !tercapai && reviu.tanggal_next_reviu
-                  ? formatTanggal(reviu.tanggal_next_reviu)
+                !tercapai && reviu.tanggal_next_evaluasi
+                  ? formatTanggal(reviu.tanggal_next_evaluasi)
                   : null,
             },
           ]),
@@ -719,7 +708,7 @@ const sigTable = signatureTable({
 
   const buffer = await Packer.toBuffer(doc);
   const safeNpp = reviu.dialog.pegawai.npp.replace(/[^a-zA-Z0-9]/g, "");
-  const filename = `Formulir_Reviu_Dialog_Kinerja_${safeNpp}_${reviu.dialog.periode_tahun}.docx`;
+  const filename = `Formulir_Reviu_Dialog_Kinerja_${safeNpp}_${reviu.dialog.triwulan}_${reviu.dialog.periode_tahun}.docx`;
 
   return { filename, buffer };
 }

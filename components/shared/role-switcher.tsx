@@ -25,7 +25,7 @@ export function RoleSwitcher({
     return (
       <div className="my-1 flex items-center gap-1 rounded-lg border border-white/15 bg-white/10 p-0.5 shadow-2xs">
         <span className="hidden md:inline-flex items-center gap-1 px-2 text-[11px] font-medium text-white/75">
-          <ArrowsLeftRightIcon size={12} weight="bold" className="text-blue-300" />
+          <ArrowsLeftRightIcon size={12} weight="bold" className="text-cyan-300" />
           Peran:
         </span>
         <div className="flex items-center gap-0.5">

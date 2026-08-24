@@ -9,6 +9,20 @@ export async function getAtasanPegawaiOptions(atasanId: number) {
       nama_pegawai: true,
       nama_jabatan: true,
       unit_kerja: true,
+      dialogAsPegawai: {
+        orderBy: { id: "desc" },
+        select: {
+          id: true,
+          periode_tahun: true,
+          triwulan: true,
+          status: true,
+          reviu: {
+            orderBy: { id: "desc" },
+            take: 1,
+            select: { id: true, status: true },
+          },
+        },
+      },
     },
     orderBy: { nama_pegawai: "asc" },
   });
@@ -29,6 +43,10 @@ const ATASAN_DIALOG_INCLUDE = {
   aspek: { include: { item: { include: { metode: true } } } },
   reviu: {
     orderBy: { created_at: "asc" as const },
+  },
+  dialog_lanjutan: { select: { id: true } },
+  dialog_induk: {
+    include: { aspek: { include: { item: { include: { metode: true } } } } },
   },
 } as const;
 

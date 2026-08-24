@@ -6,17 +6,20 @@ import {
   HourglassIcon,
   PencilSimpleIcon,
   ShieldCheckIcon,
+  ArrowSquareRightIcon,
+  MagnifyingGlassIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { UnduhBuktiLink } from "@/components/shared/unduh-bukti-link";
-import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { Progress } from "@/components/ui/progress";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
 import { ASPEK_ORDER } from "@/lib/constants/aspek";
-import type { StatusDialog } from "@/generated/prisma/enums";
+import { formatPeriode } from "@/lib/constants/triwulan";
+import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
+import { CapaianBadge } from "@/components/shared/capaian-badge";
+import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -64,7 +67,7 @@ const VALID_STATUSES: StatusDialog[] = [
 ];
 
 const FILTERS: { key: StatusDialog | "semua"; label: string }[] = [
-  { key: "semua", label: "Semua Dialog" },
+  { key: "semua", label: "Semua" },
   { key: "menunggu_pegawai", label: "Perlu Diisi" },
   { key: "menunggu_atasan", label: "Menunggu Atasan" },
   { key: "menunggu_validasi", label: "Menunggu Validasi" },
@@ -80,6 +83,16 @@ function filledAspekCount(
   ).length;
 }
 
+function evaluatedAspekCount(
+  aspek: { item: { is_tercapai: boolean | null }[] }[],
+) {
+  return aspek.filter(
+    (group) =>
+      group.item.length === 0 ||
+      group.item.every((item) => item.is_tercapai !== null),
+  ).length;
+}
+
 export default async function PegawaiDialogListPage({
   searchParams,
 }: {
@@ -92,25 +105,45 @@ export default async function PegawaiDialogListPage({
     rawStatus && (VALID_STATUSES as string[]).includes(rawStatus)
       ? (rawStatus as StatusDialog)
       : "semua";
-  const { page, skip, existingParams } = getPageParams(sp, ["status"]);
+  const { page, skip, existingParams } = getPageParams(sp, ["status", "q", "tahun", "triwulan"]);
+
+  const q = typeof sp.q === "string" ? sp.q.trim() : "";
+  const tahun = typeof sp.tahun === "string" ? sp.tahun.trim() : "";
+  const triwulan = typeof sp.triwulan === "string" ? sp.triwulan.trim() : "";
 
   const baseWhere = { id_pegawai: session.id };
 
-  const [allDialogs, filteredTotal, menungguAtasanCount, menungguValidasiCount, selesaiCount] =
+  const [allDialogs, menungguAtasanCount, menungguValidasiCount, selesaiCount] =
     await Promise.all([
       prisma.dialogKinerja.findMany({
         where: baseWhere,
         include: {
           atasan: { select: { nama_pegawai: true, nama_jabatan: true } },
-          aspek: { include: { item: { select: { id: true } } } },
+          aspek: {
+            include: {
+              item: {
+                select: {
+                  id: true,
+                  is_tercapai: true,
+                  dialog_evaluasi: true,
+                },
+              },
+            },
+          },
+          dialog_induk: {
+            select: {
+              periode_tahun: true,
+              triwulan: true,
+              aspek: { select: { item: { select: { is_tercapai: true } } } },
+            },
+          },
+          dialog_lanjutan: { select: { id: true } },
+          reviu: {
+            select: { id: true, status: true, is_tercapai: true, is_tidak_tercapai: true, dialog: { select: { id: true } } },
+            orderBy: { created_at: "asc" as const },
+          },
         },
         orderBy: { updated_at: "desc" },
-      }),
-      prisma.dialogKinerja.count({
-        where:
-          activeStatus !== "semua"
-            ? { ...baseWhere, status: activeStatus }
-            : baseWhere,
       }),
       prisma.dialogKinerja.count({ where: { ...baseWhere, status: "menunggu_atasan" } }),
       prisma.dialogKinerja.count({ where: { ...baseWhere, status: "menunggu_validasi" } }),
@@ -119,10 +152,34 @@ export default async function PegawaiDialogListPage({
 
   const allTotal = allDialogs.length;
   const menungguPegawaiCount = allDialogs.filter((d) => d.status === "menunggu_pegawai").length;
+
+  const availableYears = [...new Set(allDialogs.map((d) => d.periode_tahun))].sort((a, b) => b - a);
+
+  const filteredDialogs = allDialogs.filter((d) => {
+    if (activeStatus !== "semua" && d.status !== activeStatus) return false;
+    if (tahun && String(d.periode_tahun) !== tahun) return false;
+    if (triwulan && d.triwulan !== triwulan) return false;
+    if (q) {
+      const query = q.toLowerCase();
+      const matchTahun = String(d.periode_tahun).includes(query);
+      const matchTW = d.triwulan.toLowerCase().includes(query);
+      const matchItems = d.aspek.some(
+        (a) =>
+          a.item.some((item) =>
+            (item.dialog_evaluasi?.toLowerCase() ?? "").includes(query),
+          ) || (a.tanggung_jawab_pegawai?.toLowerCase() ?? "").includes(query),
+      );
+      if (!matchTahun && !matchTW && !matchItems) return false;
+    }
+    return true;
+  });
+
+  const filteredTotal = filteredDialogs.length;
   const totalPages = Math.ceil(filteredTotal / PAGE_SIZE);
-  const visibleDialogs = allDialogs
-    .filter((d) => activeStatus === "semua" || d.status === activeStatus)
-    .slice(skip, skip + PAGE_SIZE);
+  const visibleDialogs = filteredDialogs.slice(skip, skip + PAGE_SIZE);
+
+  const sortedById = [...allDialogs].sort((a, b) => a.id - b.id);
+  const seqMap = new Map(sortedById.map((d, index) => [d.id, index + 1]));
 
   const stats = [
     {
@@ -194,6 +251,65 @@ export default async function PegawaiDialogListPage({
         ))}
       </section>
 
+      {/* Filter & Search Bar */}
+      <form method="GET" className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex-1">
+          <MagnifyingGlassIcon
+            size={16}
+            weight="bold"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted"
+          />
+          <input
+            type="search"
+            name="q"
+            defaultValue={q}
+            placeholder="Cari berdasarkan target kegiatan atau kata kunci..."
+            className="h-10 w-full rounded-lg border border-outline bg-surface pl-9 pr-3 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          {activeStatus !== "semua" ? (
+            <input type="hidden" name="status" value={activeStatus} />
+          ) : null}
+          <select
+            name="tahun"
+            defaultValue={tahun}
+            className="h-10 rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+          >
+            <option value="">Semua Tahun</option>
+            {availableYears.map((y) => (
+              <option key={y} value={y}>
+                Tahun {y}
+              </option>
+            ))}
+          </select>
+          <select
+            name="triwulan"
+            defaultValue={triwulan}
+            className="h-10 rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+          >
+            <option value="">Semua Periode</option>
+            <option value="TW1">Triwulan I (Perencanaan & Evaluasi)</option>
+            <option value="TW3">Triwulan III (Monitoring Progres)</option>
+          </select>
+          <button
+            type="submit"
+            className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
+          >
+            Terapkan
+          </button>
+          {q || tahun || triwulan ? (
+            <Link
+              href={activeStatus !== "semua" ? `/pegawai/dialog?status=${activeStatus}` : "/pegawai/dialog"}
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-outline px-3 text-xs font-semibold text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
+            >
+              Reset
+            </Link>
+          ) : null}
+        </div>
+      </form>
+
       {/* In-Page Filter Tabs & List */}
       <section aria-label="Daftar dialog kinerja" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline pb-3">
@@ -243,54 +359,91 @@ export default async function PegawaiDialogListPage({
         ) : (
           <ul className="flex flex-col gap-3">
             {visibleDialogs.map((d) => {
-              const filled = filledAspekCount(d.aspek);
+              const isLanjutan = d.id_dialog_induk !== null;
+              const filled = isLanjutan
+                ? evaluatedAspekCount(d.aspek)
+                : filledAspekCount(d.aspek);
               const cta = CTA[d.status];
               const progress = Math.round((filled / ASPEK_ORDER.length) * 100);
+              const sourceAspek = isLanjutan
+                ? (d.dialog_induk?.aspek ?? [])
+                : d.aspek;
+              const itemCounts = isLanjutan
+                ? sourceAspek.reduce(
+                    (counts, group) => {
+                      for (const item of group.item) {
+                        if (item.is_tercapai === true) counts.tercapai += 1;
+                        else if (item.is_tercapai === false) counts.tidakTercapai += 1;
+                      }
+                      return counts;
+                    },
+                    { tercapai: 0, tidakTercapai: 0 },
+                  )
+                : null;
+              const latestSelesaiReviu = d.reviu
+                .filter((reviu) => reviu.status === "selesai")
+                .at(-1);
+              const hasLanjutan = d.dialog_lanjutan.length > 0;
+              const hasBelumTercapai = d.aspek.some((aspek) =>
+                aspek.item.some((item) => item.is_tercapai === false),
+              );
+              const sequenceNum = seqMap.get(d.id) ?? 1;
               return (
                 <li key={d.id}>
-                  <div className="flex flex-col gap-4 rounded-lg border border-outline bg-surface p-5 transition-colors hover:border-outline-strong hover:shadow-ambient sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-col gap-2 rounded-lg border border-outline bg-surface p-5 transition-colors hover:border-outline-strong hover:shadow-ambient sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 flex-col gap-2">
                       <div className="flex flex-wrap items-center gap-3">
                         <span className="text-base font-semibold text-ink">
-                          Dialog Kinerja Tahun {d.periode_tahun}
+                          Dialog Kinerja Ke-{sequenceNum} ({formatPeriode(d.triwulan, d.periode_tahun)})
                         </span>
                         <StatusBadge status={d.status} />
+                        {d.dialog_induk ? (
+                          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                            Lanjutan dari {formatPeriode(d.dialog_induk.triwulan, d.dialog_induk.periode_tahun)}
+                          </span>
+                        ) : null}
                       </div>
                       <span className="truncate text-xs leading-4 text-ink-muted">
                         Atasan Penilai: <strong className="font-medium text-ink">{d.atasan.nama_pegawai}</strong>
                         {d.atasan.nama_jabatan ? ` (${d.atasan.nama_jabatan})` : ""}
                       </span>
                       <div className="mt-1 flex items-center gap-3">
-                        <Progress
-                          value={progress}
-                          className="w-full max-w-50"
-                          aria-label={`${progress}% aspek terisi`}
+                        <CapaianBadge
+                          statusDialog={d.status}
+                          filledAspekCount={filledAspekCount(d.aspek)}
+                          reviu={isLanjutan ? null : d.reviu.at(-1)}
+                          items={sourceAspek.flatMap((a) => a.item)}
                         />
-                        <span className="text-[11px] font-medium text-ink-muted">
-                          {filled}/{ASPEK_ORDER.length} aspek terisi ({progress}%)
-                        </span>
                       </div>
+                      {itemCounts ? (
+                        <div className="flex flex-wrap gap-2 text-[11px] font-semibold">
+                          <span className="text-emerald-700">
+                            {itemCounts.tercapai} tercapai
+                          </span>
+                          <span className="text-red-700">
+                            {itemCounts.tidakTercapai} tidak tercapai
+                          </span>
+                        </div>
+                      ) : null}
                     </div>
 
                     <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-outline/50 pt-3 sm:border-t-0 sm:pt-0">
                       {d.status === "selesai" ? (
                         <>
-                          <UnduhBuktiLink
-                            path="/pegawai/dialog"
-                            dialogId={d.id}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink hover:border-outline-strong hover:bg-surface-muted"
-                          />
-                          <UnduhWordLink
-                            href={`/api/unduh/dialog/${d.id}/docx`}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink hover:border-outline-strong hover:bg-surface-muted"
-                          />
-                          <Link
-                            href={`/pegawai/reviu/new?dialog=${d.id}`}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-outline bg-white px-3.5 py-2 text-xs font-semibold text-ink hover:border-outline-strong hover:bg-surface-muted"
-                          >
-                            <ArrowsClockwiseIcon size={14} weight="bold" />
-                            Reviu
-                          </Link>
+                           {latestSelesaiReviu && !hasLanjutan ? (
+                             <EvaluasiLanjutanButton
+                               reviuId={latestSelesaiReviu.id}
+                               label={hasBelumTercapai ? 'Evaluasi Lanjutan' : 'Ajukan Evaluasi'}
+                             />
+                           ) : null}
+                           {d.reviu.length === 0 ? (
+                             <Link
+                               href={`/pegawai/reviu/new?dialog=${d.id}`}
+                               className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
+                             >
+                               Buat Reviu
+                             </Link>
+                           ) : null}
                         </>
                       ) : null}
                       <Link

@@ -10,7 +10,6 @@ import {
   UserCircleIcon,
   ShieldCheckIcon,
   UsersIcon,
-  ChatCircleDotsIcon,
   CalendarIcon,
   IdentificationCardIcon,
   BriefcaseIcon,
@@ -22,10 +21,12 @@ import {
   XCircleIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import type { StatusDialog } from "@/generated/prisma/enums";
+import { EmptyState } from "@/components/shared/empty-state";
+import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
 import { RoleTag } from "@/components/shared/role-tag";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 export interface UserDetailData {
   id: number;
@@ -57,6 +58,7 @@ export interface UserDetailData {
   dialogs?: {
     id: number;
     periode_tahun: number;
+    triwulan: Triwulan;
     status: StatusDialog;
     deskripsi_kinerja: string | null;
     updated_at: string | null;
@@ -326,10 +328,11 @@ export function UserDetailView({
               </div>
 
               {user.dialogs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-outline py-8 text-center">
-                  <ChatCircleDotsIcon size={28} className="text-ink-muted mb-2" />
-                  <p className="text-sm font-medium text-ink-muted">Belum ada riwayat dialog kinerja</p>
-                </div>
+                <EmptyState
+                  variant="dialog"
+                  title="Belum ada riwayat dialog kinerja"
+                  className="border-dashed py-8"
+                />
               ) : (
                 <div className="divide-y divide-outline rounded-lg border border-outline overflow-hidden">
                   {user.dialogs.map((d) => (
@@ -339,7 +342,7 @@ export function UserDetailView({
                     >
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-ink">Periode {d.periode_tahun}</span>
+                          <span className="font-semibold text-ink">{formatPeriode(d.triwulan, d.periode_tahun)}</span>
                           <StatusBadge status={d.status} />
                         </div>
                         <p className="text-xs text-ink-muted line-clamp-1">

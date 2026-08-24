@@ -2,6 +2,7 @@ import {
   PlusIcon,
   ListChecksIcon,
   PencilSimpleIcon,
+  LockSimpleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -106,51 +107,70 @@ export default async function AdminMetodePage({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {metodeList.map((m) => (
-                <TableRow
-                  key={m.id}
-                  className="border-outline hover:bg-surface-muted/40"
-                >
-                  <TableCell className="px-5 py-4">
-                    <div className="flex min-w-0 flex-col">
-                      <Link
-                        href={`/admin/metode/${m.id}/edit`}
-                        className={`truncate text-sm font-semibold text-ink transition-colors hover:text-primary ${m.is_active ? "" : "text-ink-muted/60"}`}
-                      >
-                        {m.nama_metode}
-                      </Link>
-                    </div>
-                  </TableCell>
-                  <TableCell
-                    className={`px-5 py-4 text-sm ${m.is_active ? "text-ink" : "text-ink-muted/60"}`}
+              {metodeList.map((m) => {
+                const isLainnya = m.nama_metode.toLowerCase().includes("lainnya");
+                return (
+                  <TableRow
+                    key={m.id}
+                    className="border-outline hover:bg-surface-muted/40"
                   >
-                    {m._count.dialogItems} item dialog
-                  </TableCell>
-                  <TableCell className="px-5 py-4">
-                    <AdminMetodeStatusToggle
-                      id={m.id}
-                      nama={m.nama_metode}
-                      isActive={m.is_active}
-                    />
-                  </TableCell>
-                  <TableCell className="px-5 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={`/admin/metode/${m.id}/edit`}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
-                      >
-                        <PencilSimpleIcon size={14} weight="bold" />
-                        Edit
-                      </Link>
-                      <AdminMetodeDeleteButton
+                    <TableCell className="px-5 py-4">
+                      <div className="flex min-w-0 items-center gap-2">
+                        {isLainnya ? (
+                          <span
+                            className={`truncate text-sm font-semibold ${m.is_active ? "text-ink" : "text-ink-muted/60"}`}
+                          >
+                            {m.nama_metode}
+                          </span>
+                        ) : (
+                          <Link
+                            href={`/admin/metode/${m.id}/edit`}
+                            className={`truncate text-sm font-semibold text-ink transition-colors hover:text-primary ${m.is_active ? "" : "text-ink-muted/60"}`}
+                          >
+                            {m.nama_metode}
+                          </Link>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      className={`px-5 py-4 text-sm ${m.is_active ? "text-ink" : "text-ink-muted/60"}`}
+                    >
+                      {m._count.dialogItems} item dialog
+                    </TableCell>
+                    <TableCell className="px-5 py-4">
+                      <AdminMetodeStatusToggle
                         id={m.id}
                         nama={m.nama_metode}
-                        digunakan={m._count.dialogItems}
+                        isActive={m.is_active}
+                        disabled={isLainnya}
                       />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell className="px-5 py-4 text-right">
+                      {isLainnya ? (
+                        <span className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline/60 px-3 text-xs font-semibold text-ink-muted/50">
+                          <LockSimpleIcon size={14} weight="bold" />
+                          locked
+                        </span>
+                      ) : (
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/admin/metode/${m.id}/edit`}
+                            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-outline px-3 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
+                          >
+                            <PencilSimpleIcon size={14} weight="bold" />
+                            Edit
+                          </Link>
+                          <AdminMetodeDeleteButton
+                            id={m.id}
+                            nama={m.nama_metode}
+                            digunakan={m._count.dialogItems}
+                          />
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

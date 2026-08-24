@@ -1,33 +1,28 @@
 import Link from "next/link";
 import {
-  BuildingsIcon,
-  BriefcaseIcon,
+  ChatCircleDotsIcon,
   CheckCircleIcon,
-  ClipboardTextIcon,
-  HourglassIcon,
-  IdentificationCardIcon,
-  PencilSimpleIcon,
-  ShieldCheckIcon,
+  ListChecksIcon,
+  XCircleIcon,
   ArrowRightIcon,
   BellIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { StatusBars, Donut, type ChartDatum } from "@/components/dashboard/charts";
+import {
+  Donut,
+  TrendLine,
+  type ChartDatum,
+} from "@/components/dashboard/charts";
 import { ChartCard } from "@/components/dashboard/chart-card";
-import { DIALOG_STATUS_CHART } from "@/lib/utils/chart-colors";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { GreetingCard } from "@/components/dashboard/greeting-card";
+import { EmptyState } from "@/components/shared/empty-state";
 import { ASPEK_ORDER } from "@/lib/constants/aspek";
+import { formatPeriode } from "@/lib/constants/triwulan";
 import { formatDistanceToNow } from "@/lib/utils/format";
-import type { StatusDialog } from "@/generated/prisma/enums";
-
-const STATUS_ORDER: StatusDialog[] = [
-  "draft_atasan",
-  "menunggu_pegawai",
-  "menunggu_atasan",
-  "menunggu_validasi",
-  "selesai",
-];
+import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
 
 function greeting() {
   const hour = new Date().getHours();
@@ -98,7 +93,11 @@ export default async function PegawaiDashboardPage({
       include: {
         atasan: { select: { nama_pegawai: true, nama_jabatan: true } },
         aspek: {
-          include: { item: { select: { id: true } } },
+          include: {
+            item: {
+              select: { id: true, is_tercapai: true, dialog_evaluasi: true },
+            },
+          },
         },
       },
       orderBy: { updated_at: "desc" },
@@ -126,15 +125,66 @@ export default async function PegawaiDashboardPage({
     (d) => d.status === "menunggu_pegawai" || d.status === "menunggu_validasi",
   );
 
-  const statusData: ChartDatum[] = STATUS_ORDER.map((status) => {
-    const cfg = DIALOG_STATUS_CHART[status];
-    return {
-      label: cfg.short,
-      tooltipLabel: cfg.label,
-      value: dialogs.filter((d) => d.status === status).length,
-      color: cfg.color,
+  const allItems = dialogs.flatMap((d) =>
+    d.aspek.flatMap((a) => a.item),
+  );
+  const filledItems = allItems.filter(
+    (it) => (it.dialog_evaluasi?.trim() ?? "") !== "",
+  );
+  const reviewedItems = filledItems.filter((it) => it.is_tercapai !== null);
+  const tercapaiCount = reviewedItems.filter((it) => it.is_tercapai).length;
+  const tidakTercapaiCount = reviewedItems.length - tercapaiCount;
+
+  const shareHint = (part: number) =>
+    reviewedItems.length > 0
+      ? `${Math.round((part / reviewedItems.length) * 100)}% dari yang direviu`
+      : "belum ada yang direviu";
+
+  type PeriodAccumulator = {
+    year: number;
+    triwulan: Triwulan;
+    tercapai: number;
+    tidakTercapai: number;
+  };
+
+  const periodMap = new Map<string, PeriodAccumulator>();
+  for (const d of dialogs) {
+    const reviewed = d.aspek
+      .flatMap((a) => a.item)
+      .filter(
+        (it) =>
+          (it.dialog_evaluasi?.trim() ?? "") !== "" &&
+          it.is_tercapai !== null,
+      );
+    if (reviewed.length === 0) continue;
+
+    const key = `${d.periode_tahun}-${d.triwulan}`;
+    const entry = periodMap.get(key) ?? {
+      year: d.periode_tahun,
+      triwulan: d.triwulan,
+      tercapai: 0,
+      tidakTercapai: 0,
     };
-  }).filter((d) => d.value > 0);
+    for (const it of reviewed) {
+      if (it.is_tercapai) entry.tercapai += 1;
+      else entry.tidakTercapai += 1;
+    }
+    periodMap.set(key, entry);
+  }
+
+  const trendData: ChartDatum[] = [...periodMap.values()]
+    .sort(
+      (a, b) => a.year - b.year || a.triwulan.localeCompare(b.triwulan),
+    )
+    .map((p) => {
+      const total = p.tercapai + p.tidakTercapai;
+      return {
+        label: `${p.triwulan} '${String(p.year).slice(2)}`,
+        tooltipLabel: formatPeriode(p.triwulan, p.year),
+        value: Math.round((p.tercapai / total) * 100),
+        hint: `${p.tercapai} tercapai · ${p.tidakTercapai} tidak tercapai`,
+      };
+    });
 
   const tercapai = reviu.filter((r) => r.is_tercapai).length;
   const tidakTercapai = reviu.filter((r) => r.is_tidak_tercapai).length;
@@ -158,80 +208,60 @@ export default async function PegawaiDashboardPage({
 
   const stats = [
     {
-      key: "menunggu_pegawai" as const,
-      label: "Perlu Diisi",
-      count: dialogs.filter((d) => d.status === "menunggu_pegawai").length,
-      icon: PencilSimpleIcon,
-      className: "bg-status-amber-soft text-status-amber",
+      label: "Dialog Kinerja",
+      value: dialogs.length,
+      hint: `${reviu.length} reviu tercatat`,
+      icon: ChatCircleDotsIcon,
+      href: "/pegawai/dialog",
+      ariaLabel: "Lihat dialog kinerja saya",
+      chipClassName: undefined as string | undefined,
     },
     {
-      key: "menunggu_atasan" as const,
-      label: "Menunggu Atasan",
-      count: dialogs.filter((d) => d.status === "menunggu_atasan").length,
-      icon: HourglassIcon,
-      className: "bg-status-blue-soft text-status-blue",
+      label: "Total Evaluasi",
+      value: filledItems.length,
+      hint: `${filledItems.length - reviewedItems.length} belum direviu`,
+      icon: ListChecksIcon,
+      href: "/pegawai/reviu",
+      ariaLabel: "Lihat reviu evaluasi saya",
+      chipClassName: undefined as string | undefined,
     },
     {
-      key: "menunggu_validasi" as const,
-      label: "Menunggu Validasi",
-      count: dialogs.filter((d) => d.status === "menunggu_validasi").length,
-      icon: ShieldCheckIcon,
-      className: "bg-status-indigo-soft text-status-indigo",
-    },
-    {
-      key: "selesai" as const,
-      label: "Selesai",
-      count: dialogs.filter((d) => d.status === "selesai").length,
+      label: "Evaluasi Tercapai",
+      value: tercapaiCount,
+      hint: shareHint(tercapaiCount),
       icon: CheckCircleIcon,
-      className: "bg-status-green-soft text-status-green",
+      href: "/pegawai/reviu",
+      ariaLabel: "Lihat evaluasi tercapai",
+      chipClassName: "bg-status-green-soft text-status-green",
     },
-  ];
-
-  const profile = [
-    { label: "NPP", value: user?.npp ?? session.npp, icon: IdentificationCardIcon },
-    { label: "Jabatan", value: user?.nama_jabatan ?? "—", icon: BriefcaseIcon },
-    { label: "Unit Kerja", value: user?.unit_kerja ?? "—", icon: BuildingsIcon },
+    {
+      label: "Evaluasi Tidak Tercapai",
+      value: tidakTercapaiCount,
+      hint: shareHint(tidakTercapaiCount),
+      icon: XCircleIcon,
+      href: "/pegawai/reviu",
+      ariaLabel: "Lihat evaluasi tidak tercapai",
+      chipClassName: "bg-status-amber-soft text-status-amber",
+    },
   ];
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-[28px] font-semibold leading-9 tracking-[-0.01em] text-ink">
-            {greeting()}, {session.nama}
-          </h1>
-          <p className="text-sm leading-5 text-ink-muted">
-            Selamat datang di Sistem Aplikasi Dialog Kinerja Biro SDM KPK.
-          </p>
-        </div>
-      </header>
-
-      {/* Profil Pegawai */}
-      <section aria-label="Ringkasan profil" className="rounded-lg border border-outline bg-surface">
-        <div className="border-b border-outline px-6 py-4">
-          <h2 className="text-sm font-semibold text-ink">Data Pegawai</h2>
-        </div>
-        <dl className="grid gap-6 px-6 py-5 sm:grid-cols-3">
-          {profile.map(({ label, value, icon: Icon }) => (
-            <div key={label} className="flex items-start gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
-                <Icon size={18} weight="bold" />
-              </span>
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-                  {label}
-                </dt>
-                <dd className="truncate text-sm font-medium text-ink">{value}</dd>
-              </div>
-            </div>
-          ))}
-        </dl>
-      </section>
+      <GreetingCard
+        greeting={`${greeting()}, ${session.nama}`}
+        subtitle="Selamat datang di Sistem Aplikasi Dialog Kinerja Biro SDM KPK."
+        user={{
+          role: "PEGAWAI",
+          npp: user?.npp ?? session.npp,
+          jabatan: user?.nama_jabatan,
+          unitKerja: user?.unit_kerja,
+        }}
+      />
 
       {/* Overview Cards */}
-      <section aria-label="Ringkasan dialog kinerja" className="flex flex-col gap-3">
+      <section aria-label="Ringkasan kinerja" className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-ink">Status Dialog Kinerja</h2>
+          <h2 className="text-lg font-semibold text-ink">Ringkasan Kinerja</h2>
           <Link
             href="/pegawai/dialog"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition-colors hover:text-primary-strong"
@@ -241,38 +271,42 @@ export default async function PegawaiDashboardPage({
           </Link>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map(({ key, label, count, icon: Icon, className }) => (
-            <Link
-              key={key}
-              href={`/pegawai/dialog?status=${key}`}
-              aria-label={`Lihat dialog berstatus ${label}`}
-              className="flex items-center gap-3 rounded-lg border border-outline bg-surface px-5 py-4 transition-colors hover:border-outline-strong hover:shadow-ambient"
-            >
-              <span
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md ${className}`}
-              >
-                <Icon size={20} weight="bold" />
-              </span>
-              <div className="flex min-w-0 flex-col">
-                <span className="text-2xl font-semibold leading-8 text-ink">
-                  {count}
-                </span>
-                <span className="truncate text-xs font-medium text-ink-muted">
-                  {label}
-                </span>
-              </div>
-            </Link>
-          ))}
+          {stats.map(
+            ({ label, value, hint, icon, href, ariaLabel, chipClassName }, index) => (
+              <StatCard
+                key={label}
+                label={label}
+                value={value}
+                hint={hint}
+                icon={icon}
+                href={href}
+                ariaLabel={ariaLabel}
+                chipClassName={
+                  chipClassName ? `rounded-md ${chipClassName}` : undefined
+                }
+                tone={index % 2 === 0 ? "cyan" : "red"}
+              />
+            ),
+          )}
         </div>
       </section>
 
       {/* Charts */}
       <section aria-label="Analitik pribadi" className="grid gap-4 lg:grid-cols-2">
         <ChartCard
-          title="Status Dialog Saya"
-          subtitle={`${dialogs.length} dialog kinerja atas nama Anda`}
+          title="Analisis Evaluasi Dialog Kinerja"
+          subtitle={`${reviewedItems.length} evaluasi telah direviu`}
         >
-          <StatusBars data={statusData} />
+          {trendData.length === 0 ? (
+            <EmptyState
+              variant="document"
+              title="Belum ada evaluasi yang direviu"
+              description="Persentase pencapaian per periode akan tampil di sini setelah reviu evaluasi Anda selesai."
+              className="border-none bg-transparent py-10"
+            />
+          ) : (
+            <TrendLine data={trendData} />
+          )}
         </ChartCard>
         <ChartCard
           title="Hasil Reviu Saya"
@@ -296,23 +330,19 @@ export default async function PegawaiDashboardPage({
         </div>
 
         {urgentDialogs.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-lg border border-outline bg-surface px-6 py-10 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-md bg-surface-muted text-primary">
-              <ClipboardTextIcon size={22} weight="bold" />
-            </span>
-            <h3 className="text-base font-semibold text-ink">
-              Semua tugas telah diselesaikan
-            </h3>
-            <p className="max-w-sm text-sm leading-5 text-ink-muted">
-              Tidak ada dialog kinerja yang membutuhkan tindakan pengisian atau validasi dari Anda saat ini.
-            </p>
-            <Link
-              href="/pegawai/dialog"
-              className="mt-2 inline-flex items-center gap-2 rounded-md border border-outline px-4 py-2 text-xs font-semibold text-ink hover:bg-surface-muted"
-            >
-              Buka Semua Dialog Kinerja Saya
-            </Link>
-          </div>
+          <EmptyState
+            variant="document"
+            title="Semua tugas telah diselesaikan"
+            description="Tidak ada dialog kinerja yang membutuhkan tindakan pengisian atau validasi dari Anda saat ini."
+            action={
+              <Link
+                href="/pegawai/dialog"
+                className="mt-1 inline-flex items-center gap-2 rounded-md border border-outline bg-surface px-4 py-2 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
+              >
+                Buka Semua Dialog Kinerja Saya
+              </Link>
+            }
+          />
         ) : (
           <ul className="flex flex-col gap-3">
             {urgentDialogs.map((d) => {
@@ -328,7 +358,7 @@ export default async function PegawaiDashboardPage({
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex min-w-0 flex-col gap-1">
                         <span className="text-sm font-semibold text-ink">
-                          Dialog Kinerja Tahun {d.periode_tahun}
+                          Dialog Kinerja {formatPeriode(d.triwulan, d.periode_tahun)}
                         </span>
                         <span className="truncate text-xs text-ink-muted">
                           Atasan: {d.atasan.nama_pegawai}

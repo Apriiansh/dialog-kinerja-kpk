@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeftIcon,
@@ -10,14 +10,26 @@ import {
   PlusIcon,
   TrashIcon,
   XIcon,
+  CloudArrowUpIcon,
+  CloudCheckIcon,
+  SpinnerGapIcon,
+  WarningCircleIcon,
 } from "@phosphor-icons/react";
 import {
   saveDialogForm,
   type AspekInput,
 } from "@/lib/actions/pegawai";
 import { ASPEK_DESC, ASPEK_LABEL, ASPEK_ORDER } from "@/lib/constants/aspek";
+import { formatPeriode } from "@/lib/constants/triwulan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
-import type { JenisAspek } from "@/generated/prisma/enums";
+import {
+  useDialogLive,
+  formatClock,
+} from "@/components/dialog/use-dialog-live";
+import type {
+  JenisAspek,
+  Triwulan,
+} from "@/generated/prisma/enums";
 
 interface MetodeOption {
   id: number;
@@ -111,6 +123,23 @@ function emptyItem(): ItemDraft {
   };
 }
 
+function buildAspekPayload(source: AspekDraft[]): AspekInput[] {
+  return source.map((d) => ({
+    jenis_aspek: d.jenis_aspek,
+    tanggung_jawab_pegawai: d.tanggung_jawab_pegawai,
+    items: d.items.map((item) => ({
+      id: item.id,
+      dialog_evaluasi: item.dialog_evaluasi,
+      kompetensi_dikembangkan: item.kompetensi_dikembangkan,
+      id_metode_pengembangan: item.id_metode_pengembangan
+        ? Number(item.id_metode_pengembangan)
+        : null,
+      metode_pengembangan_lainnya: item.metode_pengembangan_lainnya,
+      waktu_pelaksanaan: item.waktu_pelaksanaan,
+    })),
+  }));
+}
+
 function toDateInputValue(value: Date | null | undefined): string {
   if (!value) return "";
   const y = value.getFullYear();
@@ -177,12 +206,19 @@ function isItemComplete(
 function validateSubmit(
   drafts: AspekDraft[],
   isLainnya: (id: string) => boolean,
+  isLanjutan: boolean,
 ): string | null {
   const problems: string[] = [];
   for (const draft of drafts) {
     const label = ASPEK_SECTION_LABEL[draft.jenis_aspek];
     const nonEmptyItems = draft.items.filter((item) => !isItemEmpty(item));
     if (nonEmptyItems.length === 0) {
+      if (isLanjutan) {
+        // if (!draft.tanggung_jawab_pegawai.trim()) {
+        //   problems.push(`${label} tanggung jawab pegawai wajib diisi`);
+        // }
+        continue;
+      }
       problems.push(`${label} belum memiliki rincian`);
       continue;
     }
@@ -196,19 +232,62 @@ function validateSubmit(
   return problems.length > 0 ? problems.join("; ") : null;
 }
 
+function SaveStateMeta({
+  saveState,
+  savedAt,
+}: {
+  saveState: "idle" | "saving" | "saved" | "error";
+  savedAt: string;
+}) {
+  if (saveState === "saving") {
+    return (
+      <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-ink-muted">
+        <SpinnerGapIcon size={14} weight="bold" className="animate-spin" />
+        Menyimpan…
+      </span>
+    );
+  }
+  if (saveState === "error") {
+    return (
+      <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-[#C8102E]">
+        <WarningCircleIcon size={14} weight="fill" />
+        Gagal menyimpan — coba lagi
+      </span>
+    );
+  }
+  if (saveState === "saved") {
+    return (
+      <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-secondary">
+        <CloudCheckIcon size={14} weight="fill" />
+        Tersimpan otomatis · {savedAt}
+      </span>
+    );
+  }
+  return (
+    <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-ink-muted">
+      <CloudArrowUpIcon size={14} weight="bold" />
+      Perubahan tersimpan otomatis
+    </span>
+  );
+}
+
 export function DialogForm({
   dialogId,
   periodeTahun,
+  triwulan,
   deskripsiKinerja,
   atasanNama,
   aspek,
+  isLanjutan = false,
   metodeList,
 }: {
   dialogId: number;
   periodeTahun: number;
+  triwulan: Triwulan;
   deskripsiKinerja: string | null;
   atasanNama: string;
   aspek: ExistingAspek[];
+  isLanjutan?: boolean;
   metodeList: MetodeOption[];
 }) {
   const [drafts, setDrafts] = useState<AspekDraft[]>(() =>
@@ -232,6 +311,97 @@ export function DialogForm({
   );
   const [pending, setPending] = useState<"draft" | "submit" | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const [saveState, setSaveState] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const [savedAt, setSavedAt] = useState("");
+  const draftsRef = useRef(drafts);
+  const savedJsonRef = useRef<string | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const queueRef = useRef<Promise<void>>(Promise.resolve());
+
+  const [tanggungJawabAtasan, setTanggungJawabAtasan] = useState<
+    Partial<Record<JenisAspek, string | null>>
+  >({});
+  const { transport } = useDialogLive({
+    dialogId,
+    onState: (state) => {
+      const map: Partial<Record<JenisAspek, string | null>> = {};
+      for (const aspekRow of state.aspek) {
+        map[aspekRow.jenis_aspek] = aspekRow.tanggung_jawab_atasan;
+      }
+      setTanggungJawabAtasan(map);
+    },
+  });
+
+  useEffect(() => {
+    draftsRef.current = drafts;
+  }, [drafts]);
+
+  const enqueueTask = useCallback((task: () => Promise<void>) => {
+    queueRef.current = queueRef.current.then(task, task);
+    return queueRef.current;
+  }, []);
+
+  const runPersist = useCallback(async () => {
+    if (savedJsonRef.current === null) return;
+    const json = JSON.stringify(draftsRef.current);
+    if (json === savedJsonRef.current) return;
+    setSaveState("saving");
+    try {
+      const result = await saveDialogForm(
+        dialogId,
+        "draft",
+        buildAspekPayload(draftsRef.current),
+      );
+      if (result?.error) {
+        showError(result.error);
+        setSaveState("error");
+        return;
+      }
+      savedJsonRef.current = json;
+      setSaveState("saved");
+      setSavedAt(formatClock());
+    } catch {
+      showError("Gagal menyimpan otomatis. Periksa koneksi lalu lanjutkan mengetik.");
+      setSaveState("error");
+    }
+  }, [dialogId]);
+
+  const flushPersist = useCallback(async () => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+    await enqueueTask(runPersist);
+  }, [enqueueTask, runPersist]);
+
+  useEffect(() => {
+    if (pending !== null) return;
+    if (savedJsonRef.current === null) {
+      savedJsonRef.current = JSON.stringify(drafts);
+      return;
+    }
+    const json = JSON.stringify(drafts);
+    if (json === savedJsonRef.current) return;
+    setSaveState("idle");
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      void enqueueTask(runPersist);
+    }, 800);
+  }, [drafts, pending, enqueueTask, runPersist]);
+
+  useEffect(() => {
+    const onBeforeUnload = () => {
+      void flushPersist();
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, [flushPersist]);
 
   const isLainnya = useMemo(() => {
     const names = new Map(metodeList.map((m) => [m.id, m.nama_metode]));
@@ -294,22 +464,11 @@ export function DialogForm({
   async function handleSubmit(mode: "draft" | "submit") {
     setPending(mode);
 
-    const payload: AspekInput[] = drafts.map((d) => ({
-      jenis_aspek: d.jenis_aspek,
-      tanggung_jawab_pegawai: d.tanggung_jawab_pegawai,
-      items: d.items.map((item) => ({
-        id: item.id,
-        dialog_evaluasi: item.dialog_evaluasi,
-        kompetensi_dikembangkan: item.kompetensi_dikembangkan,
-        id_metode_pengembangan: item.id_metode_pengembangan
-          ? Number(item.id_metode_pengembangan)
-          : null,
-        metode_pengembangan_lainnya: item.metode_pengembangan_lainnya,
-        waktu_pelaksanaan: item.waktu_pelaksanaan,
-      })),
-    }));
-
-    const result = await saveDialogForm(dialogId, mode, payload);
+    const result = await saveDialogForm(
+      dialogId,
+      mode,
+      buildAspekPayload(draftsRef.current),
+    );
 
     if (result?.error) {
       showError(result.error);
@@ -317,14 +476,21 @@ export function DialogForm({
       return;
     }
 
+    savedJsonRef.current = JSON.stringify(draftsRef.current);
+
     if (mode === "draft") {
       setPending(null);
       showSuccess("Draft dialog berhasil disimpan");
     }
   }
 
-  function handleSubmitClick() {
-    const validationError = validateSubmit(drafts, isLainnya);
+  async function handleSubmitClick() {
+    await flushPersist();
+    const validationError = validateSubmit(
+      draftsRef.current,
+      isLainnya,
+      isLanjutan,
+    );
     if (validationError) {
       showError(validationError);
       return;
@@ -344,7 +510,7 @@ export function DialogForm({
         </Link>
         <div className="flex flex-col gap-1">
           <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-            Isi Dialog Kinerja Tahun {periodeTahun}
+            Isi Dialog Kinerja {formatPeriode(triwulan, periodeTahun)}
           </h1>
           <p className="text-sm leading-5 text-ink-muted">
             Atasan: {atasanNama} · Lengkapi empat aspek evaluasi di bawah ini.
@@ -408,7 +574,12 @@ export function DialogForm({
                             className="flex flex-col gap-3 rounded-md border border-outline bg-surface-muted/40 px-4 py-3.5"
                           >
                             <legend className="px-1 text-xs font-semibold text-ink-muted">
-                              Rincian #{itemIndex + 1}
+                              <span>Rincian #{itemIndex + 1}</span>
+                              {isLanjutan && item.id !== undefined ? (
+                                <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                                  Dari evaluasi sebelumnya
+                                </span>
+                              ) : null}
                             </legend>
 
                             <div className="flex flex-col gap-1.5">
@@ -528,7 +699,7 @@ export function DialogForm({
                             <button
                               type="button"
                               onClick={() => removeItem(jenis, itemIndex)}
-                              disabled={pending !== null}
+                              disabled={pending !== null || (isLanjutan && item.id !== undefined)}
                               className="inline-flex w-fit items-center gap-1.5 rounded-md px-2 py-1 text-xs font-semibold text-error transition-colors hover:bg-error-container disabled:opacity-50"
                             >
                               <TrashIcon size={14} weight="bold" />
@@ -558,6 +729,15 @@ export function DialogForm({
                         placeholder="Langkah atau komitmen yang akan Anda lakukan"
                         className={TEXTAREA_CLASSES}
                       />
+                      <div className="flex flex-col gap-1 rounded-md border border-outline bg-surface-muted/40 px-4 py-3.5">
+                        <span className={LABEL_CLASSES}>
+                          Tanggung Jawab Atasan
+                        </span>
+                        <p className="whitespace-pre-wrap text-sm leading-5 text-ink">
+                          {(tanggungJawabAtasan[jenis] ?? "").trim() ||
+                            "Belum diisi oleh atasan."}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 );
@@ -565,6 +745,30 @@ export function DialogForm({
             </div>
           </section>
         ))}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <span
+          className={`flex shrink-0 items-center gap-1.5 text-xs font-medium ${
+            transport === "live" ? "text-emerald-600" : "text-ink-muted"
+          }`}
+        >
+          <span
+            className={`h-2 w-2 shrink-0 rounded-full ${
+              transport === "live"
+                ? "bg-emerald-500"
+                : transport === "polling"
+                  ? "bg-amber-500"
+                  : "bg-outline-strong"
+            }`}
+          />
+          {transport === "live"
+            ? "Waktu nyata aktif"
+            : transport === "polling"
+              ? "Sinkron berkala"
+              : "Menyambungkan…"}
+        </span>
+        <SaveStateMeta saveState={saveState} savedAt={savedAt} />
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">

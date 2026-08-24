@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 enum Role {
@@ -30,6 +30,13 @@ enum JenisAspek {
   PERILAKU
   KARIR_PENDEK
   KARIR_MENENGAH
+}
+
+enum Triwulan {
+  TW1
+  TW2
+  TW3
+  TW4
 }
 
 enum StatusReviu {
@@ -67,6 +74,7 @@ model User {
 
   notifications Notification[]
   chatMessages  DialogChatMessage[]
+  importedItems ImportStagingItem[] @relation("ImportedBy")
 
   @@map("users")
 }
@@ -80,12 +88,12 @@ model MasterMetodePengembangan {
 
   @@map("master_metode_pengembangan")
 }
-
 model DialogKinerja {
   id                     Int          @id @default(autoincrement())
   id_atasan              Int
   id_pegawai             Int
   periode_tahun          Int
+  triwulan               Triwulan
   deskripsi_kinerja      String?      @db.Text
   status                 StatusDialog @default(draft_atasan)
   is_valid_pegawai       Boolean      @default(false)
@@ -100,9 +108,14 @@ model DialogKinerja {
   atasan  User @relation("DialogAtasan", fields: [id_atasan], references: [id], onDelete: Restrict)
   pegawai User @relation("DialogPegawai", fields: [id_pegawai], references: [id], onDelete: Restrict)
 
+  id_dialog_induk Int?
+
   aspek DialogKinerjaAspek[]
   reviu Reviu[]
   messages DialogChatMessage[]
+
+  dialog_induk    DialogKinerja? @relation("DialogLanjutan", fields: [id_dialog_induk], references: [id], onDelete: SetNull)
+  dialog_lanjutan DialogKinerja[] @relation("DialogLanjutan")
 
   @@map("dialog_kinerja")
 }
@@ -132,6 +145,8 @@ model DialogKinerjaItem {
   id_metode_pengembangan      Int?
   metode_pengembangan_lainnya String?   @db.VarChar(255)
   waktu_pelaksanaan           DateTime?   @default(now())
+  is_tercapai                 Boolean?   // null = belum direviu
+  capaian_keterangan          String?    @db.Text
   created_at                  DateTime  @default(now())
   updated_at                  DateTime  @updatedAt
 
@@ -149,7 +164,7 @@ model Reviu {
   penjelasan_tercapai    String?            @db.Text
   penjelasan_tidak_tercapai String?          @db.Text
   rencana_tindak_lanjut  String?            @db.Text
-  tanggal_next_reviu     DateTime?          @db.Date
+  tanggal_next_evaluasi  DateTime?          @db.Date @map("tanggal_next_reviu")
   status                 StatusReviu        @default(draft_pegawai)
   is_valid_pegawai       Boolean            @default(false)
   is_valid_atasan        Boolean            @default(false)
@@ -196,3 +211,23 @@ model DialogChatMessage {
   @@map("dialog_chat_messages")
 }
 
+model ImportStagingItem {
+  id            Int        @id @default(autoincrement())
+  jenis_aspek   JenisAspek              // SKP | GAP_ASESMEN | PERILAKU
+  periode_tahun Int
+  triwulan      Triwulan               // TW1 | TW3
+  npp           String     @db.VarChar(50)
+  narasi        String     @db.Text    // teks yang masuk ke dialog_evaluasi
+  metadata      Json?                   // data mentah (target, capaian, nilai, dll.)
+  is_consumed   Boolean    @default(false)
+  id_dialog     Int?
+  batch_id      String     @db.VarChar(100)
+  imported_by   Int
+  imported_at   DateTime   @default(now())
+
+  importer User @relation("ImportedBy", fields: [imported_by], references: [id])
+
+  @@index([npp, jenis_aspek, periode_tahun, triwulan])
+  @@index([batch_id])
+  @@map("import_staging_items")
+}

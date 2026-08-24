@@ -8,7 +8,7 @@ Aplikasi web untuk alur kerja **Dialog Kinerja** — proses evaluasi kinerja ant
 |---|---|
 | Framework | Next.js 16.3 (App Router) |
 | UI | React 19, Tailwind CSS v4, shadcn/ui |
-| ORM | Prisma 7 + MariaDB (`@prisma/adapter-mariadb`) |
+| ORM | Prisma 7 + PostgreSQL (`@prisma/adapter-pg`) |
 | Auth | iron-session (cookie-based) |
 | Export | `docx` (Word), `@react-pdf/renderer` (PDF) |
 | Icons | Phosphor Icons |
@@ -47,6 +47,29 @@ draft_pegawai → menunggu_atasan → menunggu_validasi → selesai
 
 Dibuat oleh pegawai setelah dialog selesai. Mencatat capaian, rencana tindak lanjut, dan tanggal reviu berikutnya (dengan pengingat jika terlambat).
 
+### Analisis Pencapaian Evaluasi
+
+Dashboard pegawai, atasan, dan detail pegawai menampilkan analisis capaian berbasis item evaluasi yang sudah direviu.
+
+**Rumus persentase pencapaian per periode:**
+
+```
+% pencapaian = tercapai / (tercapai + tidak tercapai) × 100
+```
+
+Aturan penghitungan:
+
+- Satuan hitung adalah **item evaluasi** (`DialogKinerjaItem`) yang memenuhi syarat:
+  - sudah direviu atasan (`is_tercapai` tidak `null`), dan
+  - memiliki isi evaluasi (`dialog_evaluasi` tidak kosong)
+- Item **belum direviu** tidak ikut dihitung (bukan dianggap gagal)
+- Periode tanpa item tereviu **dilewati** (tidak dianggap 0%)
+- Hasil dibulatkan (`Math.round`)
+
+**Agregasi tim (dashboard atasan):** semua item tereviu milik seluruh bawahan digabungkan (*pooled*) per triwulan, lalu rumus yang sama diterapkan pada total gabungannya.
+
+**Carry-over:** item dengan `is_tercapai = false` dari dialog terakhir yang memiliki reviu ditampilkan sebagai "Perlu Perhatian" di detail pegawai, dan otomatis disalin ke dialog lanjutan periode berikutnya.
+
 ### Admin
 
 - **Dashboard** — ringkasan statis dialog, grafik status dialog, distribusi pengguna
@@ -57,15 +80,15 @@ Dibuat oleh pegawai setelah dialog selesai. Mencatat capaian, rencana tindak lan
 
 ### Atasan
 
-- **Dashboard** — jumlah pegawai, dialog aktif, yang perlu ditindaklanjuti
+- **Dashboard** — kartu sapaan (carousel foto gedung), stat cards (jumlah pegawai, dialog aktif, perlu tindak lanjut), grafik **Tren Pencapaian Evaluasi Tim** (rata-rata % capaian per triwulan), kalender jadwal evaluasi, dan analitik capaian kinerja
 - **Dialog** — buat dialog baru, isi tanggung jawab, tanda tangani, ekspor
-- **Pegawai** — CRUD bawahan, profil, riwayat dialog
+- **Pegawai** — CRUD bawahan, profil, riwayat dialog; halaman detail pegawai menampilkan **Tren Pencapaian Evaluasi** individu dan daftar **Carry-over** (item belum tercapai dari periode terakhir)
 - **Reviu** — lihat dan tanda tangani reviu dari pegawai
 - **Histori** — daftar dialog yang sudah selesai
 
 ### Pegawai
 
-- **Dashboard** — profil singkat, ringkasan dialog, item mendesak dengan progress bar
+- **Dashboard** — kartu sapaan (carousel foto gedung) dengan info NPP/jabatan/unit kerja, 4 stat cards (Dialog Kinerja, Total Evaluasi, Evaluasi Tercapai, Evaluasi Tidak Tercapai), grafik **Analisis Evaluasi Dialog Kinerja** (tren % pencapaian pribadi per periode), donut hasil reviu, dan item mendesak
 - **Dialog** — isi aspek kinerja, validasi + tanda tangan, ekspor
 - **Reviu** — buat reviu tindak lanjut, edit draft, validasi
 
@@ -86,7 +109,7 @@ Dibuat oleh pegawai setelah dialog selesai. Mencatat capaian, rencana tindak lan
 ### Prasyarat
 
 - Node.js 20+
-- MariaDB / MySQL
+- PostgreSQL 14+
 - npm
 
 ### Instalasi
@@ -100,11 +123,7 @@ npm install
 Buat file `.env` di root project:
 
 ```env
-DATABASE_URL="mysql://user:password@localhost:3306/dialog_kinerja"
-DATABASE_HOST="localhost"
-DATABASE_USER="user"
-DATABASE_PASSWORD="password"
-DATABASE_NAME="dialog_kinerja"
+DATABASE_URL="postgresql://postgres:password@localhost:5432/dialog_kinerja_db?schema=public"
 SESSION_SECRET="<acak-64-karakter-hex>"
 ```
 
@@ -164,13 +183,13 @@ lib/
   export/           → docx, word-legacy, pdf, ttd helpers
   utils/            → format, flash, chart colors, styles
 components/
-  shared/           → app-shell, status-badge, signature-pad, unduh buttons
+  shared/           → app-shell, status-badge, signature-pad, empty-state, unduh buttons
   dialog/           → create, edit, summary, responses form
   pegawai/          → form, aspek-input, detail-modal
   reviu/            → create, edit, summary, sign-form
   admin/            → user-form, import-dialog, metode-form
   profile/          → profile-view, edit, password, preferences
-  dashboard/        → charts (bar, donut), chart-card
+  dashboard/        → charts (bar, donut, trend line), chart-card, stat-card, greeting-card, pegawai-trend-card
   ui/               → shadcn primitives (button, input, table, progress, toast)
 prisma/
   schema.prisma     → model dan enum

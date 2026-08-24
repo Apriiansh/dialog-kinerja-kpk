@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import type { PrismaClient } from "../generated/prisma/client";
 
-type NotificationType = "dialog_status" | "reviu_status";
+type NotificationType = "dialog_status" | "reviu_status" | "reviu_reminder" | "evaluasi_reminder";
 
 interface CreateNotificationInput {
   userId: number;

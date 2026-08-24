@@ -4,6 +4,7 @@ import { ListIcon } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
 import type { SessionData } from "@/lib/auth/session";
+import { cn } from "@/lib/utils";
 import { RoleTag } from "./role-tag";
 import { RoleSwitcher } from "./role-switcher";
 import { NotificationBell } from "./notification-bell";
@@ -25,38 +26,47 @@ export function TopBar({
   onOpenMobile: () => void;
 }) {
   return (
-    <header className="fixed inset-x-0 top-0 z-20 flex h-13 items-center justify-between border-b border-white/10 bg-primary-strong px-4 shadow-sm transition-all sm:px-6 lg:left-60 lg:px-8 print:hidden">
-      {/* Sisi Kiri: Mobile Hamburger + Brand / Desktop Title Context */}
-      <div className="flex items-center gap-3">
+    <header
+      className={cn(
+        "fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between border-b border-outline bg-white/90 px-4 shadow-sm shadow-black/5 backdrop-blur-md sm:px-6 print:hidden",
+      )}
+    >
+      {/* Sisi Kiri: Hamburger + Brand Logo KPK + Konteks Portal */}
+      <div className="flex items-center gap-2">
+        {/* Hamburger (Mobile) */}
         <button
           type="button"
           onClick={onOpenMobile}
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border border-white/20 text-white/80 transition-colors hover:bg-white/10 hover:text-white lg:hidden"
+          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-outline text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink lg:hidden"
           aria-label="Buka menu navigasi"
         >
           <ListIcon size={18} weight="bold" />
         </button>
 
-        {/* Brand khusus Mobile */}
-        <div className="flex items-center gap-2 lg:hidden">
+        {/* Brand: Logo KPK */}
+        <Link
+          href="/"
+          aria-label="Ke halaman depan"
+          className="flex items-center rounded-lg px-2 py-1.5 transition-colors hover:bg-surface-muted"
+        >
           <Image
             src="/logo-kpk.png"
             alt="Logo KPK"
-            width={64}
-            height={26}
+            width={280}
+            height={83}
             priority
-            className="h-6 w-auto"
+            className="h-7 w-auto"
           />
-          <span className="text-xs font-semibold text-white">Dialog Kinerja</span>
-        </div>
+        </Link>
 
-        {/* Portal Breadcrumb / Info khusus Desktop */}
-        <div className="hidden items-center gap-2 text-white lg:flex">
-          <span className="text-xs font-semibold tracking-tight text-white">
+        {/* Pemisah + Konteks Portal (Desktop) */}
+        <div className="hidden items-center gap-2 lg:flex">
+          <span className="h-4 w-px bg-outline" />
+          <span className="text-xs font-semibold tracking-tight text-ink">
             Portal Dialog Kinerja
           </span>
-          <span className="text-white/40 text-[10px]">&bull;</span>
-          <span className="text-[11px] font-medium text-white/70">
+          <span className="text-[10px] text-ink-muted/60">&bull;</span>
+          <span className="text-[11px] font-medium text-ink-muted">
             Komisi Pemberantasan Korupsi
           </span>
         </div>
@@ -68,26 +78,26 @@ export function TopBar({
         <NotificationBell role={session.role.toLowerCase()} />
 
         {/* Role Switcher jika memiliki multi-role */}
-        <RoleSwitcher roles={session.roles} activeRole={session.role} variant="dark" />
+        <RoleSwitcher roles={session.roles} activeRole={session.role} />
 
         {/* Pemisah Vertikal */}
-        <div className="hidden h-4 w-px bg-white/20 sm:block" />
+        <div className="hidden h-4 w-px bg-outline sm:block" />
 
         {/* Profil Akun Ringkas */}
         <Link
           href={`/${session.role.toLowerCase()}/profil`}
           title="Buka Profil Pengguna"
-          className="group flex items-center gap-2 rounded-md p-1 transition-colors hover:bg-white/10"
+          className="group flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-surface-muted"
         >
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white shadow-2xs ring-1 ring-white/30 transition-all group-hover:ring-white/60">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-strong text-[10px] font-bold text-white shadow-2xs ring-1 ring-primary-strong/20 transition-all group-hover:ring-primary-strong/50">
             {initials(session.nama)}
           </div>
           <div className="hidden flex-col text-left leading-tight sm:flex">
-            <span className="max-w-[130px] truncate text-xs font-medium text-white transition-colors group-hover:text-blue-200 md:max-w-[170px]">
+            <span className="max-w-[130px] truncate text-xs font-medium text-ink transition-colors group-hover:text-primary-strong md:max-w-[170px]">
               {session.nama}
             </span>
             <div className="scale-90 origin-left -mt-0.5">
-              <RoleTag role={session.role} tone="dark" />
+              <RoleTag role={session.role} />
             </div>
           </div>
         </Link>

@@ -19,6 +19,7 @@ export default async function AdminMetodeEditPage({
     select: { id: true, nama_metode: true, is_active: true },
   });
   if (!metode) notFound();
+  if (metode.nama_metode.toLowerCase().includes("lainnya")) notFound();
 
   return (
     <AdminMetodeForm

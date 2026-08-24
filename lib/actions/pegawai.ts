@@ -8,6 +8,7 @@ import { assertActiveActor } from "@/lib/auth/guards";
 import { canValidateDialog } from "@/lib/queries/dialog";
 import { flashRedirect } from "@/lib/utils/flash";
 import { createNotification } from "@/lib/notifications";
+import { publishDialogUpdate } from "@/lib/realtime/bus";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
 export interface AspekItemInput {
@@ -94,7 +95,10 @@ function isAspekItemComplete(
   return true;
 }
 
-async function validateSubmitInput(aspekInput: AspekInput[]): Promise<string | null> {
+async function validateSubmitInput(
+  aspekInput: AspekInput[],
+  isLanjutan: boolean,
+): Promise<string | null> {
   const metodeList = await prisma.masterMetodePengembangan.findMany({
     select: { id: true, nama_metode: true },
   });
@@ -112,6 +116,12 @@ async function validateSubmitInput(aspekInput: AspekInput[]): Promise<string | n
       (item) => !isEmptyItem(item),
     );
     if (nonEmptyItems.length === 0) {
+      if (isLanjutan) {
+        // if (!aspek.tanggung_jawab_pegawai?.trim()) {
+        //   problems.push(`${label} tanggung jawab pegawai wajib diisi`);
+        // }
+        continue;
+      }
       problems.push(`${label} belum memiliki rincian`);
       continue;
     }
@@ -138,7 +148,14 @@ export async function saveDialogForm(
 
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_pegawai: session.id },
-    select: { id: true, status: true, id_atasan: true, periode_tahun: true },
+    select: {
+      id: true,
+      status: true,
+      id_dialog_induk: true,
+      id_atasan: true,
+      periode_tahun: true,
+      triwulan: true,
+    },
   });
   if (!dialog) {
     return { error: "Dialog tidak ditemukan." };
@@ -154,7 +171,10 @@ export async function saveDialogForm(
   }
 
   if (mode === "submit") {
-    const validationError = await validateSubmitInput(aspekInput);
+    const validationError = await validateSubmitInput(
+      aspekInput,
+      dialog.id_dialog_induk !== null,
+    );
     if (validationError) {
       return {
         error: `Lengkapi isian sebelum mengirim ke atasan: ${validationError}`,
@@ -236,12 +256,17 @@ export async function saveDialogForm(
   revalidatePath("/pegawai/dashboard");
   revalidatePath(`/pegawai/dialog/${dialog.id}`);
 
+  publishDialogUpdate(dialog.id, {
+    kind: mode === "submit" ? "status" : "aspek_pegawai",
+    byUserId: session.id,
+  });
+
   if (mode === "submit") {
     await createNotification({
       userId: dialog.id_atasan,
       type: "dialog_status",
       title: "Dialog Kinerja Perlu Review",
-      description: `Dialog kinerja tahun ${dialog.periode_tahun} telah dikirim oleh pegawai dan menunggu review Anda.`,
+      description: `Dialog kinerja tahun ${dialog.periode_tahun} (${dialog.triwulan}) telah dikirim oleh pegawai dan menunggu review Anda.`,
       link: `/atasan/dialog/${dialog.id}`,
     });
 
@@ -266,9 +291,6 @@ export async function validateDialog(
   if (!input.setuju) {
     return { error: "Centang persetujuan untuk melanjutkan." };
   }
-  if (!input.ttdDataUrl) {
-    return { error: "Tanda tangan wajib diisi." };
-  }
 
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_pegawai: session.id },
@@ -279,6 +301,7 @@ export async function validateDialog(
       is_valid_atasan: true,
       id_atasan: true,
       periode_tahun: true,
+      triwulan: true,
     },
   });
   if (!dialog) {
@@ -291,11 +314,13 @@ export async function validateDialog(
     return { error: "Anda sudah melakukan validasi." };
   }
 
-  let ttdUrl: string;
-  try {
-    ttdUrl = await saveTtdFile(input.ttdDataUrl, dialog.id, "pegawai");
-  } catch {
-    return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
+  let ttdUrl: string | null = null;
+  if (input.ttdDataUrl) {
+    try {
+      ttdUrl = await saveTtdFile(input.ttdDataUrl, dialog.id, "pegawai");
+    } catch {
+      return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
+    }
   }
 
   try {
@@ -317,7 +342,7 @@ export async function validateDialog(
       userId: dialog.id_atasan,
       type: "dialog_status",
       title: "Dialog Kinerja Selesai",
-      description: `Dialog kinerja tahun ${dialog.periode_tahun} telah divalidasi oleh pegawai dan selesai.`,
+      description: `Dialog kinerja tahun ${dialog.periode_tahun} (${dialog.triwulan}) telah divalidasi oleh pegawai dan selesai.`,
       link: `/atasan/dialog/${dialog.id}`,
     });
   }

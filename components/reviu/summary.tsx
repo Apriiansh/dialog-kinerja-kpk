@@ -1,6 +1,22 @@
 import { formatTanggal } from "@/lib/utils/format";
 import { tindakLanjutLabel } from "@/lib/constants/reviu-status";
 import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
+import { ASPEK_ORDER, ASPEK_LABEL } from "@/lib/constants/aspek";
+import type { JenisAspek } from "@/generated/prisma/enums";
+
+interface ReviuAspekItem {
+  id: number;
+  dialog_evaluasi: string | null;
+  kompetensi_dikembangkan: string | null;
+  is_tercapai: boolean | null;
+  capaian_keterangan: string | null;
+}
+
+interface ReviuAspekRow {
+  id: number;
+  jenis_aspek: JenisAspek;
+  item: ReviuAspekItem[];
+}
 
 interface ReviuSummaryRow {
   is_tercapai: boolean;
@@ -8,9 +24,12 @@ interface ReviuSummaryRow {
   penjelasan_tercapai: string | null;
   penjelasan_tidak_tercapai: string | null;
   rencana_tindak_lanjut: string | null;
-  tanggal_next_reviu: Date | null;
+  tanggal_next_evaluasi: Date | null;
   waktu_validasi_pegawai: Date | null;
   waktu_validasi_atasan: Date | null;
+  dialog?: {
+    aspek?: ReviuAspekRow[];
+  };
 }
 
 export function ReviuSummary({
@@ -20,28 +39,31 @@ export function ReviuSummary({
   reviu: ReviuSummaryRow;
   showHeader?: boolean;
 }) {
-  const tanggalNext = reviu.tanggal_next_reviu
-    ? formatTanggal(reviu.tanggal_next_reviu)
+  const tanggalNext = reviu.tanggal_next_evaluasi
+    ? formatTanggal(reviu.tanggal_next_evaluasi)
     : "—";
+
+  const aspek = [...(reviu.dialog?.aspek ?? [])].sort(
+    (a, b) =>
+      ASPEK_ORDER.indexOf(a.jenis_aspek) - ASPEK_ORDER.indexOf(b.jenis_aspek),
+  );
+  const allItems = aspek.flatMap((a) => a.item);
+  const tercapaiCount = allItems.filter((i) => i.is_tercapai).length;
+  const tidakCount = allItems.filter((i) => i.is_tercapai === false).length;
+  const hasAssessment = tercapaiCount > 0 || tidakCount > 0;
 
   const rows = [
     {
       label: "Status Tindak Lanjut",
-      value: tindakLanjutLabel(reviu.is_tercapai, reviu.is_tidak_tercapai),
-    },
-    {
-      label: "Penjelasan Tercapai",
-      value: reviu.penjelasan_tercapai,
-    },
-    {
-      label: "Penjelasan Tidak Tercapai",
-      value: reviu.penjelasan_tidak_tercapai,
+      value: allItems.length > 0
+        ? `${tercapaiCount} tercapai, ${tidakCount} belum tercapai`
+        : tindakLanjutLabel(reviu.is_tercapai, reviu.is_tidak_tercapai),
     },
     {
       label: "Rencana Tindak Lanjut",
       value: reviu.rencana_tindak_lanjut,
     },
-    { label: "Tanggal Reviu Berikutnya", value: tanggalNext },
+    { label: "Tanggal Evaluasi Berikutnya", value: tanggalNext },
     {
       label: "Tanggal divalidasi Atasan",
       value: reviu.waktu_validasi_atasan
@@ -72,15 +94,79 @@ export function ReviuSummary({
               is_tidak_tercapai={reviu.is_tidak_tercapai}
             />
           </div>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold text-ink">Ringkasan item:</span>
+            {hasAssessment ? (
+              <>
+                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                  {tercapaiCount} tercapai
+                </span>
+                <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
+                  {tidakCount} tidak tercapai
+                </span>
+              </>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {allItems.length > 0 ? (
+        <div className="border-b border-outline px-5 py-4">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+            Capaian Item Evaluasi
+          </span>
+          <ul className="mt-3 flex flex-col gap-4">
+            {aspek.map((group) => {
+              if (group.item.length === 0) return null;
+              return (
+                <li key={group.id} className="flex flex-col gap-2">
+                  <span className="text-xs font-semibold text-ink">
+                    {ASPEK_LABEL[group.jenis_aspek]}
+                  </span>
+                  <ul className="flex flex-col gap-1.5">
+                    {group.item.map((item) => (
+                      <li
+                        key={item.id}
+                        className="flex items-start justify-between gap-3 rounded-md border border-outline px-3 py-2"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm leading-5 text-ink">
+                            {item.dialog_evaluasi?.trim()
+                              ? item.dialog_evaluasi
+                              : `Item evaluasi #${item.id}`}
+                          </p>
+                          {item.capaian_keterangan?.trim() ? (
+                            <p className="mt-0.5 text-xs leading-4 text-ink-muted">
+                              {item.capaian_keterangan}
+                            </p>
+                          ) : null}
+                        </div>
+                        {item.is_tercapai === null ? (
+                          <span className="shrink-0 rounded-full bg-surface-muted px-2 py-0.5 text-[11px] font-semibold text-ink-muted">
+                            Belum dinilai
+                          </span>
+                        ) : item.is_tercapai ? (
+                          <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                            Tercapai
+                          </span>
+                        ) : (
+                          <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700">
+                            Tidak tercapai
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       ) : null}
 
       <dl className="flex flex-col divide-y divide-outline">
         {rows.map((row) => {
-          const isLong =
-            row.label === "Penjelasan Tercapai" ||
-            row.label === "Penjelasan Tidak Tercapai" ||
-            row.label === "Rencana Tindak Lanjut";
+          const isLong = row.label === "Rencana Tindak Lanjut";
           return (
             <div
               key={row.label}

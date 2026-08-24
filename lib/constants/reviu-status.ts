@@ -23,10 +23,10 @@ export function tindakLanjutLabel(
   is_tidak_tercapai: boolean,
 ): string {
   if (is_tercapai && is_tidak_tercapai) {
-    return "Tercapai & Tidak Tercapai";
+    return "Tercapai Sebagian";
   }
   if (is_tercapai) {
-    return "Tercapai";
+    return "Tercapai Semua";
   }
   if (is_tidak_tercapai) {
     return "Tidak Tercapai";

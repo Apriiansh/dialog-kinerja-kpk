@@ -1,6 +1,7 @@
 import { formatTanggal } from "@/lib/utils/format";
 import { formatWaktuPelaksanaan } from "@/lib/utils/dialog-display";
 import { tindakLanjutLabel } from "@/lib/constants/reviu-status";
+import type { Triwulan } from "@/generated/prisma/enums";
 
 interface ActorProfile {
   nama_pegawai?: string | null;
@@ -11,13 +12,27 @@ interface ActorProfile {
   masa_kerja_unit_terakhir?: string | null;
 }
 
+interface ReviuAspekItem {
+  id: number;
+  dialog_evaluasi: string | null;
+  kompetensi_dikembangkan: string | null;
+  is_tercapai: boolean | null;
+  capaian_keterangan: string | null;
+}
+
+interface ReviuAspekRow {
+  id: number;
+  jenis_aspek: string;
+  item: ReviuAspekItem[];
+}
+
 interface FormulirReviuData {
   is_tercapai: boolean;
   is_tidak_tercapai: boolean;
   penjelasan_tercapai: string | null;
   penjelasan_tidak_tercapai: string | null;
   rencana_tindak_lanjut: string | null;
-  tanggal_next_reviu: Date | null;
+  tanggal_next_evaluasi: Date | null;
   ttd_pegawai_path: string | null;
   ttd_atasan_path: string | null;
   waktu_validasi_pegawai: Date | null;
@@ -25,68 +40,12 @@ interface FormulirReviuData {
   status: string;
   dialog: {
     periode_tahun: number;
+    triwulan: Triwulan;
     waktu_validasi_atasan: Date | null;
     pegawai: ActorProfile;
     atasan: ActorProfile;
+    aspek?: ReviuAspekRow[];
   };
-}
-
-function TtdBlock({
-  tanggal,
-  atasanPath,
-  atasanNama,
-  atasanJabatan,
-  pegawaiPath,
-  pegawaiNama,
-  pegawaiJabatan,
-}: {
-  tanggal: Date;
-  atasanPath: string | null;
-  atasanNama?: string | null;
-  atasanJabatan?: string | null;
-  pegawaiPath: string | null;
-  pegawaiNama?: string | null;
-  pegawaiJabatan?: string | null;
-}) {
-  return (
-    <div className="mt-10 break-inside-avoid">
-      <p>Jakarta, {formatWaktuPelaksanaan(tanggal)}</p>
-      <div className="mt-8 flex justify-between">
-        <div className="w-1/2">
-          <p className="font-semibold">Atasan Pegawai,</p>
-          {atasanPath ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={atasanPath}
-              alt="Tanda tangan atasan"
-              className="mt-3 h-16 object-contain"
-            />
-          ) : (
-            <div className="h-16" />
-          )}
-          <div className="mt-2 w-48 border-b-2 border-black" />
-          <p className="mt-1 font-semibold">{atasanNama ?? "—"}</p>
-          <p>{atasanJabatan ?? "Jabatan"}</p>
-        </div>
-        <div className="w-1/2">
-          <p className="font-semibold">Pegawai,</p>
-          {pegawaiPath ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={pegawaiPath}
-              alt="Tanda tangan pegawai"
-              className="mt-3 h-16 object-contain"
-            />
-          ) : (
-            <div className="h-16" />
-          )}
-          <div className="mt-2 w-48 border-b-2 border-black" />
-          <p className="mt-1 font-semibold">{pegawaiNama ?? "—"}</p>
-          <p>{pegawaiJabatan ?? "Jabatan"}</p>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export function FormulirReviu({ reviu }: { reviu: FormulirReviuData }) {
@@ -169,6 +128,73 @@ export function FormulirReviu({ reviu }: { reviu: FormulirReviuData }) {
           kinerja/situasi yang dihadapi pegawai pada saat Dialog Kinerja adalah:
         </p>
 
+        <table
+          className="mt-2 w-full border-collapse"
+          style={{ border: "1px solid black" }}
+        >
+          <thead>
+            <tr>
+              <th
+                className="px-2 py-1 text-left font-bold"
+                style={{ border: "1px solid black" }}
+              >
+                No
+              </th>
+              <th
+                className="px-2 py-1 text-left font-bold"
+                style={{ border: "1px solid black" }}
+              >
+                Item Evaluasi
+              </th>
+              <th
+                className="px-2 py-1 text-left font-bold"
+                style={{ border: "1px solid black" }}
+              >
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {dialog.aspek?.length
+              ? dialog.aspek
+                  .flatMap((a) => a.item)
+                  .map((item, idx) => (
+                    <tr key={item.id}>
+                      <td className="px-2 py-1" style={{ border: "1px solid black" }}>
+                        {idx + 1}
+                      </td>
+                      <td className="px-2 py-1" style={{ border: "1px solid black" }}>
+                        <p className="text-justify">
+                          {item.dialog_evaluasi?.trim()
+                            ? item.dialog_evaluasi
+                            : `Item evaluasi #${item.id}`}
+                        </p>
+                        {item.capaian_keterangan?.trim() ? (
+                          <p className="mt-0.5 text-justify">
+                            <span className="font-semibold">Catatan: </span>
+                            {item.capaian_keterangan}
+                          </p>
+                        ) : null}
+                      </td>
+                      <td className="px-2 py-1" style={{ border: "1px solid black" }}>
+                        {item.is_tercapai === null
+                          ? "Belum dinilai"
+                          : item.is_tercapai
+                            ? "Tercapai"
+                            : "Tidak tercapai"}
+                      </td>
+                    </tr>
+                  ))
+              : (
+                  <tr>
+                    <td className="px-2 py-1" style={{ border: "1px solid black" }} colSpan={3}>
+                      —
+                    </td>
+                  </tr>
+                )}
+          </tbody>
+        </table>
+
         <div className="mt-2 leading-snug">
           <div className="py-1.5">
             <p className="font-semibold">
@@ -210,27 +236,14 @@ export function FormulirReviu({ reviu }: { reviu: FormulirReviuData }) {
 
             <p className="mt-1">
               <span className="font-semibold">
-                Tanggal reviu berikutnya:
+                Tanggal evaluasi berikutnya:
               </span>{" "}
-              {tidakTercapai && reviu.tanggal_next_reviu
-                ? formatTanggal(reviu.tanggal_next_reviu)
+              {tidakTercapai && reviu.tanggal_next_evaluasi
+                ? formatTanggal(reviu.tanggal_next_evaluasi)
                 : BLANK}
             </p>
           </div>
         </div>
-      </div>
-
-      <div className="mt-8">
-
-        <TtdBlock
-          tanggal={tanggalDialog}
-          atasanPath={reviu.ttd_atasan_path}
-          atasanNama={dialog.atasan.nama_pegawai}
-          atasanJabatan={dialog.atasan.nama_jabatan}
-          pegawaiPath={reviu.ttd_pegawai_path}
-          pegawaiNama={dialog.pegawai.nama_pegawai}
-          pegawaiJabatan={dialog.pegawai.nama_jabatan}
-        />
       </div>
     </div>
   );

@@ -3,9 +3,19 @@ import type { JenisAspek } from "@/generated/prisma/enums";
 export interface AspekPegawaiItem {
   dialog_evaluasi: string | null;
   kompetensi_dikembangkan: string | null;
+  is_tercapai: boolean | null;
   metode_pengembangan_lainnya: string | null;
   waktu_pelaksanaan: Date | null;
   metode: { nama_metode: string } | null;
+}
+export function aspekItemKey(item: AspekPegawaiItem): string {
+  return [
+    item.dialog_evaluasi?.trim() ?? "",
+    item.kompetensi_dikembangkan?.trim() ?? "",
+    item.metode_pengembangan_lainnya?.trim() ?? "",
+    item.metode?.nama_metode ?? "",
+    item.waktu_pelaksanaan?.getTime() ?? "",
+  ].join("|");
 }
 
 export interface AspekPegawaiRow {

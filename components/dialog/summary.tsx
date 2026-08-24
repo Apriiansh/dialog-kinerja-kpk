@@ -1,5 +1,9 @@
 import { ASPEK_DESC, ASPEK_LABEL } from "@/lib/constants/aspek";
-import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
+import {
+  aspekItemKey,
+  type AspekPegawaiItem,
+  type AspekPegawaiRow,
+} from "@/lib/utils/dialog-display";
 import { AspekPegawaiInput } from "@/components/pegawai/aspek-input";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
@@ -45,9 +49,45 @@ const SUMMARY_SECTIONS: SummarySection[] = [
   },
 ];
 
-export function DialogSummary({ aspek }: { aspek: AspekPegawaiRow[] }) {
+export function DialogSummary({
+  aspek,
+  isLanjutan = false,
+  previousItems,
+}: {
+  aspek: AspekPegawaiRow[];
+  isLanjutan?: boolean;
+  previousItems?: AspekPegawaiItem[];
+}) {
+  const previousItemKeys = new Set(
+    (previousItems ?? []).map((item) => aspekItemKey(item)),
+  );
+  const previousItemStatuses = new Map(
+    (previousItems ?? []).map((item) => [aspekItemKey(item), item.is_tercapai]),
+  );
+  const allItems = aspek.flatMap((group) => group.item);
+  const statusItems = isLanjutan && previousItems?.length ? previousItems : allItems;
+  const tercapaiCount = statusItems.filter((item) => item.is_tercapai === true).length;
+  const tidakTercapaiCount = statusItems.filter(
+    (item) => item.is_tercapai === false,
+  ).length;
+  const hasAssessment = tercapaiCount > 0 || tidakTercapaiCount > 0;
+
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-outline bg-surface px-5 py-3">
+        <span className="text-xs font-semibold text-ink">Status Item Evaluasi:</span>
+        {hasAssessment ? (
+          <>
+            <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+              {tercapaiCount} tercapai
+            </span>
+            <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
+              {tidakTercapaiCount} tidak tercapai
+            </span>
+          </>
+        ) : null}
+      </div>
+
       {SUMMARY_SECTIONS.map(({ letter, title, desc, groups }) => (
         <section
           key={letter}
@@ -82,7 +122,12 @@ export function DialogSummary({ aspek }: { aspek: AspekPegawaiRow[] }) {
                     </p>
                   ) : (
                     <>
-                      <AspekPegawaiInput aspek={data} />
+                      <AspekPegawaiInput
+                        aspek={data}
+                        isLanjutan={isLanjutan}
+                        previousItemKeys={previousItemKeys}
+                                              previousItemStatuses={previousItemStatuses}
+                      />
                       {data.tanggung_jawab_atasan?.trim() ? (
                         <div className="flex flex-col gap-1">
                           <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">

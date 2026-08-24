@@ -11,6 +11,9 @@ import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { Separator } from "@/components/ui/separator";
 import { FormulirReviu } from "@/components/reviu/detail-view";
 import { DeleteReviuButton } from "@/components/reviu/delete-button";
+import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
+import { CapaianBadge } from "@/components/shared/capaian-badge";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -20,20 +23,6 @@ type PageProps = {
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
   return { title: `Reviu #${id}` };
-}
-
-function TtdImage({ url, alt }: { url: string; alt: string }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-        {alt}
-      </span>
-      <div className="w-56 overflow-hidden rounded-md border border-outline bg-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={alt} className="h-28 w-full object-contain" />
-      </div>
-    </div>
-  );
 }
 
 export default async function PegawaiReviuDetailPage({
@@ -53,6 +42,8 @@ export default async function PegawaiReviuDetailPage({
 
   const isDraft = reviu.status === "draft_pegawai";
   const isSelesai = reviu.status === "selesai";
+  const showEvaluasiLanjutan =
+    isSelesai && reviu.dialog.status === "selesai";
   const showValidation =
     canValidateReviu(reviu.status) && !reviu.is_valid_pegawai;
 
@@ -72,7 +63,7 @@ export default async function PegawaiReviuDetailPage({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-                  Reviu Dialog Kinerja Tahun {reviu.dialog.periode_tahun}
+                  Hasil Evaluasi Kinerja {formatPeriode(reviu.dialog.triwulan, reviu.dialog.periode_tahun)}
                 </h1>
                 <p className="text-sm leading-5 text-ink-muted">
                   Atasan: {reviu.dialog.atasan.nama_pegawai}
@@ -83,10 +74,27 @@ export default async function PegawaiReviuDetailPage({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <ReviuStatusBadge status={reviu.status} />
+                <CapaianBadge
+                  statusDialog={reviu.dialog.status}
+                  filledAspekCount={5}
+                  reviu={{
+                    status: reviu.status,
+                    is_tercapai: reviu.is_tercapai,
+                    is_tidak_tercapai: reviu.is_tidak_tercapai,
+                  }}
+                />
+                {reviu.dialog.id_dialog_induk ? (
+                  <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                    Dialog Lanjutan
+                  </span>
+                ) : null}
                 {isSelesai ? (
                   <>
                     <UnduhBuktiButton label="Unduh PDF" autoPrint={cetak} />
                     <UnduhWordLink href={`/api/unduh/reviu/${reviu.id}/docx`} />
+                    {showEvaluasiLanjutan ? (
+                      <EvaluasiLanjutanButton reviuId={reviu.id} />
+                    ) : null}
                   </>
                 ) : null}
               </div>
@@ -136,23 +144,6 @@ export default async function PegawaiReviuDetailPage({
 
         {showValidation ? (
           <ReviuSignForm reviuId={reviu.id} role="pegawai" />
-        ) : null}
-
-        {reviu.ttd_pegawai_path || reviu.ttd_atasan_path ? (
-          <section
-            aria-label="Tanda tangan reviu"
-            className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
-          >
-            <h2 className="text-sm font-semibold text-ink">Tanda Tangan</h2>
-            <div className="flex flex-wrap gap-6">
-              {reviu.ttd_pegawai_path ? (
-                <TtdImage url={reviu.ttd_pegawai_path} alt="Tanda tangan pegawai" />
-              ) : null}
-              {reviu.ttd_atasan_path ? (
-                <TtdImage url={reviu.ttd_atasan_path} alt="Tanda tangan atasan" />
-              ) : null}
-            </div>
-          </section>
         ) : null}
       </div>
 

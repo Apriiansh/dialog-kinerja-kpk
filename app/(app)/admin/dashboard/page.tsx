@@ -10,13 +10,16 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { StatusBars, Donut, type ChartDatum } from "@/components/dashboard/charts";
 import { ChartCard } from "@/components/dashboard/chart-card";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { GreetingCard } from "@/components/dashboard/greeting-card";
 import {
   DIALOG_STATUS_CHART,
   ROLE_CHART,
 } from "@/lib/utils/chart-colors";
 import type { Role, StatusDialog } from "@/generated/prisma/enums";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
-const PRIMARY = "#1e3a8a";
+const PRIMARY = "#0891b2";
 const STATUS_ORDER: StatusDialog[] = [
   "draft_atasan",
   "menunggu_pegawai",
@@ -50,6 +53,7 @@ export default async function AdminDashboardPage() {
     periodGroups,
     roleGroups,
     recentDialogs,
+    adminProfile,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { is_active: true } }),
@@ -64,7 +68,7 @@ export default async function AdminDashboardPage() {
       _count: { _all: true },
     }),
     prisma.dialogKinerja.groupBy({
-      by: ["periode_tahun"],
+      by: ["periode_tahun", "triwulan"],
       _count: { _all: true },
     }),
     prisma.user.groupBy({
@@ -76,6 +80,7 @@ export default async function AdminDashboardPage() {
       select: {
         id: true,
         periode_tahun: true,
+        triwulan: true,
         status: true,
         updated_at: true,
         pegawai: { select: { nama_pegawai: true, npp: true } },
@@ -83,6 +88,10 @@ export default async function AdminDashboardPage() {
       },
       orderBy: { updated_at: "desc" },
       take: 8,
+    }),
+    prisma.user.findUnique({
+      where: { id: session.id },
+      select: { npp: true, nama_jabatan: true, unit_kerja: true },
     }),
   ]);
 
@@ -99,11 +108,11 @@ export default async function AdminDashboardPage() {
 
   const periodData: ChartDatum[] = periodGroups
     .map((g) => ({
-      label: String(g.periode_tahun),
+      label: `${formatPeriode(g.triwulan, g.periode_tahun)}`,
       value: g._count._all,
       color: PRIMARY,
     }))
-    .sort((a, b) => Number(a.label) - Number(b.label));
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   const nonAdminActiveUserCount = roleGroups.reduce(
     (total, group) => total + group._count._all,
@@ -167,39 +176,30 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-[28px] font-semibold leading-9 tracking-[-0.01em] text-ink">
-            {greeting()}, {session.nama}
-          </h1>
-          <p className="text-sm leading-5 text-ink-muted">
-            Pantau pengguna, dialog kinerja, dan reviu di seluruh organisasi.
-          </p>
-        </div>
-      </header>
+      <GreetingCard
+        greeting={`${greeting()}, ${session.nama}`}
+        subtitle="Pantau pengguna, dialog kinerja, dan reviu di seluruh organisasi."
+        user={{
+          role: "ADMIN",
+          npp: adminProfile?.npp ?? session.npp,
+          jabatan: adminProfile?.nama_jabatan,
+          unitKerja: adminProfile?.unit_kerja,
+        }}
+      />
 
       <section
         aria-label="Ringkasan sistem"
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
-        {stats.map(({ label, value, hint, icon: Icon }) => (
-          <div
+        {stats.map(({ label, value, hint, icon }, index) => (
+          <StatCard
             key={label}
-            className="flex flex-col gap-3 rounded-lg border border-outline bg-surface p-5"
-          >
-            <div className="flex items-start justify-between">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-surface-muted text-primary">
-                <Icon size={18} weight="bold" />
-              </span>
-              <span className="text-2xl font-semibold leading-8 text-ink">
-                {value}
-              </span>
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <span className="text-sm font-semibold text-ink">{label}</span>
-              <span className="text-xs leading-4 text-ink-muted">{hint}</span>
-            </div>
-          </div>
+            label={label}
+            value={value}
+            hint={hint}
+            icon={icon}
+            tone={index % 2 === 0 ? "cyan" : "red"}
+          />
         ))}
       </section>
 
@@ -290,7 +290,7 @@ export default async function AdminDashboardPage() {
                         {d.pegawai?.nama_pegawai}
                       </Link>
                       <span className="text-xs text-ink-muted">
-                        {d.pegawai?.npp} · Tahun {d.periode_tahun} · Atasan:{" "}
+                        {d.pegawai?.npp} · {formatPeriode(d.triwulan, d.periode_tahun)} · Atasan:{" "}
                         {d.atasan?.nama_pegawai}
                       </span>
                     </div>

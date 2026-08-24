@@ -25,7 +25,28 @@ export function NotificationBell({ role }: { role: string }) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadData();
+    let cancelled = false;
+    async function init() {
+      try {
+        const count = await getUnreadCountAction();
+        if (!cancelled) setUnreadCount(count);
+        if (count > 0) {
+          const notifications = await getRecentNotificationsAction(5);
+          if (!cancelled) {
+            setRecent(
+              notifications.map((n) => ({
+                ...n,
+                created_at: new Date(n.created_at),
+              }))
+            );
+          }
+        }
+      } catch {
+        // silent fail
+      }
+    }
+    init();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -39,30 +60,26 @@ export function NotificationBell({ role }: { role: string }) {
   }, []);
 
   useEffect(() => {
-    function handleFocus() {
-      loadData();
+    async function handleFocus() {
+      try {
+        const count = await getUnreadCountAction();
+        setUnreadCount(count);
+        if (count > 0) {
+          const notifications = await getRecentNotificationsAction(5);
+          setRecent(
+            notifications.map((n) => ({
+              ...n,
+              created_at: new Date(n.created_at),
+            }))
+          );
+        }
+      } catch {
+        // silent fail
+      }
     }
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
   }, []);
-
-  async function loadData() {
-    try {
-      const count = await getUnreadCountAction();
-      setUnreadCount(count);
-      if (count > 0) {
-        const notifications = await getRecentNotificationsAction(5);
-        setRecent(
-          notifications.map((n) => ({
-            ...n,
-            created_at: new Date(n.created_at),
-          }))
-        );
-      }
-    } catch {
-      // silent fail
-    }
-  }
 
   async function handleNotificationClick(notification: NotificationItem) {
     if (!notification.is_read) {
@@ -83,7 +100,7 @@ export function NotificationBell({ role }: { role: string }) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="relative flex h-8 w-8 items-center justify-center rounded-md text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        className="relative flex h-8 w-8 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
         aria-label="Notifikasi"
       >
         <BellIcon size={18} weight="bold" />

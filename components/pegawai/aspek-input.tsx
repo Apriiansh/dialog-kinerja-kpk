@@ -4,20 +4,35 @@ import {
   isEmptyItem,
   metodeLabel,
   type AspekPegawaiRow,
+  aspekItemKey,
 } from "@/lib/utils/dialog-display";
 
-export function AspekPegawaiInput({ aspek }: { aspek: AspekPegawaiRow }) {
+export function AspekPegawaiInput({
+  aspek,
+  isLanjutan = false,
+  previousItemKeys,
+  previousItemStatuses,
+}: {
+  aspek: AspekPegawaiRow;
+  isLanjutan?: boolean;
+  previousItemKeys?: Set<string>;
+  previousItemStatuses?: Map<string, boolean | null>;
+}) {
   const items = (aspek.item ?? []).filter((i) => !isEmptyItem(i));
 
   return (
     <div className="flex flex-col gap-4">
       {items.length > 0 ? (
         <ol className="flex flex-col divide-y divide-outline rounded-md border border-outline bg-surface-muted/40">
-          {items.map((item, itemIndex) => (
-            <li
-              key={itemIndex}
-              className="flex flex-col gap-2.5 px-4 py-3 text-sm"
-            >
+          {items.map((item, itemIndex) => {
+            const effectiveStatus =
+              item.is_tercapai ??
+              (previousItemStatuses?.get(aspekItemKey(item)) ?? null);
+            return (
+              <li
+                key={itemIndex}
+                className="relative flex flex-col gap-2.5 px-4 py-3 pr-32 text-sm"
+              >
               <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
@@ -54,8 +69,23 @@ export function AspekPegawaiInput({ aspek }: { aspek: AspekPegawaiRow }) {
                   </span>
                 </div>
               </div>
-            </li>
-          ))}
+              {effectiveStatus === true ? (
+                <span className="absolute right-3 top-3 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                  Tercapai
+                </span>
+                ) : effectiveStatus === false ? (
+                <span className="absolute right-3 top-3 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700">
+                  Tidak tercapai
+                </span>
+              ) : null}
+              {isLanjutan && previousItemKeys?.has(aspekItemKey(item)) ? (
+                <span className="absolute bottom-3 right-3 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                  Lanjutan
+                </span>
+              ) : null}
+              </li>
+            );
+          })}
         </ol>
       ) : (
         <p className="text-sm leading-5 text-ink-muted">

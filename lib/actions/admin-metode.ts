@@ -122,9 +122,12 @@ export async function updateMetode(
 
   const existing = await prisma.masterMetodePengembangan.findUnique({
     where: { id },
-    select: { id: true },
+    select: { id: true, nama_metode: true },
   });
   if (!existing) return { error: "Metode tidak ditemukan." };
+  if (existing.nama_metode.toLowerCase().includes("lainnya")) {
+    return { error: "Metode bawaan sistem tidak dapat diubah." };
+  }
 
   if (await isDuplicateMetodeName(data.nama_metode, id)) {
     return { error: "Metode pengembangan dengan nama tersebut sudah ada.", values };
@@ -164,9 +167,12 @@ export async function setMetodeStatus(
 
   const existing = await prisma.masterMetodePengembangan.findUnique({
     where: { id },
-    select: { id: true },
+    select: { id: true, nama_metode: true },
   });
   if (!existing) return { error: "Metode tidak ditemukan." };
+  if (existing.nama_metode.toLowerCase().includes("lainnya")) {
+    return { error: "Metode bawaan sistem tidak dapat diubah." };
+  }
 
   await prisma.masterMetodePengembangan.update({
     where: { id },
@@ -185,9 +191,12 @@ export async function deleteMetode(
 
   const existing = await prisma.masterMetodePengembangan.findUnique({
     where: { id },
-    select: { id: true },
+    select: { id: true, nama_metode: true },
   });
   if (!existing) return { error: "Metode tidak ditemukan." };
+  if (existing.nama_metode.toLowerCase().includes("lainnya")) {
+    return { error: "Metode bawaan sistem tidak dapat dihapus." };
+  }
 
   try {
     await prisma.masterMetodePengembangan.delete({ where: { id } });

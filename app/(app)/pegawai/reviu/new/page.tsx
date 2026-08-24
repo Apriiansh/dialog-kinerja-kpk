@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeftIcon, ArrowsClockwiseIcon } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
+import { getDialogAspekItems } from "@/lib/queries/reviu";
 import { ReviuForm } from "@/components/reviu/edit-form";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -26,7 +28,23 @@ export default async function NewReviuPage({
     where: { id_pegawai: session.id, status: "selesai" },
     select: {
       id: true,
+      id_dialog_induk: true,
+      dialog_induk: {
+        select: {
+          aspek: {
+            select: {
+              item: {
+                select: {
+                  dialog_evaluasi: true,
+                  kompetensi_dikembangkan: true,
+                },
+              },
+            },
+          },
+        },
+      },
       periode_tahun: true,
+      triwulan: true,
       atasan: { select: { nama_pegawai: true, nama_jabatan: true } },
     },
     orderBy: { updated_at: "desc" },
@@ -40,6 +58,8 @@ export default async function NewReviuPage({
   }
 
   const selected = selesaiDialogs.find((d) => d.id === selectedDialogId);
+  const selectedAspek =
+    selectedDialogId !== null ? await getDialogAspekItems(selectedDialogId) : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -52,11 +72,10 @@ export default async function NewReviuPage({
           Kembali ke Reviu
         </Link>
         <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-          Buat Reviu Hasil Dialog Kinerja
+          Buat Evaluasi Tindak Lanjut Dialog Kinerja
         </h1>
         <p className="text-sm leading-5 text-ink-muted">
-          Reviu dibuat sebagai tindak lanjut dari dialog kinerja yang telah
-          selesai.
+          Evaluasi tindak lanjut dibuat untuk menilai capaian item dari dialog kinerja yang telah selesai.
         </p>
       </div>
 
@@ -87,8 +106,13 @@ export default async function NewReviuPage({
                     className="flex flex-col gap-1 rounded-lg border border-outline bg-surface px-5 py-4 transition-colors hover:border-outline-strong hover:shadow-ambient"
                   >
                     <span className="text-sm font-semibold text-ink">
-                      Dialog Kinerja Tahun {d.periode_tahun}
+                      Dialog Kinerja {formatPeriode(d.triwulan, d.periode_tahun)}
                     </span>
+                    {d.id_dialog_induk ? (
+                      <span className="w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                        Dialog Lanjutan
+                      </span>
+                    ) : null}
                     <span className="text-xs leading-4 text-ink-muted">
                       Atasan Penilai:{" "}
                       <strong className="font-medium text-ink">
@@ -108,7 +132,7 @@ export default async function NewReviuPage({
         <div className="flex flex-col gap-4">
           <div className="rounded-lg border border-outline bg-surface px-5 py-4">
             <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-              Dialog Kinerja Tahun {selected?.periode_tahun}
+              Dialog Kinerja {selected ? formatPeriode(selected.triwulan, selected.periode_tahun) : ""}
             </span>
             <p className="mt-1 text-sm leading-5 text-ink">
               Atasan Penilai: {selected?.atasan.nama_pegawai}
@@ -116,9 +140,26 @@ export default async function NewReviuPage({
                 ? ` (${selected?.atasan.nama_jabatan})`
                 : ""}
             </p>
+            {selected?.id_dialog_induk ? (
+              <span className="w-fit rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                Dialog Lanjutan
+              </span>
+            ) : null}
           </div>
 
-          <ReviuForm dialogId={selectedDialogId} />
+          <ReviuForm
+            dialogId={selectedDialogId}
+            aspek={selectedAspek ?? []}
+            isLanjutan={Boolean(selected?.id_dialog_induk)}
+            previousItemKeys={new Set(
+              (selected?.dialog_induk?.aspek ?? []).flatMap((aspek) =>
+                aspek.item.map(
+                  (item) =>
+                    `${item.dialog_evaluasi?.trim() ?? ""}|${item.kompetensi_dikembangkan?.trim() ?? ""}`,
+                ),
+              ),
+            )}
+          />
         </div>
       )}
 

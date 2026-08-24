@@ -8,6 +8,7 @@ import {
   getDialogActor,
   getPegawaiDialog,
 } from "@/lib/queries/dialog";
+import { prisma } from "@/lib/prisma";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DialogSummary } from "@/components/dialog/summary";
 import { ValidationPanel } from "@/components/shared/validation-panel";
@@ -17,6 +18,9 @@ import { FormulirDialogKinerja } from "@/components/dialog/detail-view";
 import { ReviuList } from "@/components/reviu/list";
 import { Separator } from "@/components/ui/separator";
 import { ChatHeader } from "@/components/chat/ChatHeader";
+import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
+import { formatPeriode } from "@/lib/constants/triwulan";
+import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -45,7 +49,7 @@ function StatusNote({
   if (status === "menunggu_atasan") {
     return (
       <p className="text-sm leading-5 text-ink-muted">
-        Isian Anda telah dikirim. Menunggu reviu dan tanggung jawab dari atasan.
+        Isian Anda telah dikirim. Menunggu tanggapan dan pembagian tanggung jawab dari atasan.
       </p>
     );
   }
@@ -60,8 +64,8 @@ function StatusNote({
     }
     return (
       <p className="text-sm leading-5 text-ink-muted">
-        Reviu atasan telah selesai. Lakukan persetujuan dan tanda tangan di
-        bawah untuk melanjutkan.
+        Tanggapan atasan telah selesai. Lakukan persetujuan dan tanda tangan di
+        bawah untuk mengesahkan target.
       </p>
     );
   }
@@ -73,20 +77,6 @@ function StatusNote({
     );
   }
   return null;
-}
-
-function TtdImage({ url, alt }: { url: string; alt: string }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-        {alt}
-      </span>
-      <div className="w-56 overflow-hidden rounded-md border border-outline bg-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={alt} className="h-28 w-full object-contain" />
-      </div>
-    </div>
-  );
 }
 
 export default async function DialogDetailPage({
@@ -101,9 +91,12 @@ export default async function DialogDetailPage({
   const dialogId = Number(id);
   if (Number.isNaN(dialogId)) notFound();
 
-  const [dialog, pegawai] = await Promise.all([
+  const [dialog, pegawai, sequenceNum] = await Promise.all([
     getPegawaiDialog(dialogId, session.id),
     getDialogActor(session.id),
+    prisma.dialogKinerja.count({
+      where: { id_pegawai: session.id, id: { lte: dialogId } },
+    }),
   ]);
   if (!dialog) notFound();
 
@@ -111,7 +104,14 @@ export default async function DialogDetailPage({
   const isSelesai = dialog.status === "selesai";
   const showValidation =
     canValidateDialog(dialog.status) && !dialog.is_valid_pegawai;
-  const latestReviu = dialog.reviu[dialog.reviu.length - 1];
+  const selesaiReviuIds = dialog.reviu
+    .filter((r: { status: string; id: number }) => r.status === "selesai")
+    .map((r: { id: number }) => r.id);
+  const latestSelesaiReviuId = selesaiReviuIds[selesaiReviuIds.length - 1];
+  const hasLanjutan = dialog.dialog_lanjutan.length > 0;
+  const hasBelumTercapai = dialog.aspek.some((aspek: { item: { is_tercapai: boolean | null }[] }) =>
+    aspek.item.some((item: { is_tercapai: boolean | null }) => item.is_tercapai === false),
+  );
 
   return (
     <div className="flex flex-col gap-8">
@@ -129,7 +129,7 @@ export default async function DialogDetailPage({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-                  Dialog Kinerja Tahun {dialog.periode_tahun}
+                  Dialog Kinerja Ke-{sequenceNum} ({formatPeriode(dialog.triwulan, dialog.periode_tahun)})
                 </h1>
                 <p className="text-sm leading-5 text-ink-muted">
                   Atasan: {dialog.atasan.nama_pegawai}
@@ -149,10 +149,29 @@ export default async function DialogDetailPage({
                   partnerName={dialog.atasan.nama_pegawai}
                   partnerRoleLabel="Atasan Langsung"
                 />
+                {dialog.id_dialog_induk ? (
+                  <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                    Dialog Lanjutan
+                  </span>
+                ) : null}
                 {isSelesai ? (
                   <>
                     <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />
                     <UnduhWordLink href={`/api/unduh/dialog/${dialog.id}/docx`} />
+                    {dialog.reviu.length === 0 ? (
+                      <Link
+                        href={`/pegawai/reviu/new?dialog=${dialog.id}`}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
+                      >
+                        Isi Evaluasi Kinerja
+                      </Link>
+                    ) : null}
+                    {latestSelesaiReviuId && !hasLanjutan ? (
+                      <EvaluasiLanjutanButton
+                        reviuId={latestSelesaiReviuId}
+                        label={hasBelumTercapai ? "Evaluasi Lanjutan" : "Ajukan Evaluasi"}
+                      />
+                    ) : null}
                   </>
                 ) : null}
               </div>
@@ -192,36 +211,15 @@ export default async function DialogDetailPage({
         </div>
 
         <section aria-label="Aspek dialog kinerja">
-          <DialogSummary aspek={dialog.aspek} />
+          <DialogSummary
+            aspek={dialog.aspek}
+            isLanjutan={dialog.id_dialog_induk !== null}
+            previousItems={dialog.dialog_induk?.aspek.flatMap((aspek: AspekPegawaiRow) => aspek.item)}
+          />
         </section>
 
         {showValidation ? (
           <ValidationPanel dialogId={dialog.id} roleLabel="Pegawai" />
-        ) : null}
-
-        {dialog.ttd_pegawai_path || dialog.ttd_atasan_path ? (
-          <section
-            aria-label="Tanda tangan dialog kinerja"
-            className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
-          >
-            <h2 className="text-sm font-semibold text-ink">
-              Tanda Tangan Dialog Kinerja
-            </h2>
-            <div className="flex flex-wrap gap-6">
-              {dialog.ttd_pegawai_path ? (
-                <TtdImage
-                  url={dialog.ttd_pegawai_path}
-                  alt="Tanda tangan pegawai"
-                />
-              ) : null}
-              {dialog.ttd_atasan_path ? (
-                <TtdImage
-                  url={dialog.ttd_atasan_path}
-                  alt="Tanda tangan atasan"
-                />
-              ) : null}
-            </div>
-          </section>
         ) : null}
 
         {isSelesai && dialog.reviu.length > 0 ? (
@@ -231,31 +229,6 @@ export default async function DialogDetailPage({
               reviu={dialog.reviu}
               href={(id) => `/pegawai/reviu/${id}`}
             />
-
-            {latestReviu?.ttd_pegawai_path || latestReviu?.ttd_atasan_path ? (
-              <section
-                aria-label="Tanda tangan reviu dialog kinerja"
-                className="flex flex-col gap-4 rounded-lg border border-outline bg-surface px-5 py-4"
-              >
-                <h2 className="text-sm font-semibold text-ink">
-                  Tanda Tangan Reviu Dialog Kinerja
-                </h2>
-                <div className="flex flex-wrap gap-6">
-                  {latestReviu.ttd_pegawai_path ? (
-                    <TtdImage
-                      url={latestReviu.ttd_pegawai_path}
-                      alt="Tanda tangan pegawai"
-                    />
-                  ) : null}
-                  {latestReviu.ttd_atasan_path ? (
-                    <TtdImage
-                      url={latestReviu.ttd_atasan_path}
-                      alt="Tanda tangan atasan"
-                    />
-                  ) : null}
-                </div>
-              </section>
-            ) : null}
           </div>
         ) : null}
       </div>
@@ -264,7 +237,6 @@ export default async function DialogDetailPage({
         <FormulirDialogKinerja
           dialog={dialog}
           pegawai={pegawai ?? { nama_pegawai: session.nama }}
-          atasan={dialog.atasan}
         />
       ) : null}
     </div>
