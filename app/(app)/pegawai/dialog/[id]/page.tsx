@@ -16,6 +16,7 @@ import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { FormulirDialogKinerja } from "@/components/dialog/detail-view";
 import { ReviuList } from "@/components/reviu/list";
 import { Separator } from "@/components/ui/separator";
+import { ChatHeader } from "@/components/chat/ChatHeader";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -142,6 +143,12 @@ export default async function DialogDetailPage({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={dialog.status} />
+                <ChatHeader
+                  dialogId={dialog.id}
+                  userRole="pegawai"
+                  partnerName={dialog.atasan.nama_pegawai}
+                  partnerRoleLabel="Atasan Langsung"
+                />
                 {isSelesai ? (
                   <>
                     <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />

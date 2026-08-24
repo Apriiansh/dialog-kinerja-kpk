@@ -66,6 +66,7 @@ model User {
   dialogAsPegawai DialogKinerja[] @relation("DialogPegawai")
 
   notifications Notification[]
+  chatMessages  DialogChatMessage[]
 
   @@map("users")
 }
@@ -101,6 +102,7 @@ model DialogKinerja {
 
   aspek DialogKinerjaAspek[]
   reviu Reviu[]
+  messages DialogChatMessage[]
 
   @@map("dialog_kinerja")
 }
@@ -179,3 +181,18 @@ model Notification {
   @@index([id_user, created_at])
   @@map("notifications")
 }
+
+model DialogChatMessage {
+  id         Int      @id @default(autoincrement())
+  id_dialog  Int
+  id_sender  Int
+  message    String   @db.Text
+  created_at DateTime @default(now())
+
+  dialog DialogKinerja @relation(fields: [id_dialog], references: [id], onDelete: Cascade)
+  sender User          @relation(fields: [id_sender], references: [id], onDelete: Cascade)
+
+  @@index([id_dialog, created_at])
+  @@map("dialog_chat_messages")
+}
+

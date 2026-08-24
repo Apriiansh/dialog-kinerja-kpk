@@ -16,6 +16,7 @@ import { ReviuSignForm } from "@/components/reviu/sign-form";
 import { ScrollToAnchor } from "@/components/shared/scroll-to-anchor";
 import { Separator } from "@/components/ui/separator";
 import { submitDialog } from "@/lib/actions/atasan";
+import { ChatHeader } from "@/components/chat/ChatHeader";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -138,6 +139,12 @@ export default async function DialogDetailPage({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={status} />
+                <ChatHeader
+                  dialogId={dialog.id}
+                  userRole="atasan"
+                  partnerName={dialog.pegawai.nama_pegawai}
+                  partnerRoleLabel="Pegawai"
+                />
                 {isSelesai ? (
                   <>
                     <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />
