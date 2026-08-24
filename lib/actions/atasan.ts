@@ -9,6 +9,7 @@ import { flashRedirect } from "@/lib/utils/flash";
 import { JenisAspek, Triwulan } from "@/generated/prisma/client";
 import { createNotification } from "@/lib/notifications";
 import { getTriwulanFromDate } from "@/lib/constants/triwulan";
+import { publishDialogUpdate } from "@/lib/realtime/bus";
 
 export async function startDialog(
   pegawaiId: number,
@@ -205,7 +206,7 @@ export async function autosaveResponses(
     where: {
       id: dialogId,
       id_atasan: session.id,
-      status: { in: ["draft_atasan", "menunggu_atasan"] },
+      status: { in: ["draft_atasan", "menunggu_pegawai", "menunggu_atasan"] },
     },
     select: { id: true },
   });
@@ -219,6 +220,11 @@ export async function autosaveResponses(
       }),
     ),
   );
+
+  publishDialogUpdate(dialogId, {
+    kind: "aspek_atasan",
+    byUserId: session.id,
+  });
 }
 
 export interface SaveDeskripsiState {
@@ -284,6 +290,11 @@ export async function submitDialog(dialogId: number) {
     data: { status: "menunggu_pegawai" },
   });
 
+  publishDialogUpdate(dialogId, {
+    kind: "status",
+    byUserId: session.id,
+  });
+
   await createNotification({
     userId: dialog.id_pegawai,
     type: "dialog_status",
@@ -345,6 +356,11 @@ export async function submitEvaluasi(
   } catch {
     return { error: "Gagal menyimpan evaluasi. Silakan coba lagi." };
   }
+
+  publishDialogUpdate(dialogId, {
+    kind: "status",
+    byUserId: session.id,
+  });
 
   await createNotification({
     userId: dialog.id_pegawai,

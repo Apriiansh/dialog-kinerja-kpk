@@ -18,6 +18,7 @@ import { buildDialogSections } from "@/lib/constants/dialog-sections";
 import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
 import { error, success } from "@/components/ui/toast";
 import { AspekPegawaiInput } from "@/components/pegawai/aspek-input";
+import { useDialogLive } from "@/components/dialog/use-dialog-live";
 
 const SECTION_ICONS = [ChartBarIcon, GaugeIcon, UserFocusIcon, TrendUpIcon] as const;
 
@@ -26,15 +27,26 @@ type SaveState = "idle" | "saving" | "saved";
 export function DialogResponsesForm({
   dialogId,
   canEdit,
+  canSubmit = true,
+  liveEnabled = false,
   aspek,
 }: {
   dialogId: number;
   canEdit: boolean;
+  canSubmit?: boolean;
+  liveEnabled?: boolean;
   aspek: AspekPegawaiRow[];
 }) {
   const router = useRouter();
   const { sections, initialValues } = buildDialogSections(aspek);
   const aspekById = new Map(aspek.map((a) => [a.id, a]));
+  const [liveAspek, setLiveAspek] = useState(aspek);
+  const { transport } = useDialogLive({
+    dialogId,
+    enabled: liveEnabled,
+    onState: (state) => setLiveAspek(state.aspek),
+  });
+  const liveAspekById = new Map(liveAspek.map((a) => [a.id, a]));
   const [values, setValues] = useState(initialValues);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [savedAt, setSavedAt] = useState<string>("");
@@ -94,7 +106,7 @@ export function DialogResponsesForm({
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const handleOpenConfirm = async () => {
-    if (!canEdit || pending) return;
+    if (!canEdit || !canSubmit || pending) return;
     if (timer.current) clearTimeout(timer.current);
     await persist(valuesRef.current);
     setShowConfirmModal(true);
@@ -158,7 +170,7 @@ export function DialogResponsesForm({
               </div>
               <div className="flex flex-col gap-6 px-6 py-5">
                 {fields.map(({ id, label }) => {
-                  const aspekRow = aspekById.get(id);
+                  const aspekRow = liveAspekById.get(id) ?? aspekById.get(id);
                   return (
                     <div key={id} className="flex flex-col gap-4">
                       <div className="flex flex-col gap-1.5">
@@ -197,7 +209,31 @@ export function DialogResponsesForm({
       {/* Bottom Sticky Action Bar */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-outline bg-surface/90 backdrop-blur lg:pl-60">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-          {saveMeta}
+          <div className="flex min-w-0 items-center gap-3">
+            {liveEnabled ? (
+              <span
+                className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-medium ${
+                  transport === "live" ? "text-emerald-600" : "text-ink-muted"
+                }`}
+              >
+                <span
+                  className={`h-2 w-2 shrink-0 rounded-full ${
+                    transport === "live"
+                      ? "bg-emerald-500"
+                      : transport === "polling"
+                        ? "bg-amber-500"
+                        : "bg-outline-strong"
+                  }`}
+                />
+                {transport === "live"
+                  ? "Waktu nyata aktif"
+                  : transport === "polling"
+                    ? "Sinkron berkala"
+                    : "Menyambungkan…"}
+              </span>
+            ) : null}
+            {saveMeta}
+          </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -211,7 +247,12 @@ export function DialogResponsesForm({
             <button
               type="button"
               onClick={handleOpenConfirm}
-              disabled={!canEdit || pending}
+              disabled={!canEdit || !canSubmit || pending}
+              title={
+                !canSubmit && liveEnabled
+                  ? "Bisa dikirim setelah pegawai menekan Kirim ke Atasan"
+                  : undefined
+              }
               className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-60"
             >
               <PaperPlaneTiltIcon size={16} weight="bold" />

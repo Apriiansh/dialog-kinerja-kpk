@@ -24,6 +24,19 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  ...(process.env.NODE_ENV === "development"
+    ? {
+        experimental: {
+          serverActions: {
+            allowedOrigins: [
+              "localhost:3000",
+              "127.0.0.1:3000",
+              "10.101.43.56:3000",
+            ],
+          },
+        },
+      }
+    : {}),
   async headers() {
     const headers = [...securityHeaders];
     if (process.env.NODE_ENV === "production") {

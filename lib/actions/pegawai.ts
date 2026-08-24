@@ -8,6 +8,7 @@ import { assertActiveActor } from "@/lib/auth/guards";
 import { canValidateDialog } from "@/lib/queries/dialog";
 import { flashRedirect } from "@/lib/utils/flash";
 import { createNotification } from "@/lib/notifications";
+import { publishDialogUpdate } from "@/lib/realtime/bus";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
 export interface AspekItemInput {
@@ -254,6 +255,11 @@ export async function saveDialogForm(
 
   revalidatePath("/pegawai/dashboard");
   revalidatePath(`/pegawai/dialog/${dialog.id}`);
+
+  publishDialogUpdate(dialog.id, {
+    kind: mode === "submit" ? "status" : "aspek_pegawai",
+    byUserId: session.id,
+  });
 
   if (mode === "submit") {
     await createNotification({

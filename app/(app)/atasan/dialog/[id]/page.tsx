@@ -41,7 +41,9 @@ function StatusNote({ status }: { status: string }) {
   if (status === "menunggu_pegawai") {
     return (
       <p className="text-sm leading-5 text-ink-muted">
-        Dialog telah dikirim. Menunggu pegawai melengkapi isian empat aspek.
+        Dialog telah dikirim. Pegawai sedang melengkapi isian — Anda dapat
+        memantau isian mereka secara langsung di bawah dan mengisi tanggung
+        jawab atasan secara bersamaan.
       </p>
     );
   }
@@ -92,6 +94,7 @@ export default async function DialogDetailPage({
 
   const status = dialog.status;
   const isDraft = status === "draft_atasan";
+  const isCollaboration = status === "menunggu_pegawai";
   const isReview = status === "menunggu_atasan";
   const isSelesai = status === "selesai";
   const selesaiReviuIds = dialog.reviu
@@ -204,12 +207,35 @@ export default async function DialogDetailPage({
           </header>
         </div>
 
-        {isReview ? (
-          <DialogResponsesForm
-            dialogId={dialog.id}
-            canEdit
-            aspek={dialog.aspek}
-          />
+        {isReview || isCollaboration ? (
+          <>
+            {isCollaboration ? (
+              <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary-soft/40 px-5 py-4">
+                <span className="mt-1 flex h-2 w-2 shrink-0">
+                  <span className="h-2 w-2 animate-ping rounded-full bg-emerald-500" />
+                  <span className="-ml-2 mt-0 h-2 w-2 rounded-full bg-emerald-500" />
+                </span>
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-semibold text-ink">
+                    Sesi pengisian bersama berlangsung
+                  </p>
+                  <p className="text-xs leading-5 text-ink-muted">
+                    Isian pegawai muncul otomatis di bawah. Anda dapat mengisi
+                    &ldquo;Tanggung Jawab Atasan&rdquo; secara bersamaan —
+                    tersimpan otomatis. Tombol kirim evaluasi aktif setelah
+                    pegawai menekan &ldquo;Kirim ke Atasan&rdquo;.
+                  </p>
+                </div>
+              </div>
+            ) : null}
+            <DialogResponsesForm
+              dialogId={dialog.id}
+              canEdit
+              canSubmit={isReview}
+              liveEnabled={isCollaboration}
+              aspek={dialog.aspek}
+            />
+          </>
         ) : (
           <>
             <section aria-label="Aspek dialog kinerja">
