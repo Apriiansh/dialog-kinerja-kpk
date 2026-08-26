@@ -36,9 +36,9 @@ const slides = [
     image: "/images/gedung-kpk-2.jpg",
     locationTag: "Pusat Edukasi Antikorupsi · Gedung KPK C1",
     title: "Reviu & Bimbingan Kinerja Berkala",
-    subtitle: "Komunikasi Dua Arah yang Konstruktif Antara Atasan dan Pegawai",
+    subtitle: "Siklus Evaluasi 6-Bulan: TW1 Perencanaan, TW3 Monitoring",
     description:
-      "Mendorong pemantauan berkala realisasi SKP, identifikasi tantangan kerja secara dini, serta pemberian arahan pembinaan yang berkesinambungan.",
+      "Mendorong pemantauan berkala realisasi SKP, identifikasi tantangan kerja secara dini, serta pemberian arahan pembinaan yang berkesinambungan melalui siklus dialog & reviu tindak lanjut.",
     typewriter: false,
   },
   {

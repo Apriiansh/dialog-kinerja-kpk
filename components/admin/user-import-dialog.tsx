@@ -478,7 +478,7 @@ export function UserImportDialog() {
                     <div className="max-h-[40vh] overflow-y-auto">
                       <table className="w-full text-left text-xs">
                         <thead className="sticky top-0 z-10 border-b border-outline bg-surface-muted/80 backdrop-blur">
-                          <tr className="text-[10px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                          <tr className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">
                             <th className="px-3 py-2.5 text-center w-10">
                               #
                             </th>

@@ -61,7 +61,7 @@ export function GreetingCard({
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-20 -right-10 h-52 w-52 rounded-full bg-[#DB1514]/8 blur-3xl"
+        className="pointer-events-none absolute -bottom-20 -right-10 h-52 w-52 rounded-full bg-primary/8 blur-3xl"
       />
 
       <div className="relative flex min-w-0 flex-col gap-1">
@@ -130,11 +130,11 @@ export function GreetingCard({
 
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-tr from-primary-strong/75 via-primary/30 to-[#DB1514]/40 mix-blend-multiply"
+          className="absolute inset-0 bg-linear-to-tr from-primary-strong/75 via-primary/30 to-[#DB1514]/40 mix-blend-multiply"
         />
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-t from-primary-strong/50 via-transparent to-transparent"
+          className="absolute inset-0 bg-linear-to-t from-primary-strong/50 via-transparent to-transparent"
         />
 
         <div className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-1.5">

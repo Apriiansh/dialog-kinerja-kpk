@@ -92,7 +92,7 @@ export function UserListSection({ users }: { users: UserRow[] }) {
         <select
           value={role}
           onChange={(e) => updateParam("role", e.target.value)}
-          className="h-9 w-[130px] shrink-0 rounded-md border border-outline bg-surface px-3 text-xs text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+          className="h-9 w-32.5 shrink-0 rounded-md border border-outline bg-surface px-3 text-xs text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
         >
           <option value="all">Semua Peran</option>
           <option value="admin">Admin</option>
@@ -103,7 +103,7 @@ export function UserListSection({ users }: { users: UserRow[] }) {
         <select
           value={status}
           onChange={(e) => updateParam("status", e.target.value)}
-          className="h-9 w-[130px] shrink-0 rounded-md border border-outline bg-surface px-3 text-xs text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+          className="h-9 w-32.5 shrink-0 rounded-md border border-outline bg-surface px-3 text-xs text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
         >
           <option value="all">Semua Status</option>
           <option value="active">Aktif</option>
@@ -123,16 +123,16 @@ export function UserListSection({ users }: { users: UserRow[] }) {
           <Table>
             <TableHeader className="bg-surface-muted/60">
               <TableRow className="border-outline hover:bg-transparent">
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                   Nama / NPP
                 </TableHead>
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                   Atasan
                 </TableHead>
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                   Peran
                 </TableHead>
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                   Dibuat
                 </TableHead>
               </TableRow>

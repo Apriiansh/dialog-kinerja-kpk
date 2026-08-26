@@ -67,7 +67,7 @@ export function AdminUserStatusToggle({
       >
         <span
           className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-            isActive ? "translate-x-[22px]" : "translate-x-[2px]"
+            isActive ? "translate-x-5.5" : "translate-x-0.5"
           }`}
         />
       </button>

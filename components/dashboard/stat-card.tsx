@@ -37,7 +37,7 @@ export function StatCard({
           aria-hidden
           className={cn(
             "pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full blur-2xl transition-opacity duration-300",
-            isCyan ? "bg-primary/10" : "bg-[#DB1514]/10"
+            isCyan ? "bg-primary/10" : "bg-primary/10"
           )}
         />
         <div className="relative flex items-start justify-between gap-3">
@@ -46,8 +46,8 @@ export function StatCard({
               "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm transition-transform duration-300 group-hover:scale-105",
               chipClassName ??
                 (isCyan
-                  ? "bg-gradient-to-br from-primary to-primary-strong"
-                  : "bg-gradient-to-br from-[#DB1514] to-[#9E0F10]")
+                  ? "bg-linear-to-br from-primary to-primary-strong"
+                  : "bg-linear-to-br from-[#DB1514] to-[#9E0F10]")
             )}
           >
             <Icon size={19} weight="bold" />

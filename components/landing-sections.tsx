@@ -84,43 +84,43 @@ const aspekList = [
 const alurSteps = [
   {
     step: "01",
-    title: "Draf Awal Atasan",
+    title: "Atasan Menyusun Dialog",
     role: "Atasan Langsung",
     icon: FileTextIcon,
     description:
-      "Atasan menyusun draf indikator tanggung jawab, target kerja, dan arahan pembinaan awal.",
+      "Memilih pegawai, menyusun indikator tanggung jawab, target kerja, dan arahan pembinaan. Dapat mengisi bersamaan saat pegawai bekerja.",
   },
   {
     step: "02",
-    title: "Komitmen Pegawai",
+    title: "Pegawai Mengisi & Submit",
     role: "Pegawai Dinilai",
     icon: UserCheckIcon,
     description:
-      "Pegawai mempelajari draf, menyatakan komitmen kerja, dan mengajukan aspirasi karir (IDP).",
+      "Melengkapi 4 aspek evaluasi (SKP, Gap Asesmen, Perilaku, & Karir) dengan item-item evaluasi, lalu mengirim ke atasan.",
   },
   {
     step: "03",
-    title: "Dialog Kinerja & Reviu",
+    title: "Reviu, TTD & Validasi",
     role: "Atasan & Pegawai",
     icon: ClockCounterClockwiseIcon,
     description:
-      "Pembahasan dua arah, klarifikasi capaian, serta kesepakatan akhir bimbingan kerja.",
+      "Atasan menilai, menandatangani, dan menyetujui. Pegawai memvalidasi serta menandatangani. Dialog terkunci dan siap di-export.",
   },
   {
     step: "04",
-    title: "Validasi Biro SDM",
-    role: "Pengelola Kinerja SDM",
+    title: "Reviu Tindak Lanjut",
+    role: "Pegawai & Atasan",
     icon: CheckCircleIcon,
     description:
-      "Pemeriksaan kepatuhan administratif, standardisasi format, dan rekapitulasi lembaga.",
+      "Pegawai mencatat capaian, rencana tindak lanjut, dan jadwal evaluasi berikutnya. Atasan menyetujui reviu.",
   },
   {
     step: "05",
-    title: "Pengesahan & Arsip",
-    role: "Dokumen Resmi",
+    title: "Evaluasi Lanjutan (TW1/TW3)",
+    role: "Siklus 6-Bulan",
     icon: SealCheckIcon,
     description:
-      "Penerbitan dokumen sah bertanda tangan elektronik dalam format Word & PDF resmi.",
+      "Evaluasi yang belum tercapai otomatis diteruskan ke dialog periode berikutnya. Siklus berulang: TW1 Perencanaan & Evaluasi, TW3 Monitoring Progres.",
   },
 ];
 
@@ -298,7 +298,7 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
                   className="relative flex gap-4 sm:gap-5 pb-8 last:pb-0"
                 >
                   {/* Step indicator */}
-                  <div className="absolute left-[-32px] sm:left-[-40px] z-10 flex h-6 w-6 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full border-2 border-primary-strong bg-background text-[10px] sm:text-xs font-bold text-primary-strong">
+                  <div className="absolute -left-8 sm:-left-10 z-10 flex h-6 w-6 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full border-2 border-primary-strong bg-background text-[10px] sm:text-xs font-bold text-primary-strong">
                     {step.step}
                   </div>
 
@@ -325,6 +325,51 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
               );
             })}
           </div>
+
+          {/* Siklus Berkelanjutan */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45 }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5"
+          >
+            <div className="lg:col-span-1 p-5 rounded-xl bg-white dark:bg-white/3 border border-outline dark:border-white/10">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-primary-soft dark:bg-[#FF7A86]/10 flex items-center justify-center text-primary-strong dark:text-[#FF7A86]">
+                  <ClockCounterClockwiseIcon size={18} weight="bold" />
+                </div>
+                <h3 className="text-sm font-bold">Siklus 6-Bulan</h3>
+              </div>
+              <p className="text-xs text-ink-muted dark:text-[#C9C2B6] leading-relaxed">
+                Dialog Kinerja dilaksanakan dua kali setahun: <strong>Triwulan I</strong> untuk perencanaan &amp; evaluasi, <strong>Triwulan III</strong> untuk monitoring progres.
+              </p>
+            </div>
+
+            <div className="lg:col-span-1 p-5 rounded-xl bg-white dark:bg-white/3 border border-outline dark:border-white/10">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-[#12A9B0]/10 flex items-center justify-center text-[#0F8A90] dark:text-[#5FD1D8]">
+                  <ArrowRightIcon size={18} weight="bold" />
+                </div>
+                <h3 className="text-sm font-bold">Carry-Over Otomatis</h3>
+              </div>
+              <p className="text-xs text-ink-muted dark:text-[#C9C2B6] leading-relaxed">
+                Butir target yang belum tercapai otomatis diteruskan ke dialog lanjutan periode berikutnya. Pencapaian tercatat dan dilacak secara berkelanjutan.
+              </p>
+            </div>
+
+            <div className="lg:col-span-1 p-5 rounded-xl bg-white dark:bg-white/3 border border-outline dark:border-white/10">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-[#6B4FC7]/10 flex items-center justify-center text-[#5A3FA6] dark:text-[#B39CF0]">
+                  <CheckCircleIcon size={18} weight="bold" />
+                </div>
+                <h3 className="text-sm font-bold">Reviu Tindak Lanjut</h3>
+              </div>
+              <p className="text-xs text-ink-muted dark:text-[#C9C2B6] leading-relaxed">
+                Setelah dialog selesai, pegawai membuat reviu: mencatat capaian, menjelaskan kendala, dan merencanakan tindak lanjut untuk periode berikutnya.
+              </p>
+            </div>
+          </motion.div>
 
           {/* CTA banner — solid institutional red, ring motif instead of crosshatch */}
           <motion.div

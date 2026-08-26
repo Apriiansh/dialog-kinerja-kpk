@@ -188,7 +188,7 @@ export function ChatWidget({
       <div
         role="region"
         aria-label="Panel Chat Kinerja"
-        className="fixed bottom-5 right-5 z-50 flex h-[520px] max-h-[85vh] w-[92vw] max-w-[400px] flex-col overflow-hidden rounded-2xl border border-outline bg-surface shadow-2xl ring-1 ring-black/5 dark:ring-white/10 sm:w-[400px]"
+        className="fixed bottom-5 right-5 z-50 flex h-130 max-h-[85vh] w-[92vw] max-w-100 flex-col overflow-hidden rounded-2xl border border-outline bg-surface shadow-2xl ring-1 ring-black/5 dark:ring-white/10 sm:w-100"
       >
         {/* Header */}
         <header className="flex h-16 shrink-0 items-center justify-between border-b border-outline bg-surface-sunken/60 px-4 backdrop-blur-md">
@@ -259,7 +259,7 @@ export function ChatWidget({
               <p className="text-sm font-semibold text-ink">
                 Belum ada pesan
               </p>
-              <p className="text-xs text-ink-muted max-w-[240px]">
+              <p className="text-xs text-ink-muted max-w-60">
                 Gunakan ruang chat ini untuk berdiskusi mengenai target, SKP, atau masukan kinerja secara langsung.
               </p>
             </div>
@@ -277,7 +277,7 @@ export function ChatWidget({
                     </span>
                   )}
                   <div
-                    className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm shadow-xs break-words whitespace-pre-wrap ${
+                    className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm shadow-xs wrap-break-word whitespace-pre-wrap ${
                       isMe
                         ? "bg-primary text-on-primary rounded-tr-xs"
                         : "bg-surface-sunken dark:bg-surface-elevated text-ink border border-outline/60 rounded-tl-xs"

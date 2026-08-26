@@ -173,7 +173,7 @@ export function AchievementList({ analytics, evalAnalytics, totalTercapai, total
                                       <XCircleIcon size={16} weight="fill" className="text-red-500" />
                                     )}
                                   </div>
-                                  <span className="text-sm text-ink leading-5 flex-1 break-words">
+                                  <span className="text-sm text-ink leading-5 flex-1 wrap-break-word">
                                     {item.dialog_evaluasi || "Target tidak memiliki nama"}
                                   </span>
                                 </li>
@@ -207,7 +207,7 @@ export function AchievementList({ analytics, evalAnalytics, totalTercapai, total
                     
                     return (
                       <li key={i} className="flex flex-col gap-2 p-4 bg-surface rounded-lg border border-outline shadow-sm">
-                        <span className="text-sm font-medium text-ink leading-5 break-words">
+                        <span className="text-sm font-medium text-ink leading-5 wrap-break-word">
                           {item.evaluasi}
                         </span>
                         

@@ -50,7 +50,7 @@ export function UserListToolbar({
       <select
         value={roleFilter}
         onChange={(e) => onRoleFilterChange(e.target.value)}
-        className="h-9 w-[130px] shrink-0 rounded-md border border-outline bg-surface px-3 text-xs text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+        className="h-9 w-32.5 shrink-0 rounded-md border border-outline bg-surface px-3 text-xs text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
       >
         <option value="all">Semua Peran</option>
         <option value="admin">Admin</option>
@@ -62,7 +62,7 @@ export function UserListToolbar({
       <select
         value={statusFilter}
         onChange={(e) => onStatusFilterChange(e.target.value)}
-        className="h-9 w-[130px] shrink-0 rounded-md border border-outline bg-surface px-3 text-xs text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+        className="h-9 w-32.5 shrink-0 rounded-md border border-outline bg-surface px-3 text-xs text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
       >
         <option value="all">Semua Status</option>
         <option value="active">Aktif</option>

@@ -325,7 +325,7 @@ export function AdminUserForm({
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
               Kapabilitas Tambahan
             </span>
 

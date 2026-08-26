@@ -135,16 +135,16 @@ export function UserListWrapper({ users, stats }: UserListWrapperProps) {
           <Table>
             <TableHeader className="bg-surface-muted/60">
               <TableRow className="border-outline hover:bg-transparent">
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                   Nama / NPP
                 </TableHead>
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                   Atasan
                 </TableHead>
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                   Peran
                 </TableHead>
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                   Dibuat
                 </TableHead>
               </TableRow>
