@@ -223,7 +223,7 @@ export default async function AdminMonitoringPage({
         <div className="overflow-x-auto rounded-xl border border-outline bg-surface shadow-xs">
           <table className="w-full text-left">
             <thead className="border-b border-outline bg-surface-muted/50">
-              <tr className="text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+              <tr className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                 <th className="px-5 py-3.5">Pegawai</th>
                 <th className="px-5 py-3.5">Jabatan & Unit Kerja</th>
                 <th className="px-5 py-3.5">Atasan Penilai</th>

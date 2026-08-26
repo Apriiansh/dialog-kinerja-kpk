@@ -187,7 +187,7 @@ function StatCard({
 
   return (
     <div className="flex flex-col gap-1 rounded-lg border border-outline bg-surface px-4 py-3">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
         {label}
       </span>
       <span

@@ -131,7 +131,7 @@ export default async function NewReviuPage({
       ) : (
         <div className="flex flex-col gap-4">
           <div className="rounded-lg border border-outline bg-surface px-5 py-4">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
               Dialog Kinerja {selected ? formatPeriode(selected.triwulan, selected.periode_tahun) : ""}
             </span>
             <p className="mt-1 text-sm leading-5 text-ink">

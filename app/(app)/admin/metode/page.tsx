@@ -92,16 +92,16 @@ export default async function AdminMetodePage({
           <Table>
             <TableHeader className="bg-surface-muted/60">
               <TableRow className="border-outline hover:bg-transparent">
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                   Nama Metode
                 </TableHead>
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                   Digunakan
                 </TableHead>
-                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                <TableHead className="h-11 px-5 text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                   Status
                 </TableHead>
-                <TableHead className="h-11 px-5 text-right text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                <TableHead className="h-11 px-5 text-right text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                   Aksi
                 </TableHead>
               </TableRow>

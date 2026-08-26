@@ -22,7 +22,7 @@ export default function LoginPage() {
           priority
           className="object-cover opacity-40 mix-blend-luminosity"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-strong/75 via-[#a30d24]/60 to-[#6f0814]/85" />
+        <div className="absolute inset-0 bg-linear-to-br from-primary-strong/75 via-[#a30d24]/60 to-[#6f0814]/85" />
 
         {/* decorative duality rings — cyan + violet, echoes landing page motif */}
         <svg
@@ -46,7 +46,7 @@ export default function LoginPage() {
             />
             <div className="leading-tight">
               <p className="text-sm font-bold">Dialog Kinerja</p>
-              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-white/70">
+              <p className="text-xs font-semibold uppercase tracking-wider text-white/70">
                 KPK HR Portal
               </p>
             </div>

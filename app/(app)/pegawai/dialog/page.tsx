@@ -1,23 +1,19 @@
 import Link from "next/link";
 import {
-  ArrowsClockwiseIcon,
   CheckCircleIcon,
   ClipboardTextIcon,
   HourglassIcon,
   PencilSimpleIcon,
   ShieldCheckIcon,
-  ArrowSquareRightIcon,
   MagnifyingGlassIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { Progress } from "@/components/ui/progress";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
-import { ASPEK_ORDER } from "@/lib/constants/aspek";
 import { formatPeriode } from "@/lib/constants/triwulan";
-import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
+import type { StatusDialog } from "@/generated/prisma/enums";
 import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
 
@@ -360,11 +356,7 @@ export default async function PegawaiDialogListPage({
           <ul className="flex flex-col gap-3">
             {visibleDialogs.map((d) => {
               const isLanjutan = d.id_dialog_induk !== null;
-              const filled = isLanjutan
-                ? evaluatedAspekCount(d.aspek)
-                : filledAspekCount(d.aspek);
               const cta = CTA[d.status];
-              const progress = Math.round((filled / ASPEK_ORDER.length) * 100);
               const sourceAspek = isLanjutan
                 ? (d.dialog_induk?.aspek ?? [])
                 : d.aspek;

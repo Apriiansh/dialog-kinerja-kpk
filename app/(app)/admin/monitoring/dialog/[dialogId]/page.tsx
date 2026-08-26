@@ -117,7 +117,7 @@ export default async function AdminDialogDetailPage({
 
           {dialog.deskripsi_kinerja?.trim() ? (
             <div className="rounded-lg border border-outline bg-surface px-5 py-4">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 Deskripsi Kinerja (dari Atasan)
               </span>
               <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">

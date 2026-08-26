@@ -1,0 +1,86 @@
+@startuml Workflow_Dialog_Kinerja
+title Workflow Dialog Kinerja KPK
+
+|Atasan|
+start
+:Klik "Mulai Dialog";
+:Pilih pegawai yang akan dinilai;
+:Isi deskripsi kinerja & indikator awal;
+:Kirim dialog ke pegawai;
+
+|Sistem|
+:Update status: **menunggu_pegawai**;
+note right
+  Atasan dapat mengisi tanggung jawab
+  secara bersamaan (kolaborasi real-time)
+  saat pegawai sedang mengisi.
+end note
+
+|Pegawai|
+:Buka dialog dari daftar;
+:Isi 5 aspek evaluasi\n(SKP, Gap Asesmen, Perilaku,\nKarir Pendek, Karir Menengah);
+:Isi tanggung jawab pegawai\nuntuk setiap aspek;
+:Submit dialog ke atasan;
+
+|Sistem|
+:Update status: **menunggu_atasan**;
+
+|Atasan|
+:Buka dialog dari daftar;
+:Isi tanggung jawab atasan\nuntuk setiap aspek;
+:Review & tanda tangani;
+:Setuju & kirim ke validasi;
+
+|Sistem|
+:Update status: **menunggu_validasi**;
+
+|Pegawai|
+:Periksa dialog yang sudah\ndiisi atasan;
+:Setujui & tanda tangani;
+
+|Sistem|
+:Kunci dialog (status: **selesai**);
+:Aktifkan export ke Word/PDF;
+
+|Pegawai|
+:Buat reviu;
+:Tandai setiap item\n(Tercapai / Tidak Tercapai);
+
+if (Ada item tidak tercapai?) then (Ya)
+  :Isi penjelasan kendala;
+  :Isi rencana tindak lanjut;
+  :Isi tanggal evaluasi berikutnya;
+else (Tidak)
+  :Isi penjelasan pencapaian;
+endif
+:Submit reviu ke atasan;
+
+|Atasan|
+:Review & tanda tangan reviu;
+
+|Pegawai|
+:Validasi & tanda tangan reviu;
+
+|Sistem|
+if (Ada item tidak tercapai?) then (Ya)
+  :Tampilkan tombol "Buat Evaluasi";
+
+  |Pegawai / Atasan|
+  :Klik "Buat Evaluasi";
+  :Pilih periode TW1 / TW3 (otomatis);
+
+  |Sistem|
+  :Carry-over item\nis_tercapai = false;
+  :Buat dialog baru;
+  note right
+    Dialog baru dimulai,
+    kembali ke langkah
+    "Klik Mulai Dialog"
+  end note
+  stop
+else (Tidak)
+  :Tidak ada dialog lanjutan;
+  stop
+endif
+
+@enduml

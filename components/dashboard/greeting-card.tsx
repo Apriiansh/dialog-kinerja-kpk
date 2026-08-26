@@ -130,11 +130,11 @@ export function GreetingCard({
 
         <div
           aria-hidden
-          className="absolute inset-0 bg-linear-to-tr from-primary-strong/75 via-primary/30 to-[#DB1514]/40 mix-blend-multiply"
+          className="absolute inset-0 bg-linear-to-tr from-amber-400/75 via-primary/30 to-emerald-300/40 mix-blend-multiply"
         />
         <div
           aria-hidden
-          className="absolute inset-0 bg-linear-to-t from-primary-strong/50 via-transparent to-transparent"
+          className="absolute inset-0 bg-linear-to-t from-emerald-500/50 via-transparent to-transparent"
         />
 
         <div className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-1.5">

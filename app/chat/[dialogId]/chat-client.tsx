@@ -124,7 +124,7 @@ export default function ChatClient({ dialogId }: ChatClientProps) {
                     </span>
                   )}
                   <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-xs break-words whitespace-pre-wrap ${
+                    className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-xs wrap-break-word whitespace-pre-wrap ${
                       isMe
                         ? "bg-primary text-on-primary rounded-tr-xs"
                         : "bg-surface text-ink border border-outline rounded-tl-xs"
