@@ -143,14 +143,16 @@ export default async function DialogDetailPage({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={dialog.status} />
-                <ChatHeader
-                  dialogId={dialog.id}
-                  userRole="pegawai"
-                  partnerName={dialog.atasan.nama_pegawai}
-                  partnerRoleLabel="Atasan Langsung"
-                />
+                {!isSelesai ? (
+                  <ChatHeader
+                    dialogId={dialog.id}
+                    userRole="pegawai"
+                    partnerName={dialog.atasan.nama_pegawai}
+                    partnerRoleLabel="Atasan Langsung"
+                  />
+                ) : null}
                 {dialog.id_dialog_induk ? (
-                  <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                  <span className="bg-emerald-400 px-2 py-2 rounded-md text-xs font-semibold text-gray-900">
                     Dialog Lanjutan
                   </span>
                 ) : null}

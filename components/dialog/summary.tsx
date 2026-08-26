@@ -65,9 +65,8 @@ export function DialogSummary({
     (previousItems ?? []).map((item) => [aspekItemKey(item), item.is_tercapai]),
   );
   const allItems = aspek.flatMap((group) => group.item);
-  const statusItems = isLanjutan && previousItems?.length ? previousItems : allItems;
-  const tercapaiCount = statusItems.filter((item) => item.is_tercapai === true).length;
-  const tidakTercapaiCount = statusItems.filter(
+  const tercapaiCount = allItems.filter((item) => item.is_tercapai === true).length;
+  const tidakTercapaiCount = allItems.filter(
     (item) => item.is_tercapai === false,
   ).length;
   const hasAssessment = tercapaiCount > 0 || tidakTercapaiCount > 0;

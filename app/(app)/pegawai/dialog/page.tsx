@@ -368,8 +368,7 @@ export default async function PegawaiDialogListPage({
               const sourceAspek = isLanjutan
                 ? (d.dialog_induk?.aspek ?? [])
                 : d.aspek;
-              const itemCounts = isLanjutan
-                ? sourceAspek.reduce(
+              const itemCounts = d.aspek.reduce(
                     (counts, group) => {
                       for (const item of group.item) {
                         if (item.is_tercapai === true) counts.tercapai += 1;
@@ -378,8 +377,7 @@ export default async function PegawaiDialogListPage({
                       return counts;
                     },
                     { tercapai: 0, tidakTercapai: 0 },
-                  )
-                : null;
+                  );
               const latestSelesaiReviu = d.reviu
                 .filter((reviu) => reviu.status === "selesai")
                 .at(-1);
@@ -415,7 +413,7 @@ export default async function PegawaiDialogListPage({
                           items={sourceAspek.flatMap((a) => a.item)}
                         />
                       </div>
-                      {itemCounts ? (
+                      {(itemCounts.tercapai > 0 || itemCounts.tidakTercapai > 0) ? (
                         <div className="flex flex-wrap gap-2 text-[11px] font-semibold">
                           <span className="text-emerald-700">
                             {itemCounts.tercapai} tercapai

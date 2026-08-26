@@ -331,8 +331,8 @@ export function AppShell({
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-14 bottom-0 z-20 hidden flex-col overflow-hidden bg-gradient-to-b from-primary via-primary-strong to-[#8e0b1f] shadow-xl shadow-black/20 transition-[width] duration-300 ease-in-out lg:flex print:hidden",
-          collapsed ? "lg:w-[76px]" : "lg:w-64"
+          "fixed left-0 top-14 bottom-0 z-20 hidden flex-col overflow-hidden bg-linear-to-b from-primary via-primary-strong to-[#8e0b1f] shadow-xl shadow-black/20 transition-[width] duration-300 ease-in-out lg:flex print:hidden",
+          collapsed ? "lg:w-19" : "lg:w-64"
         )}
       >
         <nav className="sidebar-scroll flex-1 overflow-x-hidden overflow-y-auto pb-3 pt-4">
