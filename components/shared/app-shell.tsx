@@ -260,9 +260,9 @@ function AmbientBackground() {
       aria-hidden
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden print:hidden"
     >
-      <div className="dot-grid absolute inset-0 [mask-image:radial-gradient(ellipse_75%_60%_at_50%_0%,black,transparent)]" />
-      <div className="absolute -top-36 -right-28 h-[26rem] w-[26rem] animate-[ambient-drift_24s_ease-in-out_infinite_alternate] rounded-full bg-primary/15 blur-3xl" />
-      <div className="absolute -bottom-44 -left-32 h-[28rem] w-[28rem] animate-[ambient-drift-reverse_30s_ease-in-out_infinite_alternate] rounded-full bg-[#DB1514]/8 blur-3xl" />
+      <div className="dot-grid absolute inset-0 mask-[radial-gradient(ellipse_75%_60%_at_50%_0%,black,transparent)]" />
+      <div className="absolute -top-36 -right-28 h-104 w-104 animate-[ambient-drift_24s_ease-in-out_infinite_alternate] rounded-full bg-primary/15 blur-3xl" />
+      <div className="absolute -bottom-44 -left-32 h-112 w-md animate-[ambient-drift-reverse_30s_ease-in-out_infinite_alternate] rounded-full bg-primary/8 blur-3xl" />
     </div>
   );
 }
@@ -363,7 +363,7 @@ export function AppShell({
 
       {/* Mobile Sidebar Drawer */}
       {mobileOpen && (
-        <aside className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] animate-in slide-in-from-left flex-col bg-gradient-to-b from-primary via-primary-strong to-[#8e0b1f] shadow-2xl duration-300 ease-out lg:hidden print:hidden">
+        <aside className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] animate-in slide-in-from-left flex-col bg-linear-to-b from-primary via-primary-strong to-[#8e0b1f] shadow-2xl duration-300 ease-out lg:hidden print:hidden">
           <div className="flex items-center justify-between px-5 pb-4 pt-5">
             <Brand />
             <button
@@ -393,7 +393,7 @@ export function AppShell({
       <div
         className={cn(
           "flex min-h-screen w-full flex-col transition-[padding] duration-300 ease-in-out print:pl-0",
-          collapsed ? "lg:pl-[76px]" : "lg:pl-64"
+          collapsed ? "lg:pl-19" : "lg:pl-64"
         )}
       >
         <div className="flex flex-1 flex-col px-4 pb-6 pt-16 sm:px-6 lg:px-8 lg:pt-18 print:p-0">

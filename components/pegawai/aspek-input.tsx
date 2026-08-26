@@ -35,7 +35,7 @@ export function AspekPegawaiInput({
               >
               <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                     {dialogEvaluasiLabel(aspek.jenis_aspek)}
                   </span>
                   <span className="whitespace-pre-wrap leading-5 text-ink">
@@ -43,7 +43,7 @@ export function AspekPegawaiInput({
                   </span>
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                     Kompetensi
                   </span>
                   <span className="whitespace-pre-wrap leading-5 text-ink">
@@ -53,7 +53,7 @@ export function AspekPegawaiInput({
               </div>
               <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                     Metode Pengembangan
                   </span>
                   <span className="leading-5 text-ink">
@@ -61,7 +61,7 @@ export function AspekPegawaiInput({
                   </span>
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                     Waktu Pelaksanaan
                   </span>
                   <span className="leading-5 text-ink">
@@ -94,7 +94,7 @@ export function AspekPegawaiInput({
       )}
 
       <div className="flex flex-col gap-1">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
           Tanggung Jawab Pegawai
         </span>
         <p className="whitespace-pre-wrap text-sm leading-5 text-ink">

@@ -248,7 +248,7 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
               ) : (
                 <table className="w-full text-left">
                   <thead className="sticky top-0 border-b border-outline bg-surface z-10">
-                    <tr className="text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+                    <tr className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                       <th className="px-6 py-3">Pegawai</th>
                       <th className="px-6 py-3">NPP / Unit Kerja</th>
                       <th className="px-6 py-3">Status Periode {tahun}</th>

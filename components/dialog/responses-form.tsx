@@ -176,7 +176,7 @@ export function DialogResponsesForm({
                       <div className="flex flex-col gap-1.5">
                         <label
                           htmlFor={`aspek_${id}`}
-                          className="text-xs font-semibold uppercase tracking-[0.05em] text-ink-muted"
+                          className="text-xs font-semibold uppercase tracking-wider text-ink-muted"
                         >
                           {label}
                         </label>
@@ -192,7 +192,7 @@ export function DialogResponsesForm({
                         />
                       </div>
                       <div className="rounded-md border border-outline bg-surface-muted/40 px-4 py-3.5">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                           Isian Pegawai
                         </span>
                         {aspekRow ? <AspekPegawaiInput aspek={aspekRow} /> : null}

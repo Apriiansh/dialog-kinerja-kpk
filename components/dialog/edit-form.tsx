@@ -249,7 +249,7 @@ function SaveStateMeta({
   }
   if (saveState === "error") {
     return (
-      <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-[#C8102E]">
+      <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-primary-strong">
         <WarningCircleIcon size={14} weight="fill" />
         Gagal menyimpan — coba lagi
       </span>

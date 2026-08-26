@@ -80,7 +80,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           <Link
             href="/"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-[#1B1712] transition-colors hover:text-[#C8102E]"
+            className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-ink transition-colors hover:text-primary-strong"
           >
             <ArrowLeftIcon size={16} weight="bold" />
             Kembali
@@ -88,17 +88,17 @@ export default function LoginPage() {
 
           <div className="mb-8 lg:hidden">
             <div className="mb-2 flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#C8102E] text-white">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-strong text-white">
                 <BankIcon size={18} weight="fill" />
               </span>
-              <p className="text-sm font-bold text-[#1B1712]">Dialog Kinerja</p>
+              <p className="text-sm font-bold text-ink">Dialog Kinerja</p>
             </div>
           </div>
 
-          <h2 className="text-2xl font-bold tracking-tight text-[#1B1712]">
+          <h2 className="text-2xl font-bold tracking-tight text-ink">
             Masuk ke Akun Anda
           </h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-[#8C8478]">
+          <p className="mt-1.5 text-sm leading-relaxed text-outline-strong">
             Silakan masukkan NPP dan kata sandi Anda untuk melanjutkan.
           </p>
 
@@ -106,7 +106,7 @@ export default function LoginPage() {
             <LoginForm />
           </div>
 
-          <p className="mt-4 text-center text-xs text-[#8C8478]">
+          <p className="mt-4 text-center text-xs text-outline-strong">
             &copy; 2026 Tim Magang Biro SDM. All rights reserved.
           </p>
         </div>

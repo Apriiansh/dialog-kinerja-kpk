@@ -17,7 +17,7 @@ export function Field({
     <div className="flex flex-col gap-1.5">
       <label
         htmlFor={htmlFor}
-        className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted"
+        className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted"
       >
         {label}
         {required ? <span className="text-error"> *</span> : null}

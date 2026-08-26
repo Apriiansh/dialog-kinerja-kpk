@@ -100,7 +100,7 @@ const alurSteps = [
   },
   {
     step: "03",
-    title: "Reviu & Dialog Kinerja",
+    title: "Dialog Kinerja & Reviu",
     role: "Atasan & Pegawai",
     icon: ClockCounterClockwiseIcon,
     description:
@@ -130,7 +130,7 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
       {/* SECTION 1: ASPEK EVALUASI */}
       <section
         id="aspek"
-        className="relative py-16 sm:py-24 bg-[#F6F3EE] dark:bg-[#15120D] text-[#1B1712] dark:text-[#F2EEE7] overflow-hidden border-b border-[#DCD5C9] dark:border-white/10"
+        className="relative py-16 sm:py-24 bg-background dark:bg-[#15120D] text-ink dark:text-[#F2EEE7] overflow-hidden border-b border-outline dark:border-white/10"
       >
         {/* Signature motif — thin overlapping rings, not a blur blob */}
         <svg
@@ -160,7 +160,7 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight tracking-tight">
                   4 Aspek Evaluasi (Aspek A – D)
                 </h2>
-                <p className="text-sm sm:text-base text-[#5A544A] dark:text-[#C9C2B6] leading-relaxed">
+                <p className="text-sm sm:text-base text-ink-muted dark:text-[#C9C2B6] leading-relaxed">
                   Dialog Kinerja bukan sekadar formulir administratif, melainkan
                   instrumen pembinaan dua arah yang mengintegrasikan target
                   kuantitatif, kode etik insan KPK, serta aspirasi pengembangan
@@ -168,13 +168,13 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl border border-[#DCD5C9] dark:border-white/10 bg-white/60 dark:bg-white/[0.03] space-y-2">
-                <div className="flex items-center justify-between text-xs font-mono text-[#8C8478]">
+              <div className="p-4 rounded-xl border border-outline dark:border-white/10 bg-white/60 dark:bg-white/3 space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono text-outline-strong">
                   <span>REGULASI KINERJA</span>
-                  <span className="text-[#C8102E] dark:text-[#FF7A86]">PERBAN KPK RI</span>
+                  <span className="text-primary-strong dark:text-[#FF7A86]">PERBAN KPK RI</span>
                 </div>
-                <div className="h-px bg-[#DCD5C9] dark:bg-white/10" />
-                <p className="text-xs text-[#5A544A] dark:text-[#C9C2B6] leading-relaxed">
+                <div className="h-px bg-muted dark:bg-white/10" />
+                <p className="text-xs text-ink dark:text-[#C9C2B6] leading-relaxed">
                   Setiap butir evaluasi mencantumkan komitmen pegawai dan
                   tanggung jawab pembinaan atasan secara eksplisit.
                 </p>
@@ -183,7 +183,7 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
               <div className="pt-2 hidden lg:block">
                 <a
                   href="#alur"
-                  className="inline-flex items-center gap-2 text-xs font-bold text-[#C8102E] dark:text-[#FF7A86] hover:underline group"
+                  className="inline-flex items-center gap-2 text-xs font-bold text-primary-strong dark:text-[#FF7A86] hover:underline group"
                 >
                   <span>Lihat Mekanisme Alur Kerja</span>
                   <ArrowRightIcon size={14} className="transition-transform group-hover:translate-x-1" />
@@ -202,7 +202,7 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
                     viewport={{ once: true, margin: "-40px" }}
                     transition={{ duration: 0.45, delay: index * 0.07, ease: "easeOut" }}
                     whileHover={{ y: -2, transition: { duration: 0.15 } }}
-                    className="group relative p-5 sm:p-6 rounded-2xl bg-white dark:bg-white/[0.03] border border-[#DCD5C9] dark:border-white/10 hover:border-[color:var(--accent)] transition-colors duration-150 flex gap-4 sm:gap-5 items-start"
+                    className="group relative p-5 sm:p-6 rounded-2xl bg-white dark:bg-white/3 border border-outline dark:border-white/10 hover:border-accent transition-colors duration-150 flex gap-4 sm:gap-5 items-start"
                     style={{ ["--accent" as string]: aspek.accent }}
                   >
                     <div className="relative shrink-0 flex flex-col items-center gap-2">
@@ -212,7 +212,7 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
                       >
                         <IconComponent size={22} weight="bold" />
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-[#8C8478]">
+                      <span className="text-[10px] font-mono font-bold text-outline-strong">
                         {aspek.code}
                       </span>
                     </div>
@@ -220,14 +220,14 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
                     <div className="space-y-1.5 flex-1 min-w-0">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <h3 className="text-base sm:text-lg font-bold">{aspek.title}</h3>
-                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border border-[#DCD5C9] dark:border-white/15 text-[#8C8478]">
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border border-outline dark:border-white/15 text-outline-strong">
                           {aspek.badge}
                         </span>
                       </div>
-                      <p className="text-xs sm:text-sm text-[#5A544A] dark:text-[#C9C2B6] leading-relaxed">
+                      <p className="text-xs sm:text-sm text-outline-strong dark:text-[#C9C2B6] leading-relaxed">
                         {aspek.summary}
                       </p>
-                      <p className="text-[11px] sm:text-xs text-[#8C8478] font-medium pt-1 flex items-center gap-1.5">
+                      <p className="text-[11px] sm:text-xs text-outline-strong font-medium pt-1 flex items-center gap-1.5">
                         <span
                           className="inline-block h-1 w-1 rounded-full"
                           style={{ backgroundColor: aspek.accent }}
@@ -246,7 +246,7 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
       {/* SECTION 2: ALUR & CTA */}
       <section
         id="alur"
-        className="relative py-16 sm:py-24 bg-[#EFEAE1] dark:bg-[#100D09] text-[#1B1712] dark:text-[#F2EEE7] overflow-hidden border-b border-[#DCD5C9] dark:border-white/10"
+        className="relative py-16 sm:py-24 bg-surface-soft dark:bg-[#100D09] text-ink dark:text-[#F2EEE7] overflow-hidden border-b border-outline dark:border-white/10"
       >
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 sm:space-y-16">
           <motion.div
@@ -263,7 +263,7 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">
               Siklus Alur Dialog &amp; Monitoring (2x Setahun)
             </h2>
-            <p className="text-sm sm:text-base text-[#5A544A] dark:text-[#C9C2B6]">
+            <p className="text-sm sm:text-base text-ink-muted dark:text-[#C9C2B6]">
               Dilaksanakan secara berkala setiap 6 bulan: <strong>Triwulan I</strong>{" "}
               untuk perencanaan target tahun berjalan &amp; evaluasi tahun lalu,
               serta <strong>Triwulan III</strong> untuk monitoring progres IDP
@@ -282,40 +282,44 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
             />
           </svg>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 sm:gap-5">
+          <div className="relative pl-8 sm:pl-10 space-y-0">
+            {/* Vertical connector line */}
+            <div className="absolute left-3 sm:left-4 top-3 bottom-3 w-px bg-outline dark:bg-white/10" />
+
             {alurSteps.map((step, index) => {
               const StepIcon = step.icon;
               return (
                 <motion.div
                   key={step.step}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, x: -16 }}
+                  whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.45, delay: index * 0.08, ease: "easeOut" }}
-                  whileHover={{ y: -3, transition: { duration: 0.15 } }}
-                  className="group relative p-5 rounded-2xl bg-white dark:bg-white/[0.03] border border-[#DCD5C9] dark:border-white/10 hover:border-[#C8102E]/50 transition-colors duration-150 flex flex-col justify-between"
+                  transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
+                  className="relative flex gap-4 sm:gap-5 pb-8 last:pb-0"
                 >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs font-bold tracking-widest text-[#C8102E] dark:text-[#FF7A86] border border-[#C8102E]/30 px-2 py-0.5 rounded-full">
-                        {step.step}
-                      </span>
-                      <div className="w-8 h-8 rounded-lg bg-[#F6F3EE] dark:bg-white/5 flex items-center justify-center text-[#5A544A] dark:text-[#C9C2B6] group-hover:text-[#C8102E] dark:group-hover:text-[#FF7A86] transition-colors">
-                        <StepIcon size={18} weight="bold" />
-                      </div>
-                    </div>
-
-                    <h3 className="text-base font-bold">{step.title}</h3>
-
-                    <p className="text-xs text-[#5A544A] dark:text-[#C9C2B6] leading-relaxed">
-                      {step.description}
-                    </p>
+                  {/* Step indicator */}
+                  <div className="absolute left-[-32px] sm:left-[-40px] z-10 flex h-6 w-6 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full border-2 border-primary-strong bg-background text-[10px] sm:text-xs font-bold text-primary-strong">
+                    {step.step}
                   </div>
 
-                  <div className="pt-3 mt-4 border-t border-[#DCD5C9] dark:border-white/10">
-                    <span className="text-[11px] font-mono text-[#8C8478] block truncate">
-                      PIC: <span className="font-semibold text-[#5A544A] dark:text-[#C9C2B6]">{step.role}</span>
-                    </span>
+                  {/* Content card */}
+                  <div className="group flex-1 p-4 sm:p-5 rounded-xl bg-white dark:bg-white/3 border border-outline dark:border-white/10 hover:border-primary-strong/40 transition-colors duration-150">
+                    <div className="flex items-start gap-3">
+                      <div className="shrink-0 mt-0.5 w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-soft dark:bg-[#FF7A86]/10 flex items-center justify-center text-primary-strong dark:text-[#FF7A86]">
+                        <StepIcon size={18} weight="bold" />
+                      </div>
+                      <div className="flex-1 min-w-0 space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="text-sm sm:text-base font-bold">{step.title}</h3>
+                          <span className="text-[10px] sm:text-[11px] font-mono text-outline-strong shrink-0">
+                            PIC: {step.role}
+                          </span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-ink-muted dark:text-[#C9C2B6] leading-relaxed">
+                          {step.description}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -329,7 +333,7 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.45 }}
-            className="relative overflow-hidden p-6 sm:p-10 rounded-3xl bg-[#C8102E] flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
+            className="relative overflow-hidden p-6 sm:p-10 rounded-3xl bg-primary-strong flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
           >
             <svg
               className="pointer-events-none absolute -bottom-14 -right-10 h-64 w-64 opacity-20"
@@ -358,7 +362,7 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
             <div className="relative z-10 w-full md:w-auto shrink-0">
               <Link
                 href={isLoggedIn ? userHomePath : "/login"}
-                className="w-full md:w-auto inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full bg-white hover:bg-[#F6F3EE] text-[#C8102E] font-bold text-sm transition-[transform] hover:-translate-y-0.5 cursor-pointer"
+                className="w-full md:w-auto inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full bg-white hover:bg-surface-muted text-primary-strong font-bold text-sm transition-[transform] hover:-translate-y-0.5 cursor-pointer"
               >
                 <span>{isLoggedIn ? "Buka Dashboard Saya" : "Masuk ke Sistem"}</span>
                 <ArrowRightIcon size={16} weight="bold" />

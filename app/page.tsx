@@ -15,13 +15,13 @@ export default async function LandingPage() {
   return (
     <div
       style={TAHOMA}
-      className="min-h-screen flex flex-col bg-[#F6F3EE] dark:bg-[#15120D] text-[#1B1712] dark:text-[#F2EEE7] transition-colors duration-200 selection:bg-[#C8102E] selection:text-white overflow-x-hidden scroll-smooth"
+      className="min-h-screen flex flex-col bg-background dark:bg-[#15120D] text-ink dark:text-[#F2EEE7] transition-colors duration-200 selection:bg-primary-strong selection:text-white overflow-x-hidden scroll-smooth"
     >
       {/* Top accent line — institutional red, no amber */}
       <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-[#7A0B1F] via-[#C8102E] to-[#7A0B1F]" />
 
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-[#DCD5C9] dark:border-white/10 bg-[#F6F3EE]/95 dark:bg-[#15120D]/95 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full border-b border-outline dark:border-white/10 bg-background/95 dark:bg-[#15120D]/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto flex h-16 sm:h-18 items-center justify-between px-4 sm:px-6 lg:px-8 gap-6">
           {/* Left: KPK Logo & Branding */}
           <Link href="/" className="flex items-center gap-2.5 min-w-0 shrink-0">
@@ -35,20 +35,20 @@ export default async function LandingPage() {
                 className="object-contain"
               />
             </div>
-            <span className="text-base sm:text-lg font-bold tracking-tight text-[#1B1712] dark:text-white truncate">
+            <span className="text-base sm:text-lg font-bold tracking-tight text-ink dark:text-white truncate">
               Dialog Kinerja
             </span>
           </Link>
 
           {/* Middle: Navigation */}
-          <nav className="hidden md:flex items-center gap-8 text-sm text-[#5A544A] dark:text-[#C9C2B6]">
-            <a href="#aspek" className="hover:text-[#1B1712] dark:hover:text-white transition-colors">
+          <nav className="hidden md:flex items-center gap-8 text-sm text-ink-muted dark:text-[#C9C2B6]">
+            <a href="#aspek" className="hover:text-ink dark:hover:text-white transition-colors">
               Aspek Evaluasi
             </a>
-            <a href="#alur" className="hover:text-[#1B1712] dark:hover:text-white transition-colors">
+            <a href="#alur" className="hover:text-ink dark:hover:text-white transition-colors">
               Alur Pengesahan
             </a>
-            <a href="#tentang" className="hover:text-[#1B1712] dark:hover:text-white transition-colors">
+            <a href="#tentang" className="hover:text-ink dark:hover:text-white transition-colors">
               Tentang Sistem
             </a>
           </nav>
@@ -60,14 +60,14 @@ export default async function LandingPage() {
             {isLoggedIn ? (
               <Link
                 href={userHomePath}
-                className="inline-flex items-center h-9 px-4 rounded-full bg-[#C8102E] hover:bg-[#A80D26] text-white text-sm font-semibold transition-colors cursor-pointer"
+                className="inline-flex items-center h-9 px-4 rounded-full bg-primary-strong hover:bg-[#A80D26] text-white text-sm font-semibold transition-colors cursor-pointer"
               >
                 Dashboard
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center h-9 px-4 rounded-full bg-[#C8102E] hover:bg-[#A80D26] text-white text-sm font-semibold transition-colors cursor-pointer"
+                className="inline-flex items-center h-9 px-4 rounded-full bg-primary-strong hover:bg-[#A80D26] text-white text-sm font-semibold transition-colors cursor-pointer"
               >
                 Masuk
               </Link>
@@ -90,7 +90,7 @@ export default async function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#DCD5C9] dark:border-white/10 bg-[#EFEAE1] dark:bg-[#100D09] text-[#5A544A] dark:text-[#A89F91]">
+      <footer className="border-t border-outline dark:border-white/10 bg-surface-soft dark:bg-[#100D09] text-ink-muted dark:text-[#A89F91]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
             {/* Left: identity + address */}
@@ -99,7 +99,7 @@ export default async function LandingPage() {
                 <div className="relative h-7 w-5.5 shrink-0">
                   <Image src="/images/logo-kpk-badge.png" alt="Logo KPK" fill sizes="28px" className="object-contain" />
                 </div>
-                <span className="text-base font-bold text-[#1B1712] dark:text-[#F2EEE7]">
+                <span className="text-base font-bold text-ink dark:text-[#F2EEE7]">
                   Dialog Kinerja
                 </span>
               </div>
@@ -110,7 +110,7 @@ export default async function LandingPage() {
                 lingkungan KPK RI.
               </p>
 
-              <p className="text-xs leading-relaxed max-w-sm text-[#8C8478]">
+              <p className="text-xs leading-relaxed max-w-sm text-outline-strong">
                 Gedung Merah Putih KPK, Jl. Kuningan Persada Kav. 4, Setiabudi,
                 Jakarta Selatan 12950
               </p>
@@ -119,12 +119,12 @@ export default async function LandingPage() {
             {/* Right: two plain link lists */}
             <div className="lg:col-span-6 grid grid-cols-2 gap-8 lg:justify-items-end lg:text-right">
               <div className="space-y-3">
-                <h5 className="text-xs font-bold uppercase tracking-[0.08em] text-[#1B1712] dark:text-[#F2EEE7]">
+                <h5 className="text-xs font-bold uppercase tracking-[0.08em] text-ink dark:text-[#F2EEE7]">
                   Bantuan
                 </h5>
                 <ul className="space-y-2 text-sm">
                   <li>
-                    <Link href="/login" className="hover:text-[#C8102E] dark:hover:text-[#FF7A86] transition-colors">
+                    <Link href="/login" className="hover:text-primary-strong dark:hover:text-[#FF7A86] transition-colors">
                       Masuk ke Sistem
                     </Link>
                   </li>
@@ -133,7 +133,7 @@ export default async function LandingPage() {
               </div>
 
               <div className="space-y-3">
-                <h5 className="text-xs font-bold uppercase tracking-[0.08em] text-[#1B1712] dark:text-[#F2EEE7]">
+                <h5 className="text-xs font-bold uppercase tracking-[0.08em] text-ink dark:text-[#F2EEE7]">
                   Sistem Terkait
                 </h5>
                 <ul className="space-y-2 text-sm">
@@ -142,7 +142,7 @@ export default async function LandingPage() {
                       href="https://idp.kpk.go.id"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-[#C8102E] dark:hover:text-[#FF7A86] transition-colors"
+                      className="hover:text-primary-strong dark:hover:text-[#FF7A86] transition-colors"
                     >
                       idp.kpk.go.id
                     </a>
@@ -152,7 +152,7 @@ export default async function LandingPage() {
                       href="https://hris.kpk.go.id"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-[#C8102E] dark:hover:text-[#FF7A86] transition-colors"
+                      className="hover:text-primary-strong dark:hover:text-[#FF7A86] transition-colors"
                     >
                       hris.kpk.go.id
                     </a>
@@ -162,7 +162,7 @@ export default async function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-12 pt-6 border-t border-[#DCD5C9] dark:border-white/10 flex items-center justify-center text-xs">
+          <div className="mt-12 pt-6 border-t border-outline dark:border-white/10 flex items-center justify-center text-xs">
             <p>© {new Date().getFullYear()} Komisi Pemberantasan Korupsi Republik Indonesia.</p>
           </div>
         </div>

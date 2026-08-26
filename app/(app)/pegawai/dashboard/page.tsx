@@ -131,13 +131,25 @@ export default async function PegawaiDashboardPage({
   const filledItems = allItems.filter(
     (it) => (it.dialog_evaluasi?.trim() ?? "") !== "",
   );
-  const reviewedItems = filledItems.filter((it) => it.is_tercapai !== null);
-  const tercapaiCount = reviewedItems.filter((it) => it.is_tercapai).length;
-  const tidakTercapaiCount = reviewedItems.length - tercapaiCount;
+
+  // Deduplicate items by dialog_evaluasi — latest dialog's status wins
+  const latestItemStatus = new Map<string, boolean>();
+  for (const d of dialogs) {
+    for (const it of d.aspek.flatMap((a) => a.item)) {
+      const key = (it.dialog_evaluasi?.trim() ?? "").toLowerCase();
+      if (!key || it.is_tercapai === null) continue;
+      if (!latestItemStatus.has(key)) {
+        latestItemStatus.set(key, it.is_tercapai);
+      }
+    }
+  }
+  const tercapaiCount = [...latestItemStatus.values()].filter(Boolean).length;
+  const tidakTercapaiCount = [...latestItemStatus.values()].filter((v) => !v).length;
+  const uniqueReviewedCount = latestItemStatus.size;
 
   const shareHint = (part: number) =>
-    reviewedItems.length > 0
-      ? `${Math.round((part / reviewedItems.length) * 100)}% dari yang direviu`
+    uniqueReviewedCount > 0
+      ? `${Math.round((part / uniqueReviewedCount) * 100)}% dari yang direviu`
       : "belum ada yang direviu";
 
   type PeriodAccumulator = {
@@ -148,15 +160,16 @@ export default async function PegawaiDashboardPage({
   };
 
   const periodMap = new Map<string, PeriodAccumulator>();
+  const seenItems = new Map<string, boolean>();
   for (const d of dialogs) {
-    const reviewed = d.aspek
+    const items = d.aspek
       .flatMap((a) => a.item)
       .filter(
         (it) =>
           (it.dialog_evaluasi?.trim() ?? "") !== "" &&
           it.is_tercapai !== null,
       );
-    if (reviewed.length === 0) continue;
+    if (items.length === 0) continue;
 
     const key = `${d.periode_tahun}-${d.triwulan}`;
     const entry = periodMap.get(key) ?? {
@@ -165,7 +178,10 @@ export default async function PegawaiDashboardPage({
       tercapai: 0,
       tidakTercapai: 0,
     };
-    for (const it of reviewed) {
+    for (const it of items) {
+      const itemKey = (it.dialog_evaluasi?.trim() ?? "").toLowerCase();
+      if (seenItems.has(itemKey)) continue;
+      seenItems.set(itemKey, true);
       if (it.is_tercapai) entry.tercapai += 1;
       else entry.tidakTercapai += 1;
     }
@@ -186,23 +202,16 @@ export default async function PegawaiDashboardPage({
       };
     });
 
-  const tercapai = reviu.filter((r) => r.is_tercapai).length;
-  const tidakTercapai = reviu.filter((r) => r.is_tidak_tercapai).length;
   const reviuData: ChartDatum[] = [
     {
       label: "Tercapai",
-      value: tercapai,
+      value: tercapaiCount,
       color: "#15803d",
     },
     {
       label: "Tidak Tercapai",
-      value: tidakTercapai,
+      value: tidakTercapaiCount,
       color: "#b45309",
-    },
-    {
-      label: "Dalam Proses",
-      value: Math.max(0, reviu.length - tercapai - tidakTercapai),
-      color: "#475569",
     },
   ].filter((d) => d.value > 0);
 
@@ -219,7 +228,7 @@ export default async function PegawaiDashboardPage({
     {
       label: "Total Evaluasi",
       value: filledItems.length,
-      hint: `${filledItems.length - reviewedItems.length} belum direviu`,
+      hint: `${filledItems.length - uniqueReviewedCount} belum direviu`,
       icon: ListChecksIcon,
       href: "/pegawai/reviu",
       ariaLabel: "Lihat reviu evaluasi saya",
@@ -295,7 +304,7 @@ export default async function PegawaiDashboardPage({
       <section aria-label="Analitik pribadi" className="grid gap-4 lg:grid-cols-2">
         <ChartCard
           title="Analisis Evaluasi Dialog Kinerja"
-          subtitle={`${reviewedItems.length} evaluasi telah direviu`}
+          subtitle={`${uniqueReviewedCount} evaluasi telah direviu`}
         >
           {trendData.length === 0 ? (
             <EmptyState
@@ -310,12 +319,12 @@ export default async function PegawaiDashboardPage({
         </ChartCard>
         <ChartCard
           title="Hasil Reviu Saya"
-          subtitle={`${reviu.length} reviu tercatat`}
+          subtitle={`${uniqueReviewedCount} evaluasi telah direviu`}
         >
           <Donut
             data={reviuData}
-            centerValue={reviu.length}
-            centerLabel="reviu"
+            centerValue={uniqueReviewedCount}
+            centerLabel="evaluasi"
           />
         </ChartCard>
       </section>

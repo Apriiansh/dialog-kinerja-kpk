@@ -75,6 +75,107 @@ interface UserDetailViewProps {
   onDelete: () => Promise<{ error?: string } | undefined>;
 }
 
+type InfoItemProps = {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}
+
+function InfoItem({ icon, label, value }: InfoItemProps) {
+  return (
+    <div className="flex items-start gap-3 rounded-lg bg-surface-muted/40 p-3">
+      <div className="shrink-0 text-primary mt-0.5">{icon}</div>
+      <div>
+        <span className="block text-xs text-ink-muted">{label}</span>
+        {typeof value === "string" ? (
+          <span className="text-sm font-semibold text-ink">{value}</span>
+        ) : (value)}
+      </div>
+    </div>
+  );
+}
+
+type ConfirmModalProps = {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  isPending: boolean;
+  title: string;
+  desc: React.ReactNode;
+  confirmLabel: string;
+  pendingLabel: string;
+  variant?: "danger" | "success" | "default";
+}
+
+function ConfirmModal({
+  open,
+  onClose,
+  onConfirm,
+  isPending,
+  title,
+  desc,
+  confirmLabel,
+  pendingLabel,
+  variant = "default"
+}: ConfirmModalProps) {
+  if (!open) return null;
+
+  const confirmClass =
+    variant === "danger"
+      ? "bg-rose-600 hover:bg-rose-700"
+      : variant === "success"
+        ? "bg-emerald-600 hover:bg-emerald-700"
+        : "bg-primary hover:bg-primary-strong"
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
+      onClick={() => !isPending && onClose()}
+    >
+      <div
+        className="flex w-full max-w-md flex-col rounded-xl bg-surface p-6 shadow-ambient"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <h3 className={`text-base font-bold ${variant === "danger" ? "text-rose-600" : "text-ink"}`}>
+            {title}
+          </h3>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isPending}
+            className="rounded p-1 text-ink-muted hover:text-ink"
+          >
+            <XIcon size={18} />
+          </button>
+        </div>
+        <p className="mt-2 text-sm text-ink-muted">{desc}</p>
+        <div className="mt-6 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isPending}
+            className="inline-flex h-9 items-center justify-center rounded-md border border-outline bg-surface px-4 text-xs font-semibold text-ink hover:bg-surface-muted"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isPending}
+            className={`inline-flex h-9 items-center justify-center rounded-md px-4 text-xs font-semibold text-white ${confirmClass}`}
+          >
+            {isPending ? pendingLabel : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 export function UserDetailView({
   user,
   context,
@@ -159,11 +260,10 @@ export function UserDetailView({
                 type="button"
                 onClick={() => setStatusModalOpen(true)}
                 disabled={isPending}
-                className={`inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-xs font-semibold transition-colors ${
-                  isActiveState
-                    ? "border border-outline bg-surface text-ink hover:bg-surface-muted"
-                    : "bg-emerald-600 text-white hover:bg-emerald-700"
-                }`}
+                className={`inline-flex h-9 items-center gap-1.5 rounded-md px-3 text-xs font-semibold transition-colors ${isActiveState
+                  ? "border border-outline bg-surface text-ink hover:bg-surface-muted"
+                  : "bg-emerald-600 text-white hover:bg-emerald-700"
+                  }`}
               >
                 {isActiveState ? (
                   <>
@@ -229,11 +329,10 @@ export function UserDetailView({
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-xl font-bold text-ink">{user.nama_pegawai}</h2>
               <span
-                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                  isActiveState
-                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400"
-                    : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-                }`}
+                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${isActiveState
+                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400"
+                  : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                  }`}
               >
                 {isActiveState ? "Aktif" : "Nonaktif"}
               </span>
@@ -260,61 +359,54 @@ export function UserDetailView({
               Informasi Kepegawaian
             </h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="flex items-start gap-3 rounded-lg bg-surface-muted/40 p-3">
-                <IdentificationCardIcon size={22} className="shrink-0 text-primary mt-0.5" />
-                <div>
-                  <span className="block text-xs text-ink-muted">NPP & NIP</span>
+              <InfoItem
+                icon={<IdentificationCardIcon size={22} />}
+                label="NPP & NIP"
+                value={<>
                   <span className="text-sm font-semibold text-ink">NPP {user.npp}</span>
                   <span className="block text-xs text-ink-muted">NIP {user.nip || "—"}</span>
-                </div>
-              </div>
+                </>}
+              />
 
-              <div className="flex items-start gap-3 rounded-lg bg-surface-muted/40 p-3">
-                <BriefcaseIcon size={22} className="shrink-0 text-primary mt-0.5" />
-                <div>
-                  <span className="block text-xs text-ink-muted">Jabatan</span>
-                  <span className="text-sm font-semibold text-ink">{user.nama_jabatan || "—"}</span>
-                </div>
-              </div>
+              <InfoItem
+                icon={<BriefcaseIcon size={22} />}
+                label="Jabatan"
+                value={user.nama_jabatan || "-"}
+              />
 
-              <div className="flex items-start gap-3 rounded-lg bg-surface-muted/40 p-3">
-                <BuildingOfficeIcon size={22} className="shrink-0 text-primary mt-0.5" />
-                <div>
-                  <span className="block text-xs text-ink-muted">Unit Kerja</span>
-                  <span className="text-sm font-semibold text-ink">{user.unit_kerja || "—"}</span>
-                </div>
-              </div>
+              <InfoItem
+                icon={<BuildingOfficeIcon size={22} />}
+                label="Unit Kerja"
+                value={user.unit_kerja || "-"}
+              />
 
-              <div className="flex items-start gap-3 rounded-lg bg-surface-muted/40 p-3">
-                <CalendarIcon size={22} className="shrink-0 text-primary mt-0.5" />
-                <div>
-                  <span className="block text-xs text-ink-muted">Tanggal Bergabung</span>
-                  <span className="text-sm font-semibold text-ink">{user.tanggal_bergabung || "—"}</span>
-                </div>
-              </div>
+              <InfoItem
+                icon={<CalendarIcon size={22} />}
+                label="Tgl Bergabung"
+                value={user.tanggal_bergabung || "-"}
+              />
 
-              <div className="flex items-start gap-3 rounded-lg bg-surface-muted/40 p-3">
-                <ClockIcon size={22} className="shrink-0 text-primary mt-0.5" />
-                <div>
-                  <span className="block text-xs text-ink-muted">Masa Kerja Unit Terakhir</span>
-                  <span className="text-sm font-semibold text-ink">{user.masa_kerja_unit_terakhir || "—"}</span>
-                </div>
-              </div>
+              <InfoItem
+                icon={<ClockIcon size={22} />}
+                label="Masa Kerja Unit Terakhir"
+                value={user.masa_kerja_unit_terakhir || "-"}
+              />
 
-              <div className="flex items-start gap-3 rounded-lg bg-surface-muted/40 p-3">
-                <UserSwitchIcon size={22} className="shrink-0 text-primary mt-0.5" />
-                <div>
-                  <span className="block text-xs text-ink-muted">Atasan Langsung</span>
-                  {user.atasan ? (
-                    <div>
+              <InfoItem
+                icon={<UserSwitchIcon size={22} />}
+                label="Atasan Langsung"
+                value={
+                  user.atasan ? (
+                    <>
                       <span className="text-sm font-semibold text-ink">{user.atasan.nama_pegawai}</span>
                       <span className="block text-xs text-ink-muted">NPP {user.atasan.npp}</span>
-                    </div>
+                    </>
                   ) : (
                     <span className="text-sm font-semibold text-ink-muted">—</span>
-                  )}
-                </div>
-              </div>
+                  )
+                }
+              />
+
             </div>
           </div>
 
@@ -397,9 +489,8 @@ export function UserDetailView({
                       </div>
                     </div>
                     <span
-                      className={`inline-block h-2 w-2 rounded-full ${
-                        b.is_active ? "bg-emerald-500" : "bg-slate-400"
-                      }`}
+                      className={`inline-block h-2 w-2 rounded-full ${b.is_active ? "bg-emerald-500" : "bg-slate-400"
+                        }`}
                       title={b.is_active ? "Aktif" : "Nonaktif"}
                     />
                   </Link>
@@ -411,108 +502,38 @@ export function UserDetailView({
       </div>
 
       {/* Modal Konfirmasi Toggle Status */}
-      {statusModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
-          onClick={() => !isPending && setStatusModalOpen(false)}
-        >
-          <div
-            className="flex w-full max-w-md flex-col rounded-xl bg-surface p-6 shadow-ambient"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <h3 className="text-base font-bold text-ink">
-                {isActiveState ? `Nonaktifkan ${roleLabel}` : `Aktifkan ${roleLabel}`}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setStatusModalOpen(false)}
-                disabled={isPending}
-                className="rounded p-1 text-ink-muted hover:text-ink"
-              >
-                <XIcon size={18} />
-              </button>
-            </div>
-            <p className="mt-2 text-sm text-ink-muted">
-              {isActiveState
-                ? `Apakah Anda yakin ingin menonaktifkan akun ${user.nama_pegawai}? Pengguna tidak akan dapat login atau mengisi formulir.`
-                : `Apakah Anda yakin ingin mengaktifkan kembali akun ${user.nama_pegawai}?`}
-            </p>
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setStatusModalOpen(false)}
-                disabled={isPending}
-                className="inline-flex h-9 items-center justify-center rounded-md border border-outline bg-surface px-4 text-xs font-semibold text-ink hover:bg-surface-muted"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={handleToggleStatus}
-                disabled={isPending}
-                className={`inline-flex h-9 items-center justify-center rounded-md px-4 text-xs font-semibold text-white ${
-                  isActiveState ? "bg-rose-600 hover:bg-rose-700" : "bg-emerald-600 hover:bg-emerald-700"
-                }`}
-              >
-                {isPending ? "Memproses..." : isActiveState ? "Ya, Nonaktifkan" : "Ya, Aktifkan"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        open={statusModalOpen}
+        onClose={() => setStatusModalOpen(false)}
+        onConfirm={handleToggleStatus}
+        isPending={isPending}
+        variant={isActiveState ? "danger" : "success"}
+        title={isActiveState ? `Nonaktifkan ${roleLabel}` : `Aktifkan ${roleLabel}`}
+        desc={
+          isActiveState
+            ? `Apakah Anda yakin ingin menonaktifkan akun ${user.nama_pegawai}? Pengguna tidak akan dapat login atau mengisi formulir.`
+            : `Apakah Anda yakin ingin mengaktifkan kembali akun ${user.nama_pegawai}?`
+        }
+        confirmLabel={isActiveState ? "Ya, Nonaktifkan" : "Ya, Aktifkan"}
+        pendingLabel={"Memproses..."}
+      />
 
       {/* Modal Konfirmasi Hard Delete */}
-      {deleteModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
-          onClick={() => !isPending && setDeleteModalOpen(false)}
-        >
-          <div
-            className="flex w-full max-w-md flex-col rounded-xl bg-surface p-6 shadow-ambient"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <h3 className="text-base font-bold text-rose-600">
-                Hapus Permanen {roleLabel}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setDeleteModalOpen(false)}
-                disabled={isPending}
-                className="rounded p-1 text-ink-muted hover:text-ink"
-              >
-                <XIcon size={18} />
-              </button>
-            </div>
-            <p className="mt-2 text-sm text-ink-muted">
-              Tindakan ini tidak dapat dibatalkan. Akun <strong>{user.nama_pegawai}</strong> (NPP: {user.npp}) akan dihapus secara permanen dari database.
-            </p>
-            <div className="mt-6 flex items-center justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setDeleteModalOpen(false)}
-                disabled={isPending}
-                className="inline-flex h-9 items-center justify-center rounded-md border border-outline bg-surface px-4 text-xs font-semibold text-ink hover:bg-surface-muted"
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={isPending}
-                className="inline-flex h-9 items-center justify-center rounded-md bg-rose-600 px-4 text-xs font-semibold text-white hover:bg-rose-700"
-              >
-                {isPending ? "Menghapus..." : "Hapus Permanen"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        isPending={isPending}
+        variant="danger"
+        title={`Hapus Permanen ${roleLabel}`}
+        desc={
+          <>
+            Tindakan ini tidak dapat dibatalkan. Akun <strong>{user.nama_pegawai}</strong> (NPP: {user.npp}) akan dihapus secara permanen dari database.
+          </>
+        }
+        confirmLabel="Hapus Permanen"
+        pendingLabel="Menghapus..."
+      />
     </div>
   );
 }

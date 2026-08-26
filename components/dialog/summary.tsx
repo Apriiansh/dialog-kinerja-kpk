@@ -129,7 +129,7 @@ export function DialogSummary({
                       />
                       {data.tanggung_jawab_atasan?.trim() ? (
                         <div className="flex flex-col gap-1">
-                          <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                          <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                             Tanggung Jawab Atasan
                           </span>
                           <p className="whitespace-pre-wrap text-sm leading-5 text-ink">

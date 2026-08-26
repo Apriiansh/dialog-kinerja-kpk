@@ -93,7 +93,7 @@ export function TopBar({
             {initials(session.nama)}
           </div>
           <div className="hidden flex-col text-left leading-tight sm:flex">
-            <span className="max-w-[130px] truncate text-xs font-medium text-ink transition-colors group-hover:text-primary-strong md:max-w-[170px]">
+            <span className="max-w-32.5 truncate text-xs font-medium text-ink transition-colors group-hover:text-primary-strong md:max-w-42.5">
               {session.nama}
             </span>
             <div className="scale-90 origin-left -mt-0.5">

@@ -44,7 +44,7 @@ export function DialogFilterBar({
       <select
         name="tahun"
         defaultValue={tahun}
-        className="h-10 w-[110px] shrink-0 rounded-lg border border-outline bg-surface px-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+        className="h-10 w-27.5 shrink-0 rounded-lg border border-outline bg-surface px-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
       >
         <option value="">Semua Tahun</option>
         {availableYears.map((y) => (
@@ -56,7 +56,7 @@ export function DialogFilterBar({
       <select
         name="triwulan"
         defaultValue={triwulan}
-        className="h-10 w-[130px] shrink-0 rounded-lg border border-outline bg-surface px-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
+        className="h-10 w-32.5 shrink-0 rounded-lg border border-outline bg-surface px-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
       >
         <option value="">Semua Periode</option>
         <option value="TW1">TW I</option>

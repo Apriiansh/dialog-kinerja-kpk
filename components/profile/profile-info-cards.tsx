@@ -15,14 +15,14 @@ export function ProfileInfoCards({ user }: { user: UserProfileData }) {
         <div className="p-5">
           <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex flex-col gap-1">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 Nomor Pokok Pegawai (NPP)
               </dt>
               <dd className="text-sm font-semibold text-ink">{user.npp}</dd>
             </div>
 
             <div className="flex flex-col gap-1">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 Nomor Induk Pegawai (NIP)
               </dt>
               <dd className="text-sm font-semibold text-ink">
@@ -31,7 +31,7 @@ export function ProfileInfoCards({ user }: { user: UserProfileData }) {
             </div>
 
             <div className="flex flex-col gap-1">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 Nama Lengkap
               </dt>
               <dd className="text-sm font-semibold text-ink">
@@ -40,7 +40,7 @@ export function ProfileInfoCards({ user }: { user: UserProfileData }) {
             </div>
 
             <div className="flex flex-col gap-1">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 Jabatan
               </dt>
               <dd className="text-sm text-ink">
@@ -49,7 +49,7 @@ export function ProfileInfoCards({ user }: { user: UserProfileData }) {
             </div>
 
             <div className="flex flex-col gap-1">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 Unit Kerja
               </dt>
               <dd className="text-sm text-ink">
@@ -58,7 +58,7 @@ export function ProfileInfoCards({ user }: { user: UserProfileData }) {
             </div>
 
             <div className="flex flex-col gap-1">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 Status Keaktifan
               </dt>
               <dd className="text-sm">
@@ -88,7 +88,7 @@ export function ProfileInfoCards({ user }: { user: UserProfileData }) {
         <div className="p-5">
           <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="flex flex-col gap-1">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 Tanggal Bergabung
               </dt>
               <dd className="text-sm text-ink">
@@ -99,7 +99,7 @@ export function ProfileInfoCards({ user }: { user: UserProfileData }) {
             </div>
 
             <div className="flex flex-col gap-1">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 Masa Kerja di Unit Terakhir
               </dt>
               <dd className="text-sm text-ink">
@@ -108,7 +108,7 @@ export function ProfileInfoCards({ user }: { user: UserProfileData }) {
             </div>
 
             <div className="flex flex-col gap-1">
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 Aktivitas Dialog Kinerja
               </dt>
               <dd className="text-sm text-ink">
@@ -130,7 +130,7 @@ export function ProfileInfoCards({ user }: { user: UserProfileData }) {
 
         <div className="grid divide-y divide-outline sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           <div className="p-5 flex flex-col gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
               Atasan Langsung (Pejabat  )
             </span>
             {user.atasan ? (
@@ -156,7 +156,7 @@ export function ProfileInfoCards({ user }: { user: UserProfileData }) {
           </div>
 
           <div className="p-5 flex flex-col gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
               Pegawai Bawahan Langsung
             </span>
             <div className="flex flex-col gap-0.5">

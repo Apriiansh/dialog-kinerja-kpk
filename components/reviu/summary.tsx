@@ -86,7 +86,7 @@ export function ReviuSummary({
       {showHeader ? (
         <div className="border-b border-outline bg-surface-muted/60 px-5 py-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
               Formulir Reviu Hasil Dialog Kinerja
             </span>
             <TindakLanjutBadge
@@ -112,7 +112,7 @@ export function ReviuSummary({
 
       {allItems.length > 0 ? (
         <div className="border-b border-outline px-5 py-4">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
             Capaian Item Evaluasi
           </span>
           <ul className="mt-3 flex flex-col gap-4">
@@ -172,7 +172,7 @@ export function ReviuSummary({
               key={row.label}
               className="flex flex-col gap-1 px-5 py-3 sm:grid sm:grid-cols-[220px_1fr] sm:gap-4"
             >
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 {row.label}
               </dt>
               <dd

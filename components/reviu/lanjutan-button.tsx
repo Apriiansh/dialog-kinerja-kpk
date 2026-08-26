@@ -75,7 +75,7 @@ export function EvaluasiLanjutanButton({
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="modal_periode_tahun"
-                  className="text-xs font-semibold uppercase tracking-[0.05em] text-ink-muted"
+                  className="text-xs font-semibold uppercase tracking-wider text-ink-muted"
                 >
                   Tahun Periode
                 </label>
@@ -96,7 +96,7 @@ export function EvaluasiLanjutanButton({
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="modal_triwulan"
-                  className="text-xs font-semibold uppercase tracking-[0.05em] text-ink-muted"
+                  className="text-xs font-semibold uppercase tracking-wider text-ink-muted"
                 >
                   Tahap Triwulan
                 </label>

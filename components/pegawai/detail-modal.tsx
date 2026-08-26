@@ -236,7 +236,7 @@ export function PegawaiDetailModal({
                       <DetailItem label="Bawahan" value={String(u.bawahan)} />
                       {showControls && onToggleStatus ? (
                         <div className="flex flex-col gap-1">
-                          <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                          <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                             Status
                           </dt>
                           <dd className="flex items-center gap-2">
@@ -255,8 +255,8 @@ export function PegawaiDetailModal({
                               <span
                                 className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
                                   u.is_active
-                                    ? "translate-x-[22px]"
-                                    : "translate-x-[2px]"
+                                    ? "translate-x-5.5"
+                                    : "translate-x-0.5"
                                 }`}
                               />
                             </button>
@@ -278,7 +278,7 @@ export function PegawaiDetailModal({
                     </dl>
 
                     <div className="mt-5 flex flex-col gap-1.5 border-t border-outline pt-4">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                         Peran
                       </span>
                       <div className="flex flex-wrap gap-1.5">
@@ -293,12 +293,12 @@ export function PegawaiDetailModal({
 
                     {hasSubordinates ? (
                       <div className="mt-5 flex flex-col gap-2 border-t border-outline pt-4">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                           Bawahan ({u.bawahanList.length})
                         </span>
                         <table className="w-full text-left">
                           <thead className="border-b border-outline">
-                            <tr className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+                            <tr className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                               <th className="py-2 pr-3">Nama</th>
                               <th className="py-2 pr-3">NPP</th>
                               <th className="py-2 pr-3">Jabatan / Unit</th>
@@ -390,7 +390,7 @@ export function PegawaiDetailModal({
 function DetailItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+      <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
         {label}
       </dt>
       <dd className="text-sm text-ink">{value}</dd>

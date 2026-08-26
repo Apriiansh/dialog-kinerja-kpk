@@ -4,6 +4,7 @@ import { ReviuStatusBadge } from "@/components/reviu/status-badge";
 import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { tindakLanjutLabel } from "@/lib/constants/reviu-status";
+import React from "react";
 
 interface ReviuListRow {
   id: number;
@@ -14,6 +15,20 @@ interface ReviuListRow {
   penjelasan_tidak_tercapai: string | null;
   rencana_tindak_lanjut: string | null;
   tanggal_next_evaluasi: Date | null;
+}
+
+type DetailRowProps = {
+  label: string;
+  value: React.ReactNode;
+}
+
+export function DetailRow({ label, value }: DetailRowProps) {
+  return (
+    <div className="flex flex-col gap-1 px-5 py-3 sm:grid sm:grid-cols-[220px_1fr] sm:gap-4">
+      <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">{label}</dt>
+      <dd className="whitespace-pre-wrap text-sm leading-5 text-ink">{value}</dd>
+    </div>
+  );
 }
 
 export function ReviuList({
@@ -41,7 +56,7 @@ export function ReviuList({
             className="overflow-hidden rounded-lg border border-outline bg-surface"
           >
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-outline bg-surface-muted/60 px-5 py-3">
-              <span className="text-[11px] font-bold uppercase tracking-[0.05em] text-ink-muted">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
                 Reviu #{r.id}
               </span>
               <div className="flex items-center gap-2">
@@ -54,54 +69,32 @@ export function ReviuList({
             </div>
 
             <dl className="flex flex-col divide-y divide-outline">
-              <div className="flex flex-col gap-1 px-5 py-3 sm:grid sm:grid-cols-[220px_1fr] sm:gap-4">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-                  Status Tindak Lanjut
-                </dt>
-                <dd className="text-sm leading-5 text-ink">
-                  {tindakLanjutLabel(r.is_tercapai, r.is_tidak_tercapai)}
-                </dd>
-              </div>
+              <DetailRow
+               label="Status Tindak Lanjut"
+               value={tindakLanjutLabel(r.is_tercapai, r.is_tidak_tercapai)}
+              />
               {r.penjelasan_tercapai?.trim() ? (
-                <div className="flex flex-col gap-1 px-5 py-3 sm:grid sm:grid-cols-[220px_1fr] sm:gap-4">
-                  <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-                    Penjelasan Tercapai
-                  </dt>
-                  <dd className="whitespace-pre-wrap text-sm leading-5 text-ink">
-                    {r.penjelasan_tercapai}
-                  </dd>
-                </div>
+                <DetailRow 
+                  label="Penjelasan Tercapai"
+                  value={r.penjelasan_tercapai}
+                />
               ) : null}
               {r.penjelasan_tidak_tercapai?.trim() ? (
-                <div className="flex flex-col gap-1 px-5 py-3 sm:grid sm:grid-cols-[220px_1fr] sm:gap-4">
-                  <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-                    Penjelasan Tidak Tercapai
-                  </dt>
-                  <dd className="whitespace-pre-wrap text-sm leading-5 text-ink">
-                    {r.penjelasan_tidak_tercapai}
-                  </dd>
-                </div>
+               <DetailRow 
+                  label="Penjelasan Tidak Tercapai"
+                  value={r.penjelasan_tidak_tercapai}
+                />
               ) : null}
               {r.rencana_tindak_lanjut?.trim() ? (
-                <div className="flex flex-col gap-1 px-5 py-3 sm:grid sm:grid-cols-[220px_1fr] sm:gap-4">
-                  <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-                    Rencana Tindak Lanjut
-                  </dt>
-                  <dd className="whitespace-pre-wrap text-sm leading-5 text-ink">
-                    {r.rencana_tindak_lanjut}
-                  </dd>
-                </div>
+                <DetailRow
+                  label="Rencana Tindak Lanjut"
+                  value={r.rencana_tindak_lanjut}
+                />
               ) : null}
-              <div className="flex flex-col gap-1 px-5 py-3 sm:grid sm:grid-cols-[220px_1fr] sm:gap-4">
-                <dt className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
-                  Tanggal Evaluasi Berikutnya
-                </dt>
-                <dd className="text-sm leading-5 text-ink">
-                  {r.tanggal_next_evaluasi
-                    ? formatTanggal(r.tanggal_next_evaluasi)
-                    : "—"}
-                </dd>
-              </div>
+              <DetailRow 
+                label="Tanggal Evaluasi Berikutnya"
+                value={r.tanggal_next_evaluasi ? formatTanggal(r.tanggal_next_evaluasi) : "—"}
+              />
             </dl>
 
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-outline bg-surface-muted/30 px-5 py-2.5">
@@ -123,3 +116,5 @@ export function ReviuList({
     </section>
   );
 }
+
+

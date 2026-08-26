@@ -151,7 +151,7 @@ export function FormulirDialogKinerja({
   ];
 
   return (
-    <div className="hidden font-[Arial,_Helvetica,_sans-serif] text-[10.5pt] text-black print:block">
+    <div className="hidden font-[Arial,Helvetica,sans-serif] text-[10.5pt] text-black print:block">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/logo-kpk.png"

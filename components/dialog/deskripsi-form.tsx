@@ -140,7 +140,7 @@ export function DeskripsiKinerjaForm({
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="periode_tahun" className="text-xs font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <label htmlFor="periode_tahun" className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
                 Tahun Periode
               </label>
               <select
@@ -158,7 +158,7 @@ export function DeskripsiKinerjaForm({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="triwulan" className="text-xs font-semibold uppercase tracking-[0.05em] text-ink-muted">
+              <label htmlFor="triwulan" className="text-xs font-semibold uppercase tracking-wider text-ink-muted">
                 Triwulan
               </label>
               <select
@@ -193,7 +193,7 @@ export function DeskripsiKinerjaForm({
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="deskripsi_kinerja"
-                className="text-xs font-semibold uppercase tracking-[0.05em] text-ink-muted"
+                className="text-xs font-semibold uppercase tracking-wider text-ink-muted"
               >
                 Deskripsi Kinerja
               </label>

@@ -34,7 +34,7 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
     <div className="overflow-x-auto rounded-lg border border-outline bg-surface">
       <table className="w-full text-left">
         <thead className="border-b border-outline">
-          <tr className="text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted">
+          <tr className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
             <th className="px-6 py-3">Pegawai</th>
             <th className="px-6 py-3">Periode</th>
             <th className="px-6 py-3">Status Pros</th>

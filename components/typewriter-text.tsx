@@ -54,7 +54,7 @@ export function TypewriterText({
   return (
     <span className={`inline-flex items-center ${className}`}>
       <span>{text}</span>
-      <span className="ml-1 inline-block w-[3px] h-[1.15em] bg-red-500 animate-pulse align-middle" />
+      <span className="ml-1 inline-block w-0.75 h-[1.15em] bg-red-500 animate-pulse align-middle" />
     </span>
   );
 }
