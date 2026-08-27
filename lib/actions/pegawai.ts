@@ -24,6 +24,7 @@ export interface AspekItemInput {
 export interface AspekInput {
   jenis_aspek: JenisAspek;
   tanggung_jawab_pegawai?: string;
+  tanggung_jawab_atasan?: string;
   items: AspekItemInput[];
 }
 
@@ -195,6 +196,16 @@ export async function saveDialogForm(
       }
 
       for (const aspek of aspekInput) {
+        const updateData: {
+          tanggung_jawab_pegawai?: string | null;
+          tanggung_jawab_atasan?: string | null;
+        } = {
+          tanggung_jawab_pegawai: toNullable(aspek.tanggung_jawab_pegawai),
+        };
+        if (aspek.tanggung_jawab_atasan !== undefined) {
+          updateData.tanggung_jawab_atasan = toNullable(aspek.tanggung_jawab_atasan);
+        }
+
         const savedAspek = await tx.dialogKinerjaAspek.upsert({
           where: {
             id_dialog_jenis_aspek: {
@@ -202,13 +213,12 @@ export async function saveDialogForm(
               jenis_aspek: aspek.jenis_aspek,
             },
           },
-          update: {
-            tanggung_jawab_pegawai: toNullable(aspek.tanggung_jawab_pegawai),
-          },
+          update: updateData,
           create: {
             id_dialog: dialog.id,
             jenis_aspek: aspek.jenis_aspek,
             tanggung_jawab_pegawai: toNullable(aspek.tanggung_jawab_pegawai),
+            tanggung_jawab_atasan: toNullable(aspek.tanggung_jawab_atasan),
           },
         });
 

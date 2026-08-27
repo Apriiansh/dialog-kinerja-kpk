@@ -28,6 +28,8 @@ export interface DialogLiveAspekRow {
 
 export interface DialogLiveState {
   status: StatusDialog;
+  deskripsi_kinerja: string | null;
+  deskripsi_pegawai: string | null;
   aspek: DialogLiveAspekRow[];
 }
 
@@ -47,6 +49,8 @@ export async function getDialogLiveState(
     },
     select: {
       status: true,
+      deskripsi_kinerja: true,
+      deskripsi_pegawai: true,
       aspek: {
         orderBy: { id: "asc" },
         select: {
@@ -74,6 +78,8 @@ export async function getDialogLiveState(
 
   return {
     status: dialog.status,
+    deskripsi_kinerja: dialog.deskripsi_kinerja,
+    deskripsi_pegawai: dialog.deskripsi_pegawai,
     aspek: dialog.aspek.map((aspek) => ({
       id: aspek.id,
       jenis_aspek: aspek.jenis_aspek,

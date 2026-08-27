@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, PencilSimpleLineIcon } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeftIcon, PencilSimpleIcon, PencilSimpleLineIcon } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/auth/session";
 import {
   canEditDialog,
@@ -120,21 +120,34 @@ export default async function DialogDetailPage({
       <div className={`flex flex-col gap-8 ${isSelesai ? "print:hidden" : ""}`}>
         <div className="flex flex-col gap-4">
           <Link
-            href="/pegawai/dashboard"
-            className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
+            href="/pegawai/dialog"
+            className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-ink-muted transition-colors hover:text-ink"
           >
-            <ArrowLeftIcon size={16} weight="bold" />
-            Kembali ke Dashboard
+            <ArrowLeftIcon size={14} weight="bold" />
+            Kembali ke Daftar Dialog
           </Link>
 
-          <header className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+          <header className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex flex-col gap-1">
-                <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-                  Dialog Kinerja Ke-{sequenceNum} ({formatPeriode(dialog.triwulan, dialog.periode_tahun)})
-                </h1>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
+                    Dialog Kinerja Ke-{sequenceNum}
+                  </h1>
+                  <span className="rounded-md border border-outline bg-surface-muted px-2.5 py-0.5 text-xs font-semibold text-ink-muted">
+                    {formatPeriode(dialog.triwulan, dialog.periode_tahun)}
+                  </span>
+                  {dialog.id_dialog_induk ? (
+                    <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+                      Dialog Lanjutan
+                    </span>
+                  ) : null}
+                </div>
                 <p className="text-sm leading-5 text-ink-muted">
-                  Atasan: {dialog.atasan.nama_pegawai}
+                  Atasan:{" "}
+                  <span className="font-medium text-ink">
+                    {dialog.atasan.nama_pegawai}
+                  </span>
                   {dialog.atasan.nama_jabatan
                     ? ` (${dialog.atasan.nama_jabatan})`
                     : ""}
@@ -143,6 +156,7 @@ export default async function DialogDetailPage({
                     : ""}
                 </p>
               </div>
+
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={dialog.status} />
                 {!isSelesai ? (
@@ -153,10 +167,14 @@ export default async function DialogDetailPage({
                     partnerRoleLabel="Atasan Langsung"
                   />
                 ) : null}
-                {dialog.id_dialog_induk ? (
-                  <span className="bg-emerald-400 px-2 py-2 rounded-md text-xs font-semibold text-gray-900">
-                    Dialog Lanjutan
-                  </span>
+                {isEditable ? (
+                  <Link
+                    href={`/pegawai/dialog/${dialog.id}/edit`}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-on-primary shadow-xs transition-colors hover:bg-primary-strong"
+                  >
+                    <PencilSimpleIcon size={14} weight="bold" />
+                    Isi Dialog
+                  </Link>
                 ) : null}
                 {isSelesai ? (
                   <>

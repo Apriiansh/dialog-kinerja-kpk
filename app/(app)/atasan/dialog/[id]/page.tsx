@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, PencilSimple, PaperPlaneTilt } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, PencilSimple } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { getAtasanDialog } from "@/lib/queries/atasan";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DeleteDialogButton } from "@/components/dialog/delete-button";
 import { DialogSummary } from "@/components/dialog/summary";
-import { DialogResponsesForm } from "@/components/dialog/responses-form";
 import { UnduhBuktiButton } from "@/components/shared/unduh-bukti-button";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { FormulirDialogKinerja } from "@/components/dialog/detail-view";
@@ -15,7 +14,6 @@ import { ReviuList } from "@/components/reviu/list";
 import { ReviuSignForm } from "@/components/reviu/sign-form";
 import { ScrollToAnchor } from "@/components/shared/scroll-to-anchor";
 import { Separator } from "@/components/ui/separator";
-import { submitDialog } from "@/lib/actions/atasan";
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
 import { formatPeriode } from "@/lib/constants/triwulan";
@@ -43,9 +41,7 @@ function StatusNote({ status }: { status: string }) {
   if (status === "menunggu_pegawai") {
     return (
       <p className="text-sm leading-5 text-ink-muted">
-        Dialog telah dikirim/disetujui. Pegawai sedang melengkapi isian aspek — Anda dapat
-        memantau isian mereka secara langsung di bawah dan mengisi tanggung
-        jawab atasan secara bersamaan.
+        Dialog telah disetujui. Pegawai sedang melengkapi isian aspek — Anda dapat mengisi Deskripsi Kinerja dan Tanggung Jawab Atasan melalui menu <strong>Input</strong>.
       </p>
     );
   }
@@ -99,6 +95,7 @@ export default async function DialogDetailPage({
   const isCollaboration = status === "menunggu_pegawai";
   const isReview = status === "menunggu_atasan";
   const isSelesai = status === "selesai";
+  const canEditDialog = isDraft || isCollaboration || isReview;
   const selesaiReviuIds = dialog.reviu
     .filter((r) => r.status === "selesai")
     .map((r) => r.id);
@@ -115,20 +112,33 @@ export default async function DialogDetailPage({
         <div className="flex flex-col gap-4">
           <Link
             href="/atasan/dialog"
-            className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
+            className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-ink-muted transition-colors hover:text-ink"
           >
-            <ArrowLeft size={16} weight="bold" />
+            <ArrowLeft size={14} weight="bold" />
             Kembali ke Daftar Dialog
           </Link>
 
-          <header className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+          <header className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex flex-col gap-1">
-                <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-                  Dialog Kinerja Ke-{sequenceNum} ({formatPeriode(dialog.triwulan, dialog.periode_tahun)})
-                </h1>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
+                    Dialog Kinerja Ke-{sequenceNum}
+                  </h1>
+                  <span className="rounded-md border border-outline bg-surface-muted px-2.5 py-0.5 text-xs font-semibold text-ink-muted">
+                    {formatPeriode(dialog.triwulan, dialog.periode_tahun)}
+                  </span>
+                  {dialog.id_dialog_induk ? (
+                    <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+                      Dialog Lanjutan
+                    </span>
+                  ) : null}
+                </div>
                 <p className="text-sm leading-5 text-ink-muted">
-                  Pegawai: {dialog.pegawai.nama_pegawai}
+                  Pegawai:{" "}
+                  <span className="font-medium text-ink">
+                    {dialog.pegawai.nama_pegawai}
+                  </span>
                   {dialog.pegawai.nama_jabatan
                     ? ` (${dialog.pegawai.nama_jabatan})`
                     : ""}
@@ -137,6 +147,7 @@ export default async function DialogDetailPage({
                     : ""}
                 </p>
               </div>
+
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={status} />
                 {!isSelesai ? (
@@ -147,10 +158,14 @@ export default async function DialogDetailPage({
                     partnerRoleLabel="Pegawai"
                   />
                 ) : null}
-                {dialog.id_dialog_induk ? (
-                  <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                    Dialog Lanjutan
-                  </span>
+                {canEditDialog ? (
+                  <Link
+                    href={`/atasan/dialog/${dialog.id}/edit`}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-outline-strong bg-surface px-3.5 text-xs font-semibold text-ink shadow-xs transition-colors hover:bg-surface-muted"
+                  >
+                    <PencilSimple size={14} weight="bold" />
+                    Edit Dialog
+                  </Link>
                 ) : null}
                 {isSelesai ? (
                   <>
@@ -207,73 +222,40 @@ export default async function DialogDetailPage({
           </header>
         </div>
 
-        {isReview || isCollaboration ? (
-          <>
-            {isCollaboration ? (
-              <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary-soft/40 px-5 py-4">
-                <span className="mt-1 flex h-2 w-2 shrink-0">
-                  <span className="h-2 w-2 animate-ping rounded-full bg-emerald-500" />
-                  <span className="-ml-2 mt-0 h-2 w-2 rounded-full bg-emerald-500" />
-                </span>
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-semibold text-ink">
-                    Sesi pengisian bersama berlangsung
-                  </p>
-                  <p className="text-xs leading-5 text-ink-muted">
-                    Isian pegawai muncul otomatis di bawah. Anda dapat mengisi
-                    &ldquo;Tanggung Jawab Atasan&rdquo; secara bersamaan —
-                    tersimpan otomatis. Tombol kirim evaluasi aktif setelah
-                    pegawai menekan &ldquo;Kirim ke Atasan&rdquo;.
-                  </p>
-                </div>
-              </div>
-            ) : null}
-            <DialogResponsesForm
-              dialogId={dialog.id}
-              canEdit
-              canSubmit={isReview}
-              liveEnabled={isCollaboration}
-              aspek={dialog.aspek}
-            />
-          </>
-        ) : (
-          <>
-            <section aria-label="Aspek dialog kinerja">
-              <DialogSummary
-                aspek={dialog.aspek}
-                isLanjutan={dialog.id_dialog_induk !== null}
-                previousItems={dialog.dialog_induk?.aspek.flatMap((aspek) => aspek.item)}
+        <section aria-label="Aspek dialog kinerja">
+          <DialogSummary
+            aspek={dialog.aspek}
+            isLanjutan={dialog.id_dialog_induk !== null}
+            previousItems={dialog.dialog_induk?.aspek.flatMap((aspek) => aspek.item)}
+          />
+        </section>
+
+        {status === "menunggu_validasi" ? (
+          <p className="text-sm leading-5 text-ink-muted">
+            Evaluasi atasan telah disimpan dan menunggu validasi pegawai.
+          </p>
+        ) : null}
+
+        {isSelesai && dialog.reviu.length > 0 ? (
+          <div id="reviu" className="flex scroll-mt-14 flex-col gap-8">
+            <Separator />
+            <ReviuList reviu={dialog.reviu} />
+
+            {dialog.reviu.some(
+              (r) => r.status === "menunggu_atasan" && !r.is_valid_atasan,
+            ) ? (
+              <ReviuSignForm
+                reviuId={
+                  dialog.reviu.find(
+                    (r) =>
+                      r.status === "menunggu_atasan" && !r.is_valid_atasan,
+                  )!.id
+                }
+                role="atasan"
               />
-            </section>
-
-            {status === "menunggu_validasi" ? (
-              <p className="text-sm leading-5 text-ink-muted">
-                Evaluasi atasan telah disimpan dan menunggu validasi pegawai.
-              </p>
             ) : null}
-
-            {isSelesai && dialog.reviu.length > 0 ? (
-              <div id="reviu" className="flex scroll-mt-14 flex-col gap-8">
-                <Separator />
-                <ReviuList reviu={dialog.reviu} />
-
-                {dialog.reviu.some(
-                  (r) => r.status === "menunggu_atasan" && !r.is_valid_atasan,
-                ) ? (
-                  <ReviuSignForm
-                    reviuId={
-                      dialog.reviu.find(
-                        (r) =>
-                          r.status === "menunggu_atasan" && !r.is_valid_atasan,
-                      )!.id
-                    }
-                    role="atasan"
-                  />
-                ) : null}
-              </div>
-            ) : null}
-          </>
-        )}
+          </div>
+        ) : null}
       </div>
 
       {isSelesai ? (

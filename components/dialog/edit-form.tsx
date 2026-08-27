@@ -48,12 +48,14 @@ interface ItemDraft {
 interface AspekDraft {
   jenis_aspek: JenisAspek;
   tanggung_jawab_pegawai: string;
+  tanggung_jawab_atasan?: string;
   items: ItemDraft[];
 }
 
 interface ExistingAspek {
   jenis_aspek: JenisAspek;
   tanggung_jawab_pegawai: string | null;
+  tanggung_jawab_atasan?: string | null;
   item: {
     id: number;
     dialog_evaluasi: string | null;
@@ -127,6 +129,7 @@ function buildAspekPayload(source: AspekDraft[]): AspekInput[] {
   return source.map((d) => ({
     jenis_aspek: d.jenis_aspek,
     tanggung_jawab_pegawai: d.tanggung_jawab_pegawai,
+    tanggung_jawab_atasan: d.tanggung_jawab_atasan,
     items: d.items.map((item) => ({
       id: item.id,
       dialog_evaluasi: item.dialog_evaluasi,
@@ -298,6 +301,7 @@ export function DialogForm({
       return {
         jenis_aspek: jenis,
         tanggung_jawab_pegawai: existing?.tanggung_jawab_pegawai ?? "",
+        tanggung_jawab_atasan: existing?.tanggung_jawab_atasan ?? "",
         items: (existing?.item ?? []).map((item) => ({
           id: item.id,
           dialog_evaluasi: item.dialog_evaluasi ?? "",
@@ -314,6 +318,9 @@ export function DialogForm({
   const [deskripsiPegawaiText, setDeskripsiPegawaiText] = useState(
     deskripsiPegawai ?? "",
   );
+  const [liveDeskripsiAtasan, setLiveDeskripsiAtasan] = useState(
+    deskripsiKinerja ?? "",
+  );
   const [pending, setPending] = useState<"draft" | "submit" | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -325,21 +332,41 @@ export function DialogForm({
   const deskripsiPegawaiRef = useRef(deskripsiPegawaiText);
   const savedJsonRef = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingStopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queueRef = useRef<Promise<void>>(Promise.resolve());
 
-  const [tanggungJawabAtasan, setTanggungJawabAtasan] = useState<
-    Partial<Record<JenisAspek, string | null>>
-  >({});
-  const { transport } = useDialogLive({
+  const { transport, partnerTyping, isFieldLocked, getFieldLockerRole, sendTyping } = useDialogLive({
     dialogId,
     onState: (state) => {
-      const map: Partial<Record<JenisAspek, string | null>> = {};
-      for (const aspekRow of state.aspek) {
-        map[aspekRow.jenis_aspek] = aspekRow.tanggung_jawab_atasan;
+      if (state.deskripsi_kinerja !== undefined) {
+        setLiveDeskripsiAtasan(state.deskripsi_kinerja ?? "");
       }
-      setTanggungJawabAtasan(map);
+      if (state.aspek) {
+        setDrafts((prev) =>
+          prev.map((d) => {
+            const liveRow = state.aspek.find((a) => a.jenis_aspek === d.jenis_aspek);
+            if (!liveRow) return d;
+            return {
+              ...d,
+              tanggung_jawab_atasan:
+                liveRow.tanggung_jawab_atasan ?? d.tanggung_jawab_atasan ?? "",
+            };
+          }),
+        );
+      }
     },
   });
+
+  const notifyTyping = useCallback(
+    (fieldId?: string) => {
+      sendTyping(true, fieldId, { role: "pegawai" });
+      if (typingStopTimer.current) clearTimeout(typingStopTimer.current);
+      typingStopTimer.current = setTimeout(() => {
+        sendTyping(false, fieldId, { role: "pegawai" });
+      }, 2_000);
+    },
+    [sendTyping],
+  );
 
   useEffect(() => {
     draftsRef.current = drafts;
@@ -436,6 +463,7 @@ export function DialogForm({
   }, [showConfirm]);
 
   function updateAspek(jenis: JenisAspek, patch: Partial<AspekDraft>) {
+    notifyTyping();
     setDrafts((prev) =>
       prev.map((d) => (d.jenis_aspek === jenis ? { ...d, ...patch } : d)),
     );
@@ -446,13 +474,13 @@ export function DialogForm({
     index: number,
     patch: Partial<ItemDraft>,
   ) {
+    notifyTyping();
     setDrafts((prev) =>
       prev.map((d) => {
         if (d.jenis_aspek !== jenis) return d;
-        const items = d.items.map((item, i) =>
-          i === index ? { ...item, ...patch } : item,
-        );
-        return { ...d, items };
+        const nextItems = [...d.items];
+        nextItems[index] = { ...nextItems[index], ...patch };
+        return { ...d, items: nextItems };
       }),
     );
   }
@@ -516,44 +544,76 @@ export function DialogForm({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-3">
-        <Link
-          href={`/pegawai/dialog/${dialogId}`}
-          className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-ink-muted transition-colors hover:text-ink"
-        >
-          <ArrowLeftIcon size={16} weight="bold" />
-          Kembali ke Detail
-        </Link>
-        <div className="flex flex-col gap-1">
-          <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-            Isi Dialog Kinerja {formatPeriode(triwulan, periodeTahun)}
-          </h1>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <Link
+            href={`/pegawai/dialog/${dialogId}`}
+            className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-ink-muted transition-colors hover:text-ink"
+          >
+            <ArrowLeftIcon size={14} weight="bold" />
+            Kembali ke Detail Dialog
+          </Link>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
+              Isi Dialog Kinerja
+            </h1>
+            <span className="rounded-md border border-outline bg-surface-muted px-2.5 py-0.5 text-xs font-semibold text-ink-muted">
+              {formatPeriode(triwulan, periodeTahun)}
+            </span>
+          </div>
           <p className="text-sm leading-5 text-ink-muted">
-            Atasan: {atasanNama} · Lengkapi empat aspek evaluasi di bawah ini.
+            Atasan: <span className="font-medium text-ink">{atasanNama}</span> · Lengkapi empat aspek evaluasi di bawah ini.
           </p>
         </div>
 
         <div className="flex flex-col gap-1.5 rounded-lg border border-outline bg-surface px-5 py-4">
-          <label htmlFor="deskripsi-pegawai-input" className={LABEL_CLASSES}>
-            {deskripsiKinerja?.trim() ? "Deskripsi Kinerja (versi Pegawai)" : "Deskripsi Kinerja (Pegawai)"}
-          </label>
+          <div className="flex items-center justify-between gap-2">
+            <label htmlFor="deskripsi-pegawai-input" className={LABEL_CLASSES}>
+              {liveDeskripsiAtasan?.trim() ? "Deskripsi Kinerja (versi Pegawai)" : "Deskripsi Kinerja (Pegawai)"}
+            </label>
+            {isFieldLocked("deskripsi_pegawai") ? (
+              <span className="text-xs font-medium text-primary animate-pulse">
+                Sedang diedit oleh Atasan...
+              </span>
+            ) : partnerTyping?.isTyping ? (
+              <span className="text-xs font-medium text-primary animate-pulse">
+                Atasan sedang mengetik...
+              </span>
+            ) : null}
+          </div>
           <textarea
             id="deskripsi-pegawai-input"
             rows={3}
             value={deskripsiPegawaiText}
-            onChange={(e) => setDeskripsiPegawaiText(e.target.value)}
+            disabled={isFieldLocked("deskripsi_pegawai")}
+            onChange={(e) => {
+              setDeskripsiPegawaiText(e.target.value);
+              notifyTyping("deskripsi_pegawai");
+            }}
+            onFocus={() => notifyTyping("deskripsi_pegawai")}
             placeholder="Tuliskan gambaran/deskripsi kinerja versi Anda (opsional)..."
-            className={TEXTAREA_CLASSES}
+            className={`${TEXTAREA_CLASSES} ${
+              isFieldLocked("deskripsi_pegawai")
+                ? "bg-surface-muted/60 cursor-not-allowed opacity-80"
+                : ""
+            }`}
           />
         </div>
 
-        {deskripsiKinerja?.trim() ? (
+        {liveDeskripsiAtasan?.trim() ? (
           <div className="rounded-lg border border-outline bg-surface px-5 py-4">
-            <span className={LABEL_CLASSES}>
-              {deskripsiPegawaiText.trim() ? "Deskripsi Kinerja (versi Atasan)" : "Deskripsi Kinerja (Atasan)"}
-            </span>
+            <div className="flex items-center justify-between gap-2">
+              <span className={LABEL_CLASSES}>
+                {deskripsiPegawaiText.trim() ? "Deskripsi Kinerja (versi Atasan)" : "Deskripsi Kinerja (Atasan)"}
+              </span>
+              {isFieldLocked("deskripsi_atasan") ? (
+                <span className="text-xs font-medium text-primary animate-pulse">
+                  Sedang diedit oleh Atasan...
+                </span>
+              ) : null}
+            </div>
             <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
-              {deskripsiKinerja}
+              {liveDeskripsiAtasan}
             </p>
           </div>
         ) : null}
@@ -742,33 +802,75 @@ export function DialogForm({
                       </div>
                     ) : null}
 
-                    <div className="flex flex-col gap-1.5">
-                      <label
-                        htmlFor={`${jenis}-tj`}
-                        className={LABEL_CLASSES}
-                      >
-                        Tanggung Jawab Pegawai
-                      </label>
-                      <textarea
-                        id={`${jenis}-tj`}
-                        rows={3}
-                        value={draft.tanggung_jawab_pegawai}
-                        onChange={(e) =>
-                          updateAspek(jenis, {
-                            tanggung_jawab_pegawai: e.target.value,
-                          })
-                        }
-                        placeholder="Langkah atau komitmen yang akan Anda lakukan"
-                        className={TEXTAREA_CLASSES}
-                      />
-                      <div className="flex flex-col gap-1 rounded-md border border-outline bg-surface-muted/40 px-4 py-3.5">
-                        <span className={LABEL_CLASSES}>
-                          Tanggung Jawab Atasan
-                        </span>
-                        <p className="whitespace-pre-wrap text-sm leading-5 text-ink">
-                          {(tanggungJawabAtasan[jenis] ?? "").trim() ||
-                            "Belum diisi oleh atasan."}
-                        </p>
+                    <div className="flex flex-col gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <label
+                            htmlFor={`${jenis}-tj-pegawai`}
+                            className={LABEL_CLASSES}
+                          >
+                            Tanggung Jawab Pegawai
+                          </label>
+                          {isFieldLocked(`tanggung_jawab_pegawai_${jenis}`) ? (
+                            <span className="text-xs font-medium text-primary animate-pulse">
+                              Sedang diedit oleh Atasan...
+                            </span>
+                          ) : null}
+                        </div>
+                        <textarea
+                          id={`${jenis}-tj-pegawai`}
+                          rows={3}
+                          value={draft.tanggung_jawab_pegawai}
+                          disabled={isFieldLocked(`tanggung_jawab_pegawai_${jenis}`)}
+                          onChange={(e) => {
+                            updateAspek(jenis, {
+                              tanggung_jawab_pegawai: e.target.value,
+                            });
+                            notifyTyping(`tanggung_jawab_pegawai_${jenis}`);
+                          }}
+                          onFocus={() => notifyTyping(`tanggung_jawab_pegawai_${jenis}`)}
+                          placeholder="Langkah atau komitmen yang akan Anda lakukan"
+                          className={`${TEXTAREA_CLASSES} ${
+                            isFieldLocked(`tanggung_jawab_pegawai_${jenis}`)
+                              ? "bg-surface-muted/60 cursor-not-allowed opacity-80"
+                              : ""
+                          }`}
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <label
+                            htmlFor={`${jenis}-tj-atasan`}
+                            className={LABEL_CLASSES}
+                          >
+                            Tanggung Jawab Atasan
+                          </label>
+                          {isFieldLocked(`tanggung_jawab_atasan_${jenis}`) ? (
+                            <span className="text-xs font-medium text-primary animate-pulse">
+                              Sedang diedit oleh Atasan...
+                            </span>
+                          ) : null}
+                        </div>
+                        <textarea
+                          id={`${jenis}-tj-atasan`}
+                          rows={3}
+                          value={draft.tanggung_jawab_atasan ?? ""}
+                          disabled={isFieldLocked(`tanggung_jawab_atasan_${jenis}`)}
+                          onChange={(e) => {
+                            updateAspek(jenis, {
+                              tanggung_jawab_atasan: e.target.value,
+                            });
+                            notifyTyping(`tanggung_jawab_atasan_${jenis}`);
+                          }}
+                          onFocus={() => notifyTyping(`tanggung_jawab_atasan_${jenis}`)}
+                          placeholder="Tuliskan usulan atau komitmen atasan untuk mendukung aspek ini..."
+                          className={`${TEXTAREA_CLASSES} ${
+                            isFieldLocked(`tanggung_jawab_atasan_${jenis}`)
+                              ? "bg-surface-muted/60 cursor-not-allowed opacity-80"
+                              : ""
+                          }`}
+                        />
                       </div>
                     </div>
                   </div>
@@ -801,6 +903,11 @@ export function DialogForm({
               : "Menyambungkan…"}
         </span>
         <SaveStateMeta saveState={saveState} savedAt={savedAt} />
+        {partnerTyping?.isTyping ? (
+          <span className="text-xs font-medium text-primary animate-pulse">
+            Atasan sedang mengetik...
+          </span>
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">

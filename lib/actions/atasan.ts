@@ -267,6 +267,11 @@ export async function saveDeskripsiKinerja(
     data: updateData,
   });
 
+  publishDialogUpdate(dialogId, {
+    kind: "aspek_atasan",
+    byUserId: session.id,
+  });
+
   revalidatePath(`/atasan/dialog/${dialog.id}`);
   revalidatePath(`/atasan/dialog/${dialog.id}/edit`);
   revalidatePath("/atasan/dialog");

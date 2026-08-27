@@ -22,6 +22,7 @@ import { buildDialogSections } from "@/lib/constants/dialog-sections";
 import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import { AspekPegawaiInput } from "@/components/pegawai/aspek-input";
+import { useDialogLive } from "@/lib/hooks/use-dialog-live";
 import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
 
 const SECTION_ICONS = [ChartBarIcon, GaugeIcon, UserFocusIcon, TrendUpIcon] as const;
@@ -35,6 +36,7 @@ export function AtasanEditForm({
   initialTahun = 2026,
   initialTriwulan = "TW3",
   aspek,
+  deskripsiPegawai = "",
 }: {
   dialogId: number;
   status: StatusDialog;
@@ -42,17 +44,20 @@ export function AtasanEditForm({
   initialTahun?: number;
   initialTriwulan?: Triwulan;
   aspek: AspekPegawaiRow[];
+  deskripsiPegawai?: string;
 }) {
   const router = useRouter();
 
   // Deskripsi & Periode State
   const [deskripsi, setDeskripsi] = useState(initialDeskripsiKinerja);
+  const [liveDeskripsiPegawai, setLiveDeskripsiPegawai] = useState(deskripsiPegawai);
   const [tahun, setTahun] = useState<number>(initialTahun);
   const [triwulan, setTriwulan] = useState<Triwulan>(initialTriwulan);
 
   // Aspect Responses State
+  const [liveAspek, setLiveAspek] = useState(aspek);
   const { sections, initialValues } = buildDialogSections(aspek);
-  const aspekById = new Map(aspek.map((a) => [a.id, a]));
+  const aspekById = new Map(liveAspek.map((a) => [a.id, a]));
   const [responses, setResponses] = useState(initialValues);
 
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -66,6 +71,40 @@ export function AtasanEditForm({
   const triwulanRef = useRef(triwulan);
   const responsesRef = useRef(responses);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingStopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { transport, partnerTyping, isFieldLocked, getFieldLockerRole, sendTyping } = useDialogLive({
+    dialogId,
+    enabled: true,
+    onState: (state) => {
+      if (state.deskripsi_pegawai !== undefined) {
+        setLiveDeskripsiPegawai(state.deskripsi_pegawai ?? "");
+      }
+      if (state.aspek) {
+        setLiveAspek(state.aspek as unknown as AspekPegawaiRow[]);
+        setResponses((prev) => {
+          const next = { ...prev };
+          for (const a of state.aspek) {
+            if (a.tanggung_jawab_atasan !== undefined) {
+              next[a.id] = a.tanggung_jawab_atasan ?? "";
+            }
+          }
+          return next;
+        });
+      }
+    },
+  });
+
+  const notifyTyping = useCallback(
+    (fieldId?: string) => {
+      sendTyping(true, fieldId, { role: "atasan" });
+      if (typingStopTimer.current) clearTimeout(typingStopTimer.current);
+      typingStopTimer.current = setTimeout(() => {
+        sendTyping(false, fieldId, { role: "atasan" });
+      }, 2_000);
+    },
+    [sendTyping],
+  );
 
   useEffect(() => {
     deskripsiRef.current = deskripsi;
@@ -113,6 +152,7 @@ export function AtasanEditForm({
   const handleDeskripsiChange = (next: string) => {
     setDeskripsi(next);
     setSaveState("idle");
+    notifyTyping("deskripsi_atasan");
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => void persist(), 800);
   };
@@ -131,11 +171,12 @@ export function AtasanEditForm({
     timer.current = setTimeout(() => void persist(), 800);
   };
 
-  const handleResponseChange = (id: string, value: string) => {
+  const handleResponseChange = (id: string, value: string, fieldId?: string) => {
     const next = { ...responsesRef.current, [id]: value };
     responsesRef.current = next;
     setResponses(next);
     setSaveState("idle");
+    notifyTyping(fieldId ?? `aspek_${id}`);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => void persist(), 800);
   };
@@ -253,9 +294,22 @@ export function AtasanEditForm({
 
         <div className="rounded-xl border border-outline bg-surface p-6 shadow-xs">
           <div className="flex flex-col gap-0.5 border-b border-outline pb-4">
-            <h2 className="text-base font-semibold text-ink">
-              Deskripsi Kinerja (versi Atasan)
-            </h2>
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-base font-semibold text-ink">
+                {liveDeskripsiPegawai?.trim()
+                  ? "Deskripsi Kinerja (versi Atasan)"
+                  : "Deskripsi Kinerja (Atasan)"}
+              </h2>
+              {isFieldLocked("deskripsi_atasan") ? (
+                <span className="text-xs font-medium text-primary animate-pulse">
+                  Sedang diedit oleh Pegawai...
+                </span>
+              ) : partnerTyping?.isTyping ? (
+                <span className="text-xs font-medium text-primary animate-pulse">
+                  Pegawai sedang mengetik...
+                </span>
+              ) : null}
+            </div>
             <p className="text-xs leading-4 text-ink-muted">
               Tuliskan arahan, situasi, atau deskripsi kinerja dari Atasan.
             </p>
@@ -265,12 +319,38 @@ export function AtasanEditForm({
               id="deskripsi_kinerja"
               name="deskripsi_kinerja"
               value={deskripsi}
+              disabled={isFieldLocked("deskripsi_atasan")}
               onChange={(e) => handleDeskripsiChange(e.target.value)}
+              onFocus={() => notifyTyping("deskripsi_atasan")}
               rows={4}
               placeholder="Contoh: Target capaian kinerja triwulan ini memerlukan perhatian pada kualitas dokumen teknis…"
-              className="w-full resize-y rounded-lg border border-outline bg-surface p-3 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus"
+              className={`w-full resize-y rounded-lg border border-outline bg-surface p-3 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus ${
+                isFieldLocked("deskripsi_atasan")
+                  ? "bg-surface-muted/60 cursor-not-allowed opacity-80"
+                  : ""
+              }`}
             />
           </div>
+
+          {liveDeskripsiPegawai?.trim() ? (
+            <div className="mt-4 rounded-md border border-outline bg-surface-muted/40 px-4 py-3.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                  {deskripsi.trim()
+                    ? "Deskripsi Kinerja (versi Pegawai) — Baca Saja"
+                    : "Deskripsi Kinerja (Pegawai) — Baca Saja"}
+                </span>
+                {isFieldLocked("deskripsi_pegawai") ? (
+                  <span className="text-xs font-medium text-primary animate-pulse">
+                    Sedang diedit oleh Pegawai...
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
+                {liveDeskripsiPegawai}
+              </p>
+            </div>
+          ) : null}
         </div>
       </section>
 
@@ -303,31 +383,64 @@ export function AtasanEditForm({
               <div className="flex flex-col gap-6 px-6 py-5">
                 {fields.map(({ id, label }) => {
                   const aspekRow = aspekById.get(id);
+                  const fieldKey = aspekRow
+                    ? `tanggung_jawab_atasan_${aspekRow.jenis_aspek}`
+                    : `aspek_${id}`;
+                  const isLocked =
+                    isFieldLocked(fieldKey) || isFieldLocked(`aspek_${id}`);
+
                   return (
                     <div key={id} className="flex flex-col gap-4">
                       <div className="flex flex-col gap-1.5">
-                        <label
-                          htmlFor={`aspek_${id}`}
-                          className="text-xs font-semibold uppercase tracking-wider text-ink-muted"
-                        >
-                          Tanggung Jawab Atasan — {label}
-                        </label>
+                        <div className="flex items-center justify-between gap-2">
+                          <label
+                            htmlFor={`aspek_${id}`}
+                            className="text-xs font-semibold uppercase tracking-wider text-ink-muted"
+                          >
+                            Tanggung Jawab Atasan — {label}
+                          </label>
+                          {isLocked ? (
+                            <span className="text-xs font-medium text-primary animate-pulse">
+                              Sedang diedit oleh Pegawai...
+                            </span>
+                          ) : null}
+                        </div>
                         <textarea
                           id={`aspek_${id}`}
                           name={`aspek_${id}`}
                           value={responses[id] ?? ""}
+                          disabled={isLocked}
                           onChange={(e) =>
-                            handleResponseChange(String(id), e.target.value)
+                            handleResponseChange(
+                              String(id),
+                              e.target.value,
+                              fieldKey,
+                            )
                           }
+                          onFocus={() => notifyTyping(fieldKey)}
                           rows={3}
                           placeholder="Tulis tanggung jawab atasan untuk mendukung aspek ini…"
-                          className="w-full resize-y rounded-md border border-outline bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus"
+                          className={`w-full resize-y rounded-md border border-outline bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus ${
+                            isLocked
+                              ? "bg-surface-muted/60 cursor-not-allowed opacity-80"
+                              : ""
+                          }`}
                         />
                       </div>
                       <div className="rounded-md border border-outline bg-surface-muted/40 px-4 py-3.5">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
-                          Isian Pegawai (Pratinjau Baca-Saja)
-                        </span>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                            Isian Pegawai (Pratinjau Baca-Saja)
+                          </span>
+                          {aspekRow &&
+                          isFieldLocked(
+                            `tanggung_jawab_pegawai_${aspekRow.jenis_aspek}`,
+                          ) ? (
+                            <span className="text-xs font-medium text-primary animate-pulse">
+                              Sedang diedit oleh Pegawai...
+                            </span>
+                          ) : null}
+                        </div>
                         {aspekRow ? <AspekPegawaiInput aspek={aspekRow} /> : null}
                       </div>
                     </div>
@@ -342,7 +455,14 @@ export function AtasanEditForm({
       {/* Sticky Bottom Action Bar */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-outline bg-surface/90 backdrop-blur lg:pl-60">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">{saveMeta}</div>
+          <div className="flex items-center gap-4">
+            {saveMeta}
+            {partnerTyping?.isTyping ? (
+              <span className="text-xs font-medium text-primary animate-pulse">
+                Pegawai sedang mengetik...
+              </span>
+            ) : null}
+          </div>
           <div className="flex items-center gap-2">
             <button
               type="button"

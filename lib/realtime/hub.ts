@@ -192,7 +192,35 @@ export function setupWebSocketHub({
     const room = ensureRoom(dialogId);
     room.add(entry);
 
-    ws.on("message", () => {});
+    ws.on("message", (raw) => {
+      try {
+        const payload = JSON.parse(String(raw)) as {
+          type?: string;
+          isTyping?: boolean;
+          fieldId?: string;
+          role?: string;
+          name?: string;
+        };
+        if (payload.type === "typing") {
+          const broadcastMsg = JSON.stringify({
+            kind: "typing",
+            byUserId: userId,
+            isTyping: Boolean(payload.isTyping),
+            fieldId: payload.fieldId,
+            role: payload.role,
+            name: payload.name,
+          });
+          for (const member of room) {
+            if (member.userId === userId) continue;
+            if (member.ws.readyState === WebSocket.OPEN) {
+              member.ws.send(broadcastMsg);
+            }
+          }
+        }
+      } catch {
+        // ignore invalid payload
+      }
+    });
 
     const removeFromRoom = () => {
       room.delete(entry);

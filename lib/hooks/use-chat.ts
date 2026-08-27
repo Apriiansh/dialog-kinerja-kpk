@@ -102,7 +102,7 @@ export function useChat(dialogId: number, options: UseChatOptions = {}) {
   }, [fetchMessages]);
 
   // Realtime via shared WebSocket; polling hanya fallback saat koneksi putus.
-  const transport = useDialogSocket({
+  const { transport } = useDialogSocket({
     dialogId,
     enabled,
     pollIntervalMs,
