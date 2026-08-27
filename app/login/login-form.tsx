@@ -70,7 +70,12 @@ export function LoginForm() {
             >
               Kata Sandi
             </label>
-            
+            <Link
+              href="/forgot-password"
+              className="text-xs font-semibold text-[#C8102E] hover:text-[#A80D26]"
+            >
+              Lupa password?
+            </Link>
           </div>
           <div className="relative">
             <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-[#8C8478]">

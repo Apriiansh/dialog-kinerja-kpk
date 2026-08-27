@@ -1,5 +1,8 @@
 import nodemailer from "nodemailer";
 
+const emailUser = process.env.EMAIL_USER ?? process.env.GMAIL_USER ?? "";
+const smtpUser = process.env.GMAIL_USER ?? process.env.EMAIL_USER ?? "";
+
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
@@ -7,7 +10,7 @@ const transporter = nodemailer.createTransport({
   requireTLS: true,
 
   auth: {
-    user: process.env.GMAIL_USER!,
+    user: smtpUser,
     pass: process.env.GMAIL_APP_PASSWORD!,
   },
 });
@@ -22,7 +25,7 @@ export async function sendEmail({
   html: string;
 }) {
   return transporter.sendMail({
-    from: `"developer.dialogkinerja" <${process.env.EMAIL_USER!}>`,
+    from: `"developer.dialogkinerja" <${emailUser}>`,
     to,
     subject,
     html,
