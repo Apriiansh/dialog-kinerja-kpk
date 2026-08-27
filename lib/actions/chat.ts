@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth/session";
 import { publishDialogUpdate } from "@/lib/realtime/bus";
+import { createNotification } from "@/lib/notifications";
+import { sendEmail } from "@/lib/email";
 
 export interface ChatMessageItem {
   id: number;
@@ -197,6 +199,182 @@ export async function sendChatMessage(
     }
 
     publishDialogUpdate(dialogId, { kind: "chat", byUserId: session.id });
+
+    const recipientId =
+      session.id === dialog.id_atasan ? dialog.id_pegawai : dialog.id_atasan;
+
+    const recipient = await prisma.user.findUnique({
+      where: { id: recipientId },
+      select: { nama_pegawai: true, email: true },
+    });
+
+    if (recipient) {
+      const senderLabel =
+        role === "atasan" ? "Atasan" : role === "pegawai" ? "Pegawai" : "Admin";
+
+      createNotification({
+        userId: recipientId,
+        type: "chat_message",
+        title: `Pesan baru dari ${created.sender.nama_pegawai}`,
+        description: trimmed.length > 120 ? trimmed.slice(0, 120) + "..." : trimmed,
+        link: `/chat/${dialogId}`,
+      }).catch((e) => console.error("Gagal buat notifikasi chat:", e));
+
+      if (recipient.email) {
+        sendEmail({
+          to: recipient.email,
+          subject: `Pesan Baru dari ${created.sender.nama_pegawai} | Dialog Kinerja`,
+          html: `
+            <div style="margin:0;padding:0;background:#f4f5f7;font-family:Arial,Helvetica,sans-serif;">
+              <div style="max-width:640px;margin:0 auto;padding:32px 16px;">
+
+                <!-- Email Card -->
+                <div style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+
+                  <!-- Header -->
+                  <div style="background:#111827;padding:22px 28px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="vertical-align:middle;">
+                          <img
+                            src="https://spipendidikan.kpk.go.id/dash/assets/spip/img/LOGO-KPK-putih.png"
+                            alt="KPK"
+                            width="72"
+                            style="display:block;width:72px;height:auto;"
+                          />
+                        </td>
+
+                        <td style="text-align:right;vertical-align:middle;">
+                          <div style="color:#ffffff;font-size:14px;font-weight:bold;">
+                            Dialog Kinerja
+                          </div>
+                          <div style="color:#9ca3af;font-size:11px;margin-top:4px;">
+                            dialogkinerja.kpk.go.id
+                          </div>
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+
+                  <!-- Content -->
+                  <div style="padding:32px 28px;">
+
+                    <p style="margin:0 0 8px;color:#111827;font-size:16px;">
+                      Halo <strong>${recipient.nama_pegawai}</strong>,
+                    </p>
+
+                    <p style="margin:0 0 24px;color:#4b5563;font-size:14px;line-height:1.7;">
+                      Anda menerima pesan baru pada percakapan Dialog Kinerja dari
+                      <strong>${created.sender.nama_pegawai}</strong>
+                      (${senderLabel}).
+                    </p>
+
+                    <!-- Message Box -->
+                    <div style="
+                      background:#f9fafb;
+                      border:1px solid #e5e7eb;
+                      border-radius:8px;
+                      padding:18px;
+                      margin-bottom:24px;
+                    ">
+                      <div style="
+                        color:#6b7280;
+                        font-size:11px;
+                        font-weight:bold;
+                        text-transform:uppercase;
+                        letter-spacing:0.5px;
+                        margin-bottom:8px;
+                      ">
+                        Pesan
+                      </div>
+
+                      <div style="
+                        color:#1f2937;
+                        font-size:14px;
+                        line-height:1.7;
+                        word-break:break-word;
+                      ">
+                        ${trimmed.length > 300
+                          ? trimmed.slice(0, 300) + "..."
+                          : trimmed}
+                      </div>
+                    </div>
+
+                    <!-- CTA -->
+                    <div style="text-align:center;margin:28px 0;">
+                      <a
+                        href="${process.env.NEXT_PUBLIC_APP_URL}/chat/${dialogId}"
+                        style="
+                          display:inline-block;
+                          background:#111827;
+                          color:#ffffff;
+                          text-decoration:none;
+                          font-size:13px;
+                          font-weight:bold;
+                          padding:12px 22px;
+                          border-radius:7px;
+                        "
+                      >
+                        Buka Percakapan
+                      </a>
+                    </div>
+
+                    <p style="
+                      margin:0;
+                      color:#6b7280;
+                      font-size:12px;
+                      line-height:1.6;
+                      text-align:center;
+                    ">
+                      Silakan masuk ke aplikasi Dialog Kinerja untuk melihat
+                      percakapan lengkap dan memberikan tanggapan.
+                    </p>
+
+                  </div>
+
+                  <!-- Footer -->
+                  <div style="
+                    background:#f9fafb;
+                    border-top:1px solid #e5e7eb;
+                    padding:18px 28px;
+                    text-align:center;
+                  ">
+                    <p style="
+                      margin:0 0 5px;
+                      color:#6b7280;
+                      font-size:11px;
+                    ">
+                      Dialog Kinerja
+                    </p>
+
+                    <p style="
+                      margin:0;
+                      color:#9ca3af;
+                      font-size:10px;
+                    ">
+                      Email ini dikirim secara otomatis oleh sistem.
+                      Mohon tidak membalas email ini. Aplikasi ini Masih pada proses pengembangan, jadi hiraukan pesan ini jika anda bukan pengguna aplikasi Dialog Kinerja.
+                    </p>
+
+                    <p style="
+                      margin:8px 0 0;
+                      color:#9ca3af;
+                      font-size:10px;
+                    ">
+                      developer.dialogkinerja
+                    </p>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+          `,
+        }).catch((e) =>
+          console.error("Gagal kirim email notifikasi chat:", e)
+        );
+      }
+    }
 
     return {
       success: true,
