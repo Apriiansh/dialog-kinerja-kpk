@@ -51,6 +51,7 @@ model User {
   npp                      String   @unique @db.VarChar(50)
   nip                      String?  @unique @db.VarChar(50)
   nama_pegawai             String   @db.VarChar(255)
+  email                    String?  @db.VarChar(255)
   tanggal_bergabung        DateTime? @db.Date
   nama_jabatan             String?  @db.VarChar(150)
   unit_kerja               String?  @db.VarChar(150)
