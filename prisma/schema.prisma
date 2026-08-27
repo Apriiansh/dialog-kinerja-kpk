@@ -57,6 +57,7 @@ model User {
   unit_kerja               String?  @db.VarChar(150)
   masa_kerja_unit_terakhir String?  @db.VarChar(100)
   password                 String   @db.VarChar(255)
+  email_verified_at        DateTime?
 
   default_role             Role     @default(PEGAWAI) // peran default saat login (bukan pembatas akses)
   as_pegawai               Boolean  @default(false)   // true kalau user ini bawahan seseorang

@@ -19,6 +19,7 @@ export default async function AtasanPegawaiEditPage({
     where: { id: Number(id), id_atasan: session.id },
     select: {
       npp: true,
+      email: true,
       nip: true,
       nama_pegawai: true,
       tanggal_bergabung: true,

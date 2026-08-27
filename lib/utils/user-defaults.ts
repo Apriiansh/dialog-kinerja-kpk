@@ -8,6 +8,7 @@ function durasiKeTanggal(value: string | null): string {
 
 export function pegawaiFormDefaults(user?: {
   npp: string;
+  email: string | null;
   nip: string | null;
   nama_pegawai: string;
   tanggal_bergabung: Date | null;
@@ -18,6 +19,7 @@ export function pegawaiFormDefaults(user?: {
   if (!user) return {};
   return {
     npp: user.npp,
+    email: user.email ?? "",
     nip: user.nip ?? "",
     nama_pegawai: user.nama_pegawai,
     tanggal_bergabung: toDateInput(user.tanggal_bergabung),
@@ -29,6 +31,7 @@ export function pegawaiFormDefaults(user?: {
 
 export function adminUserFormDefaults(user: {
   npp: string;
+  email: string | null;
   nip: string | null;
   nama_pegawai: string;
   tanggal_bergabung: Date | null;
@@ -42,6 +45,7 @@ export function adminUserFormDefaults(user: {
 }): Record<string, string> {
   return {
     npp: user.npp,
+    email: user.email ?? "",
     nip: user.nip ?? "",
     nama_pegawai: user.nama_pegawai,
     tanggal_bergabung: toDateInput(user.tanggal_bergabung),

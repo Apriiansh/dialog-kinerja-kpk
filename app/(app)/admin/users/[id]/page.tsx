@@ -24,10 +24,12 @@ export default async function AdminUserDetailPage({
     where: {
       id: numericId,
     },
-    select: {
-      id: true,
-      npp: true,
-      nip: true,
+      select: {
+        id: true,
+        npp: true,
+        email: true,
+        email_verified_at: true,
+        nip: true,
       nama_pegawai: true,
       nama_jabatan: true,
       unit_kerja: true,
@@ -75,6 +77,8 @@ export default async function AdminUserDetailPage({
   const userData: UserDetailData = {
     id: user.id,
     npp: user.npp,
+    email: user.email,
+    email_verified: Boolean(user.email_verified_at),
     nip: user.nip,
     nama_pegawai: user.nama_pegawai,
     nama_jabatan: user.nama_jabatan,

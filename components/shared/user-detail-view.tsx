@@ -8,6 +8,7 @@ import {
   PencilSimpleIcon,
   TrashIcon,
   UserCircleIcon,
+  EnvelopeSimpleIcon,
   ShieldCheckIcon,
   UsersIcon,
   CalendarIcon,
@@ -31,6 +32,8 @@ import { formatPeriode } from "@/lib/constants/triwulan";
 export interface UserDetailData {
   id: number;
   npp: string;
+  email: string | null;
+  email_verified: boolean;
   nip: string | null;
   nama_pegawai: string;
   nama_jabatan: string | null;
@@ -366,6 +369,29 @@ export function UserDetailView({
                   <span className="text-sm font-semibold text-ink">NPP {user.npp}</span>
                   <span className="block text-xs text-ink-muted">NIP {user.nip || "—"}</span>
                 </>}
+              />
+
+              <InfoItem
+                icon={<EnvelopeSimpleIcon size={22} />}
+                label="Email"
+                value={
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-semibold text-ink">
+                      {user.email || "—"}
+                    </span>
+                    {user.email ? (
+                      <span
+                        className={`inline-flex w-fit items-center rounded-md px-2 py-0.5 text-[11px] font-semibold ${
+                          user.email_verified
+                            ? "bg-status-green-soft text-status-green"
+                            : "bg-amber-100 text-amber-800"
+                        }`}
+                      >
+                        {user.email_verified ? "Terverifikasi" : "Belum diverifikasi"}
+                      </span>
+                    ) : null}
+                  </div>
+                }
               />
 
               <InfoItem

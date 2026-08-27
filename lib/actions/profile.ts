@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, capabilitiesForUser, type Role } from "@/lib/auth/session";
 import { parseDateInput, formatDurasiKeHariIni } from "@/lib/utils/format";
+import { clearEmailVerificationNotifications } from "@/lib/notifications";
 
 export interface ChangePasswordState {
   error?: string;
@@ -225,6 +226,57 @@ export async function updateUserProfileDataAction(
   return {
     success: true,
     message: "Data profil kepegawaian Anda berhasil diperbarui.",
+  };
+}
+
+export interface VerifyEmailState {
+  error?: string;
+  success?: boolean;
+  message?: string;
+}
+
+export async function verifyEmailAction(
+  _prevState: VerifyEmailState,
+  _formData: FormData,
+): Promise<VerifyEmailState> {
+  void _prevState;
+  void _formData;
+
+  const session = await requireAuth();
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.id },
+    select: { id: true, email: true, email_verified_at: true, is_admin: true },
+  });
+
+  if (!user) return { error: "Pengguna tidak ditemukan." };
+  if (user.is_admin) {
+    return { error: "Verifikasi email hanya untuk pengguna non-admin." };
+  }
+  if (!user.email) {
+    return { error: "Email belum diisi. Hubungi administrator." };
+  }
+  if (user.email_verified_at) {
+    return {
+      success: true,
+      message: "Email Anda sudah terverifikasi.",
+    };
+  }
+
+  await prisma.user.update({
+    where: { id: session.id },
+    data: { email_verified_at: new Date() },
+  });
+
+  await clearEmailVerificationNotifications(session.id);
+
+  revalidatePath("/pegawai/profil");
+  revalidatePath("/atasan/profil");
+  revalidatePath("/admin/profil");
+
+  return {
+    success: true,
+    message: "Email berhasil diverifikasi.",
   };
 }
 

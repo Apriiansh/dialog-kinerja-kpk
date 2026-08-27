@@ -20,6 +20,7 @@ export default async function AdminUserEditPage({
     select: {
       id: true,
       npp: true,
+      email: true,
       nip: true,
       nama_pegawai: true,
       tanggal_bergabung: true,
