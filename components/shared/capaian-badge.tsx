@@ -48,34 +48,33 @@ export function CapaianBadge({
     );
   }
 
-  // Fase 2: Hasil Evaluasi Capaian (Opsi A)
-  let type: "tercapai" | "sebagian" | "tidak_tercapai" | "menunggu" = "menunggu";
+  // Fase 2: Hasil Evaluasi Capaian
+  // Hitung dari items jika tersedia untuk menentukan proporsi
+  const evaluated = items.filter((i) => i.is_tercapai !== null);
+  const tercapaiCount = evaluated.filter((i) => i.is_tercapai === true).length;
+  const tidakTercapaiCount = evaluated.filter((i) => i.is_tercapai === false).length;
+  const majorityAchieved = tercapaiCount >= tidakTercapaiCount;
 
-  if (
+  let type: "tercapai" | "tidak_tercapai_sebagian" | "tercapai_sebagian" | "tidak_tercapai" | "menunggu" = "menunggu";
+
+  if (evaluated.length > 0) {
+    if (tercapaiCount > 0 && tidakTercapaiCount === 0) {
+      type = "tercapai";
+    } else if (tercapaiCount > 0 && tidakTercapaiCount > 0) {
+      type = majorityAchieved ? "tidak_tercapai_sebagian" : "tercapai_sebagian";
+    } else if (tercapaiCount === 0 && tidakTercapaiCount > 0) {
+      type = "tidak_tercapai";
+    }
+  } else if (
     reviu &&
     (reviu.status === "selesai" || reviu.status === "menunggu_validasi")
   ) {
     if (reviu.is_tercapai && !reviu.is_tidak_tercapai) {
       type = "tercapai";
     } else if (reviu.is_tercapai && reviu.is_tidak_tercapai) {
-      type = "sebagian";
+      type = "tidak_tercapai_sebagian";
     } else if (!reviu.is_tercapai && reviu.is_tidak_tercapai) {
       type = "tidak_tercapai";
-    }
-  } else if (items.length > 0) {
-    const evaluated = items.filter((i) => i.is_tercapai !== null);
-    if (evaluated.length > 0) {
-      const tercapaiCount = evaluated.filter((i) => i.is_tercapai === true).length;
-      const tidakTercapaiCount = evaluated.filter(
-        (i) => i.is_tercapai === false,
-      ).length;
-      if (tercapaiCount > 0 && tidakTercapaiCount === 0) {
-        type = "tercapai";
-      } else if (tercapaiCount > 0 && tidakTercapaiCount > 0) {
-        type = "sebagian";
-      } else if (tercapaiCount === 0 && tidakTercapaiCount > 0) {
-        type = "tidak_tercapai";
-      }
     }
   }
 
@@ -88,9 +87,20 @@ export function CapaianBadge({
     );
   }
 
-  if (type === "sebagian") {
+  if (type === "tidak_tercapai_sebagian") {
+    // Mayoritas tercapai, sebagian kecil tidak tercapai
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+        <WarningIcon size={14} weight="bold" />
+        Tidak Tercapai Sebagian
+      </span>
+    );
+  }
+
+  if (type === "tercapai_sebagian") {
+    // Mayoritas tidak tercapai, sebagian kecil tercapai
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700">
         <WarningIcon size={14} weight="bold" />
         Tercapai Sebagian
       </span>

@@ -27,6 +27,7 @@ interface SeedUser {
   npp: string;
   nip: string;
   nama_pegawai: string;
+  email?: string;
   nama_jabatan: string;
   unit_kerja: string;
   tanggal_bergabung: Date;
@@ -205,6 +206,38 @@ const USERS: SeedUser[] = [
     atasan_npp: "1000002",
     password: "pegawai123",
   },
+  {
+    npp: "1000010",
+    nip: "198507152010011002",
+    nama_pegawai: "Apriansyah",
+    email: "apriansyahmlp@gmail.com",
+    nama_jabatan: "Kepala Bagian Kinerja",
+    unit_kerja: "Biro SDM",
+    tanggal_bergabung: new Date("2018-01-01"),
+    masa_kerja_unit_terakhir: "7 Tahun 0 Bulan 0 Hari",
+    default_role: "ATASAN",
+    as_pegawai: false,
+    is_admin: false,
+    is_active: true,
+    atasan_npp: null,
+    password: "apri123",
+  },
+  {
+    npp: "2000010",
+    nip: "199608252020022003",
+    nama_pegawai: "Masha",
+    email: "masharuby0123@gmail.com",
+    nama_jabatan: "Analis Kinerja",
+    unit_kerja: "Biro SDM",
+    tanggal_bergabung: new Date("2021-03-01"),
+    masa_kerja_unit_terakhir: "4 Tahun 0 Bulan 0 Hari",
+    default_role: "PEGAWAI",
+    as_pegawai: true,
+    is_admin: false,
+    is_active: true,
+    atasan_npp: "1000010",
+    password: "masha123",
+  },
 ];
 
 const LEGACY_DUMMY_NPPS = [
@@ -220,6 +253,8 @@ function upsertData(user: SeedUser, hashedPassword: string) {
   const common = {
     nip: user.nip,
     nama_pegawai: user.nama_pegawai,
+    email: user.email ?? null,
+    email_verified_at: user.email ? new Date() : null,
     nama_jabatan: user.nama_jabatan,
     unit_kerja: user.unit_kerja,
     tanggal_bergabung: user.tanggal_bergabung,
