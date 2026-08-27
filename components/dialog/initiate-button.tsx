@@ -6,7 +6,41 @@ import { initiateDialog } from "@/lib/actions/pegawai";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import { formatPeriode, getTriwulanFromDate } from "@/lib/constants/triwulan";
 
-export function InitiateDialogButton() {
+export interface EligibleParentInfo {
+  id: number;
+  periodeLabel: string;
+  unachievedCount: number;
+}
+
+export interface InitiateDialogButtonProps {
+  eligibleParent?: EligibleParentInfo;
+  parentDialogId?: number;
+  parentPeriodeLabel?: string;
+  unachievedCount?: number;
+  label?: string;
+  variant?: "primary" | "outline";
+  size?: "sm" | "md";
+  className?: string;
+}
+
+export function InitiateDialogButton({
+  eligibleParent,
+  parentDialogId,
+  parentPeriodeLabel,
+  unachievedCount,
+  label,
+  variant = "primary",
+  size = "md",
+  className = "",
+}: InitiateDialogButtonProps = {}) {
+  const parentId = eligibleParent?.id ?? parentDialogId;
+  const parentLabel = eligibleParent?.periodeLabel ?? parentPeriodeLabel;
+  const unachieved = eligibleParent?.unachievedCount ?? unachievedCount ?? 0;
+  const isLanjutan = Boolean(parentId);
+
+  const defaultLabel = "Ajukan Dialog Kinerja";
+  const displayLabel = label || defaultLabel;
+
   const [open, setOpen] = useState(false);
   const [jadwalDate, setJadwalDate] = useState("");
   const [deskripsi, setDeskripsi] = useState("");
@@ -51,6 +85,7 @@ export function InitiateDialogButton() {
     const res = await initiateDialog({
       jadwal_dialog: jadwalDate,
       deskripsi_pegawai: deskripsi,
+      id_dialog_induk: parentId,
     });
     setLoading(false);
 
@@ -58,28 +93,41 @@ export function InitiateDialogButton() {
       showError(res.error);
       return;
     }
-    showSuccess("Pengajuan dialog berhasil dikirim ke atasan.");
+    showSuccess(
+      isLanjutan
+        ? "Pengajuan dialog lanjutan berhasil dikirim ke atasan."
+        : "Pengajuan dialog berhasil dikirim ke atasan.",
+    );
     setOpen(false);
   }
 
   const todayStr = new Date().toISOString().split("T")[0];
+
+  const buttonClasses =
+    variant === "primary"
+      ? size === "sm"
+        ? "inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-semibold text-on-primary shadow-xs transition-colors hover:bg-primary-strong cursor-pointer"
+        : "inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-on-primary shadow-xs transition-colors hover:bg-primary-strong cursor-pointer"
+      : size === "sm"
+        ? "inline-flex h-9 items-center gap-1.5 rounded-md border border-outline bg-surface px-3.5 text-xs font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted cursor-pointer"
+        : "inline-flex h-10 items-center gap-2 rounded-md border border-outline bg-surface px-4 text-sm font-semibold text-ink transition-colors hover:border-outline-strong hover:bg-surface-muted cursor-pointer";
 
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-on-primary shadow-xs transition-colors hover:bg-primary-strong cursor-pointer"
+        className={`${buttonClasses} ${className}`}
       >
-        <PlusIcon size={16} weight="bold" />
-        Ajukan Dialog Kinerja
+        <PlusIcon size={size === "sm" ? 14 : 16} weight="bold" />
+        {displayLabel}
       </button>
 
       {open ? (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Ajukan Dialog Kinerja"
+          aria-label={displayLabel}
           className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4 backdrop-blur-xs"
           onClick={() => setOpen(false)}
         >
@@ -91,10 +139,14 @@ export function InitiateDialogButton() {
             <div className="flex items-center justify-between border-b border-outline px-6 py-4 bg-surface">
               <div className="flex flex-col gap-0.5">
                 <h2 className="text-base font-bold text-ink">
-                  Ajukan Jadwal Dialog Kinerja
+                  {isLanjutan
+                    ? "Ajukan Jadwal Dialog Kinerja Lanjutan"
+                    : "Ajukan Jadwal Dialog Kinerja"}
                 </h2>
                 <p className="text-xs leading-4 text-ink-muted">
-                  Pilih tanggal pelaksanaan dialog. Periode & Triwulan akan ditentukan secara otomatis.
+                  {isLanjutan
+                    ? "Pilih tanggal pelaksanaan dialog lanjutan. Butir target yang belum tercapai otomatis diteruskan."
+                    : "Pilih tanggal pelaksanaan dialog. Periode & Triwulan akan ditentukan secara otomatis."}
                 </p>
               </div>
               <button
@@ -109,6 +161,24 @@ export function InitiateDialogButton() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-6">
+              {isLanjutan && parentLabel ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-xs text-amber-900 flex flex-col gap-1.5">
+                  <div className="flex items-center gap-2 font-bold text-amber-950 text-sm">
+                    <span>Dialog Kinerja Lanjutan</span>
+                    <span className="rounded-md bg-amber-200/80 px-2 py-0.5 text-[11px] font-semibold text-amber-900">
+                      Lanjutan dari {parentLabel}
+                    </span>
+                  </div>
+                  <p className="leading-5 text-amber-800">
+                    Pengajuan ini terhubung dengan periode sebelumnya. Sebanyak{" "}
+                    <strong className="font-bold text-amber-950 underline decoration-amber-400">
+                      {unachieved} butir kegiatan yang belum tercapai
+                    </strong>{" "}
+                    serta komitmen tanggung jawab akan otomatis disalin ke dialog kinerja baru ini.
+                  </p>
+                </div>
+              ) : null}
+
               <div className="flex flex-col gap-1.5">
                 <label
                   htmlFor="jadwal-date"
@@ -146,7 +216,11 @@ export function InitiateDialogButton() {
                   rows={3}
                   value={deskripsi}
                   onChange={(e) => setDeskripsi(e.target.value)}
-                  placeholder="Tuliskan konteks atau topik utama yang ingin didiskusikan..."
+                  placeholder={
+                    isLanjutan
+                      ? "Tuliskan fokus capaian atau kendala yang ingin didiskusikan pada periode lanjutan ini..."
+                      : "Tuliskan konteks atau topik utama yang ingin didiskusikan..."
+                  }
                   className="w-full rounded-lg border border-outline bg-surface p-3 text-xs text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus"
                 />
               </div>
@@ -167,7 +241,7 @@ export function InitiateDialogButton() {
                   {loading ? (
                     <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                   ) : null}
-                  Kirim Pengajuan
+                  {isLanjutan ? "Ajukan Dialog Lanjutan" : "Kirim Pengajuan"}
                 </button>
               </div>
             </form>

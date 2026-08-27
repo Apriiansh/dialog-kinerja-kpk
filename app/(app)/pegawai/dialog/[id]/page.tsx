@@ -18,7 +18,7 @@ import { FormulirDialogKinerja } from "@/components/dialog/detail-view";
 import { ReviuList } from "@/components/reviu/list";
 import { Separator } from "@/components/ui/separator";
 import { ChatHeader } from "@/components/chat/ChatHeader";
-import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
+import { InitiateDialogButton } from "@/components/dialog/initiate-button";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
 
@@ -189,9 +189,12 @@ export default async function DialogDetailPage({
                       </Link>
                     ) : null}
                     {latestSelesaiReviuId && !hasLanjutan ? (
-                      <EvaluasiLanjutanButton
-                        reviuId={latestSelesaiReviuId}
-                        label={hasBelumTercapai ? "Evaluasi Lanjutan" : "Ajukan Evaluasi"}
+                      <InitiateDialogButton
+                        parentDialogId={dialog.id}
+                        parentPeriodeLabel={formatPeriode(dialog.triwulan, dialog.periode_tahun)}
+                        label="Ajukan Dialog Lanjutan"
+                        variant="outline"
+                        size="sm"
                       />
                     ) : null}
                   </>

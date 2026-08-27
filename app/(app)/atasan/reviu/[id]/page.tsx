@@ -102,7 +102,10 @@ export default async function AtasanReviuDetailPage({
                     />
                     <UnduhWordLink href={`/api/unduh/reviu/${reviu.id}/docx`} />
                     {showEvaluasiLanjutan ? (
-                      <EvaluasiLanjutanButton reviuId={reviu.id} />
+                      <EvaluasiLanjutanButton
+                        parentDialogId={reviu.dialog.id}
+                        parentPeriodeLabel={formatPeriode(reviu.dialog.triwulan, reviu.dialog.periode_tahun)}
+                      />
                     ) : null}
                   </>
                 ) : null}

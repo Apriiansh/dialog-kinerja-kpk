@@ -11,7 +11,7 @@ import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { Separator } from "@/components/ui/separator";
 import { FormulirReviu } from "@/components/reviu/detail-view";
 import { DeleteReviuButton } from "@/components/reviu/delete-button";
-import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
+import { InitiateDialogButton } from "@/components/dialog/initiate-button";
 import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { formatPeriode } from "@/lib/constants/triwulan";
 
@@ -93,7 +93,13 @@ export default async function PegawaiReviuDetailPage({
                     <UnduhBuktiButton label="Unduh PDF" autoPrint={cetak} />
                     <UnduhWordLink href={`/api/unduh/reviu/${reviu.id}/docx`} />
                     {showEvaluasiLanjutan ? (
-                      <EvaluasiLanjutanButton reviuId={reviu.id} />
+                      <InitiateDialogButton
+                        parentDialogId={reviu.dialog.id}
+                        parentPeriodeLabel={formatPeriode(reviu.dialog.triwulan, reviu.dialog.periode_tahun)}
+                        label="Ajukan Dialog Lanjutan"
+                        variant="outline"
+                        size="sm"
+                      />
                     ) : null}
                   </>
                 ) : null}

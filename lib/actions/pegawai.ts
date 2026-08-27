@@ -375,6 +375,7 @@ export async function validateDialog(
 export async function initiateDialog(input: {
   jadwal_dialog: string;
   deskripsi_pegawai?: string;
+  id_dialog_induk?: number;
 }) {
   const session = await requireRole("PEGAWAI");
   const err = await assertActiveActor(session.id);
@@ -409,6 +410,32 @@ export async function initiateDialog(input: {
     };
   }
 
+  let parentDialog = null;
+  if (input.id_dialog_induk) {
+    parentDialog = await prisma.dialogKinerja.findFirst({
+      where: {
+        id: input.id_dialog_induk,
+        id_pegawai: session.id,
+        status: "selesai",
+      },
+      include: {
+        aspek: {
+          include: {
+            item: true,
+          },
+        },
+        dialog_lanjutan: { select: { id: true } },
+      },
+    });
+
+    if (!parentDialog) {
+      return { error: "Dialog induk tidak ditemukan atau belum selesai." };
+    }
+    if (parentDialog.dialog_lanjutan.length > 0) {
+      return { error: "Dialog lanjutan untuk dialog ini sudah pernah dibuat." };
+    }
+  }
+
   let newDialogId: number;
   try {
     const dialog = await prisma.$transaction(async (tx) => {
@@ -421,12 +448,30 @@ export async function initiateDialog(input: {
           jadwal_dialog: dateObj,
           deskripsi_pegawai: toNullable(input.deskripsi_pegawai),
           status: "draft",
+          id_dialog_induk: parentDialog ? parentDialog.id : null,
           aspek: {
-            createMany: {
-              data: VALID_JENIS.map((jenis) => ({
-                jenis_aspek: jenis,
-              })),
-            },
+            create: VALID_JENIS.map((jenis_aspek) => {
+              const parentAspek = parentDialog?.aspek.find(
+                (a) => a.jenis_aspek === jenis_aspek,
+              );
+              const belumTercapai = (parentAspek?.item ?? []).filter(
+                (item) => item.is_tercapai === false,
+              );
+              return {
+                jenis_aspek,
+                tanggung_jawab_pegawai: parentAspek?.tanggung_jawab_pegawai ?? null,
+                tanggung_jawab_atasan: parentAspek?.tanggung_jawab_atasan ?? null,
+                item: {
+                  create: belumTercapai.map((item) => ({
+                    dialog_evaluasi: item.dialog_evaluasi,
+                    kompetensi_dikembangkan: item.kompetensi_dikembangkan,
+                    id_metode_pengembangan: item.id_metode_pengembangan,
+                    metode_pengembangan_lainnya: item.metode_pengembangan_lainnya,
+                    waktu_pelaksanaan: item.waktu_pelaksanaan,
+                  })),
+                },
+              };
+            }),
           },
         },
       });
@@ -439,18 +484,22 @@ export async function initiateDialog(input: {
 
   revalidatePath("/pegawai/dialog");
   revalidatePath("/pegawai/dashboard");
+  revalidatePath("/atasan/dialog");
 
+  const isLanjutan = Boolean(parentDialog);
   await createNotification({
     userId: user.id_atasan,
     type: "dialog_status",
-    title: "Pengajuan Dialog Kinerja Baru",
-    description: `${user.nama_pegawai} mengajukan jadwal Dialog Kinerja untuk ${triwulanLabel(triwulan)} ${periode_tahun}.`,
+    title: isLanjutan ? "Pengajuan Dialog Kinerja Lanjutan" : "Pengajuan Dialog Kinerja Baru",
+    description: `${user.nama_pegawai} mengajukan jadwal Dialog Kinerja ${isLanjutan ? "Lanjutan " : ""}untuk ${triwulanLabel(triwulan)} ${periode_tahun}.`,
     link: `/atasan/dialog/${newDialogId}`,
   });
 
   flashRedirect(`/pegawai/dialog/${newDialogId}`, {
     type: "success",
-    title: "Pengajuan dialog berhasil dikirim ke atasan",
+    title: isLanjutan
+      ? "Pengajuan dialog lanjutan berhasil dikirim ke atasan"
+      : "Pengajuan dialog berhasil dikirim ke atasan",
   });
 
   return {};

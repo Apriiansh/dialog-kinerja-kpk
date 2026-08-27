@@ -103,7 +103,8 @@ Aturan penghitungan:
 - **Dashboard** — ringkasan statis dialog, grafik status dialog, distribusi pengguna
 - **User Management** — CRUD pengguna, pencarian/filter, paginasi, aktivasi/penonaktifan
 - **Import Pengguna** — unggah Excel, pratinjau data, create/update per baris
-- **Import Aspek Evaluasi** — unggah Excel butir evaluasi, data masuk ke staging dan otomatis di-insert ke dialog saat dibuat
+- **Import Aspek Evaluasi** — unggah Excel 
+evaluasi, data masuk ke staging dan otomatis di-insert ke dialog saat dibuat
 - **Metode Pengembangan** — CRUD metode pengembangan (coaching, training, OJT, dll.)
 - **Monitoring** — lihat detail dialog pegawai mana saja (read-only), termasuk semua periode
 

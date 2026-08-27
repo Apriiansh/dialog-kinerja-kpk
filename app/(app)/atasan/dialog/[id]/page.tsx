@@ -12,10 +12,8 @@ import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { FormulirDialogKinerja } from "@/components/dialog/detail-view";
 import { ReviuList } from "@/components/reviu/list";
 import { ReviuSignForm } from "@/components/reviu/sign-form";
-import { ScrollToAnchor } from "@/components/shared/scroll-to-anchor";
-import { Separator } from "@/components/ui/separator";
 import { ChatHeader } from "@/components/chat/ChatHeader";
-import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
+import { InitiateDialogButton } from "@/components/dialog/initiate-button";
 import { formatPeriode } from "@/lib/constants/triwulan";
 
 type PageProps = {
@@ -172,7 +170,13 @@ export default async function DialogDetailPage({
                     <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />
                     <UnduhWordLink href={`/api/unduh/dialog/${dialog.id}/docx`} />
                     {latestSelesaiReviuId && !hasLanjutan ? (
-                      <EvaluasiLanjutanButton reviuId={latestSelesaiReviuId} />
+                      <InitiateDialogButton
+                        parentDialogId={dialog.id}
+                        parentPeriodeLabel={formatPeriode(dialog.triwulan, dialog.periode_tahun)}
+                        label="Ajukan Dialog Lanjutan"
+                        variant="outline"
+                        size="sm"
+                      />
                     ) : null}
                   </>
                 ) : null}

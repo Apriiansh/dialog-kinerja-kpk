@@ -15,8 +15,6 @@ import { getPageParams } from "@/lib/utils/pagination";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import type { StatusDialog } from "@/generated/prisma/enums";
 import { CapaianBadge } from "@/components/shared/capaian-badge";
-import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
-
 import { InitiateDialogButton } from "@/components/dialog/initiate-button";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -211,6 +209,28 @@ export default async function PegawaiDialogListPage({
     },
   ];
 
+  const eligibleParentDialog = allDialogs.find(
+    (d) =>
+      d.status === "selesai" &&
+      d.dialog_lanjutan.length === 0 &&
+      d.reviu.some((r) => r.status === "selesai"),
+  );
+
+  const eligibleParent = eligibleParentDialog
+    ? {
+        id: eligibleParentDialog.id,
+        periodeLabel: formatPeriode(
+          eligibleParentDialog.triwulan,
+          eligibleParentDialog.periode_tahun,
+        ),
+        unachievedCount: eligibleParentDialog.aspek.reduce(
+          (count, group) =>
+            count + group.item.filter((i) => i.is_tercapai === false).length,
+          0,
+        ),
+      }
+    : undefined;
+
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -222,7 +242,7 @@ export default async function PegawaiDialogListPage({
             Daftar lengkap dokumen dialog kinerja periode berjalan dan riwayat evaluasi Anda.
           </p>
         </div>
-        <InitiateDialogButton />
+        <InitiateDialogButton eligibleParent={eligibleParent} />
       </header>
 
       {/* Stats Summary Banner */}
@@ -422,23 +442,13 @@ export default async function PegawaiDialogListPage({
                     </div>
 
                     <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-outline/50 pt-3 sm:border-t-0 sm:pt-0">
-                      {d.status === "selesai" ? (
-                        <>
-                           {latestSelesaiReviu && !hasLanjutan ? (
-                             <EvaluasiLanjutanButton
-                               reviuId={latestSelesaiReviu.id}
-                               label={hasBelumTercapai ? 'Evaluasi Lanjutan' : 'Ajukan Evaluasi'}
-                             />
-                           ) : null}
-                           {d.reviu.length === 0 ? (
-                             <Link
-                               href={`/pegawai/reviu/new?dialog=${d.id}`}
-                               className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
-                             >
-                               Buat Reviu
-                             </Link>
-                           ) : null}
-                        </>
+                      {d.status === "selesai" && d.reviu.length === 0 ? (
+                        <Link
+                          href={`/pegawai/reviu/new?dialog=${d.id}`}
+                          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong shadow-xs"
+                        >
+                          Buat Reviu
+                        </Link>
                       ) : null}
                       <Link
                         href={cta.href(d.id)}
