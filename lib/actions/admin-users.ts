@@ -18,6 +18,12 @@ export interface AdminUserFormState {
 const userSchema = z
   .object({
     npp: z.string().regex(/^\d{7}$/, "NPP harus terdiri dari 7 digit angka."),
+    email: z
+      .string()
+      .trim()
+      .email("Format email tidak valid.")
+      .optional()
+      .transform((v) => (v ? v : undefined)),
     nip: z
       .string()
       .trim()
@@ -86,6 +92,7 @@ const updateSchema = userSchema;
 function toValues(formData: FormData): Record<string, string> {
   const keys = [
     "npp",
+    "email",
     "nip",
     "nama_pegawai",
     "tanggal_bergabung",
@@ -165,6 +172,7 @@ export async function createAdminUser(
     await prisma.user.create({
       data: {
         npp: data.npp,
+        email: data.email,
         nip: data.nip,
         nama_pegawai: data.nama_pegawai,
         tanggal_bergabung: tanggal,
@@ -176,6 +184,7 @@ export async function createAdminUser(
         is_admin: data.is_admin,
         as_pegawai: data.as_pegawai,
         is_active: true,
+        email_verified_at: null,
         id_atasan: data.is_admin ? null : data.id_atasan,
       },
     });
@@ -225,7 +234,7 @@ export async function updateAdminUser(
 
   const existing = await prisma.user.findUnique({
     where: { id },
-    select: { id: true },
+    select: { id: true, email: true },
   });
   if (!existing) return { error: "Pengguna tidak ditemukan." };
 
@@ -252,6 +261,7 @@ export async function updateAdminUser(
       where: { id },
       data: {
         npp: data.npp,
+        email: data.email,
         nip: data.nip,
         nama_pegawai: data.nama_pegawai,
         tanggal_bergabung: tanggal,
@@ -262,6 +272,7 @@ export async function updateAdminUser(
         is_admin: data.is_admin,
         as_pegawai: data.as_pegawai,
         id_atasan: proposedAtasan,
+        email_verified_at: data.email !== existing.email ? null : undefined,
         ...(data.password
           ? { password: await bcrypt.hash(data.password, 10) }
           : {}),

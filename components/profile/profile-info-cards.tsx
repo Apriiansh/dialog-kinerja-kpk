@@ -32,6 +32,36 @@ export function ProfileInfoCards({ user }: { user: UserProfileData }) {
 
             <div className="flex flex-col gap-1">
               <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                Email
+              </dt>
+              <dd className="text-sm text-ink">
+                {user.email ?? "—"}
+              </dd>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                Status Verifikasi Email
+              </dt>
+              <dd className="text-sm">
+                {user.email ? (
+                  <span
+                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold ${
+                      user.email_verified_at
+                        ? "bg-status-green-soft text-status-green"
+                        : "bg-amber-100 text-amber-800"
+                    }`}
+                  >
+                    {user.email_verified_at ? "Terverifikasi" : "Belum Diverifikasi"}
+                  </span>
+                ) : (
+                  <span className="text-ink-muted">Belum diisi</span>
+                )}
+              </dd>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
                 Nama Lengkap
               </dt>
               <dd className="text-sm font-semibold text-ink">

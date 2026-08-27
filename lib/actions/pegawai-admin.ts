@@ -17,6 +17,12 @@ export interface PegawaiFormState {
 
 const profileSchema = z.object({
   npp: z.string().regex(/^\d{7}$/, "NPP harus terdiri dari 7 digit angka."),
+  email: z
+    .string()
+    .trim()
+    .email("Format email tidak valid.")
+    .optional()
+    .transform((v) => (v ? v : undefined)),
   nip: z
     .string()
     .trim()
@@ -65,6 +71,7 @@ const updateSchema = profileSchema.extend({
 function toValues(formData: FormData): Record<string, string> {
   const keys = [
     "npp",
+    "email",
     "nip",
     "nama_pegawai",
     "tanggal_bergabung",
@@ -112,6 +119,7 @@ export async function createPegawai(
     await prisma.user.create({
       data: {
         npp: data.npp,
+        email: data.email,
         nip: data.nip,
         nama_pegawai: data.nama_pegawai,
         tanggal_bergabung: tanggal,
@@ -123,6 +131,7 @@ export async function createPegawai(
         as_pegawai: true,
         is_admin: false,
         is_active: true,
+        email_verified_at: null,
         id_atasan: session.id,
       },
     });
@@ -160,7 +169,7 @@ export async function updatePegawai(
 
   const target = await prisma.user.findFirst({
     where: { id, id_atasan: session.id },
-    select: { id: true },
+    select: { id: true, email: true },
   });
   if (!target) return { error: "Pegawai tidak ditemukan atau bukan bawahan Anda." };
 
@@ -188,12 +197,14 @@ export async function updatePegawai(
       where: { id },
       data: {
         npp: data.npp,
+        email: data.email,
         nip: data.nip,
         nama_pegawai: data.nama_pegawai,
         tanggal_bergabung: tanggal,
         nama_jabatan: data.nama_jabatan,
         unit_kerja: data.unit_kerja,
         masa_kerja_unit_terakhir: data.masa_kerja_unit_terakhir,
+        email_verified_at: data.email !== target.email ? null : undefined,
         ...(data.password
           ? { password: await bcrypt.hash(data.password, 10) }
           : {}),

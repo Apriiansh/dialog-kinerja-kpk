@@ -184,6 +184,24 @@ export function PegawaiForm({
           {renderError("nama_pegawai")}
         </div>
 
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="email" className={LABEL_CLASSES}>
+            Email
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={values.email ?? ""}
+            onChange={(e) => setField("email", e.target.value)}
+            placeholder="Alamat email pegawai"
+            className={INPUT_CLASSES}
+            disabled={pending}
+            aria-invalid={!!fieldErrors.email}
+          />
+          {renderError("email")}
+        </div>
+
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <label htmlFor="tanggal_bergabung" className={LABEL_CLASSES}>

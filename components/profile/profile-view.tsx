@@ -9,6 +9,7 @@ import {
 } from "@phosphor-icons/react";
 import { ProfileHeader } from "./profile-header";
 import { ProfileInfoCards } from "./profile-info-cards";
+import { EmailVerificationCard } from "./email-verification-card";
 import { EditProfileForm } from "./edit-profile-form";
 import { ChangePasswordForm } from "./change-password-form";
 import { ProfilePreferencesForm } from "./profile-preferences-form";
@@ -69,6 +70,8 @@ export function ProfileView({
 
       {/* Profile Header Hero */}
       <ProfileHeader user={user} activeRole={activeRole} />
+
+      <EmailVerificationCard user={user} activeRole={activeRole} />
 
       {/* Tabs Navigation */}
       <div className="flex flex-col gap-6">

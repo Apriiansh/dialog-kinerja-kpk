@@ -6,6 +6,8 @@ export async function getUserProfileData(userId: number) {
     select: {
       id: true,
       npp: true,
+      email: true,
+      email_verified_at: true,
       nip: true,
       nama_pegawai: true,
       tanggal_bergabung: true,
