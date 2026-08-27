@@ -76,8 +76,23 @@ model User {
   notifications Notification[]
   chatMessages  DialogChatMessage[]
   importedItems ImportStagingItem[] @relation("ImportedBy")
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  tokenHash String   @unique @db.VarChar(64) @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("password_reset_tokens")
 }
 
 model MasterMetodePengembangan {

@@ -6,8 +6,11 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isLoggedIn = Boolean(session?.id);
+  const publicPaths = ["/", "/login", "/forgot-password"];
+  const isPublicPath =
+    publicPaths.includes(pathname) || pathname.startsWith("/reset-password/");
 
-  if (!isLoggedIn && pathname !== "/login" && pathname !== "/") {
+  if (!isLoggedIn && !isPublicPath) {
     const url = new URL("/login", request.url);
     url.searchParams.set("from", pathname);
     return NextResponse.redirect(url);
