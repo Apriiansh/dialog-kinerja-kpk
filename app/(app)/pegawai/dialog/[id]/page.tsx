@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon, PencilSimpleIcon, PencilSimpleLineIcon } from "@phosphor-icons/react/dist/ssr";
@@ -21,18 +22,19 @@ import { ChatHeader } from "@/components/chat/ChatHeader";
 import { InitiateDialogButton } from "@/components/dialog/initiate-button";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
+import { PegawaiDraftActions } from "@/components/dialog/draft-actions";
 
 type PageProps = {
   params: Promise<{ id: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { id } = await params;
   return { title: `Dialog Kinerja #${id}` };
 }
-
-import { PegawaiDraftActions } from "@/components/dialog/draft-actions";
 
 function StatusNote({
   status,
@@ -111,9 +113,6 @@ export default async function DialogDetailPage({
     .map((r: { id: number }) => r.id);
   const latestSelesaiReviuId = selesaiReviuIds[selesaiReviuIds.length - 1];
   const hasLanjutan = dialog.dialog_lanjutan.length > 0;
-  const hasBelumTercapai = dialog.aspek.some((aspek: { item: { is_tercapai: boolean | null }[] }) =>
-    aspek.item.some((item: { is_tercapai: boolean | null }) => item.is_tercapai === false),
-  );
 
   return (
     <div className="flex flex-col gap-8">
