@@ -5,7 +5,7 @@ const STATUS: Record<
   StatusDialog,
   { label: string; className: string; icon?: typeof CheckCircleIcon }
 > = {
-  draft_atasan: {
+  draft: {
     label: "Draft",
     className: "bg-slate-100 text-slate-700",
   },

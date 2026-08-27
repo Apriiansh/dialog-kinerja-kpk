@@ -32,6 +32,8 @@ export async function generateMetadata({ params }: PageProps) {
   return { title: `Dialog Kinerja #${id}` };
 }
 
+import { PegawaiDraftActions } from "@/components/dialog/draft-actions";
+
 function StatusNote({
   status,
   isValidPegawai,
@@ -39,10 +41,10 @@ function StatusNote({
   status: string;
   isValidPegawai: boolean;
 }) {
-  if (status === "draft_atasan") {
+  if (status === "draft") {
     return (
       <p className="text-sm leading-5 text-ink-muted">
-        Dialog ini masih disiapkan oleh atasan dan belum dikirim kepada Anda.
+        Pengajuan dialog kinerja ini sedang menunggu persetujuan jadwal dari atasan Anda.
       </p>
     );
   }
@@ -184,21 +186,74 @@ export default async function DialogDetailPage({
               isValidPegawai={dialog.is_valid_pegawai}
             />
 
-            {dialog.deskripsi_kinerja?.trim() ? (
-              <div className="rounded-lg border border-outline bg-surface px-5 py-4">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
-                  Deskripsi Kinerja (dari Atasan)
+            {dialog.alasan_tolak ? (
+              <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900">
+                <span className="font-bold text-amber-800 uppercase tracking-wider block mb-1">
+                  Catatan Revisi dari Atasan:
                 </span>
-                <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
-                  {dialog.deskripsi_kinerja}
+                <p className="text-sm font-medium">{dialog.alasan_tolak}</p>
+              </div>
+            ) : null}
+
+            {dialog.jadwal_dialog ? (
+              <div className="rounded-lg border border-outline bg-surface p-4 flex flex-col gap-2">
+                <div className="text-xs text-ink-muted">
+                  Jadwal Pelaksanaan: <strong className="text-ink font-semibold">{new Date(dialog.jadwal_dialog).toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</strong>
+                </div>
+              </div>
+            ) : null}
+
+            {dialog.status === "draft" ? (
+              <div className="flex flex-col gap-3 rounded-lg border border-outline bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-ink-muted">
+                  Pengajuan sedang ditinjau atasan. Anda dapat memperbarui jadwal atau menghapus draft pengajuan ini.
                 </p>
+                <PegawaiDraftActions
+                  dialogId={dialog.id}
+                  currentJadwal={
+                    dialog.jadwal_dialog
+                      ? new Date(dialog.jadwal_dialog).toISOString().split("T")[0]
+                      : new Date().toISOString().split("T")[0]
+                  }
+                  currentDeskripsi={dialog.deskripsi_pegawai ?? ""}
+                />
+              </div>
+            ) : null}
+
+            {dialog.deskripsi_pegawai?.trim() || dialog.deskripsi_kinerja?.trim() ? (
+              <div className="grid gap-3 sm:grid-cols-1">
+                {dialog.deskripsi_pegawai?.trim() ? (
+                  <div className="rounded-lg border border-outline bg-surface px-5 py-4">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                      {dialog.deskripsi_kinerja?.trim()
+                        ? "Deskripsi Kinerja (versi Pegawai)"
+                        : "Deskripsi Kinerja (Pegawai)"}
+                    </span>
+                    <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
+                      {dialog.deskripsi_pegawai}
+                    </p>
+                  </div>
+                ) : null}
+
+                {dialog.deskripsi_kinerja?.trim() ? (
+                  <div className="rounded-lg border border-outline bg-surface px-5 py-4">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                      {dialog.deskripsi_pegawai?.trim()
+                        ? "Deskripsi Kinerja (versi Atasan)"
+                        : "Deskripsi Kinerja (Atasan)"}
+                    </span>
+                    <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
+                      {dialog.deskripsi_kinerja}
+                    </p>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
             {isEditable ? (
               <div className="flex flex-col gap-2 rounded-lg border border-outline bg-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-5 text-ink-muted">
-                  Lengkapi empat aspek evaluasi berikut, lalu kirim ke atasan.
+                  Lengkapi lima aspek evaluasi berikut, lalu kirim ke atasan.
                 </p>
                 <Link
                   href={`/pegawai/dialog/${dialog.id}/edit`}

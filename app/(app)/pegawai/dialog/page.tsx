@@ -17,6 +17,8 @@ import type { StatusDialog } from "@/generated/prisma/enums";
 import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { EvaluasiLanjutanButton } from "@/components/reviu/lanjutan-button";
 
+import { InitiateDialogButton } from "@/components/dialog/initiate-button";
+
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export const metadata = {
@@ -27,8 +29,8 @@ const CTA: Record<
   StatusDialog,
   { label: string; href: (id: number) => string; variant: "primary" | "plain" }
 > = {
-  draft_atasan: {
-    label: "Ditunggu Atasan",
+  draft: {
+    label: "Lihat Pengajuan",
     href: (id) => `/pegawai/dialog/${id}`,
     variant: "plain",
   },
@@ -55,7 +57,7 @@ const CTA: Record<
 };
 
 const VALID_STATUSES: StatusDialog[] = [
-  "draft_atasan",
+  "draft",
   "menunggu_pegawai",
   "menunggu_atasan",
   "menunggu_validasi",
@@ -64,6 +66,7 @@ const VALID_STATUSES: StatusDialog[] = [
 
 const FILTERS: { key: StatusDialog | "semua"; label: string }[] = [
   { key: "semua", label: "Semua" },
+  { key: "draft", label: "Pengajuan Draft" },
   { key: "menunggu_pegawai", label: "Perlu Diisi" },
   { key: "menunggu_atasan", label: "Menunggu Atasan" },
   { key: "menunggu_validasi", label: "Menunggu Validasi" },
@@ -210,7 +213,7 @@ export default async function PegawaiDialogListPage({
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-[26px] font-semibold leading-9 tracking-[-0.01em] text-ink">
             Dialog Kinerja Saya
@@ -219,6 +222,7 @@ export default async function PegawaiDialogListPage({
             Daftar lengkap dokumen dialog kinerja periode berjalan dan riwayat evaluasi Anda.
           </p>
         </div>
+        <InitiateDialogButton />
       </header>
 
       {/* Stats Summary Banner */}

@@ -36,8 +36,8 @@ const CTA: Record<
   StatusDialog,
   { label: string; href: (id: number) => string; variant: "primary" | "plain" }
 > = {
-  draft_atasan: {
-    label: "Ditunggu",
+  draft: {
+    label: "Lihat Pengajuan",
     href: (id) => `/pegawai/dialog/${id}`,
     variant: "plain",
   },

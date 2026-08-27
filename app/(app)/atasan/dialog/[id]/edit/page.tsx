@@ -34,7 +34,7 @@ export default async function EditDialogPage({
     },
   });
   if (!dialog) redirect("/atasan/dialog");
-  if (dialog.status !== "draft_atasan") redirect(`/atasan/dialog/${dialog.id}`);
+  if (!["draft", "menunggu_pegawai", "menunggu_atasan"].includes(dialog.status)) redirect(`/atasan/dialog/${dialog.id}`);
 
   return (
     <div className="flex flex-col gap-10">

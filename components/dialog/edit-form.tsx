@@ -276,6 +276,7 @@ export function DialogForm({
   periodeTahun,
   triwulan,
   deskripsiKinerja,
+  deskripsiPegawai,
   atasanNama,
   aspek,
   isLanjutan = false,
@@ -285,6 +286,7 @@ export function DialogForm({
   periodeTahun: number;
   triwulan: Triwulan;
   deskripsiKinerja: string | null;
+  deskripsiPegawai?: string | null;
   atasanNama: string;
   aspek: ExistingAspek[];
   isLanjutan?: boolean;
@@ -309,6 +311,9 @@ export function DialogForm({
       };
     }),
   );
+  const [deskripsiPegawaiText, setDeskripsiPegawaiText] = useState(
+    deskripsiPegawai ?? "",
+  );
   const [pending, setPending] = useState<"draft" | "submit" | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -317,6 +322,7 @@ export function DialogForm({
   >("idle");
   const [savedAt, setSavedAt] = useState("");
   const draftsRef = useRef(drafts);
+  const deskripsiPegawaiRef = useRef(deskripsiPegawaiText);
   const savedJsonRef = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queueRef = useRef<Promise<void>>(Promise.resolve());
@@ -337,7 +343,8 @@ export function DialogForm({
 
   useEffect(() => {
     draftsRef.current = drafts;
-  }, [drafts]);
+    deskripsiPegawaiRef.current = deskripsiPegawaiText;
+  }, [drafts, deskripsiPegawaiText]);
 
   const enqueueTask = useCallback((task: () => Promise<void>) => {
     queueRef.current = queueRef.current.then(task, task);
@@ -346,7 +353,10 @@ export function DialogForm({
 
   const runPersist = useCallback(async () => {
     if (savedJsonRef.current === null) return;
-    const json = JSON.stringify(draftsRef.current);
+    const json = JSON.stringify({
+      drafts: draftsRef.current,
+      deskripsi: deskripsiPegawaiRef.current,
+    });
     if (json === savedJsonRef.current) return;
     setSaveState("saving");
     try {
@@ -354,6 +364,7 @@ export function DialogForm({
         dialogId,
         "draft",
         buildAspekPayload(draftsRef.current),
+        deskripsiPegawaiRef.current,
       );
       if (result?.error) {
         showError(result.error);
@@ -379,18 +390,22 @@ export function DialogForm({
 
   useEffect(() => {
     if (pending !== null) return;
+    const currentPayload = {
+      drafts,
+      deskripsi: deskripsiPegawaiText,
+    };
     if (savedJsonRef.current === null) {
-      savedJsonRef.current = JSON.stringify(drafts);
+      savedJsonRef.current = JSON.stringify(currentPayload);
       return;
     }
-    const json = JSON.stringify(drafts);
+    const json = JSON.stringify(currentPayload);
     if (json === savedJsonRef.current) return;
     setSaveState("idle");
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       void enqueueTask(runPersist);
     }, 800);
-  }, [drafts, pending, enqueueTask, runPersist]);
+  }, [drafts, deskripsiPegawaiText, pending, enqueueTask, runPersist]);
 
   useEffect(() => {
     const onBeforeUnload = () => {
@@ -468,6 +483,7 @@ export function DialogForm({
       dialogId,
       mode,
       buildAspekPayload(draftsRef.current),
+      deskripsiPegawaiRef.current,
     );
 
     if (result?.error) {
@@ -517,9 +533,25 @@ export function DialogForm({
           </p>
         </div>
 
+        <div className="flex flex-col gap-1.5 rounded-lg border border-outline bg-surface px-5 py-4">
+          <label htmlFor="deskripsi-pegawai-input" className={LABEL_CLASSES}>
+            {deskripsiKinerja?.trim() ? "Deskripsi Kinerja (versi Pegawai)" : "Deskripsi Kinerja (Pegawai)"}
+          </label>
+          <textarea
+            id="deskripsi-pegawai-input"
+            rows={3}
+            value={deskripsiPegawaiText}
+            onChange={(e) => setDeskripsiPegawaiText(e.target.value)}
+            placeholder="Tuliskan gambaran/deskripsi kinerja versi Anda (opsional)..."
+            className={TEXTAREA_CLASSES}
+          />
+        </div>
+
         {deskripsiKinerja?.trim() ? (
           <div className="rounded-lg border border-outline bg-surface px-5 py-4">
-            <span className={LABEL_CLASSES}>Deskripsi Kinerja (dari Atasan)</span>
+            <span className={LABEL_CLASSES}>
+              {deskripsiPegawaiText.trim() ? "Deskripsi Kinerja (versi Atasan)" : "Deskripsi Kinerja (Atasan)"}
+            </span>
             <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
               {deskripsiKinerja}
             </p>

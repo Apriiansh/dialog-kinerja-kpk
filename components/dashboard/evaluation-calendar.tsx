@@ -8,13 +8,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { EmptyState } from "@/components/shared/empty-state";
 
 export type CalendarEvent = {
-  id: number; // reviu id
+  id: number;
   dialogId: number;
-  date: string; // ISO date string
+  date: string;
   pegawaiName: string;
   npp: string;
   triwulan: any;
   tahun: number;
+  kind?: "reviu" | "dialog";
+  status?: string;
 };
 
 interface EvaluationCalendarProps {
@@ -110,10 +112,22 @@ export function EvaluationCalendar({ events }: EvaluationCalendarProps) {
           <ul className="flex flex-col gap-3">
             {displayedEvents.map((ev) => {
               const d = new Date(ev.date);
+              const isDialog = ev.kind === "dialog";
               return (
-                <li key={ev.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg border border-outline-strong bg-surface-muted">
-                  <div className="flex flex-col min-w-0">
-                    <span className="font-semibold text-sm text-ink truncate">{ev.pegawaiName}</span>
+                <li key={`${ev.kind ?? "event"}-${ev.id}`} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg border border-outline-strong bg-surface-muted">
+                  <div className="flex flex-col min-w-0 gap-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sm text-ink truncate">{ev.pegawaiName}</span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                          isDialog
+                            ? "bg-amber-100 text-amber-800 border border-amber-200"
+                            : "bg-indigo-100 text-indigo-800 border border-indigo-200"
+                        }`}
+                      >
+                        {isDialog ? "Jadwal Dialog" : "Evaluasi Reviu"}
+                      </span>
+                    </div>
                     <span className="text-xs text-ink-muted">
                       {d.getDate()} {MONTHS[d.getMonth()]} · NPP: {ev.npp} · {formatPeriode(ev.triwulan, ev.tahun)}
                     </span>

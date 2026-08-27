@@ -30,19 +30,20 @@ export async function generateMetadata({ params }: PageProps) {
   return { title: `Dialog Kinerja #${id}` };
 }
 
+import { AtasanApprovalPanel } from "@/components/dialog/atasan-approval-panel";
+
 function StatusNote({ status }: { status: string }) {
-  if (status === "draft_atasan") {
+  if (status === "draft") {
     return (
       <p className="text-sm leading-5 text-ink-muted">
-        Dialog masih berupa draf dan belum dikirim ke pegawai. Deskripsi
-        kinerja opsional; isi bila perlu lalu kirim.
+        Pegawai telah mengajukan jadwal dialog kinerja ini. Tinjau pengajuan di bawah untuk menyetujui atau mengembalikan dengan catatan.
       </p>
     );
   }
   if (status === "menunggu_pegawai") {
     return (
       <p className="text-sm leading-5 text-ink-muted">
-        Dialog telah dikirim. Pegawai sedang melengkapi isian — Anda dapat
+        Dialog telah dikirim/disetujui. Pegawai sedang melengkapi isian aspek — Anda dapat
         memantau isian mereka secara langsung di bawah dan mengisi tanggung
         jawab atasan secara bersamaan.
       </p>
@@ -94,7 +95,7 @@ export default async function DialogDetailPage({
   });
 
   const status = dialog.status;
-  const isDraft = status === "draft_atasan";
+  const isDraft = status === "draft";
   const isCollaboration = status === "menunggu_pegawai";
   const isReview = status === "menunggu_atasan";
   const isSelesai = status === "selesai";
@@ -160,57 +161,47 @@ export default async function DialogDetailPage({
                     ) : null}
                   </>
                 ) : null}
-                {isDraft ? (
-                  <>
-                    <Link
-                      href={`/atasan/dialog/${dialog.id}/edit`}
-                      className="inline-flex h-8 items-center gap-1 rounded-md bg-primary-soft px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-faint"
-                    >
-                      <PencilSimple size={12} weight="bold" />
-                      {dialog.id_dialog_induk ? "Isi Dialog Lanjutan" : "Isi Dialog"}
-                    </Link>
-                    <DeleteDialogButton dialogId={dialog.id} />
-                    <form action={submitDialog.bind(null, dialog.id)}>
-                      <button
-                        type="submit"
-                        className="inline-flex h-8 items-center gap-1 rounded-md bg-primary px-3 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
-                      >
-                        <PaperPlaneTilt size={12} weight="bold" />
-                        Kirim
-                      </button>
-                    </form>
-                  </>
-                ) : null}
               </div>
             </div>
 
             <StatusNote status={status} />
 
-            {isDraft && !dialog.deskripsi_kinerja?.trim() ? (
-              <div className="flex flex-col gap-2 rounded-lg border border-dashed border-outline-strong bg-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm leading-5 text-ink-muted">
-                  Belum ada deskripsi kinerja. Anda dapat langsung mengirim
-                  dialog atau mengisi deskripsi terlebih dahulu melalui tombol
-                  Edit.
-                </p>
-                <Link
-                  href={`/atasan/dialog/${dialog.id}/edit`}
-                  className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong"
-                >
-                  <PencilSimple size={16} weight="bold" />
-                  Isi Deskripsi Kinerja
-                </Link>
-              </div>
+            {isDraft ? (
+              <AtasanApprovalPanel
+                dialogId={dialog.id}
+                jadwalDialog={dialog.jadwal_dialog}
+                deskripsiPegawai={dialog.deskripsi_pegawai}
+                initialDeskripsiAtasan={dialog.deskripsi_kinerja}
+              />
             ) : null}
 
-            {dialog.deskripsi_kinerja?.trim() ? (
-              <div className="rounded-lg border border-outline bg-surface px-5 py-4">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
-                  Deskripsi Kinerja (dari Atasan)
-                </span>
-                <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
-                  {dialog.deskripsi_kinerja}
-                </p>
+            {dialog.deskripsi_pegawai?.trim() || dialog.deskripsi_kinerja?.trim() ? (
+              <div className="grid gap-3 sm:grid-cols-1">
+                {dialog.deskripsi_pegawai?.trim() ? (
+                  <div className="rounded-lg border border-outline bg-surface px-5 py-4">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                      {dialog.deskripsi_kinerja?.trim()
+                        ? "Deskripsi Kinerja (versi Pegawai)"
+                        : "Deskripsi Kinerja (Pegawai)"}
+                    </span>
+                    <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
+                      {dialog.deskripsi_pegawai}
+                    </p>
+                  </div>
+                ) : null}
+
+                {dialog.deskripsi_kinerja?.trim() ? (
+                  <div className="rounded-lg border border-outline bg-surface px-5 py-4">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                      {dialog.deskripsi_pegawai?.trim()
+                        ? "Deskripsi Kinerja (versi Atasan)"
+                        : "Deskripsi Kinerja (Atasan)"}
+                    </span>
+                    <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
+                      {dialog.deskripsi_kinerja}
+                    </p>
+                  </div>
+                ) : null}
               </div>
             ) : null}
           </header>

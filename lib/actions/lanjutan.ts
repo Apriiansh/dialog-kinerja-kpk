@@ -87,7 +87,7 @@ export async function createDialogLanjutan(
           periode_tahun: tahunBerjalan,
           triwulan,
           id_dialog_induk: parent.id,
-          status: "draft_atasan",
+          status: "draft",
           aspek: {
             create: VALID_JENIS.map((jenis_aspek) => {
               const parentAspek = parent.aspek.find(

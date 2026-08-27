@@ -9,6 +9,7 @@ import { canValidateDialog } from "@/lib/queries/dialog";
 import { flashRedirect } from "@/lib/utils/flash";
 import { createNotification } from "@/lib/notifications";
 import { publishDialogUpdate } from "@/lib/realtime/bus";
+import { getTriwulanFromDate, triwulanLabel } from "@/lib/constants/triwulan";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
 export interface AspekItemInput {
@@ -141,6 +142,7 @@ export async function saveDialogForm(
   dialogId: number,
   mode: "draft" | "submit",
   aspekInput: AspekInput[],
+  deskripsiPegawai?: string,
 ): Promise<SaveDialogState> {
   const session = await requireRole("PEGAWAI");
   const err = await assertActiveActor(session.id);
@@ -184,6 +186,14 @@ export async function saveDialogForm(
 
   try {
     await prisma.$transaction(async (tx) => {
+      // Update deskripsi_pegawai if provided
+      if (deskripsiPegawai !== undefined) {
+        await tx.dialogKinerja.update({
+          where: { id: dialog.id },
+          data: { deskripsi_pegawai: toNullable(deskripsiPegawai) },
+        });
+      }
+
       for (const aspek of aspekInput) {
         const savedAspek = await tx.dialogKinerjaAspek.upsert({
           where: {
@@ -349,5 +359,192 @@ export async function validateDialog(
 
   revalidatePath("/pegawai/dashboard");
   revalidatePath(`/pegawai/dialog/${dialog.id}`);
+  return {};
+}
+
+export async function initiateDialog(input: {
+  jadwal_dialog: string;
+  deskripsi_pegawai?: string;
+}) {
+  const session = await requireRole("PEGAWAI");
+  const err = await assertActiveActor(session.id);
+  if (err) return { error: err };
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.id },
+    select: { id: true, id_atasan: true, nama_pegawai: true },
+  });
+  if (!user || !user.id_atasan) {
+    return { error: "Anda belum terhubung dengan Atasan. Silakan hubungi admin." };
+  }
+
+  const dateObj = toNullableDate(input.jadwal_dialog);
+  if (!dateObj) {
+    return { error: "Tanggal jadwal dialog tidak valid." };
+  }
+
+  const periode_tahun = dateObj.getFullYear();
+  const triwulan = getTriwulanFromDate(dateObj);
+
+  const existing = await prisma.dialogKinerja.findFirst({
+    where: {
+      id_pegawai: session.id,
+      periode_tahun,
+      triwulan,
+    },
+  });
+  if (existing) {
+    return {
+      error: `Sudah terdapat Dialog Kinerja untuk ${triwulanLabel(triwulan)} ${periode_tahun}.`,
+    };
+  }
+
+  let newDialogId: number;
+  try {
+    const dialog = await prisma.$transaction(async (tx) => {
+      const created = await tx.dialogKinerja.create({
+        data: {
+          id_pegawai: session.id,
+          id_atasan: user.id_atasan!,
+          periode_tahun,
+          triwulan,
+          jadwal_dialog: dateObj,
+          deskripsi_pegawai: toNullable(input.deskripsi_pegawai),
+          status: "draft",
+          aspek: {
+            createMany: {
+              data: VALID_JENIS.map((jenis) => ({
+                jenis_aspek: jenis,
+              })),
+            },
+          },
+        },
+      });
+      return created;
+    });
+    newDialogId = dialog.id;
+  } catch {
+    return { error: "Gagal membuat pengajuan dialog. Silakan coba lagi." };
+  }
+
+  revalidatePath("/pegawai/dialog");
+  revalidatePath("/pegawai/dashboard");
+
+  await createNotification({
+    userId: user.id_atasan,
+    type: "dialog_status",
+    title: "Pengajuan Dialog Kinerja Baru",
+    description: `${user.nama_pegawai} mengajukan jadwal Dialog Kinerja untuk ${triwulanLabel(triwulan)} ${periode_tahun}.`,
+    link: `/atasan/dialog/${newDialogId}`,
+  });
+
+  flashRedirect(`/pegawai/dialog/${newDialogId}`, {
+    type: "success",
+    title: "Pengajuan dialog berhasil dikirim ke atasan",
+  });
+
+  return {};
+}
+
+export async function updateDraftDialog(
+  dialogId: number,
+  input: {
+    jadwal_dialog: string;
+    deskripsi_pegawai?: string;
+  },
+) {
+  const session = await requireRole("PEGAWAI");
+  const err = await assertActiveActor(session.id);
+  if (err) return { error: err };
+
+  const dialog = await prisma.dialogKinerja.findFirst({
+    where: { id: dialogId, id_pegawai: session.id, status: "draft" },
+    select: { id: true, id_atasan: true, periode_tahun: true, triwulan: true },
+  });
+  if (!dialog) {
+    return { error: "Dialog draft tidak ditemukan atau sudah diproses." };
+  }
+
+  const dateObj = toNullableDate(input.jadwal_dialog);
+  if (!dateObj) {
+    return { error: "Tanggal jadwal dialog tidak valid." };
+  }
+
+  const newYear = dateObj.getFullYear();
+  const newTw = getTriwulanFromDate(dateObj);
+
+  if (newYear !== dialog.periode_tahun || newTw !== dialog.triwulan) {
+    const existing = await prisma.dialogKinerja.findFirst({
+      where: {
+        id_pegawai: session.id,
+        periode_tahun: newYear,
+        triwulan: newTw,
+        id: { not: dialogId },
+      },
+    });
+    if (existing) {
+      return {
+        error: `Sudah terdapat Dialog Kinerja lain untuk ${triwulanLabel(newTw)} ${newYear}.`,
+      };
+    }
+  }
+
+  try {
+    await prisma.dialogKinerja.update({
+      where: { id: dialogId },
+      data: {
+        jadwal_dialog: dateObj,
+        periode_tahun: newYear,
+        triwulan: newTw,
+        deskripsi_pegawai: toNullable(input.deskripsi_pegawai),
+        alasan_tolak: null,
+      },
+    });
+  } catch {
+    return { error: "Gagal memperbarui pengajuan dialog." };
+  }
+
+  revalidatePath("/pegawai/dialog");
+  revalidatePath(`/pegawai/dialog/${dialogId}`);
+  revalidatePath("/pegawai/dashboard");
+
+  await createNotification({
+    userId: dialog.id_atasan,
+    type: "dialog_status",
+    title: "Revisi Jadwal Dialog Kinerja",
+    description: `Pegawai memperbarui pengajuan jadwal Dialog Kinerja untuk ${triwulanLabel(newTw)} ${newYear}.`,
+    link: `/atasan/dialog/${dialogId}`,
+  });
+
+  return {};
+}
+
+export async function deleteDraftDialog(dialogId: number) {
+  const session = await requireRole("PEGAWAI");
+  const err = await assertActiveActor(session.id);
+  if (err) return { error: err };
+
+  const dialog = await prisma.dialogKinerja.findFirst({
+    where: { id: dialogId, id_pegawai: session.id, status: "draft" },
+  });
+  if (!dialog) {
+    return { error: "Draft dialog tidak ditemukan atau sudah tidak dapat dihapus." };
+  }
+
+  try {
+    await prisma.dialogKinerja.delete({
+      where: { id: dialogId },
+    });
+  } catch {
+    return { error: "Gagal menghapus draft dialog." };
+  }
+
+  revalidatePath("/pegawai/dialog");
+  revalidatePath("/pegawai/dashboard");
+
+  flashRedirect("/pegawai/dialog", {
+    type: "info",
+    title: "Draft dialog berhasil dihapus",
+  });
   return {};
 }

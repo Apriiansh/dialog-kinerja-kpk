@@ -17,7 +17,7 @@ enum Role {
 }
 
 enum StatusDialog {
-  draft_atasan
+  draft
   menunggu_pegawai
   menunggu_atasan
   menunggu_validasi
@@ -95,7 +95,10 @@ model DialogKinerja {
   periode_tahun          Int
   triwulan               Triwulan
   deskripsi_kinerja      String?      @db.Text
-  status                 StatusDialog @default(draft_atasan)
+  deskripsi_pegawai      String?      @db.Text
+  jadwal_dialog          DateTime?    @db.Date
+  alasan_tolak           String?      @db.Text
+  status                 StatusDialog @default(draft)
   is_valid_pegawai       Boolean      @default(false)
   is_valid_atasan        Boolean      @default(false)
   ttd_pegawai_path       String?      @db.VarChar(255)

@@ -25,7 +25,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { GreetingCard } from "@/components/dashboard/greeting-card";
 
 const STATUS_ORDER: StatusDialog[] = [
-  "draft_atasan",
+  "draft",
   "menunggu_pegawai",
   "menunggu_atasan",
   "menunggu_validasi",
@@ -48,6 +48,7 @@ export default async function AtasanDashboardPage() {
     dialogs,
     recentNotifications,
     upcomingReviu,
+    upcomingDialogs,
     analyticsByPegawai,
     atasanProfile,
   ] = await Promise.all([
@@ -94,7 +95,7 @@ export default async function AtasanDashboardPage() {
       where: {
         dialog: { id_atasan: session.id },
         status: "selesai",
-        tanggal_next_evaluasi: { not: null }
+        tanggal_next_evaluasi: { not: null },
       },
       select: {
         id: true,
@@ -104,11 +105,27 @@ export default async function AtasanDashboardPage() {
             id: true,
             periode_tahun: true,
             triwulan: true,
-            pegawai: { select: { nama_pegawai: true, npp: true } }
-          }
-        }
+            pegawai: { select: { nama_pegawai: true, npp: true } },
+          },
+        },
       },
-      orderBy: { tanggal_next_evaluasi: "asc" }
+      orderBy: { tanggal_next_evaluasi: "asc" },
+    }),
+    prisma.dialogKinerja.findMany({
+      where: {
+        id_atasan: session.id,
+        jadwal_dialog: { not: null },
+        status: { in: ["draft", "menunggu_pegawai", "menunggu_atasan", "menunggu_validasi"] },
+      },
+      select: {
+        id: true,
+        jadwal_dialog: true,
+        periode_tahun: true,
+        triwulan: true,
+        status: true,
+        pegawai: { select: { nama_pegawai: true, npp: true } },
+      },
+      orderBy: { jadwal_dialog: "asc" },
     }),
     prisma.user.findMany({
       where: { id_atasan: session.id, is_active: true },
@@ -130,15 +147,15 @@ export default async function AtasanDashboardPage() {
                     id: true,
                     dialog_evaluasi: true,
                     is_tercapai: true,
-                  }
-                }
-              }
-            }
+                  },
+                },
+              },
+            },
           },
-          orderBy: { created_at: "desc" }
-        }
+          orderBy: { created_at: "desc" },
+        },
       },
-      orderBy: { nama_pegawai: "asc" }
+      orderBy: { nama_pegawai: "asc" },
     }),
     prisma.user.findUnique({
       where: { id: session.id },
@@ -179,15 +196,29 @@ export default async function AtasanDashboardPage() {
       hint: `${acc.tercapai} tercapai · ${acc.tidakTercapai} tidak tercapai`,
     }));
 
-  const calendarEvents: CalendarEvent[] = upcomingReviu.map(r => ({
-    id: r.id,
-    dialogId: r.dialog.id,
-    date: r.tanggal_next_evaluasi!.toISOString(),
-    pegawaiName: r.dialog.pegawai.nama_pegawai,
-    npp: r.dialog.pegawai.npp,
-    triwulan: r.dialog.triwulan,
-    tahun: r.dialog.periode_tahun
-  }));
+  const calendarEvents: CalendarEvent[] = [
+    ...upcomingReviu.map((r) => ({
+      id: r.id,
+      dialogId: r.dialog.id,
+      date: r.tanggal_next_evaluasi!.toISOString(),
+      pegawaiName: r.dialog.pegawai.nama_pegawai,
+      npp: r.dialog.pegawai.npp,
+      triwulan: r.dialog.triwulan,
+      tahun: r.dialog.periode_tahun,
+      kind: "reviu" as const,
+    })),
+    ...upcomingDialogs.map((d) => ({
+      id: d.id,
+      dialogId: d.id,
+      date: d.jadwal_dialog!.toISOString(),
+      pegawaiName: d.pegawai.nama_pegawai,
+      npp: d.pegawai.npp,
+      triwulan: d.triwulan,
+      tahun: d.periode_tahun,
+      kind: "dialog" as const,
+      status: d.status,
+    })),
+  ];
 
   const achievementStats = analyticsByPegawai.map(p => {
     const items = p.dialogAsPegawai.flatMap(d => d.aspek.flatMap(a => a.item.map(i => ({

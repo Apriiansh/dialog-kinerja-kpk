@@ -135,7 +135,7 @@ export async function startDialog(
       periode_tahun: periodeTahun,
       triwulan,
       id_dialog_induk: idDialogInduk,
-      status: "draft_atasan",
+      status: "draft",
       aspek: {
         create: aspekData,
       },
@@ -206,7 +206,7 @@ export async function autosaveResponses(
     where: {
       id: dialogId,
       id_atasan: session.id,
-      status: { in: ["draft_atasan", "menunggu_pegawai", "menunggu_atasan"] },
+      status: { in: ["draft", "menunggu_pegawai", "menunggu_atasan"] },
     },
     select: { id: true },
   });
@@ -241,11 +241,15 @@ export async function saveDeskripsiKinerja(
   const err = await assertActiveActor(session.id);
   if (err) return { error: err };
   const dialog = await prisma.dialogKinerja.findFirst({
-    where: { id: dialogId, id_atasan: session.id, status: "draft_atasan" },
+    where: {
+      id: dialogId,
+      id_atasan: session.id,
+      status: { in: ["draft", "menunggu_pegawai", "menunggu_atasan"] },
+    },
     select: { id: true },
   });
   if (!dialog) {
-    return { error: "Dialog tidak ditemukan atau sudah dikirim." };
+    return { error: "Dialog tidak ditemukan atau sudah tidak dapat diubah." };
   }
 
   const updateData: Record<string, unknown> = {
@@ -277,7 +281,7 @@ export async function submitDialog(dialogId: number) {
     title: "Sesi berakhir",
   });
   const dialog = await prisma.dialogKinerja.findFirst({
-    where: { id: dialogId, id_atasan: session.id, status: "draft_atasan" },
+    where: { id: dialogId, id_atasan: session.id, status: "draft" },
     select: { id: true, id_pegawai: true, periode_tahun: true, triwulan: true },
   });
   if (!dialog) flashRedirect("/atasan/dashboard", {
@@ -307,6 +311,111 @@ export async function submitDialog(dialogId: number) {
     type: "success",
     title: "Dialog kinerja berhasil dikirim ke pegawai",
   });
+}
+
+export async function approveDialog(
+  dialogId: number,
+  deskripsiKinerja?: string,
+): Promise<{ error?: string }> {
+  const session = await requireRole("ATASAN");
+  const err = await assertActiveActor(session.id);
+  if (err) return { error: err };
+
+  const dialog = await prisma.dialogKinerja.findFirst({
+    where: { id: dialogId, id_atasan: session.id, status: "draft" },
+    select: { id: true, id_pegawai: true, periode_tahun: true, triwulan: true },
+  });
+  if (!dialog) {
+    return { error: "Pengajuan dialog tidak ditemukan atau sudah diproses." };
+  }
+
+  try {
+    await prisma.dialogKinerja.update({
+      where: { id: dialogId },
+      data: {
+        status: "menunggu_pegawai",
+        alasan_tolak: null,
+        ...(deskripsiKinerja !== undefined
+          ? { deskripsi_kinerja: deskripsiKinerja.trim() || null }
+          : {}),
+      },
+    });
+  } catch {
+    return { error: "Gagal menyetujui pengajuan dialog." };
+  }
+
+  publishDialogUpdate(dialogId, {
+    kind: "status",
+    byUserId: session.id,
+  });
+
+  await createNotification({
+    userId: dialog.id_pegawai,
+    type: "dialog_status",
+    title: "Pengajuan Dialog Disetujui",
+    description: `Pengajuan Dialog Kinerja untuk ${dialog.triwulan} ${dialog.periode_tahun} telah disetujui atasan. Silakan lengkapi isian aspek.`,
+    link: `/pegawai/dialog/${dialog.id}`,
+  });
+
+  revalidatePath("/atasan/dialog");
+  revalidatePath(`/atasan/dialog/${dialogId}`);
+  revalidatePath("/pegawai/dialog");
+  revalidatePath(`/pegawai/dialog/${dialogId}`);
+
+  return {};
+}
+
+export async function rejectDialog(
+  dialogId: number,
+  alasan_tolak: string,
+): Promise<{ error?: string }> {
+  const session = await requireRole("ATASAN");
+  const err = await assertActiveActor(session.id);
+  if (err) return { error: err };
+
+  if (!alasan_tolak?.trim()) {
+    return { error: "Alasan pengembalian/revisi wajib diisi." };
+  }
+
+  const dialog = await prisma.dialogKinerja.findFirst({
+    where: { id: dialogId, id_atasan: session.id, status: "draft" },
+    select: { id: true, id_pegawai: true, periode_tahun: true, triwulan: true },
+  });
+  if (!dialog) {
+    return { error: "Pengajuan dialog tidak ditemukan atau sudah diproses." };
+  }
+
+  try {
+    await prisma.dialogKinerja.update({
+      where: { id: dialogId },
+      data: {
+        status: "draft",
+        alasan_tolak: alasan_tolak.trim(),
+      },
+    });
+  } catch {
+    return { error: "Gagal mengembalikan pengajuan dialog." };
+  }
+
+  publishDialogUpdate(dialogId, {
+    kind: "status",
+    byUserId: session.id,
+  });
+
+  await createNotification({
+    userId: dialog.id_pegawai,
+    type: "dialog_status",
+    title: "Pengajuan Dialog Memerlukan Revisi",
+    description: `Pengajuan Dialog Kinerja ${dialog.triwulan} ${dialog.periode_tahun} perlu direvisi: "${alasan_tolak.trim()}".`,
+    link: `/pegawai/dialog/${dialog.id}`,
+  });
+
+  revalidatePath("/atasan/dialog");
+  revalidatePath(`/atasan/dialog/${dialogId}`);
+  revalidatePath("/pegawai/dialog");
+  revalidatePath(`/pegawai/dialog/${dialogId}`);
+
+  return {};
 }
 
 export interface SubmitEvaluasiState {
@@ -380,7 +489,7 @@ export async function deleteDialog(dialogId: number): Promise<{ error?: string }
   const err = await assertActiveActor(session.id);
   if (err) return { error: err };
   const dialog = await prisma.dialogKinerja.findFirst({
-    where: { id: dialogId, id_atasan: session.id, status: "draft_atasan" },
+    where: { id: dialogId, id_atasan: session.id, status: "draft" },
     select: { id: true },
   });
   if (!dialog) return { error: "Dialog tidak ditemukan" };

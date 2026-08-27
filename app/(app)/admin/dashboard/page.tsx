@@ -21,7 +21,7 @@ import { formatPeriode } from "@/lib/constants/triwulan";
 
 const PRIMARY = "#0891b2";
 const STATUS_ORDER: StatusDialog[] = [
-  "draft_atasan",
+  "draft",
   "menunggu_pegawai",
   "menunggu_atasan",
   "menunggu_validasi",

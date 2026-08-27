@@ -45,7 +45,7 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
         <tbody className="divide-y divide-outline">
           {dialogs.map((dialog) => {
             const lengkap = dialog.is_valid_pegawai && dialog.is_valid_atasan;
-            const draft = dialog.status === "draft_atasan";
+            const draft = dialog.status === "draft";
             const perluEvaluasi = dialog.status === "menunggu_atasan";
             const hasLanjutan = dialog.dialog_lanjutan.length > 0;
             const filledCount = dialog.aspek
@@ -99,35 +99,17 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-1.5">
-                    {draft ? (
-                      <>
-                        <Link
-                          href={`/atasan/dialog/${dialog.id}/edit`}
-                          className="inline-flex h-8 items-center gap-1 rounded-md bg-primary-soft px-3 text-xs font-semibold text-primary-strong transition-colors hover:bg-primary-faint"
-                        >
-                          <PencilSimpleIcon size={12} weight="bold" />
-                          {dialog.id_dialog_induk ? "Isi Dialog Lanjutan" : "Isi Dialog"}
-                        </Link>
-                        {dialog.status === "selesai" && hasLanjutan ? (
-                          <span className="text-[11px] font-semibold text-ink-muted">
-                            Lanjutan sudah dibuat
-                          </span>
-                        ) : null}
-                        <DeleteDialogButton dialogId={dialog.id} />
-                      </>
-                    ) : (
-                      <Link
-                        href={`/atasan/dialog/${dialog.id}`}
-                        className={`inline-flex h-8 items-center gap-1 rounded-md px-3 text-xs font-semibold transition-colors ${
-                          perluEvaluasi
-                            ? "bg-primary text-on-primary hover:bg-primary-strong"
-                            : "bg-surface-muted text-primary-strong hover:bg-primary-soft"
-                        }`}
-                      >
-                        <EyeIcon size={12} weight="bold" />
-                        {perluEvaluasi ? "Evaluasi" : "Detail"}
-                      </Link>
-                    )}
+                    <Link
+                      href={`/atasan/dialog/${dialog.id}`}
+                      className={`inline-flex h-8 items-center gap-1 rounded-md px-3 text-xs font-semibold transition-colors ${
+                        draft || perluEvaluasi
+                          ? "bg-primary text-on-primary hover:bg-primary-strong"
+                          : "bg-surface-muted text-primary-strong hover:bg-primary-soft"
+                      }`}
+                    >
+                      <EyeIcon size={12} weight="bold" />
+                      {draft ? "Tinjau Pengajuan" : perluEvaluasi ? "Evaluasi" : "Detail"}
+                    </Link>
                   </div>
                 </td>
               </tr>

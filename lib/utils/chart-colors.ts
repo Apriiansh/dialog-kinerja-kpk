@@ -4,7 +4,7 @@ export const DIALOG_STATUS_CHART: Record<
   StatusDialog,
   { label: string; short: string; color: string }
 > = {
-  draft_atasan: { label: "Draft (Atasan)", short: "Draft", color: "#475569" },
+  draft: { label: "Draft", short: "Draft", color: "#475569" },
   menunggu_pegawai: {
     label: "Menunggu Pegawai",
     short: "M. Pegawai",

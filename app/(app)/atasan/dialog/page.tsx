@@ -11,7 +11,6 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { getAtasanPegawaiOptions } from "@/lib/queries/atasan";
 import { DialogList } from "@/components/dialog/list";
-import { NewDialogButton } from "@/components/dialog/create-button";
 import { DialogFilterBar } from "@/components/dialog/dialog-filter-bar";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
@@ -21,7 +20,7 @@ import type { StatusDialog } from "@/generated/prisma/enums";
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 const VALID_STATUSES: StatusDialog[] = [
-  "draft_atasan",
+  "draft",
   "menunggu_pegawai",
   "menunggu_atasan",
   "menunggu_validasi",
@@ -145,9 +144,9 @@ export default async function DialogIndexPage({
       className: "bg-surface-soft text-primary",
     },
     {
-      key: "draft_atasan",
-      label: "Draft",
-      count: countByStatus("draft_atasan"),
+      key: "draft",
+      label: "Pengajuan / Draft",
+      count: countByStatus("draft"),
       icon: PencilSimpleIcon,
       className: "bg-slate-100 text-slate-700",
     },
@@ -192,7 +191,6 @@ export default async function DialogIndexPage({
             Daftar dialog kinerja pegawai beserta status prosesnya.
           </p>
         </div>
-        <NewDialogButton pegawai={pegawai} />
       </header>
 
       {/* Stats by Status */}
