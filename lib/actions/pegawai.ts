@@ -9,8 +9,13 @@ import { canValidateDialog } from "@/lib/queries/dialog";
 import { flashRedirect } from "@/lib/utils/flash";
 import { createNotification } from "@/lib/notifications";
 import { publishDialogUpdate } from "@/lib/realtime/bus";
-import { getTriwulanFromDate, triwulanLabel } from "@/lib/constants/triwulan";
+import {
+  formatPeriode,
+  getTriwulanFromDate,
+  triwulanLabel,
+} from "@/lib/constants/triwulan";
 import type { JenisAspek } from "@/generated/prisma/enums";
+import { sendDialogSubmissionEmail } from "@/lib/dialog-email";
 
 export interface AspekItemInput {
   id?: number;
@@ -156,6 +161,12 @@ export async function saveDialogForm(
       status: true,
       id_dialog_induk: true,
       id_atasan: true,
+      atasan: {
+        select: { nama_pegawai: true, email: true },
+      },
+      pegawai: {
+        select: { nama_pegawai: true },
+      },
       periode_tahun: true,
       triwulan: true,
     },
@@ -282,6 +293,20 @@ export async function saveDialogForm(
   });
 
   if (mode === "submit") {
+    if (dialog.atasan.email) {
+      const baseUrl = process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+      const link = new URL(`/atasan/dialog/${dialog.id}`, baseUrl).toString();
+      await sendDialogSubmissionEmail({
+        to: dialog.atasan.email,
+        atasanName: dialog.atasan.nama_pegawai,
+        pegawaiName: dialog.pegawai.nama_pegawai,
+        periode: formatPeriode(dialog.triwulan, dialog.periode_tahun),
+        link,
+      }).catch((err) => {
+        console.error("Gagal kirim email pengajuan dialog ke atasan:", err);
+      });
+    }
+
     await createNotification({
       userId: dialog.id_atasan,
       type: "dialog_status",
@@ -383,7 +408,18 @@ export async function initiateDialog(input: {
 
   const user = await prisma.user.findUnique({
     where: { id: session.id },
-    select: { id: true, id_atasan: true, nama_pegawai: true },
+    select: {
+      id: true,
+      id_atasan: true,
+      nama_pegawai: true,
+      atasan: {
+        select: {
+          id: true,
+          nama_pegawai: true,
+          email: true,
+        },
+      },
+    },
   });
   if (!user || !user.id_atasan) {
     return { error: "Anda belum terhubung dengan Atasan. Silakan hubungi admin." };
@@ -495,6 +531,26 @@ export async function initiateDialog(input: {
     link: `/atasan/dialog/${newDialogId}`,
   });
 
+  if (user.atasan?.email) {
+    const baseUrl =
+      process.env.APP_URL ??
+      process.env.NEXT_PUBLIC_APP_URL ??
+      "http://localhost:3000";
+    const link = new URL(`/atasan/dialog/${newDialogId}`, baseUrl).toString();
+    await sendDialogSubmissionEmail({
+      to: user.atasan.email,
+      atasanName: user.atasan.nama_pegawai,
+      pegawaiName: user.nama_pegawai,
+      periode: formatPeriode(triwulan, periode_tahun),
+      link,
+      isLanjutan,
+      jadwalDialog: input.jadwal_dialog,
+      deskripsiPegawai: input.deskripsi_pegawai,
+    }).catch((err) => {
+      console.error("Gagal kirim email pengajuan dialog ke atasan:", err);
+    });
+  }
+
   flashRedirect(`/pegawai/dialog/${newDialogId}`, {
     type: "success",
     title: isLanjutan
@@ -518,7 +574,15 @@ export async function updateDraftDialog(
 
   const dialog = await prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_pegawai: session.id, status: "draft" },
-    select: { id: true, id_atasan: true, periode_tahun: true, triwulan: true },
+    select: {
+      id: true,
+      id_atasan: true,
+      periode_tahun: true,
+      triwulan: true,
+      id_dialog_induk: true,
+      pegawai: { select: { nama_pegawai: true } },
+      atasan: { select: { nama_pegawai: true, email: true } },
+    },
   });
   if (!dialog) {
     return { error: "Dialog draft tidak ditemukan atau sudah diproses." };
@@ -574,6 +638,26 @@ export async function updateDraftDialog(
     description: `Pegawai memperbarui pengajuan jadwal Dialog Kinerja untuk ${triwulanLabel(newTw)} ${newYear}.`,
     link: `/atasan/dialog/${dialogId}`,
   });
+
+  if (dialog.atasan?.email) {
+    const baseUrl =
+      process.env.APP_URL ??
+      process.env.NEXT_PUBLIC_APP_URL ??
+      "http://localhost:3000";
+    const link = new URL(`/atasan/dialog/${dialogId}`, baseUrl).toString();
+    await sendDialogSubmissionEmail({
+      to: dialog.atasan.email,
+      atasanName: dialog.atasan.nama_pegawai,
+      pegawaiName: dialog.pegawai.nama_pegawai,
+      periode: formatPeriode(newTw, newYear),
+      link,
+      isLanjutan: Boolean(dialog.id_dialog_induk),
+      jadwalDialog: input.jadwal_dialog,
+      deskripsiPegawai: input.deskripsi_pegawai,
+    }).catch((err) => {
+      console.error("Gagal kirim email revisi dialog ke atasan:", err);
+    });
+  }
 
   return {};
 }
