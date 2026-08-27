@@ -18,7 +18,7 @@ export default async function LandingPage() {
       className="min-h-screen flex flex-col bg-background dark:bg-[#15120D] text-ink dark:text-[#F2EEE7] transition-colors duration-200 selection:bg-primary-strong selection:text-white overflow-x-hidden scroll-smooth"
     >
       {/* Top accent line — institutional red, no amber */}
-      <div className="h-1 sm:h-1.5 w-full bg-gradient-to-r from-[#7A0B1F] via-[#C8102E] to-[#7A0B1F]" />
+      <div className="h-1 sm:h-1.5 w-full bg-linear-to-r from-[#7A0B1F] via-[#C8102E] to-[#7A0B1F]" />
 
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-outline dark:border-white/10 bg-background/95 dark:bg-[#15120D]/95 backdrop-blur-md">

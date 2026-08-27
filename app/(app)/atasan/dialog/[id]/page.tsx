@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, PencilSimple } from "@phosphor-icons/react/dist/ssr";
@@ -5,9 +6,9 @@ import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { getAtasanDialog } from "@/lib/queries/atasan";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { DeleteDialogButton } from "@/components/dialog/delete-button";
 import { DialogSummary } from "@/components/dialog/summary";
 import { UnduhBuktiButton } from "@/components/shared/unduh-bukti-button";
+import { Separator } from "@/components/ui/separator";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { FormulirDialogKinerja } from "@/components/dialog/detail-view";
 import { ReviuList } from "@/components/reviu/list";
@@ -15,18 +16,20 @@ import { ReviuSignForm } from "@/components/reviu/sign-form";
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { InitiateDialogButton } from "@/components/dialog/initiate-button";
 import { formatPeriode } from "@/lib/constants/triwulan";
+import { AtasanApprovalPanel } from "@/components/dialog/atasan-approval-panel";
+import { ScrollToAnchor } from "@/components/shared/scroll-to-anchor";
 
 type PageProps = {
   params: Promise<{ id: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { id } = await params;
   return { title: `Dialog Kinerja #${id}` };
 }
-
-import { AtasanApprovalPanel } from "@/components/dialog/atasan-approval-panel";
 
 function StatusNote({ status }: { status: string }) {
   if (status === "draft") {
@@ -99,9 +102,6 @@ export default async function DialogDetailPage({
     .map((r) => r.id);
   const latestSelesaiReviuId = selesaiReviuIds[selesaiReviuIds.length - 1];
   const hasLanjutan = dialog.dialog_lanjutan.length > 0;
-  const hasBelumTercapai = dialog.aspek.some((aspek) =>
-    aspek.item.some((item) => item.is_tercapai === false),
-  );
 
   return (
     <div className="flex flex-col gap-8">
