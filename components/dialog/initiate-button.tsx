@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { initiateDialog } from "@/lib/actions/pegawai";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import { formatPeriode, getTriwulanFromDate } from "@/lib/constants/triwulan";
+import { dateInputFromDaysFromNow } from "@/lib/utils";
 
 export interface EligibleParentInfo {
   id: number;
@@ -42,13 +43,9 @@ export function InitiateDialogButton({
   const displayLabel = label || defaultLabel;
 
   const [open, setOpen] = useState(false);
-  const [jadwalDate, setJadwalDate] = useState(() => {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, "0");
-    const dd = String(today.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
-  });
+  const [jadwalDate, setJadwalDate] = useState(() =>
+    dateInputFromDaysFromNow(2),
+  );
   const [deskripsi, setDeskripsi] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -78,6 +75,10 @@ export function InitiateDialogButton({
       showError("Pilih tanggal jadwal dialog.");
       return;
     }
+    if (jadwalDate < minDateStr) {
+      showError("Jadwal dialog paling cepat 2 (dua) hari setelah hari ini.");
+      return;
+    }
     setLoading(true);
     const res = await initiateDialog({
       jadwal_dialog: jadwalDate,
@@ -98,8 +99,7 @@ export function InitiateDialogButton({
     setOpen(false);
   }
 
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const minDateStr = dateInputFromDaysFromNow(2);
 
   const buttonClasses =
     variant === "primary"
@@ -143,8 +143,8 @@ export function InitiateDialogButton({
                 </h2>
                 <p className="text-xs leading-4 text-ink-muted">
                   {isLanjutan
-                    ? "Pilih tanggal pelaksanaan dialog lanjutan. Butir target yang belum tercapai otomatis diteruskan."
-                    : "Pilih tanggal pelaksanaan dialog. Periode & Triwulan akan ditentukan secara otomatis."}
+                    ? "Pilih tanggal pelaksanaan dialog lanjutan (paling cepat 2 hari dari hari ini). Butir target yang belum tercapai otomatis diteruskan."
+                    : "Pilih tanggal pelaksanaan dialog (paling cepat 2 hari dari hari ini). Periode & Triwulan akan ditentukan secara otomatis."}
                 </p>
               </div>
               <button
@@ -188,10 +188,19 @@ export function InitiateDialogButton({
                 <input
                   id="jadwal-date"
                   type="date"
-                  min={todayStr}
+                  min={minDateStr}
                   required
                   value={jadwalDate}
-                  onChange={(e) => setJadwalDate(e.target.value)}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    if (next && next < minDateStr) {
+                      showError(
+                        "Jadwal dialog paling cepat 2 (dua) hari setelah hari ini.",
+                      );
+                      return;
+                    }
+                    setJadwalDate(next);
+                  }}
                   className="h-10 w-full rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none transition-[border-color,box-shadow] focus:border-primary focus:shadow-focus"
                 />
               </div>
