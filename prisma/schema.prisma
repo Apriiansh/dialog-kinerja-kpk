@@ -133,11 +133,24 @@ model DialogKinerja {
   aspek DialogKinerjaAspek[]
   reviu Reviu[]
   messages DialogChatMessage[]
+  emailLogs DialogEmailLog[]
 
   dialog_induk    DialogKinerja? @relation("DialogLanjutan", fields: [id_dialog_induk], references: [id], onDelete: SetNull)
   dialog_lanjutan DialogKinerja[] @relation("DialogLanjutan")
 
   @@map("dialog_kinerja")
+}
+
+model DialogEmailLog {
+  id         Int      @id @default(autoincrement())
+  id_dialog  Int
+  jenis      String   @db.VarChar(30) // h_minus_1 | h
+  created_at DateTime @default(now())
+
+  dialog DialogKinerja @relation(fields: [id_dialog], references: [id], onDelete: Cascade)
+
+  @@unique([id_dialog, jenis])
+  @@map("dialog_email_log")
 }
 
 model DialogKinerjaAspek {
