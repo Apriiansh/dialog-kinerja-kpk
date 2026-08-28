@@ -52,7 +52,6 @@ export default async function DialogEditPage({ params }: PageProps) {
       <ChatHeader
         dialogId={dialog.id}
         userRole="pegawai"
-        variant="floating-only"
         partnerName={dialog.atasan.nama_pegawai}
         partnerRoleLabel="Atasan Langsung"
       />

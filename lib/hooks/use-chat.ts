@@ -169,16 +169,30 @@ export function useChat(dialogId: number, options: UseChatOptions = {}) {
     }
   };
 
+  const removeMessages = useCallback((ids: number[]) => {
+    const idSet = new Set(ids);
+    setMessages((prev) => {
+      const next = prev.filter((m) => !idSet.has(m.id));
+      const real = next.filter((m) => m.id > 0);
+      latestMessageIdRef.current =
+        real.length > 0 ? Math.max(...real.map((m) => m.id)) : 0;
+      return next;
+    });
+    void fetchMessagesRef.current(false);
+  }, []);
+
   return {
     messages,
     dialogInfo,
     input,
     setInput,
+    setError,
     isLoading,
     isSending,
     isConnected,
     error,
     sendMessage,
+    removeMessages,
     refresh: () => fetchMessages(false),
   };
 }

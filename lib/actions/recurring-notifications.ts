@@ -40,8 +40,8 @@ export async function checkUpcomingReviuReminders(): Promise<void> {
   if (revius.length === 0) return;
 
   const links = revius.flatMap((r) => [
-    `/pegawai/dialog?reviu=${r.id}`,
-    `/atasan/dialog?reviu=${r.id}`,
+    `/pegawai/reviu/${r.id}`,
+    `/atasan/reviu/${r.id}`,
   ]);
 
   const existing = await prisma.notification.findMany({
@@ -51,8 +51,8 @@ export async function checkUpcomingReviuReminders(): Promise<void> {
   const existingSet = new Set(existing.map((n) => n.link));
 
   const inputs = revius.flatMap((r) => {
-    const pegawaiLink = `/pegawai/dialog?reviu=${r.id}`;
-    const atasanLink = `/atasan/dialog?reviu=${r.id}`;
+    const pegawaiLink = `/pegawai/reviu/${r.id}`;
+    const atasanLink = `/atasan/reviu/${r.id}`;
     const tanggal = r.tanggal_next_evaluasi
       ? r.tanggal_next_evaluasi.toLocaleDateString("id-ID", {
           day: "numeric",

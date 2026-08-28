@@ -20,6 +20,7 @@ export interface ChatMessageItem {
 export interface ChatDialogInfo {
   id: number;
   periodeTahun: number;
+  path: string;
   atasan: { id: number; nama: string; jabatan?: string | null };
   pegawai: { id: number; nama: string; jabatan?: string | null };
 }
@@ -113,6 +114,12 @@ export async function getChatMessages(
       dialogInfo: {
         id: dialog.id,
         periodeTahun: dialog.periode_tahun,
+        path:
+          session.role === "ADMIN"
+            ? `/admin/monitoring/dialog/${dialog.id}`
+            : session.role === "ATASAN"
+              ? `/atasan/dialog/${dialog.id}`
+              : `/pegawai/dialog/${dialog.id}`,
         atasan: {
           id: dialog.atasan.id,
           nama: dialog.atasan.nama_pegawai,
@@ -156,6 +163,7 @@ export async function sendChatMessage(
         id: true,
         id_atasan: true,
         id_pegawai: true,
+        status: true,
       },
     });
 
@@ -203,6 +211,12 @@ export async function sendChatMessage(
     const recipientId =
       session.id === dialog.id_atasan ? dialog.id_pegawai : dialog.id_atasan;
 
+    const recipientIsAtasan = recipientId === dialog.id_atasan;
+    const chatLink =
+      dialog.status === "selesai"
+        ? `/chat/${dialogId}`
+        : `/${recipientIsAtasan ? "atasan" : "pegawai"}/dialog/${dialogId}?chat=1`;
+
     const recipient = await prisma.user.findUnique({
       where: { id: recipientId },
       select: { nama_pegawai: true, email: true },
@@ -217,7 +231,7 @@ export async function sendChatMessage(
         type: "chat_message",
         title: `Pesan baru dari ${created.sender.nama_pegawai}`,
         description: trimmed.length > 120 ? trimmed.slice(0, 120) + "..." : trimmed,
-        link: `/chat/${dialogId}`,
+        link: chatLink,
       }).catch((e) => console.error("Gagal buat notifikasi chat:", e));
 
       if (recipient.email) {
@@ -303,7 +317,7 @@ export async function sendChatMessage(
                     <!-- CTA -->
                     <div style="text-align:center;margin:28px 0;">
                       <a
-                        href="${process.env.NEXT_PUBLIC_APP_URL}/chat/${dialogId}"
+                        href="${process.env.NEXT_PUBLIC_APP_URL}${chatLink}"
                         style="
                           display:inline-block;
                           background:#111827;
@@ -392,5 +406,76 @@ export async function sendChatMessage(
   } catch (error) {
     console.error("Error sendChatMessage:", error);
     return { success: false, error: "Gagal mengirim pesan" };
+  }
+}
+
+export async function deleteChatMessage(
+  messageId: number,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await getSession();
+    if (!session?.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const message = await prisma.dialogChatMessage.findUnique({
+      where: { id: messageId },
+      select: { id: true, id_sender: true, id_dialog: true },
+    });
+    if (!message) {
+      return { success: false, error: "Pesan tidak ditemukan" };
+    }
+
+    const canDelete =
+      session.role === "ADMIN" || message.id_sender === session.id;
+    if (!canDelete) {
+      return { success: false, error: "Akses ditolak" };
+    }
+
+    await prisma.dialogChatMessage.delete({ where: { id: messageId } });
+    publishDialogUpdate(message.id_dialog, {
+      kind: "chat",
+      byUserId: session.id,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleteChatMessage:", error);
+    return { success: false, error: "Gagal menghapus pesan" };
+  }
+}
+
+export async function deleteDialogChat(
+  dialogId: number,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await getSession();
+    if (!session?.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const dialog = await prisma.dialogKinerja.findUnique({
+      where: { id: dialogId },
+      select: { id_atasan: true, id_pegawai: true },
+    });
+    if (!dialog) {
+      return { success: false, error: "Dialog tidak ditemukan" };
+    }
+
+    const canDelete =
+      session.role === "ADMIN" ||
+      session.id === dialog.id_atasan ||
+      session.id === dialog.id_pegawai;
+    if (!canDelete) {
+      return { success: false, error: "Akses ditolak" };
+    }
+
+    await prisma.dialogChatMessage.deleteMany({ where: { id_dialog: dialogId } });
+    publishDialogUpdate(dialogId, { kind: "chat", byUserId: session.id });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleteDialogChat:", error);
+    return { success: false, error: "Gagal menghapus percakapan" };
   }
 }

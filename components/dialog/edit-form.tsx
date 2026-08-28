@@ -267,9 +267,8 @@ function SaveStateMeta({
     );
   }
   return (
-    <span className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-ink-muted">
+    <span className="flex shrink-0 items-center text-xs font-medium text-ink-muted">
       <CloudArrowUpIcon size={14} weight="bold" />
-      Perubahan tersimpan otomatis
     </span>
   );
 }
@@ -335,7 +334,7 @@ export function DialogForm({
   const typingStopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queueRef = useRef<Promise<void>>(Promise.resolve());
 
-  const { transport, partnerTyping, isFieldLocked, getFieldLockerRole, sendTyping } = useDialogLive({
+  const { transport, partnerTyping, isFieldLocked, sendTyping } = useDialogLive({
     dialogId,
     onState: (state) => {
       if (state.deskripsi_kinerja !== undefined) {

@@ -87,7 +87,7 @@ export default async function AtasanReviuDetailPage({
                   items={reviu.dialog.aspek.flatMap((a) => a.item)}
                 />
                 {reviu.dialog.id_dialog_induk ? (
-                  <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                  <span className="rounded-md bg-blue-500 px-2.5 py-1 text-xs font-semibold text-gray-700">
                     Dialog Lanjutan
                   </span>
                 ) : null}

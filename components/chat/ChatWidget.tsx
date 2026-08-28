@@ -31,6 +31,18 @@ export function ChatWidget({
   const isOpen = open;
   const setOpen = (next: boolean) => onOpenChange?.(next);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const [isDragMoving, setIsDragMoving] = useState(false);
+  const dragRef = useRef<{
+    el: HTMLElement;
+    pointerId: number;
+    startX: number;
+    startY: number;
+    originX: number;
+    originY: number;
+    moved: boolean;
+  } | null>(null);
+  const wasDraggedRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -73,6 +85,70 @@ export function ChatWidget({
     }
   };
 
+  const handleDragStart = (e: React.PointerEvent<HTMLElement>) => {
+    const el = e.currentTarget;
+    const rect = el.getBoundingClientRect();
+    dragRef.current = {
+      el,
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      originX: rect.left,
+      originY: rect.top,
+      moved: false,
+    };
+    wasDraggedRef.current = false;
+
+    const handleMove = (ev: PointerEvent) => {
+      const drag = dragRef.current;
+      if (!drag || drag.pointerId !== ev.pointerId) return;
+      const dx = ev.clientX - drag.startX;
+      const dy = ev.clientY - drag.startY;
+      if (!drag.moved && Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+      if (!drag.moved) {
+        drag.moved = true;
+        wasDraggedRef.current = true;
+        setIsDragMoving(true);
+      }
+      const margin = 8;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const w = drag.el.offsetWidth;
+      const h = drag.el.offsetHeight;
+      const left = Math.min(
+        Math.max(drag.originX + dx, margin),
+        Math.max(margin, vw - w - margin),
+      );
+      const top = Math.min(
+        Math.max(drag.originY + dy, margin),
+        Math.max(margin, vh - h - margin),
+      );
+      setPos({ x: left, y: top });
+    };
+
+    const handleUp = (ev: PointerEvent) => {
+      const drag = dragRef.current;
+      if (!drag || drag.pointerId !== ev.pointerId) return;
+      dragRef.current = null;
+      setIsDragMoving(false);
+      window.removeEventListener("pointermove", handleMove);
+      window.removeEventListener("pointerup", handleUp);
+      window.removeEventListener("pointercancel", handleUp);
+    };
+
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", handleUp);
+    window.addEventListener("pointercancel", handleUp);
+  };
+
+  const wasDragged = () => {
+    if (wasDraggedRef.current) {
+      wasDraggedRef.current = false;
+      return true;
+    }
+    return false;
+  };
+
   const displayName =
     partnerName ||
     (userRole === "atasan"
@@ -99,25 +175,33 @@ export function ChatWidget({
 
   // If closed completely, show floating launcher button
   if (!isOpen) {
+    const messageCount = messages.length;
     return (
       <aside aria-label="Ruang Percakapan Kinerja">
         <button
           type="button"
           onClick={() => {
+            if (wasDragged()) return;
             setOpen(true);
             setIsMinimized(false);
           }}
-          className="fixed bottom-6 right-6 z-50 inline-flex items-center gap-2.5 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-on-primary shadow-xl ring-4 ring-primary/20 transition-all duration-200 hover:scale-105 hover:bg-primary-strong active:scale-95"
+          onPointerDown={handleDragStart}
+          style={pos ? { left: pos.x, top: pos.y } : undefined}
+          className={`fixed z-50 inline-flex cursor-grab touch-none select-none items-center justify-center rounded-full bg-primary p-3.5 text-on-primary shadow-xl ring-4 ring-primary/20 active:cursor-grabbing ${
+            isDragMoving
+              ? "transition-none"
+              : "transition-all duration-200 hover:scale-105 hover:bg-primary-strong active:scale-95"
+          } ${pos ? "" : "bottom-6 right-6"}`}
           title="Buka Chat Dialog Kinerja"
         >
           <div className="relative flex items-center justify-center">
             <ChatCircleDotsIcon size={22} weight="fill" />
-            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-            </span>
+            {messageCount > 0 ? (
+              <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-surface">
+                {messageCount}
+              </span>
+            ) : null}
           </div>
-          <span className="hidden sm:inline">Chat Dialog</span>
         </button>
       </aside>
     );
@@ -131,24 +215,32 @@ export function ChatWidget({
           role="region"
           aria-label="Panel Chat Kinerja Diminimalkan"
           tabIndex={0}
-          onClick={() => setIsMinimized(false)}
+          onClick={() => {
+            if (wasDragged()) return;
+            setIsMinimized(false);
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               setIsMinimized(false);
             }
           }}
-          className="fixed bottom-6 right-6 z-50 flex cursor-pointer items-center justify-between gap-3 rounded-2xl border border-outline bg-surface px-4 py-3 shadow-2xl transition-all duration-200 hover:border-primary/50 hover:shadow-primary/10 sm:w-80"
+          onPointerDown={handleDragStart}
+          style={pos ? { left: pos.x, top: pos.y } : undefined}
+          className={`fixed z-50 flex cursor-grab touch-none select-none items-center justify-between gap-3 rounded-2xl border border-outline bg-surface px-4 py-3 shadow-2xl active:cursor-grabbing hover:border-primary/50 hover:shadow-primary/10 ${
+            isDragMoving ? "transition-none" : "transition-all duration-200"
+          } ${pos ? "" : "bottom-6 right-6"} sm:w-80`}
         >
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <ChatCircleDotsIcon size={18} weight="fill" />
-              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-surface" />
+              {messages.length > 0 ? (
+                <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-surface">
+                  {messages.length}
+                </span>
+              ) : null}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-ink">
-                Chat Dialog #{dialogId}
-              </p>
               <p className="truncate text-[11px] text-ink-muted">
                 {displayName} ({displayRoleLabel})
               </p>
@@ -188,10 +280,16 @@ export function ChatWidget({
       <div
         role="region"
         aria-label="Panel Chat Kinerja"
-        className="fixed bottom-5 right-5 z-50 flex h-130 max-h-[85vh] w-[92vw] max-w-100 flex-col overflow-hidden rounded-2xl border border-outline bg-surface shadow-2xl ring-1 ring-black/5 dark:ring-white/10 sm:w-100"
+        style={pos ? { left: pos.x, top: pos.y } : undefined}
+        className={`fixed z-50 flex h-130 max-h-[85vh] w-[92vw] max-w-100 flex-col overflow-hidden rounded-2xl border border-outline bg-surface shadow-2xl ring-1 ring-black/5 dark:ring-white/10 sm:w-100 ${
+          pos ? "" : "bottom-5 right-5"
+        }`}
       >
         {/* Header */}
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-outline bg-surface-sunken/60 px-4 backdrop-blur-md">
+        <header
+          onPointerDown={handleDragStart}
+          className="flex h-16 shrink-0 cursor-grab touch-none select-none items-center justify-between border-b border-outline bg-surface-sunken/60 px-4 backdrop-blur-md active:cursor-grabbing"
+        >
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-on-primary font-semibold shadow-xs">
               {displayName.charAt(0).toUpperCase()}

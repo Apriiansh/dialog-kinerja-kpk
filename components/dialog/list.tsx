@@ -2,7 +2,6 @@ import { EyeIcon, PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { DeleteDialogButton } from "@/components/dialog/delete-button";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { CapaianBadge } from "@/components/shared/capaian-badge";
 
@@ -44,10 +43,12 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
         </thead>
         <tbody className="divide-y divide-outline">
           {dialogs.map((dialog) => {
-            const lengkap = dialog.is_valid_pegawai && dialog.is_valid_atasan;
             const draft = dialog.status === "draft";
             const perluEvaluasi = dialog.status === "menunggu_atasan";
-            const hasLanjutan = dialog.dialog_lanjutan.length > 0;
+            const canEditDialog =
+              draft ||
+              perluEvaluasi ||
+              dialog.status === "menunggu_pegawai";
             const filledCount = dialog.aspek
               ? dialog.aspek.filter(
                   (a) =>
@@ -99,6 +100,15 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-1.5">
+                    {canEditDialog ? (
+                      <Link
+                        href={`/atasan/dialog/${dialog.id}/edit`}
+                        className="inline-flex h-8 items-center gap-1 rounded-md border border-outline bg-surface px-2.5 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
+                      >
+                        <PencilSimpleIcon size={12} weight="bold" />
+                        Isi Dialog
+                      </Link>
+                    ) : null}
                     <Link
                       href={`/atasan/dialog/${dialog.id}`}
                       className={`inline-flex h-8 items-center gap-1 rounded-md px-3 text-xs font-semibold transition-colors ${

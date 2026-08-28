@@ -1,6 +1,6 @@
 "use client";
 
-import { ListIcon } from "@phosphor-icons/react";
+import { ListIcon, ChatsIcon } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
 import type { SessionData } from "@/lib/auth/session";
@@ -74,6 +74,16 @@ export function TopBar({
 
       {/* Sisi Kanan: Notifikasi, Role Switcher & Profil Ringkas */}
       <div className="flex items-center gap-2 sm:gap-3">
+        {/* Riwayat Chat */}
+        <Link
+          href="/chat"
+          title="Riwayat Chat"
+          aria-label="Buka Riwayat Chat"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
+        >
+          <ChatsIcon size={18} weight="bold" />
+        </Link>
+
         {/* Notifikasi */}
         <NotificationBell role={session.role.toLowerCase()} />
 

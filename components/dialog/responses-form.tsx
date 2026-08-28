@@ -144,9 +144,8 @@ export function DialogResponsesForm({
         Tersimpan otomatis · {savedAt}
       </span>
     ) : (
-      <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-medium text-ink-muted">
+      <span className="flex shrink-0 items-center whitespace-nowrap text-xs font-medium text-ink-muted">
         <CloudArrowUpIcon size={14} weight="bold" />
-        Perubahan tersimpan otomatis
       </span>
     );
 

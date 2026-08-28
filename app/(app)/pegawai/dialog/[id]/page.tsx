@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, PencilSimpleIcon, PencilSimpleLineIcon } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeftIcon, PencilSimpleIcon, ChatCircleDotsIcon } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/auth/session";
 import {
   canEditDialog,
@@ -45,14 +45,14 @@ function StatusNote({
 }) {
   if (status === "draft") {
     return (
-      <p className="text-sm leading-5 text-ink-muted">
+      <p className="text-xs leading-5 text-ink-muted sm:text-sm">
         Pengajuan dialog kinerja ini sedang menunggu persetujuan jadwal dari atasan Anda.
       </p>
     );
   }
   if (status === "menunggu_atasan") {
     return (
-      <p className="text-sm leading-5 text-ink-muted">
+      <p className="text-xs leading-5 text-ink-muted sm:text-sm">
         Isian Anda telah dikirim. Menunggu tanggapan dan pembagian tanggung jawab dari atasan.
       </p>
     );
@@ -60,14 +60,14 @@ function StatusNote({
   if (status === "menunggu_validasi") {
     if (isValidPegawai) {
       return (
-        <p className="text-sm leading-5 text-ink-muted">
+        <p className="text-xs leading-5 text-ink-muted sm:text-sm">
           Validasi Anda telah diberikan. Menunggu validasi atasan untuk
           menyelesaikan dialog.
         </p>
       );
     }
     return (
-      <p className="text-sm leading-5 text-ink-muted">
+      <p className="text-xs leading-5 text-ink-muted sm:text-sm">
         Tanggapan atasan telah selesai. Lakukan persetujuan dan tanda tangan di
         bawah untuk mengesahkan target.
       </p>
@@ -75,7 +75,7 @@ function StatusNote({
   }
   if (status === "selesai") {
     return (
-      <p className="text-sm leading-5 text-ink-muted">
+      <p className="text-xs leading-5 text-ink-muted sm:text-sm">
         Dialog kinerja telah selesai divalidasi dan dikunci.
       </p>
     );
@@ -90,6 +90,7 @@ export default async function DialogDetailPage({
   const { id } = await params;
   const sp = await searchParams;
   const cetak = sp?.cetak === "1";
+  const chatOpen = sp?.chat === "1";
   const session = await requireRole("PEGAWAI");
 
   const dialogId = Number(id);
@@ -115,9 +116,9 @@ export default async function DialogDetailPage({
   const hasLanjutan = dialog.dialog_lanjutan.length > 0;
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className={`flex flex-col gap-8 ${isSelesai ? "print:hidden" : ""}`}>
-        <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6 sm:gap-8">
+      <div className={`flex flex-col gap-6 sm:gap-8 ${isSelesai ? "print:hidden" : ""}`}>
+        <div className="flex flex-col gap-3 sm:gap-4">
           <Link
             href="/pegawai/dialog"
             className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-ink-muted transition-colors hover:text-ink"
@@ -127,22 +128,22 @@ export default async function DialogDetailPage({
           </Link>
 
           <header className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex flex-col gap-1">
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex flex-col gap-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                  <h1 className="text-xl font-semibold leading-7 tracking-[-0.01em] text-ink sm:text-[24px] sm:leading-8">
                     Dialog Kinerja Ke-{sequenceNum}
                   </h1>
-                  <span className="rounded-md border border-outline bg-surface-muted px-2.5 py-0.5 text-xs font-semibold text-ink-muted">
+                  <span className="rounded-md border border-outline bg-surface-muted px-2.5 py-0.5 text-xs font-semibold text-ink-muted whitespace-nowrap">
                     {formatPeriode(dialog.triwulan, dialog.periode_tahun)}
                   </span>
                   {dialog.id_dialog_induk ? (
-                    <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+                    <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 whitespace-nowrap">
                       Dialog Lanjutan
                     </span>
                   ) : null}
                 </div>
-                <p className="text-sm leading-5 text-ink-muted">
+                <p className="text-xs leading-5 text-ink-muted sm:text-sm wrap-break-words">
                   Atasan:{" "}
                   <span className="font-medium text-ink">
                     {dialog.atasan.nama_pegawai}
@@ -156,12 +157,13 @@ export default async function DialogDetailPage({
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 lg:justify-end">
                 <StatusBadge status={dialog.status} />
                 {!isSelesai ? (
                   <ChatHeader
                     dialogId={dialog.id}
                     userRole="pegawai"
+                    defaultOpen={chatOpen}
                     partnerName={dialog.atasan.nama_pegawai}
                     partnerRoleLabel="Atasan Langsung"
                   />
@@ -169,7 +171,7 @@ export default async function DialogDetailPage({
                 {isEditable ? (
                   <Link
                     href={`/pegawai/dialog/${dialog.id}/edit`}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-on-primary shadow-xs transition-colors hover:bg-primary-strong"
+                    className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-primary px-3.5 text-xs font-semibold text-on-primary shadow-xs transition-colors hover:bg-primary-strong"
                   >
                     <PencilSimpleIcon size={14} weight="bold" />
                     Isi Dialog
@@ -179,10 +181,17 @@ export default async function DialogDetailPage({
                   <>
                     <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />
                     <UnduhWordLink href={`/api/unduh/dialog/${dialog.id}/docx`} />
+                    <Link
+                      href={`/chat/${dialog.id}`}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-outline bg-surface px-3.5 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
+                    >
+                      <ChatCircleDotsIcon size={14} weight="bold" />
+                      Riwayat Chat
+                    </Link>
                     {dialog.reviu.length === 0 ? (
                       <Link
                         href={`/pegawai/reviu/new?dialog=${dialog.id}`}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
+                        className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
                       >
                         Isi Evaluasi Kinerja
                       </Link>
@@ -207,24 +216,32 @@ export default async function DialogDetailPage({
             />
 
             {dialog.alasan_tolak ? (
-              <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900">
+              <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 sm:p-4">
                 <span className="font-bold text-amber-800 uppercase tracking-wider block mb-1">
                   Catatan Revisi dari Atasan:
                 </span>
-                <p className="text-sm font-medium">{dialog.alasan_tolak}</p>
+                <p className="text-xs font-medium sm:text-sm">{dialog.alasan_tolak}</p>
               </div>
             ) : null}
 
             {dialog.jadwal_dialog ? (
-              <div className="rounded-lg border border-outline bg-surface p-4 flex flex-col gap-2">
+              <div className="rounded-lg border border-outline bg-surface p-3 flex flex-col gap-2 sm:p-4">
                 <div className="text-xs text-ink-muted">
-                  Jadwal Pelaksanaan: <strong className="text-ink font-semibold">{new Date(dialog.jadwal_dialog).toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</strong>
+                  Jadwal Pelaksanaan:{" "}
+                  <strong className="text-ink font-semibold">
+                    {new Date(dialog.jadwal_dialog).toLocaleDateString("id-ID", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </strong>
                 </div>
               </div>
             ) : null}
 
             {dialog.status === "draft" ? (
-              <div className="flex flex-col gap-3 rounded-lg border border-outline bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 rounded-lg border border-outline bg-surface p-3 sm:p-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs text-ink-muted">
                   Pengajuan sedang ditinjau atasan. Anda dapat memperbarui jadwal atau menghapus draft pengajuan ini.
                 </p>
@@ -241,53 +258,49 @@ export default async function DialogDetailPage({
             ) : null}
 
             {dialog.deskripsi_pegawai?.trim() || dialog.deskripsi_kinerja?.trim() ? (
-              <div className="grid gap-3 sm:grid-cols-1">
-                {dialog.deskripsi_pegawai?.trim() ? (
-                  <div className="rounded-lg border border-outline bg-surface px-5 py-4">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
-                      {dialog.deskripsi_kinerja?.trim()
-                        ? "Deskripsi Kinerja (versi Pegawai)"
-                        : "Deskripsi Kinerja (Pegawai)"}
-                    </span>
-                    <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
-                      {dialog.deskripsi_pegawai}
-                    </p>
-                  </div>
-                ) : null}
+              <div className="rounded-lg border border-outline bg-surface px-4 py-3 sm:px-5 sm:py-4">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                  {dialog.deskripsi_pegawai?.trim() && dialog.deskripsi_kinerja?.trim()
+                    ? "Deskripsi Kinerja"
+                    : dialog.deskripsi_pegawai?.trim()
+                      ? "Deskripsi Kinerja (Pegawai)"
+                      : "Deskripsi Kinerja (Atasan)"}
+                </span>
 
-                {dialog.deskripsi_kinerja?.trim() ? (
-                  <div className="rounded-lg border border-outline bg-surface px-5 py-4">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
-                      {dialog.deskripsi_pegawai?.trim()
-                        ? "Deskripsi Kinerja (versi Atasan)"
-                        : "Deskripsi Kinerja (Atasan)"}
-                    </span>
-                    <p className="mt-1.5 whitespace-pre-wrap text-sm leading-5 text-ink">
-                      {dialog.deskripsi_kinerja}
+                <div className="mt-2">
+                  {dialog.deskripsi_pegawai?.trim() && dialog.deskripsi_kinerja?.trim() ? (
+                    <>
+                      <div>
+                        <span className="text-xs font-medium text-ink-muted">
+                          Pegawai
+                        </span>
+                        <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-ink">
+                          {dialog.deskripsi_pegawai}
+                        </p>
+                      </div>
+
+                      <div className="mt-4 border-t border-outline pt-4">
+                        <span className="text-xs font-medium text-ink-muted">
+                          Atasan
+                        </span>
+                        <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-ink">
+                          {dialog.deskripsi_kinerja}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="whitespace-pre-wrap text-sm leading-6 text-ink">
+                      {dialog.deskripsi_pegawai?.trim() || dialog.deskripsi_kinerja}
                     </p>
-                  </div>
-                ) : null}
+                  )}
+                </div>
               </div>
             ) : null}
 
-            {isEditable ? (
-              <div className="flex flex-col gap-2 rounded-lg border border-outline bg-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm leading-5 text-ink-muted">
-                  Lengkapi lima aspek evaluasi berikut, lalu kirim ke atasan.
-                </p>
-                <Link
-                  href={`/pegawai/dialog/${dialog.id}/edit`}
-                  className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong"
-                >
-                  <PencilSimpleLineIcon size={16} weight="bold" />
-                  Isi Dialog Kinerja
-                </Link>
-              </div>
-            ) : null}
           </header>
         </div>
 
-        <section aria-label="Aspek dialog kinerja">
+        <section aria-label="Aspek dialog kinerja" className="overflow-x-auto">
           <DialogSummary
             aspek={dialog.aspek}
             isLanjutan={dialog.id_dialog_induk !== null}
@@ -300,7 +313,7 @@ export default async function DialogDetailPage({
         ) : null}
 
         {isSelesai && dialog.reviu.length > 0 ? (
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-6 sm:gap-8">
             <Separator />
             <ReviuList
               reviu={dialog.reviu}
@@ -311,10 +324,12 @@ export default async function DialogDetailPage({
       </div>
 
       {isSelesai ? (
-        <FormulirDialogKinerja
-          dialog={dialog}
-          pegawai={pegawai ?? { nama_pegawai: session.nama }}
-        />
+        <div className="overflow-x-auto">
+          <FormulirDialogKinerja
+            dialog={dialog}
+            pegawai={pegawai ?? { nama_pegawai: session.nama }}
+          />
+        </div>
       ) : null}
     </div>
   );

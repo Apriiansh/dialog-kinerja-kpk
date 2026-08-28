@@ -5,7 +5,6 @@ import {
   SealCheckIcon,
   HourglassIcon,
   CheckCircleIcon,
-  AlarmIcon,
   MagnifyingGlassIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
@@ -20,13 +19,14 @@ import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
-import { formatTanggal, toDateInput } from "@/lib/utils/format";
 import type { StatusReviu } from "@/generated/prisma/enums";
 import { checkUpcomingReviuReminders } from "@/lib/actions/recurring-notifications";
+import { countCapaian } from "@/lib/utils/capaian";
+import { Metadata } from "next";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Reviu Dialog Kinerja - Dialog Kinerja KPK",
 };
 
@@ -340,6 +340,7 @@ export default async function PegawaiReviuListPage({
           <ul className="flex flex-col gap-3">
             {visible.map((r) => {
               const cta = CTA[r.status];
+              const { tercapai, belum } = countCapaian(r.dialog.aspek);
               return (
                 <li key={r.id}>
                   <div className="flex flex-col gap-4 rounded-lg border border-outline bg-surface p-5 transition-colors hover:border-outline-strong hover:shadow-ambient sm:flex-row sm:items-center sm:justify-between">
@@ -349,10 +350,20 @@ export default async function PegawaiReviuListPage({
                           Dialog Kinerja {formatPeriode(r.dialog.triwulan, r.dialog.periode_tahun)}
                         </span>
                         <ReviuStatusBadge status={r.status} />
-                        <TindakLanjutBadge
-                          is_tercapai={r.is_tercapai}
-                          is_tidak_tercapai={r.is_tidak_tercapai}
-                        />
+
+                        {tercapai + belum > 0 ? (
+                          <div className="flex flex-row gap-1 items-center">
+                            <span className="inline-flex gap-1 rounded-md bg-emerald-400 px-2.5 py-1 text-[11px] font-bold leading-4 text-ink-muted">
+                              {tercapai} Tercapai
+                            </span>
+                            <span className="inline-flex gap-1 rounded-md bg-amber-400 px-2.5 py-1 text-[11px] font-bold leading-4 text-ink-muted">
+                              {belum} Belum Tercapai
+                            </span>
+                            <TindakLanjutBadge
+                              is_tercapai={r.is_tercapai}
+                              is_tidak_tercapai={r.is_tidak_tercapai}
+                            />
+                          </div>) : null}
                       </div>
                       <span className="truncate text-xs leading-4 text-ink-muted">
                         Atasan Penilai:{" "}

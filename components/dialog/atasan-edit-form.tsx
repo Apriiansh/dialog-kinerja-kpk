@@ -73,7 +73,7 @@ export function AtasanEditForm({
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const typingStopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { transport, partnerTyping, isFieldLocked, getFieldLockerRole, sendTyping } = useDialogLive({
+  const { partnerTyping, isFieldLocked, sendTyping } = useDialogLive({
     dialogId,
     enabled: true,
     onState: (state) => {
@@ -230,7 +230,7 @@ export function AtasanEditForm({
     ) : (
       <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-medium text-ink-muted">
         <CloudArrowUpIcon size={14} weight="bold" />
-        Perubahan tersimpan otomatis
+
       </span>
     );
 
@@ -467,7 +467,7 @@ export function AtasanEditForm({
             <button
               type="button"
               onClick={handleSaveNow}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-outline-strong bg-surface px-5 text-sm font-semibold text-ink transition-colors hover:bg-surface-muted cursor-pointer"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-outline-strong bg-primary-strong px-5 text-sm font-semibold text-white transition-colors hover:bg-surface-primary cursor-pointer"
             >
               <FloppyDiskIcon size={16} weight="bold" />
               Simpan

@@ -11,10 +11,11 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { AspekImportDialog } from "@/components/admin/aspek-import-dialog";
 import { formatPeriode } from "@/lib/constants/triwulan";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Impor Data Evaluasi - Admin Dialog Kinerja KPK",
 };
 
@@ -205,7 +206,7 @@ export default async function AdminImportDataPage() {
                 {stagingItems.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-12 text-center text-ink-muted">
-                      Belum ada data staging yang diimpor. Klik tombol "Impor Data Evaluasi" di atas untuk memulai.
+                      Belum ada data staging yang diimpor. Klik tombol &quotImpor Data Evaluasi&quot di atas untuk memulai.
                     </td>
                   </tr>
                 ) : (

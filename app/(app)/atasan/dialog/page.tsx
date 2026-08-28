@@ -1,6 +1,5 @@
 import { ChartLineUpIcon } from "@phosphor-icons/react/dist/ssr";
 import {
-  ArrowClockwiseIcon,
   CheckCircleIcon,
   HourglassIcon,
   PencilSimpleIcon,
@@ -64,7 +63,7 @@ export default async function DialogIndexPage({
     };
   }
 
-  const [dialogs, pegawai, total, statusCounts, allDialogsForYears] = await Promise.all([
+  const [dialogs, total, statusCounts, allDialogsForYears] = await Promise.all([
     prisma.dialogKinerja.findMany({
       where,
       select: {

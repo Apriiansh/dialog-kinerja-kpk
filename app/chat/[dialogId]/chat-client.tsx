@@ -2,13 +2,17 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeftIcon,
   ChatCircleDotsIcon,
+  FolderOpenIcon,
   PaperPlaneTiltIcon,
   SpinnerIcon,
+  TrashIcon,
 } from "@phosphor-icons/react";
 import { useChat } from "@/lib/hooks/use-chat";
+import { deleteChatMessage } from "@/lib/actions/chat";
 
 type ChatClientProps = {
   dialogId: string;
@@ -24,11 +28,13 @@ export default function ChatClient({ dialogId }: ChatClientProps) {
     dialogInfo,
     input,
     setInput,
+    setError,
     isLoading,
     isSending,
     isConnected,
     error,
     sendMessage,
+    removeMessages,
   } = useChat(numDialogId);
 
   useEffect(() => {
@@ -39,6 +45,15 @@ export default function ChatClient({ dialogId }: ChatClientProps) {
     if (e) e.preventDefault();
     if (!input.trim() || isSending) return;
     await sendMessage();
+  };
+
+  const handleDeleteMessage = async (msgId: number) => {
+    const result = await deleteChatMessage(msgId);
+    if (result.success) {
+      removeMessages([msgId]);
+    } else {
+      setError(result.error || "Gagal menghapus pesan");
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -90,6 +105,17 @@ export default function ChatClient({ dialogId }: ChatClientProps) {
             )}
           </div>
         </div>
+        {dialogInfo?.path && (
+          <Link
+            href={dialogInfo.path}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-outline bg-surface px-3 text-xs font-semibold text-ink-muted transition-colors hover:bg-surface-sunken hover:text-primary"
+            title="Buka Dialog Kinerja"
+            aria-label="Buka Dialog Kinerja"
+          >
+            <FolderOpenIcon size={16} weight="bold" />
+            <span className="hidden sm:inline">Buka Dialog</span>
+          </Link>
+        )}
       </header>
 
       {/* Message Stream */}
@@ -116,21 +142,34 @@ export default function ChatClient({ dialogId }: ChatClientProps) {
               return (
                 <div
                   key={msg.id}
-                  className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
+                  className={`group flex flex-col ${isMe ? "items-end" : "items-start"}`}
                 >
                   {!isMe && (
                     <span className="mb-1 text-xs font-medium text-ink-muted px-1">
                       {msg.senderName} ({msg.senderRole === "atasan" ? "Atasan" : msg.senderRole === "pegawai" ? "Pegawai" : "Admin"})
                     </span>
                   )}
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-xs wrap-break-word whitespace-pre-wrap ${
-                      isMe
-                        ? "bg-primary text-on-primary rounded-tr-xs"
-                        : "bg-surface text-ink border border-outline rounded-tl-xs"
-                    }`}
-                  >
-                    {msg.content}
+                  <div className="flex items-end gap-1.5">
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-xs wrap-break-word whitespace-pre-wrap ${
+                        isMe
+                          ? "bg-primary text-on-primary rounded-tr-xs"
+                          : "bg-surface text-ink border border-outline rounded-tl-xs"
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                    {isMe && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteMessage(msg.id)}
+                        className="mb-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-ink-muted opacity-0 transition-opacity hover:bg-rose-50 hover:text-rose-600 focus:opacity-100 group-hover:opacity-100"
+                        title="Hapus pesan"
+                        aria-label="Hapus pesan"
+                      >
+                        <TrashIcon size={14} weight="bold" />
+                      </button>
+                    )}
                   </div>
                   <span className="mt-1 text-[11px] text-ink-muted px-1">
                     {formatTime(msg.createdAt)}

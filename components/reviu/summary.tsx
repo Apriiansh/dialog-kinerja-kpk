@@ -1,8 +1,8 @@
 import { formatTanggal } from "@/lib/utils/format";
 import { tindakLanjutLabel } from "@/lib/constants/reviu-status";
-import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
 import { ASPEK_ORDER, ASPEK_LABEL } from "@/lib/constants/aspek";
 import type { JenisAspek } from "@/generated/prisma/enums";
+import { CapaianBadge } from "../shared/capaian-badge";
 
 interface ReviuAspekItem {
   id: number;
@@ -89,19 +89,15 @@ export function ReviuSummary({
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink-muted">
               Formulir Reviu Hasil Dialog Kinerja
             </span>
-            <TindakLanjutBadge
-              is_tercapai={reviu.is_tercapai}
-              is_tidak_tercapai={reviu.is_tidak_tercapai}
-            />
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold text-ink">Ringkasan item:</span>
             {hasAssessment ? (
               <>
-                <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                <span className="inline-flex gap-1 rounded-md bg-emerald-400 px-2.5 py-1 text-[11px] font-bold leading-4 text-ink-muted">
                   {tercapaiCount} tercapai
                 </span>
-                <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
+                <span className="inline-flex gap-1 rounded-md bg-amber-400 px-2.5 py-1 text-[11px] font-bold leading-4 text-ink-muted">
                   {tidakCount} tidak tercapai
                 </span>
               </>

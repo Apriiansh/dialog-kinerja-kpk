@@ -7,19 +7,19 @@ import {
   ArrowSquareOutIcon,
   UsersIcon,
   CheckCircleIcon,
-  HourglassIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
 import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Monitoring Dialog Kinerja - Admin",
 };
 
