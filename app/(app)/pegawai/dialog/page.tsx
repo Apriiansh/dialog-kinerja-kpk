@@ -381,19 +381,6 @@ export default async function PegawaiDialogListPage({
             {visibleDialogs.map((d) => {
               const isLanjutan = d.id_dialog_induk !== null;
               const cta = CTA[d.status];
-              const sourceAspek = isLanjutan
-                ? (d.dialog_induk?.aspek ?? [])
-                : d.aspek;
-              const itemCounts = d.aspek.reduce(
-                    (counts, group) => {
-                      for (const item of group.item) {
-                        if (item.is_tercapai === true) counts.tercapai += 1;
-                        else if (item.is_tercapai === false) counts.tidakTercapai += 1;
-                      }
-                      return counts;
-                    },
-                    { tercapai: 0, tidakTercapai: 0 },
-                  );
               const latestSelesaiReviu = d.reviu
                 .filter((reviu) => reviu.status === "selesai")
                 .at(-1);
@@ -425,20 +412,10 @@ export default async function PegawaiDialogListPage({
                         <CapaianBadge
                           statusDialog={d.status}
                           filledAspekCount={filledAspekCount(d.aspek)}
-                          reviu={isLanjutan ? null : d.reviu.at(-1)}
-                          items={sourceAspek.flatMap((a) => a.item)}
+                          reviu={d.reviu.at(-1)}
+                          items={d.aspek.flatMap((a) => a.item)}
                         />
                       </div>
-                      {(itemCounts.tercapai > 0 || itemCounts.tidakTercapai > 0) ? (
-                        <div className="flex flex-wrap gap-2 text-[11px] font-semibold">
-                          <span className="text-emerald-700">
-                            {itemCounts.tercapai} tercapai
-                          </span>
-                          <span className="text-red-700">
-                            {itemCounts.tidakTercapai} tidak tercapai
-                          </span>
-                        </div>
-                      ) : null}
                     </div>
 
                     <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-outline/50 pt-3 sm:border-t-0 sm:pt-0">

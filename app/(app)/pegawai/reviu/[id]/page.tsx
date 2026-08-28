@@ -82,6 +82,7 @@ export default async function PegawaiReviuDetailPage({
                     is_tercapai: reviu.is_tercapai,
                     is_tidak_tercapai: reviu.is_tidak_tercapai,
                   }}
+                  items={reviu.dialog.aspek.flatMap((a) => a.item)}
                 />
                 {reviu.dialog.id_dialog_induk ? (
                   <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
