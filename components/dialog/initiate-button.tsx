@@ -42,18 +42,15 @@ export function InitiateDialogButton({
   const displayLabel = label || defaultLabel;
 
   const [open, setOpen] = useState(false);
-  const [jadwalDate, setJadwalDate] = useState("");
-  const [deskripsi, setDeskripsi] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    // Default to today or tomorrow
+  const [jadwalDate, setJadwalDate] = useState(() => {
     const today = new Date();
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, "0");
     const dd = String(today.getDate()).padStart(2, "0");
-    setJadwalDate(`${yyyy}-${mm}-${dd}`);
-  }, []);
+    return `${yyyy}-${mm}-${dd}`;
+  });
+  const [deskripsi, setDeskripsi] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const autoPeriode = useMemo(() => {
     if (!jadwalDate) return null;
@@ -101,7 +98,8 @@ export function InitiateDialogButton({
     setOpen(false);
   }
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   const buttonClasses =
     variant === "primary"

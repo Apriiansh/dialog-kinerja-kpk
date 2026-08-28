@@ -4,7 +4,6 @@ import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
-import Autoplay from "embla-carousel-autoplay"
 import { ArrowLeft, ArrowRight } from "@phosphor-icons/react"
 
 import { cn } from "@/lib/utils"
@@ -112,6 +111,7 @@ const Carousel = React.forwardRef<
         return
       }
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       onSelect(api)
       api.on("reInit", onSelect)
       api.on("select", onSelect)

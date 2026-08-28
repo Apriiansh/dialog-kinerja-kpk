@@ -185,7 +185,7 @@ export function AspekImportDialog({
     setPreviewLoading(true);
     setError(null);
     try {
-      const rows = await importAspekPreview(rawRows, jenis, tahun, triwulan);
+      const rows = await importAspekPreview(rawRows, jenis);
       setPreviewRows(rows);
       setStep("preview");
     } catch {
@@ -193,7 +193,7 @@ export function AspekImportDialog({
     } finally {
       setPreviewLoading(false);
     }
-  }, [rawRows, jenis, tahun, triwulan]);
+  }, [rawRows, jenis]);
 
   const handleExecute = useCallback(async () => {
     setLoading(true);

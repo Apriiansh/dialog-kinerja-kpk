@@ -98,8 +98,8 @@ export function formatDistanceToNow(date: Date | string): string {
   const diffDay = Math.floor(diffHour / 24);
 
   if (diffSec < 60) return "Baru saja";
-  if (diffMin < 60) return `${diffMin} menit yang lalu`;
-  if (diffHour < 24) return `${diffHour} jam yang lalu`;
-  if (diffDay < 7) return `${diffDay} hari yang lalu`;
+  if (diffMin < 60) return `${diffMin} menit yg lalu`;
+  if (diffHour < 24) return `${diffHour} jam yg lalu`;
+  if (diffDay < 7) return `${diffDay} hari yg lalu`;
   return formatTanggal(date);
 }

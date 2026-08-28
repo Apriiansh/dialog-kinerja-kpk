@@ -8,7 +8,6 @@ import {
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
-import { getAtasanPegawaiOptions } from "@/lib/queries/atasan";
 import { DialogList } from "@/components/dialog/list";
 import { DialogFilterBar } from "@/components/dialog/dialog-filter-bar";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
@@ -63,7 +62,7 @@ export default async function DialogIndexPage({
     };
   }
 
-  const [dialogs, total, statusCounts, allDialogsForYears] = await Promise.all([
+  const [dialogs, statusCounts, total, allDialogsForYears] = await Promise.all([
     prisma.dialogKinerja.findMany({
       where,
       select: {
@@ -100,13 +99,12 @@ export default async function DialogIndexPage({
       skip,
       take: PAGE_SIZE,
     }),
-    getAtasanPegawaiOptions(session.id),
-    prisma.dialogKinerja.count({ where }),
     prisma.dialogKinerja.groupBy({
       by: ["status"],
       where: { id_atasan: session.id },
       _count: { _all: true },
     }),
+    prisma.dialogKinerja.count({ where }),
     prisma.dialogKinerja.findMany({
       where: { id_atasan: session.id },
       select: { periode_tahun: true },

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { startDialog } from "@/lib/actions/atasan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
-import { formatPeriode, triwulanLabel, getAvailableYears } from "@/lib/constants/triwulan";
+import { triwulanLabel, getAvailableYears } from "@/lib/constants/triwulan";
 
 export interface PegawaiOption {
   id: number;

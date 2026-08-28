@@ -4,7 +4,6 @@ import { LoginForm } from "./login-form";
 import {
   ArrowLeftIcon,
   BankIcon,
-  ShieldCheckIcon,
 } from "@phosphor-icons/react/dist/ssr";
 
 const TAHOMA = { fontFamily: "Tahoma, 'Segoe UI', Verdana, sans-serif" };

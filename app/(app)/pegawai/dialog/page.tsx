@@ -80,16 +80,6 @@ function filledAspekCount(
   ).length;
 }
 
-function evaluatedAspekCount(
-  aspek: { item: { is_tercapai: boolean | null }[] }[],
-) {
-  return aspek.filter(
-    (group) =>
-      group.item.length === 0 ||
-      group.item.every((item) => item.is_tercapai !== null),
-  ).length;
-}
-
 export default async function PegawaiDialogListPage({
   searchParams,
 }: {
@@ -379,15 +369,7 @@ export default async function PegawaiDialogListPage({
         ) : (
           <ul className="flex flex-col gap-3">
             {visibleDialogs.map((d) => {
-              const isLanjutan = d.id_dialog_induk !== null;
               const cta = CTA[d.status];
-              const latestSelesaiReviu = d.reviu
-                .filter((reviu) => reviu.status === "selesai")
-                .at(-1);
-              const hasLanjutan = d.dialog_lanjutan.length > 0;
-              const hasBelumTercapai = d.aspek.some((aspek) =>
-                aspek.item.some((item) => item.is_tercapai === false),
-              );
               const sequenceNum = seqMap.get(d.id) ?? 1;
               return (
                 <li key={d.id}>

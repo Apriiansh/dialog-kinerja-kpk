@@ -17,20 +17,12 @@ import {
 import { EmptyState } from "@/components/shared/empty-state";
 import { DIALOG_STATUS_CHART } from "@/lib/utils/chart-colors";
 import { formatDistanceToNow } from "@/lib/utils/format";
-import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
+import type { Triwulan } from "@/generated/prisma/enums";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { EvaluationCalendar, type CalendarEvent } from "@/components/dashboard/evaluation-calendar";
 import { AchievementList } from "@/components/dashboard/achievement-list";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { GreetingCard } from "@/components/dashboard/greeting-card";
-
-const STATUS_ORDER: StatusDialog[] = [
-  "draft",
-  "menunggu_pegawai",
-  "menunggu_atasan",
-  "menunggu_validasi",
-  "selesai",
-];
 
 function greeting() {
   const hour = new Date().getHours();
@@ -262,7 +254,7 @@ export default async function AtasanDashboardPage() {
   });
 
   const rawEvalStats = Array.from(evalMap.entries()).map(([key, stat]) => {
-    const [jenis_aspek, _] = key.split(":::");
+    const [jenis_aspek] = key.split(":::");
     return { jenis_aspek, ...stat };
   });
 

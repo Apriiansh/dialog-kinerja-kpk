@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Role, SessionData } from "@/lib/auth/session";
+import { formatPeriode } from "@/lib/constants/triwulan";
 
 export function chatDialogPath(role: Role, dialogId: number): string {
   switch (role) {
@@ -17,7 +18,7 @@ export type ChatHistoryItem = {
   status: string;
   dialogPath: string;
   partnerNama: string;
-  partnerLabel: string;
+  periode: string;
   lastMessage: string;
   lastMessageByMe: boolean;
   lastMessageAt: string;
@@ -39,6 +40,8 @@ export async function getChatHistory(
     select: {
       id: true,
       status: true,
+      periode_tahun: true,
+      triwulan: true,
       id_atasan: true,
       id_pegawai: true,
       atasan: { select: { nama_pegawai: true } },
@@ -65,16 +68,12 @@ export async function getChatHistory(
       dialogId: dialog.id,
       status: dialog.status,
       dialogPath: chatDialogPath(session.role, dialog.id),
+      periode: formatPeriode(dialog.triwulan, dialog.periode_tahun),
       partnerNama: isMe
         ? dialog.id_atasan === session.id
           ? dialog.pegawai.nama_pegawai
           : dialog.atasan.nama_pegawai
         : `${dialog.pegawai.nama_pegawai} & ${dialog.atasan.nama_pegawai}`,
-      partnerLabel: isMe
-        ? dialog.id_atasan === session.id
-          ? "Pegawai"
-          : "Atasan Langsung"
-        : "Dialog",
       lastMessage:
         last?.message.slice(0, 120) ?? "Tidak ada pesan",
       lastMessageByMe: last ? last.id_sender === session.id : false,

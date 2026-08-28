@@ -6,6 +6,7 @@ import Link from "next/link";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { Calendar } from "@/components/ui/calendar";
 import { EmptyState } from "@/components/shared/empty-state";
+import type { Triwulan } from "@/generated/prisma/enums";
 
 export type CalendarEvent = {
   id: number;
@@ -13,7 +14,7 @@ export type CalendarEvent = {
   date: string;
   pegawaiName: string;
   npp: string;
-  triwulan: any;
+  triwulan: Triwulan;
   tahun: number;
   kind?: "reviu" | "dialog";
   status?: string;

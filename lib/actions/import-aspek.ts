@@ -3,7 +3,7 @@
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
-import type { JenisAspek, Triwulan } from "@/generated/prisma/client";
+import type { JenisAspek, Prisma, Triwulan } from "@/generated/prisma/client";
 import {
   type JenisAspekImport,
   type AspekImportRowInput,
@@ -18,8 +18,6 @@ import {
 export async function importAspekPreview(
   rawRows: AspekImportRowInput[],
   jenis: JenisAspekImport,
-  tahun: number,
-  triwulan: Triwulan,
 ): Promise<AspekImportPreviewRow[]> {
   await requireRole("ADMIN");
 
@@ -148,7 +146,7 @@ export async function importAspekExecute(
 ): Promise<AspekImportResult> {
   const session = await requireRole("ADMIN");
 
-  const previews = await importAspekPreview(rawRows, jenis, tahun, triwulan);
+  const previews = await importAspekPreview(rawRows, jenis);
   const validPreviews = previews.filter((p) => p.status === "valid");
 
   const errors: { rowIndex: number; npp: string; message: string }[] = previews
@@ -181,7 +179,7 @@ export async function importAspekExecute(
       triwulan: triwulan,
       npp: p.npp,
       narasi: narasi,
-      metadata: (metadata as any) ?? undefined,
+      metadata: (metadata as Prisma.InputJsonValue) ?? undefined,
       batch_id: batchId,
       imported_by: session.id,
       imported_at: now,

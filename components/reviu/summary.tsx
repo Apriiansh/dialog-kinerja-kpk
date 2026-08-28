@@ -2,7 +2,6 @@ import { formatTanggal } from "@/lib/utils/format";
 import { tindakLanjutLabel } from "@/lib/constants/reviu-status";
 import { ASPEK_ORDER, ASPEK_LABEL } from "@/lib/constants/aspek";
 import type { JenisAspek } from "@/generated/prisma/enums";
-import { CapaianBadge } from "../shared/capaian-badge";
 
 interface ReviuAspekItem {
   id: number;
