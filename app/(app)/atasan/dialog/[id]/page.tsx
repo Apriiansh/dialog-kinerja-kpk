@@ -18,6 +18,7 @@ import { InitiateDialogButton } from "@/components/dialog/initiate-button";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { AtasanApprovalPanel } from "@/components/dialog/atasan-approval-panel";
 import { ScrollToAnchor } from "@/components/shared/scroll-to-anchor";
+import { getOutlookLink } from "@/lib/utils/outlook";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -30,6 +31,8 @@ export async function generateMetadata({
   const { id } = await params;
   return { title: `Dialog Kinerja #${id}` };
 }
+
+// const outlookHref =
 
 function StatusNote({ status }: { status: string }) {
   if (status === "draft") {

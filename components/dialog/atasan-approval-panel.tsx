@@ -1,9 +1,10 @@
 "use client";
 
-import { CheckIcon, XIcon } from "@phosphor-icons/react";
+import { CheckIcon, XIcon, MailboxIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { approveDialog, rejectDialog } from "@/lib/actions/atasan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
+import { getOutlookLink } from "@/lib/utils/outlook";
 
 export function AtasanApprovalPanel({
   dialogId,
@@ -59,6 +60,20 @@ export function AtasanApprovalPanel({
         day: "numeric",
       })
     : "Belum ditentukan";
+
+  const outlookHref = jadwalDialog ? getOutlookLink({
+    title: `Dialog Kinerja - ${deskripsiPegawai?.slice(0, 50) || "Pegawai"}`,
+    start: jadwalDialog,
+    end: new Date(new Date(jadwalDialog).getTime() + 60 * 60 * 1000),
+    body: [
+      `Jadwal Dialog Kinerja`,
+      `Tanggal: ${formattedDate}`,
+      deskripsiPegawai ? `Catatan Pegawai ${deskripsiPegawai}` : "",
+      deskripsiAtasan ? `Catatan Atasan ${deskripsiAtasan}` : "",
+      `---`,
+      `Link ${typeof window !== "undefined" ? window.location.href : ""}`
+      ].filter(Boolean).join("\n\n"),
+  }): null
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-primary/30 bg-surface p-6 shadow-sm">
@@ -129,6 +144,17 @@ export function AtasanApprovalPanel({
           )}
           Setujui Pengajuan
         </button>
+        {outlookHref && (
+          <a
+            href={outlookHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-outline bg-blue-500 px-4 text-xs font-semibold text-ink shadow-xs transition-colors hover:bg-surface cursor-pointer"
+          >
+            <MailboxIcon size={15} weight="bold" />
+            Tambah ke Outlook
+          </a>
+        )}
       </div>
 
       {/* Reject Modal */}
