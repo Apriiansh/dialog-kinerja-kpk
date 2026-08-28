@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   PencilSimple,
   ChatCircleDotsIcon,
-  CalendarCheckIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -22,8 +21,8 @@ import { ChatHeader } from "@/components/chat/ChatHeader";
 import { InitiateDialogButton } from "@/components/dialog/initiate-button";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { AtasanApprovalPanel } from "@/components/dialog/atasan-approval-panel";
+import { CalendarDownloadButton } from "@/components/dialog/calendar-download-button";
 import { ScrollToAnchor } from "@/components/shared/scroll-to-anchor";
-import { generateIcsContent, downloadIcsFile } from "@/lib/utils/ics";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -123,28 +122,20 @@ export default async function DialogDetailPage({
       })
       : "Belum ditentukan";
 
-  const icsData = dialog.jadwal_dialog
-    ? {
-        title: `Dialog Kinerja - ${dialog.pegawai.nama_pegawai} - ${formatPeriode(dialog.triwulan, dialog.periode_tahun)}`,
-        description: [
-          `Jadwal Dialog Kinerja`,
-          `Pegawai: ${dialog.pegawai.nama_pegawai}`,
-          `Periode: ${formatPeriode(dialog.triwulan, dialog.periode_tahun)}`,
-          `Tanggal: ${formattedDate}`,
-          dialog.deskripsi_pegawai ? `Catatan Pegawai: ${dialog.deskripsi_pegawai}` : "",
-          dialog.deskripsi_kinerja ? `Catatan Atasan: ${dialog.deskripsi_kinerja}` : "",
-        ].filter(Boolean).join("\n"),
-        start: new Date(dialog.jadwal_dialog),
-        end: new Date(new Date(dialog.jadwal_dialog).getTime() + 60 * 60 * 1000),
-        location: "KPK",
-      }
-    : null;
+  const icsTitle = dialog.jadwal_dialog
+    ? `Dialog Kinerja - ${dialog.pegawai.nama_pegawai} - ${formatPeriode(dialog.triwulan, dialog.periode_tahun)}`
+    : "";
 
-  function handleDownloadIcs() {
-    if (!icsData) return;
-    const icsContent = generateIcsContent(icsData);
-    downloadIcsFile(icsContent, "dialog-kinerja.ics");
-  }
+  const icsDescription = dialog.jadwal_dialog
+    ? [
+        `Jadwal Dialog Kinerja`,
+        `Pegawai: ${dialog.pegawai.nama_pegawai}`,
+        `Periode: ${formatPeriode(dialog.triwulan, dialog.periode_tahun)}`,
+        `Tanggal: ${formattedDate}`,
+        dialog.deskripsi_pegawai ? `Catatan Pegawai: ${dialog.deskripsi_pegawai}` : "",
+        dialog.deskripsi_kinerja ? `Catatan Atasan: ${dialog.deskripsi_kinerja}` : "",
+      ].filter(Boolean).join("\n")
+    : "";
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
@@ -213,14 +204,12 @@ export default async function DialogDetailPage({
                 ) : null}
 
                 {dialog.jadwal_dialog && !isDraft && (
-                  <button
-                    type="button"
-                    onClick={handleDownloadIcs}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-outline-strong bg-surface px-3.5 text-xs font-semibold text-ink shadow-xs transition-colors hover:bg-surface-muted"
-                  >
-                    <CalendarCheckIcon size={14} weight="bold" />
-                    Kalender
-                  </button>
+                  <CalendarDownloadButton
+                    jadwalDialog={dialog.jadwal_dialog}
+                    title={icsTitle}
+                    description={icsDescription}
+                    label="Kalender"
+                  />
                 )}
 
                 {isSelesai ? (
