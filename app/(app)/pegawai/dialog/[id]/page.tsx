@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeftIcon, PencilSimpleIcon, ChatCircleDotsIcon } from "@phosphor-icons/react/dist/ssr";
+import {
+  ArrowLeftIcon,
+  PencilSimpleIcon,
+  ChatCircleDotsIcon,
+} from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/auth/session";
 import {
   canEditDialog,
@@ -46,14 +50,16 @@ function StatusNote({
   if (status === "draft") {
     return (
       <p className="text-xs leading-5 text-ink-muted sm:text-sm">
-        Pengajuan dialog kinerja ini sedang menunggu persetujuan jadwal dari atasan Anda.
+        Pengajuan dialog kinerja ini sedang menunggu persetujuan jadwal dari
+        atasan Anda.
       </p>
     );
   }
   if (status === "menunggu_atasan") {
     return (
       <p className="text-xs leading-5 text-ink-muted sm:text-sm">
-        Isian Anda telah dikirim. Menunggu tanggapan dan pembagian tanggung jawab dari atasan.
+        Isian Anda telah dikirim. Menunggu tanggapan dan pembagian tanggung
+        jawab dari atasan.
       </p>
     );
   }
@@ -117,7 +123,9 @@ export default async function DialogDetailPage({
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
-      <div className={`flex flex-col gap-6 sm:gap-8 ${isSelesai ? "print:hidden" : ""}`}>
+      <div
+        className={`flex flex-col gap-6 sm:gap-8 ${isSelesai ? "print:hidden" : ""}`}
+      >
         <div className="flex flex-col gap-3 sm:gap-4">
           <Link
             href="/pegawai/dialog"
@@ -180,7 +188,9 @@ export default async function DialogDetailPage({
                 {isSelesai ? (
                   <>
                     <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />
-                    <UnduhWordLink href={`/api/unduh/dialog/${dialog.id}/docx`} />
+                    <UnduhWordLink
+                      href={`/api/unduh/dialog/${dialog.id}/docx`}
+                    />
                     <Link
                       href={`/chat/${dialog.id}`}
                       className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-outline bg-surface px-3.5 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
@@ -199,7 +209,10 @@ export default async function DialogDetailPage({
                     {latestSelesaiReviuId && !hasLanjutan ? (
                       <InitiateDialogButton
                         parentDialogId={dialog.id}
-                        parentPeriodeLabel={formatPeriode(dialog.triwulan, dialog.periode_tahun)}
+                        parentPeriodeLabel={formatPeriode(
+                          dialog.triwulan,
+                          dialog.periode_tahun,
+                        )}
                         label="Ajukan Dialog Lanjutan"
                         variant="outline"
                         size="sm"
@@ -220,36 +233,48 @@ export default async function DialogDetailPage({
                 <span className="font-bold text-amber-800 uppercase tracking-wider block mb-1">
                   Catatan Revisi dari Atasan:
                 </span>
-                <p className="text-xs font-medium sm:text-sm">{dialog.alasan_tolak}</p>
-              </div>
-            ) : null}
-
-            {dialog.jadwal_dialog ? (
-              <div className="rounded-lg border border-outline bg-surface p-3 flex flex-col gap-2 sm:p-4">
-                <div className="text-xs text-ink-muted">
-                  Jadwal Pelaksanaan:{" "}
-                  <strong className="text-ink font-semibold">
-                    {new Date(dialog.jadwal_dialog).toLocaleDateString("id-ID", {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </strong>
-                </div>
+                <p className="text-xs font-medium sm:text-sm">
+                  {dialog.alasan_tolak}
+                </p>
               </div>
             ) : null}
 
             {dialog.status === "draft" ? (
-              <div className="flex flex-col gap-3 rounded-lg border border-outline bg-surface p-3 sm:p-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-ink-muted">
-                  Pengajuan sedang ditinjau atasan. Anda dapat memperbarui jadwal atau menghapus draft pengajuan ini.
-                </p>
+              <div className="flex-md rounded-lg border border-amber-800 bg-amber-200 p-3 sm:p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-4">
+                  <h2 className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                    Sedang Ditinjau
+                  </h2>
+                  <p className="text-xs text-ink-muted">
+                    Pengajuan sedang ditinjau atasan. Anda dapat memperbarui
+                    jadwal atau menghapus draft pengajuan ini.
+                  </p>
+                </div>
+
+                {dialog.jadwal_dialog ? (
+                  <div className="text-xs text-ink-muted mb-3">
+                    Jadwal Pelaksanaan:{" "}
+                    <strong className="text-ink font-semibold">
+                      {new Date(dialog.jadwal_dialog).toLocaleDateString(
+                        "id-ID",
+                        {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        },
+                      )}
+                    </strong>
+                  </div>
+                ) : null}
+
                 <PegawaiDraftActions
                   dialogId={dialog.id}
                   currentJadwal={
                     dialog.jadwal_dialog
-                      ? new Date(dialog.jadwal_dialog).toISOString().split("T")[0]
+                      ? new Date(dialog.jadwal_dialog)
+                          .toISOString()
+                          .split("T")[0]
                       : new Date().toISOString().split("T")[0]
                   }
                   currentDeskripsi={dialog.deskripsi_pegawai ?? ""}
@@ -257,10 +282,12 @@ export default async function DialogDetailPage({
               </div>
             ) : null}
 
-            {dialog.deskripsi_pegawai?.trim() || dialog.deskripsi_kinerja?.trim() ? (
+            {dialog.deskripsi_pegawai?.trim() ||
+            dialog.deskripsi_kinerja?.trim() ? (
               <div className="rounded-lg border border-outline bg-surface px-4 py-3 sm:px-5 sm:py-4">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
-                  {dialog.deskripsi_pegawai?.trim() && dialog.deskripsi_kinerja?.trim()
+                  {dialog.deskripsi_pegawai?.trim() &&
+                  dialog.deskripsi_kinerja?.trim()
                     ? "Deskripsi Kinerja"
                     : dialog.deskripsi_pegawai?.trim()
                       ? "Deskripsi Kinerja (Pegawai)"
@@ -268,7 +295,8 @@ export default async function DialogDetailPage({
                 </span>
 
                 <div className="mt-2">
-                  {dialog.deskripsi_pegawai?.trim() && dialog.deskripsi_kinerja?.trim() ? (
+                  {dialog.deskripsi_pegawai?.trim() &&
+                  dialog.deskripsi_kinerja?.trim() ? (
                     <>
                       <div>
                         <span className="text-xs font-medium text-ink-muted">
@@ -290,13 +318,13 @@ export default async function DialogDetailPage({
                     </>
                   ) : (
                     <p className="whitespace-pre-wrap text-sm leading-6 text-ink">
-                      {dialog.deskripsi_pegawai?.trim() || dialog.deskripsi_kinerja}
+                      {dialog.deskripsi_pegawai?.trim() ||
+                        dialog.deskripsi_kinerja}
                     </p>
                   )}
                 </div>
               </div>
             ) : null}
-
           </header>
         </div>
 
@@ -304,7 +332,9 @@ export default async function DialogDetailPage({
           <DialogSummary
             aspek={dialog.aspek}
             isLanjutan={dialog.id_dialog_induk !== null}
-            previousItems={dialog.dialog_induk?.aspek.flatMap((aspek: AspekPegawaiRow) => aspek.item)}
+            previousItems={dialog.dialog_induk?.aspek.flatMap(
+              (aspek: AspekPegawaiRow) => aspek.item,
+            )}
           />
         </section>
 

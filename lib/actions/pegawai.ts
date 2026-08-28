@@ -59,7 +59,7 @@ function toNullableDate(value: string | null | undefined): Date | null {
   const match = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (!match) return null;
   const [, y, m, d] = match;
-  const date = new Date(Number(y), Number(m) - 1, Number(d));
+  const date = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
   return Number.isNaN(date.getTime()) ? null : date;
 }
 

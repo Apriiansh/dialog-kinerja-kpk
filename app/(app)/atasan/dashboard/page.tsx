@@ -107,7 +107,7 @@ export default async function AtasanDashboardPage() {
       where: {
         id_atasan: session.id,
         jadwal_dialog: { not: null },
-        status: { in: ["draft", "menunggu_pegawai", "menunggu_atasan", "menunggu_validasi"] },
+        status: { in: ["menunggu_pegawai", "menunggu_atasan", "menunggu_validasi"] },
       },
       select: {
         id: true,

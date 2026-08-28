@@ -71,6 +71,41 @@ const FILTERS: { key: StatusDialog | "semua"; label: string }[] = [
   { key: "selesai", label: "Selesai" },
 ];
 
+const STATUS_CARD: Record<
+  StatusDialog,
+  {
+    card: string;
+    accent: string;
+    chip: string;
+  }
+> = {
+  draft: {
+    card: "border-slate-200 bg-status-draft-soft/50",
+    accent: "border-l-slate-400",
+    chip: "bg-slate-100 text-slate-700",
+  },
+  menunggu_pegawai: {
+    card: "border-amber-200 bg-status-amber-soft/50",
+    accent: "border-l-status-amber",
+    chip: "bg-amber-100 text-amber-800",
+  },
+  menunggu_atasan: {
+    card: "border-blue-200 bg-status-blue-soft/50",
+    accent: "border-l-status-blue",
+    chip: "bg-blue-100 text-blue-800",
+  },
+  menunggu_validasi: {
+    card: "border-indigo-200 bg-status-indigo-soft/50",
+    accent: "border-l-status-indigo",
+    chip: "bg-indigo-100 text-indigo-800",
+  },
+  selesai: {
+    card: "border-emerald-200 bg-status-green-soft/50",
+    accent: "border-l-status-green",
+    chip: "bg-emerald-100 text-emerald-800",
+  },
+};
+
 function filledAspekCount(
   aspek: { tanggung_jawab_pegawai: string | null; item: { id: number }[] }[],
 ) {
@@ -373,7 +408,7 @@ export default async function PegawaiDialogListPage({
               const sequenceNum = seqMap.get(d.id) ?? 1;
               return (
                 <li key={d.id}>
-                  <div className="flex flex-col gap-2 rounded-lg border border-outline bg-surface p-5 transition-colors hover:border-outline-strong hover:shadow-ambient sm:flex-row sm:items-center sm:justify-between">
+                  <div className={`flex flex-col gap-2 overflow-hidden rounded-lg border border-l-4 p-5 transition-all hover:shadow-ambient sm:flex-row sm:items-center sm:justify-between ${STATUS_CARD[d.status].card} ${STATUS_CARD[d.status].accent}`}>
                     <div className="flex min-w-0 flex-col gap-2">
                       <div className="flex flex-wrap items-center gap-3">
                         <span className="text-base font-semibold text-ink">
@@ -381,7 +416,7 @@ export default async function PegawaiDialogListPage({
                         </span>
                         <StatusBadge status={d.status} />
                         {d.dialog_induk ? (
-                          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
                             Lanjutan dari {formatPeriode(d.dialog_induk.triwulan, d.dialog_induk.periode_tahun)}
                           </span>
                         ) : null}
@@ -411,9 +446,9 @@ export default async function PegawaiDialogListPage({
                       ) : null}
                       <Link
                         href={cta.href(d.id)}
-                        className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-xs font-semibold transition-colors ${cta.variant === "primary"
-                            ? "bg-primary text-on-primary hover:bg-primary-strong shadow-xs"
-                            : "border border-outline bg-white text-ink hover:border-outline-strong hover:bg-surface-muted"
+                        className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-xs font-semibold transition-all hover:-translate-y-0.5 shadow-xs ${cta.variant === "primary"
+                            ? "bg-primary text-on-primary hover:bg-primary-strong"
+                            : `${STATUS_CARD[d.status].chip} hover:brightness-95`
                           }`}
                       >
                         {cta.label}

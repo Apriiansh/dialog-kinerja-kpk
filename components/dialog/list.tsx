@@ -46,9 +46,7 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
             const draft = dialog.status === "draft";
             const perluEvaluasi = dialog.status === "menunggu_atasan";
             const canEditDialog =
-              draft ||
-              perluEvaluasi ||
-              dialog.status === "menunggu_pegawai";
+              perluEvaluasi || dialog.status === "menunggu_pegawai";
             const filledCount = dialog.aspek
               ? dialog.aspek.filter(
                   (a) =>

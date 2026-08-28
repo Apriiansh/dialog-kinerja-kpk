@@ -42,15 +42,18 @@ function StatusNote({ status }: { status: string }) {
   if (status === "menunggu_pegawai") {
     return (
       <p className="text-xs leading-5 text-ink-muted sm:text-sm">
-        Dialog telah disetujui. Pegawai sedang melengkapi isian aspek — Anda dapat mengisi Deskripsi Kinerja dan Tanggung Jawab Atasan melalui menu <strong>Input</strong>.
+        Dialog sedang dalam proses pengisian. Pegawai melengkapi isian aspek,
+        dan Anda juga dapat mengisi Deskripsi Kinerja serta Tanggung Jawab
+        Atasan melalui tombol <strong>Isi Dialog</strong>.
       </p>
     );
   }
   if (status === "menunggu_atasan") {
     return (
       <p className="text-xs leading-5 text-ink-muted sm:text-sm">
-        Pegawai telah mengisi dialog. Reviu isian pegawai, isi tanggung jawab
-        atasan, lalu beri persetujuan dan tanda tangan di bawah.
+        Pegawai telah mengisi dialog. Menunggu validasi Anda: reviu isian
+        pegawai, isi tanggung jawab atasan, lalu beri persetujuan dan tanda
+        tangan di bawah.
       </p>
     );
   }
@@ -97,7 +100,7 @@ export default async function DialogDetailPage({
   const isCollaboration = status === "menunggu_pegawai";
   const isReview = status === "menunggu_atasan";
   const isSelesai = status === "selesai";
-  const canEditDialog = isDraft || isCollaboration || isReview;
+  const canEditDialog = isCollaboration || isReview;
   const selesaiReviuIds = dialog.reviu
     .filter((r) => r.status === "selesai")
     .map((r) => r.id);
