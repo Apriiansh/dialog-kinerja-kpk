@@ -105,7 +105,7 @@ export function useDialogLive({
               return next;
             });
             delete fieldTimersRef.current[fieldId];
-          }, 3_500);
+          }, 2_200);
         } else {
           setLockedFields((prev) => {
             const next = { ...prev };
@@ -120,7 +120,7 @@ export function useDialogLive({
         setPartnerTyping(event);
         typingTimerRef.current = setTimeout(() => {
           setPartnerTyping(null);
-        }, 3_500);
+        }, 2_200);
       } else {
         setPartnerTyping(null);
       }

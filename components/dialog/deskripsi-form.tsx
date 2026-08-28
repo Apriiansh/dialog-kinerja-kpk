@@ -211,14 +211,14 @@ export function DeskripsiKinerjaForm({
         </div>
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-outline bg-surface/90 backdrop-blur lg:pl-60">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="sticky bottom-0 z-10 mt-auto overflow-hidden rounded-xl border border-outline bg-surface/95 shadow-ambient backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           {saveMeta}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={handleSaveNow}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-outline-strong bg-surface px-5 text-sm font-semibold text-ink transition-colors hover:bg-surface-muted"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-outline bg-surface px-5 text-sm font-semibold text-ink transition-colors hover:bg-surface-muted"
             >
               <FloppyDiskIcon size={16} weight="bold" />
               Simpan

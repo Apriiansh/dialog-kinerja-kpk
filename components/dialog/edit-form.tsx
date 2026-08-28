@@ -337,10 +337,12 @@ export function DialogForm({
   const deskripsiPegawaiRef = useRef(deskripsiPegawaiText);
   const savedJsonRef = useRef<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const typingStopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingStopTimers = useRef<
+    Record<string, ReturnType<typeof setTimeout>>
+  >({});
   const queueRef = useRef<Promise<void>>(Promise.resolve());
 
-  const { transport, partnerTyping, isFieldLocked, sendTyping } = useDialogLive({
+  const { partnerTyping, isFieldLocked, sendTyping } = useDialogLive({
     dialogId,
     onState: (state) => {
       if (state.deskripsi_kinerja !== undefined) {
@@ -364,11 +366,15 @@ export function DialogForm({
 
   const notifyTyping = useCallback(
     (fieldId?: string) => {
+      const key = fieldId ?? "__general__";
       sendTyping(true, fieldId, { role: "pegawai" });
-      if (typingStopTimer.current) clearTimeout(typingStopTimer.current);
-      typingStopTimer.current = setTimeout(() => {
+      if (typingStopTimers.current[key]) {
+        clearTimeout(typingStopTimers.current[key]);
+      }
+      typingStopTimers.current[key] = setTimeout(() => {
         sendTyping(false, fieldId, { role: "pegawai" });
-      }, 2_000);
+        delete typingStopTimers.current[key];
+      }, 1_500);
     },
     [sendTyping],
   );
@@ -447,6 +453,10 @@ export function DialogForm({
     return () => {
       window.removeEventListener("beforeunload", onBeforeUnload);
       if (timer.current) clearTimeout(timer.current);
+      for (const t of Object.values(typingStopTimers.current)) {
+        clearTimeout(t);
+      }
+      typingStopTimers.current = {};
     };
   }, [flushPersist]);
 
@@ -555,7 +565,7 @@ export function DialogForm({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 pb-24">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <Link
@@ -599,7 +609,8 @@ export function DialogForm({
               <span className="text-xs font-medium text-primary animate-pulse">
                 Sedang diedit oleh Atasan...
               </span>
-            ) : partnerTyping?.isTyping ? (
+            ) : partnerTyping?.isTyping &&
+              !partnerTyping.fieldId ? (
               <span className="text-xs font-medium text-primary animate-pulse">
                 Atasan sedang mengetik...
               </span>
@@ -905,64 +916,47 @@ export function DialogForm({
         ))}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <span
-          className={`flex shrink-0 items-center gap-1.5 text-xs font-medium ${
-            transport === "live" ? "text-emerald-600" : "text-ink-muted"
-          }`}
-        >
-          <span
-            className={`h-2 w-2 shrink-0 rounded-full ${
-              transport === "live"
-                ? "bg-emerald-500"
-                : transport === "polling"
-                  ? "bg-amber-500"
-                  : "bg-outline-strong"
-            }`}
-          />
-          {transport === "live"
-            ? "Waktu nyata aktif"
-            : transport === "polling"
-              ? "Sinkron berkala"
-              : "Menyambungkan…"}
-        </span>
-        <SaveStateMeta saveState={saveState} savedAt={savedAt} />
-        {partnerTyping?.isTyping ? (
-          <span className="text-xs font-medium text-primary animate-pulse">
-            Atasan sedang mengetik...
-          </span>
-        ) : null}
-      </div>
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-        <button
-          type="button"
-          onClick={() => handleSubmit("draft")}
-          disabled={pending !== null}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-outline-strong px-5 text-sm font-semibold text-ink transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {pending === "draft" ? (
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink-muted/40 border-t-ink-muted" />
-          ) : (
-            <FloppyDiskIcon size={16} weight="bold" />
-          )}
-          Simpan Draft
-        </button>
-        <button
-          type="button"
-          onClick={handleSubmitClick}
-          disabled={pending !== null}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {pending === "submit" ? (
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-on-primary/40 border-t-on-primary" />
-          ) : (
-            <>
-              Kirim ke Atasan
-              <ArrowRightIcon size={16} weight="bold" />
-            </>
-          )}
-        </button>
+      <div className="sticky bottom-0 z-10 mt-auto overflow-hidden rounded-xl border border-outline bg-surface/95 shadow-ambient backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="order-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 sm:order-1">
+            <SaveStateMeta saveState={saveState} savedAt={savedAt} />
+            {partnerTyping?.isTyping && !partnerTyping.fieldId ? (
+              <span className="text-xs font-medium text-primary animate-pulse">
+                Atasan sedang mengetik...
+              </span>
+            ) : null}
+          </div>
+          <div className="order-1 flex flex-col gap-2 sm:order-2 sm:flex-row sm:items-center sm:justify-end">
+            <button
+              type="button"
+              onClick={() => handleSubmit("draft")}
+              disabled={pending !== null}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-outline bg-surface px-5 text-sm font-semibold text-ink transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {pending === "draft" ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink-muted/40 border-t-ink-muted" />
+              ) : (
+                <FloppyDiskIcon size={16} weight="bold" />
+              )}
+              Simpan Draft
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmitClick}
+              disabled={pending !== null}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {pending === "submit" ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-on-primary/40 border-t-on-primary" />
+              ) : (
+                <>
+                  Kirim ke Atasan
+                  <ArrowRightIcon size={16} weight="bold" />
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
       {showConfirm ? (

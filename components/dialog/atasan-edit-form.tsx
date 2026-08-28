@@ -72,7 +72,9 @@ export function AtasanEditForm({
   const triwulanRef = useRef(triwulan);
   const responsesRef = useRef(responses);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const typingStopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingStopTimers = useRef<
+    Record<string, ReturnType<typeof setTimeout>>
+  >({});
 
   const { partnerTyping, isFieldLocked, sendTyping } = useDialogLive({
     dialogId,
@@ -98,11 +100,15 @@ export function AtasanEditForm({
 
   const notifyTyping = useCallback(
     (fieldId?: string) => {
+      const key = fieldId ?? "__general__";
       sendTyping(true, fieldId, { role: "atasan" });
-      if (typingStopTimer.current) clearTimeout(typingStopTimer.current);
-      typingStopTimer.current = setTimeout(() => {
+      if (typingStopTimers.current[key]) {
+        clearTimeout(typingStopTimers.current[key]);
+      }
+      typingStopTimers.current[key] = setTimeout(() => {
         sendTyping(false, fieldId, { role: "atasan" });
-      }, 2_000);
+        delete typingStopTimers.current[key];
+      }, 1_500);
     },
     [sendTyping],
   );
@@ -147,7 +153,13 @@ export function AtasanEditForm({
       }
     };
     window.addEventListener("beforeunload", onBeforeUnload);
-    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      for (const t of Object.values(typingStopTimers.current)) {
+        clearTimeout(t);
+      }
+      typingStopTimers.current = {};
+    };
   }, [persist]);
 
   const handleDeskripsiChange = (next: string) => {
@@ -305,7 +317,7 @@ export function AtasanEditForm({
                 <span className="text-xs font-medium text-primary animate-pulse">
                   Sedang diedit oleh Pegawai...
                 </span>
-              ) : partnerTyping?.isTyping ? (
+              ) : partnerTyping?.isTyping && !partnerTyping.fieldId ? (
                 <span className="text-xs font-medium text-primary animate-pulse">
                   Pegawai sedang mengetik...
                 </span>
@@ -454,21 +466,21 @@ export function AtasanEditForm({
       </section>
 
       {/* Sticky Bottom Action Bar */}
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-outline bg-surface/90 backdrop-blur lg:pl-60">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4">
+      <div className="sticky bottom-0 z-10 mt-auto overflow-hidden rounded-xl border border-outline bg-surface/95 shadow-ambient backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="order-2 flex items-center gap-4 sm:order-1">
             {saveMeta}
-            {partnerTyping?.isTyping ? (
+            {partnerTyping?.isTyping && !partnerTyping.fieldId ? (
               <span className="text-xs font-medium text-primary animate-pulse">
                 Pegawai sedang mengetik...
               </span>
             ) : null}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="order-1 flex flex-wrap items-center gap-2 sm:order-2">
             <button
               type="button"
               onClick={handleSaveNow}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-outline-strong bg-primary-strong px-5 text-sm font-semibold text-white transition-colors hover:bg-surface-primary cursor-pointer"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-outline bg-surface px-5 text-sm font-semibold text-ink transition-colors hover:bg-surface-muted cursor-pointer"
             >
               <FloppyDiskIcon size={16} weight="bold" />
               Simpan

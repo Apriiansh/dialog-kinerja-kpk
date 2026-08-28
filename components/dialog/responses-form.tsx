@@ -41,7 +41,7 @@ export function DialogResponsesForm({
   const { sections, initialValues } = buildDialogSections(aspek);
   const aspekById = new Map(aspek.map((a) => [a.id, a]));
   const [liveAspek, setLiveAspek] = useState(aspek);
-  const { transport } = useDialogLive({
+  useDialogLive({
     dialogId,
     enabled: liveEnabled,
     onState: (state) => setLiveAspek(state.aspek),
@@ -206,39 +206,17 @@ export function DialogResponsesForm({
       </section>
 
       {/* Bottom Sticky Action Bar */}
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-outline bg-surface/90 backdrop-blur lg:pl-60">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-3">
-            {liveEnabled ? (
-              <span
-                className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-medium ${
-                  transport === "live" ? "text-emerald-600" : "text-ink-muted"
-                }`}
-              >
-                <span
-                  className={`h-2 w-2 shrink-0 rounded-full ${
-                    transport === "live"
-                      ? "bg-emerald-500"
-                      : transport === "polling"
-                        ? "bg-amber-500"
-                        : "bg-outline-strong"
-                  }`}
-                />
-                {transport === "live"
-                  ? "Waktu nyata aktif"
-                  : transport === "polling"
-                    ? "Sinkron berkala"
-                    : "Menyambungkan…"}
-              </span>
-            ) : null}
+      <div className="sticky bottom-0 z-10 mt-auto overflow-hidden rounded-xl border border-outline bg-surface/95 shadow-ambient backdrop-blur">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="order-2 flex min-w-0 items-center gap-3 sm:order-1">
             {saveMeta}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="order-1 flex flex-wrap items-center gap-2 sm:order-2">
             <button
               type="button"
               onClick={handleSaveNow}
               disabled={!canEdit || pending}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-outline-strong bg-surface px-5 text-sm font-semibold text-ink transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-outline bg-surface px-5 text-sm font-semibold text-ink transition-colors hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-60"
             >
               <CheckIcon size={16} weight="bold" />
               Simpan
