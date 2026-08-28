@@ -23,6 +23,7 @@ import { ASPEK_DESC, ASPEK_LABEL, ASPEK_ORDER } from "@/lib/constants/aspek";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import { isDialogExpired } from "@/lib/utils/dialog-deadline";
+import { AutoResizeTextarea } from "@/components/dialog/auto-resize-textarea";
 import {
   useDialogLive,
   formatClock,
@@ -604,10 +605,10 @@ export function DialogForm({
               </span>
             ) : null}
           </div>
-          <textarea
+          <AutoResizeTextarea
             id="deskripsi-pegawai-input"
-            rows={3}
             value={deskripsiPegawaiText}
+            rows={3}
             disabled={isFieldLocked("deskripsi_pegawai")}
             onChange={(e) => {
               setDeskripsiPegawaiText(e.target.value);

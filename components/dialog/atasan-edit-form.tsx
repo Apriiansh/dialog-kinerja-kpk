@@ -23,6 +23,7 @@ import type { AspekPegawaiRow } from "@/lib/utils/dialog-display";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import { AspekPegawaiInput } from "@/components/pegawai/aspek-input";
 import { useDialogLive } from "@/lib/hooks/use-dialog-live";
+import { AutoResizeTextarea } from "@/components/dialog/auto-resize-textarea";
 import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
 
 const SECTION_ICONS = [ChartBarIcon, GaugeIcon, UserFocusIcon, TrendUpIcon] as const;
@@ -315,7 +316,7 @@ export function AtasanEditForm({
             </p>
           </div>
           <div className="mt-4 flex flex-col gap-1.5">
-            <textarea
+            <AutoResizeTextarea
               id="deskripsi_kinerja"
               name="deskripsi_kinerja"
               value={deskripsi}
@@ -324,7 +325,7 @@ export function AtasanEditForm({
               onFocus={() => notifyTyping("deskripsi_atasan")}
               rows={4}
               placeholder="Contoh: Target capaian kinerja triwulan ini memerlukan perhatian pada kualitas dokumen teknis…"
-              className={`w-full resize-y rounded-lg border border-outline bg-surface p-3 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus ${
+              className={`w-full rounded-lg border border-outline bg-surface p-3 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus ${
                 isFieldLocked("deskripsi_atasan")
                   ? "bg-surface-muted/60 cursor-not-allowed opacity-80"
                   : ""
