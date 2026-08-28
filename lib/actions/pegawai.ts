@@ -16,6 +16,7 @@ import {
 } from "@/lib/constants/triwulan";
 import type { JenisAspek } from "@/generated/prisma/enums";
 import { sendDialogSubmissionEmail } from "@/lib/dialog-email";
+import { dateInputFromDaysFromNow } from "@/lib/utils/format";
 
 export interface AspekItemInput {
   id?: number;
@@ -430,6 +431,14 @@ export async function initiateDialog(input: {
     return { error: "Tanggal jadwal dialog tidak valid." };
   }
 
+  const minDate = toNullableDate(dateInputFromDaysFromNow(2))!;
+  if (dateObj < minDate) {
+    return {
+      error:
+        "Jadwal dialog paling cepat 2 (dua) hari setelah hari ini. Silakan pilih tanggal lain.",
+    };
+  }
+
   const periode_tahun = dateObj.getFullYear();
   const triwulan = getTriwulanFromDate(dateObj);
 
@@ -591,6 +600,14 @@ export async function updateDraftDialog(
   const dateObj = toNullableDate(input.jadwal_dialog);
   if (!dateObj) {
     return { error: "Tanggal jadwal dialog tidak valid." };
+  }
+
+  const minDate = toNullableDate(dateInputFromDaysFromNow(2))!;
+  if (dateObj < minDate) {
+    return {
+      error:
+        "Jadwal dialog paling cepat 2 (dua) hari setelah hari ini. Silakan pilih tanggal lain.",
+    };
   }
 
   const newYear = dateObj.getFullYear();

@@ -30,6 +30,12 @@ export function parseDateInput(value: string): Date | null {
   return date;
 }
 
+export function dateInputFromDaysFromNow(days: number): string {
+  const now = new Date();
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + days);
+  return toDateInput(d);
+}
+
 function addMonthsClamped(date: Date, months: number): Date {
   const result = new Date(date);
   const targetMonth = result.getMonth() + months;

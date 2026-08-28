@@ -4,6 +4,7 @@ import { CalendarIcon, PencilSimpleLineIcon, TrashIcon, XIcon } from "@phosphor-
 import { useState } from "react";
 import { updateDraftDialog, deleteDraftDialog } from "@/lib/actions/pegawai";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
+import { dateInputFromDaysFromNow } from "@/lib/utils";
 
 export function PegawaiDraftActions({
   dialogId,
@@ -22,6 +23,15 @@ export function PegawaiDraftActions({
 
   async function handleUpdate(e: React.FormEvent) {
     e.preventDefault();
+    const minDateStr = dateInputFromDaysFromNow(2);
+    if (!jadwalDate) {
+      showError("Pilih tanggal jadwal dialog.");
+      return;
+    }
+    if (jadwalDate < minDateStr) {
+      showError("Jadwal dialog paling cepat 2 (dua) hari setelah hari ini.");
+      return;
+    }
     setLoading(true);
     const res = await updateDraftDialog(dialogId, {
       jadwal_dialog: jadwalDate,
@@ -49,13 +59,16 @@ export function PegawaiDraftActions({
     setOpenDelete(false);
   }
 
-  const todayStr = new Date().toISOString().split("T")[0];
+  const minDateStr = dateInputFromDaysFromNow(2);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       <button
         type="button"
-        onClick={() => setOpenEdit(true)}
+        onClick={() => {
+          if (currentJadwal < minDateStr) setJadwalDate(minDateStr);
+          setOpenEdit(true);
+        }}
         className="inline-flex h-9 items-center gap-1.5 rounded-md border border-outline bg-surface px-3.5 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted cursor-pointer"
       >
         <PencilSimpleLineIcon size={15} weight="bold" />
@@ -102,10 +115,19 @@ export function PegawaiDraftActions({
                 <input
                   id="edit-jadwal-date"
                   type="date"
-                  min={todayStr}
+                  min={minDateStr}
                   required
                   value={jadwalDate}
-                  onChange={(e) => setJadwalDate(e.target.value)}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    if (next && next < minDateStr) {
+                      showError(
+                        "Jadwal dialog paling cepat 2 (dua) hari setelah hari ini.",
+                      );
+                      return;
+                    }
+                    setJadwalDate(next);
+                  }}
                   className="h-10 w-full rounded-lg border border-outline bg-surface px-3 text-sm text-ink outline-none focus:border-primary"
                 />
               </div>
