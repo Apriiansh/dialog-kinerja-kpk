@@ -2,8 +2,9 @@ import { notFound } from "next/navigation";
 import { requireRole, capabilitiesForUser } from "@/lib/auth/session";
 import { getUserProfileData } from "@/lib/queries/profile";
 import { ProfileView } from "@/components/profile/profile-view";
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Profil Saya - Dialog Kinerja KPK",
 };
 

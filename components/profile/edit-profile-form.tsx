@@ -27,6 +27,7 @@ const LABEL_CLASSES =
 export function EditProfileForm({ user }: { user: UserProfileData }) {
   const [namaPegawai, setNamaPegawai] = useState(user.nama_pegawai ?? "");
   const [nip, setNip] = useState(user.nip ?? "");
+  const [email, setEmail] = useState(user.email ?? "");
   const [namaJabatan, setNamaJabatan] = useState(user.nama_jabatan ?? "");
   const [unitKerja, setUnitKerja] = useState(user.unit_kerja ?? "");
   const [tanggalBergabung, setTanggalBergabung] = useState(
@@ -49,6 +50,7 @@ export function EditProfileForm({ user }: { user: UserProfileData }) {
     const formData = new FormData();
     formData.set("nama_pegawai", namaPegawai);
     formData.set("nip", nip);
+    formData.set("email", email);
     formData.set("nama_jabatan", namaJabatan);
     formData.set("unit_kerja", unitKerja);
     formData.set("tanggal_bergabung", tanggalBergabung);
@@ -146,25 +148,49 @@ export function EditProfileForm({ user }: { user: UserProfileData }) {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="nama_pegawai" className={LABEL_CLASSES}>
-              Nama Lengkap <span className="text-error">*</span>
-            </label>
-            <input
-              id="nama_pegawai"
-              name="nama_pegawai"
-              type="text"
-              value={namaPegawai}
-              onChange={(e) => setNamaPegawai(e.target.value)}
-              placeholder="Nama lengkap beserta gelar"
-              disabled={pending}
-              className={INPUT_CLASSES}
-            />
-            {state.fieldErrors?.nama_pegawai ? (
-              <p className="text-xs font-medium text-error">
-                {state.fieldErrors.nama_pegawai}
-              </p>
-            ) : null}
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="nama_pegawai" className={LABEL_CLASSES}>
+                Nama Lengkap <span className="text-error">*</span>
+              </label>
+              <input
+                id="nama_pegawai"
+                name="nama_pegawai"
+                type="text"
+                value={namaPegawai}
+                onChange={(e) => setNamaPegawai(e.target.value)}
+                placeholder="Nama lengkap beserta gelar"
+                disabled={pending}
+                className={INPUT_CLASSES}
+              />
+              {state.fieldErrors?.nama_pegawai ? (
+                <p className="text-xs font-medium text-error">
+                  {state.fieldErrors.nama_pegawai}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="email" className={LABEL_CLASSES}>
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Contoh: user@kpk.go.id"
+                disabled={pending}
+                className={INPUT_CLASSES}
+              />
+              {state.fieldErrors?.email ? (
+                <p className="text-xs font-medium text-error">
+                  {state.fieldErrors.email}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
@@ -245,7 +271,7 @@ export function EditProfileForm({ user }: { user: UserProfileData }) {
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-outline">
             <button
               type="submit"
-              disabled={pending || !namaPegawai.trim()}
+              disabled={pending  || !namaPegawai.trim()}
               className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong disabled:cursor-not-allowed disabled:opacity-60"
             >
               {pending ? (

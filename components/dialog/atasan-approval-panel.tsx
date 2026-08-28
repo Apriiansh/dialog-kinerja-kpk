@@ -1,10 +1,10 @@
 "use client";
 
-import { CheckIcon, XIcon, MailboxIcon } from "@phosphor-icons/react";
+import { CheckIcon, XIcon, CalendarCheckIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { approveDialog, rejectDialog } from "@/lib/actions/atasan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
-import { getOutlookLink } from "@/lib/utils/outlook";
+import { generateIcsContent, downloadIcsFile } from "@/lib/utils/ics";
 
 export function AtasanApprovalPanel({
   dialogId,
@@ -52,28 +52,31 @@ export function AtasanApprovalPanel({
     setOpenReject(false);
   }
 
-  const formattedDate = jadwalDialog
+const formattedDate = jadwalDialog
     ? new Date(jadwalDialog).toLocaleDateString("id-ID", {
         weekday: "long",
         year: "numeric",
         month: "long",
         day: "numeric",
       })
-    : "Belum ditentukan";
+      : "Belum ditentukan";
 
-  const outlookHref = jadwalDialog ? getOutlookLink({
-    title: `Dialog Kinerja - ${deskripsiPegawai?.slice(0, 50) || "Pegawai"}`,
-    start: jadwalDialog,
-    end: new Date(new Date(jadwalDialog).getTime() + 60 * 60 * 1000),
-    body: [
-      `Jadwal Dialog Kinerja`,
-      `Tanggal: ${formattedDate}`,
-      deskripsiPegawai ? `Catatan Pegawai ${deskripsiPegawai}` : "",
-      deskripsiAtasan ? `Catatan Atasan ${deskripsiAtasan}` : "",
-      `---`,
-      `Link ${typeof window !== "undefined" ? window.location.href : ""}`
-      ].filter(Boolean).join("\n\n"),
-  }): null
+  function handleDownloadIcs() {
+    if (!jadwalDialog) return;
+    const icsContent = generateIcsContent({
+      title: `Dialog Kinerja - ${deskripsiPegawai?.slice(0, 50) || "Pegawai"}`,
+      description: [
+        `Jadwal Dialog Kinerja`,
+        `Tanggal: ${formattedDate}`,
+        deskripsiPegawai ? `Catatan Pegawai: ${deskripsiPegawai}` : "",
+        deskripsiAtasan?.trim() ? `Catatan Atasan: ${deskripsiAtasan.trim()}` : "",
+      ].filter(Boolean).join("\n"),
+      start: new Date(jadwalDialog),
+      end: new Date(new Date(jadwalDialog).getTime() + 60 * 60 * 1000),
+      location: "KPK",
+    });
+    downloadIcsFile(icsContent, "dialog-kinerja.ics");
+  }
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-primary/30 bg-surface p-6 shadow-sm">
@@ -128,7 +131,7 @@ export function AtasanApprovalPanel({
           className="inline-flex h-9 items-center gap-1.5 rounded-md border border-amber-300 bg-amber-50 px-4 text-xs font-semibold text-amber-900 transition-colors hover:bg-amber-100 cursor-pointer disabled:opacity-50"
         >
           <XIcon size={15} weight="bold" />
-          Kembalikan (Minta Revisi)
+          Tolak (Revisi)
         </button>
 
         <button
@@ -144,16 +147,15 @@ export function AtasanApprovalPanel({
           )}
           Setujui Pengajuan
         </button>
-        {outlookHref && (
-          <a
-            href={outlookHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-outline bg-blue-500 px-4 text-xs font-semibold text-ink shadow-xs transition-colors hover:bg-surface cursor-pointer"
+        {jadwalDialog && (
+          <button
+            type="button"
+            onClick={handleDownloadIcs}
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-outline bg-primary px-4 text-xs font-semibold text-on-primary shadow-xs transition-colors hover:bg-primary-strong cursor-pointer"
           >
-            <MailboxIcon size={15} weight="bold" />
-            Tambah ke Outlook
-          </a>
+            <CalendarCheckIcon size={15} weight="bold" />
+            Tambah ke Kalender
+          </button>
         )}
       </div>
 

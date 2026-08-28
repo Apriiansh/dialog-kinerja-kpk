@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, PencilSimple, ChatCircleDotsIcon } from "@phosphor-icons/react/dist/ssr";
+import {
+  ArrowLeft,
+  PencilSimple,
+  ChatCircleDotsIcon,
+  CalendarCheckIcon,
+} from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { getAtasanDialog } from "@/lib/queries/atasan";
@@ -18,7 +23,7 @@ import { InitiateDialogButton } from "@/components/dialog/initiate-button";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { AtasanApprovalPanel } from "@/components/dialog/atasan-approval-panel";
 import { ScrollToAnchor } from "@/components/shared/scroll-to-anchor";
-import { getOutlookLink } from "@/lib/utils/outlook";
+import { generateIcsContent, downloadIcsFile } from "@/lib/utils/ics";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -32,13 +37,12 @@ export async function generateMetadata({
   return { title: `Dialog Kinerja #${id}` };
 }
 
-// const outlookHref =
-
 function StatusNote({ status }: { status: string }) {
   if (status === "draft") {
     return (
       <p className="text-xs leading-5 text-ink-muted sm:text-sm">
-        Pegawai telah mengajukan jadwal dialog kinerja ini. Tinjau pengajuan di bawah untuk menyetujui atau mengembalikan dengan catatan.
+        Pegawai telah mengajukan jadwal dialog kinerja ini. Tinjau pengajuan di
+        bawah untuk menyetujui atau mengembalikan dengan catatan.
       </p>
     );
   }
@@ -110,10 +114,44 @@ export default async function DialogDetailPage({
   const latestSelesaiReviuId = selesaiReviuIds[selesaiReviuIds.length - 1];
   const hasLanjutan = dialog.dialog_lanjutan.length > 0;
 
+  const formattedDate = dialog.jadwal_dialog
+    ? new Date(dialog.jadwal_dialog).toLocaleDateString("id-ID", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+      : "Belum ditentukan";
+
+  const icsData = dialog.jadwal_dialog
+    ? {
+        title: `Dialog Kinerja - ${dialog.pegawai.nama_pegawai} - ${formatPeriode(dialog.triwulan, dialog.periode_tahun)}`,
+        description: [
+          `Jadwal Dialog Kinerja`,
+          `Pegawai: ${dialog.pegawai.nama_pegawai}`,
+          `Periode: ${formatPeriode(dialog.triwulan, dialog.periode_tahun)}`,
+          `Tanggal: ${formattedDate}`,
+          dialog.deskripsi_pegawai ? `Catatan Pegawai: ${dialog.deskripsi_pegawai}` : "",
+          dialog.deskripsi_kinerja ? `Catatan Atasan: ${dialog.deskripsi_kinerja}` : "",
+        ].filter(Boolean).join("\n"),
+        start: new Date(dialog.jadwal_dialog),
+        end: new Date(new Date(dialog.jadwal_dialog).getTime() + 60 * 60 * 1000),
+        location: "KPK",
+      }
+    : null;
+
+  function handleDownloadIcs() {
+    if (!icsData) return;
+    const icsContent = generateIcsContent(icsData);
+    downloadIcsFile(icsContent, "dialog-kinerja.ics");
+  }
+
   return (
     <div className="flex flex-col gap-6 sm:gap-8">
       <ScrollToAnchor />
-      <div className={`flex flex-col gap-6 sm:gap-8 ${isSelesai ? "print:hidden" : ""}`}>
+      <div
+        className={`flex flex-col gap-6 sm:gap-8 ${isSelesai ? "print:hidden" : ""}`}
+      >
         <div className="flex flex-col gap-3 sm:gap-4">
           <Link
             href="/atasan/dialog"
@@ -173,10 +211,24 @@ export default async function DialogDetailPage({
                     Isi Dialog
                   </Link>
                 ) : null}
+
+                {dialog.jadwal_dialog && !isDraft && (
+                  <button
+                    type="button"
+                    onClick={handleDownloadIcs}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-outline-strong bg-surface px-3.5 text-xs font-semibold text-ink shadow-xs transition-colors hover:bg-surface-muted"
+                  >
+                    <CalendarCheckIcon size={14} weight="bold" />
+                    Kalender
+                  </button>
+                )}
+
                 {isSelesai ? (
                   <>
                     <UnduhBuktiButton autoPrint={cetak} label="Unduh PDF" />
-                    <UnduhWordLink href={`/api/unduh/dialog/${dialog.id}/docx`} />
+                    <UnduhWordLink
+                      href={`/api/unduh/dialog/${dialog.id}/docx`}
+                    />
                     <Link
                       href={`/chat/${dialog.id}`}
                       className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-outline-strong bg-surface px-3.5 text-xs font-semibold text-ink shadow-xs transition-colors hover:bg-surface-muted"
@@ -187,7 +239,10 @@ export default async function DialogDetailPage({
                     {latestSelesaiReviuId && !hasLanjutan ? (
                       <InitiateDialogButton
                         parentDialogId={dialog.id}
-                        parentPeriodeLabel={formatPeriode(dialog.triwulan, dialog.periode_tahun)}
+                        parentPeriodeLabel={formatPeriode(
+                          dialog.triwulan,
+                          dialog.periode_tahun,
+                        )}
                         label="Ajukan Dialog Lanjutan"
                         variant="outline"
                         size="sm"
@@ -209,10 +264,12 @@ export default async function DialogDetailPage({
               />
             ) : null}
 
-            {dialog.deskripsi_pegawai?.trim() || dialog.deskripsi_kinerja?.trim() ? (
+            {dialog.deskripsi_pegawai?.trim() ||
+            dialog.deskripsi_kinerja?.trim() ? (
               <div className="rounded-lg border border-outline bg-surface px-4 py-3 sm:px-5 sm:py-4">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
-                  {dialog.deskripsi_pegawai?.trim() && dialog.deskripsi_kinerja?.trim()
+                  {dialog.deskripsi_pegawai?.trim() &&
+                  dialog.deskripsi_kinerja?.trim()
                     ? "Deskripsi Kinerja"
                     : dialog.deskripsi_pegawai?.trim()
                       ? "Deskripsi Kinerja (Pegawai)"
@@ -220,7 +277,8 @@ export default async function DialogDetailPage({
                 </span>
 
                 <div className="mt-2">
-                  {dialog.deskripsi_pegawai?.trim() && dialog.deskripsi_kinerja?.trim() ? (
+                  {dialog.deskripsi_pegawai?.trim() &&
+                  dialog.deskripsi_kinerja?.trim() ? (
                     <>
                       <div>
                         <span className="text-xs font-medium text-ink-muted">
@@ -242,7 +300,8 @@ export default async function DialogDetailPage({
                     </>
                   ) : (
                     <p className="whitespace-pre-wrap text-sm leading-6 text-ink">
-                      {dialog.deskripsi_pegawai?.trim() || dialog.deskripsi_kinerja}
+                      {dialog.deskripsi_pegawai?.trim() ||
+                        dialog.deskripsi_kinerja}
                     </p>
                   )}
                 </div>
@@ -255,7 +314,9 @@ export default async function DialogDetailPage({
           <DialogSummary
             aspek={dialog.aspek}
             isLanjutan={dialog.id_dialog_induk !== null}
-            previousItems={dialog.dialog_induk?.aspek.flatMap((aspek) => aspek.item)}
+            previousItems={dialog.dialog_induk?.aspek.flatMap(
+              (aspek) => aspek.item,
+            )}
           />
         </section>
 
@@ -276,8 +337,7 @@ export default async function DialogDetailPage({
               <ReviuSignForm
                 reviuId={
                   dialog.reviu.find(
-                    (r) =>
-                      r.status === "menunggu_atasan" && !r.is_valid_atasan,
+                    (r) => r.status === "menunggu_atasan" && !r.is_valid_atasan,
                   )!.id
                 }
                 role="atasan"
@@ -289,10 +349,7 @@ export default async function DialogDetailPage({
 
       {isSelesai ? (
         <div className="overflow-x-auto">
-          <FormulirDialogKinerja
-            dialog={dialog}
-            pegawai={dialog.pegawai}
-          />
+          <FormulirDialogKinerja dialog={dialog} pegawai={dialog.pegawai} />
         </div>
       ) : null}
     </div>

@@ -128,6 +128,12 @@ const updateProfileSchema = z.object({
     .regex(/^\d{0,18}$/, "NIP maksimal 18 digit angka.")
     .optional()
     .transform((v) => (v ? v : null)),
+  email: z
+    .string()
+    .trim()
+    .email("Format email tidak valid.")
+    .optional()
+    .transform((v) => (v ? v : null)),
   nama_jabatan: z
     .string()
     .trim()
@@ -167,6 +173,7 @@ export async function updateUserProfileDataAction(
   const raw = {
     nama_pegawai: (formData.get("nama_pegawai") as string) ?? "",
     nip: (formData.get("nip") as string) ?? "",
+    email: (formData.get("email") as string) ?? "",
     nama_jabatan: (formData.get("nama_jabatan") as string) ?? "",
     unit_kerja: (formData.get("unit_kerja") as string) ?? "",
     tanggal_bergabung: (formData.get("tanggal_bergabung") as string) ?? "",
@@ -202,11 +209,34 @@ export async function updateUserProfileDataAction(
     }
   }
 
+  // Check email uniqueness if modified
+  if (parsed.data.email) {
+    const existingEmail = await prisma.user.findFirst({
+      where: {
+        email: parsed.data.email,
+        id: { not: session.id },
+      },
+    });
+    if (existingEmail) {
+      return {
+        fieldErrors: {
+          email: "Email tersebut sudah digunakan oleh pegawai lain.",
+        },
+      };
+    }
+  }
+
   await prisma.user.update({
     where: { id: session.id },
     data: {
       nama_pegawai: parsed.data.nama_pegawai,
       nip: parsed.data.nip,
+      ...(parsed.data.email !== undefined
+        ? {
+            email: parsed.data.email,
+            email_verified_at: parsed.data.email ? null : undefined,
+          }
+        : {}),
       nama_jabatan: parsed.data.nama_jabatan,
       unit_kerja: parsed.data.unit_kerja,
       tanggal_bergabung: parsed.data.tanggal_bergabung,
