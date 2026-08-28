@@ -7,6 +7,7 @@ import {
 } from "@/lib/queries/dialog";
 import { DialogForm } from "@/components/dialog/edit-form";
 import { ChatHeader } from "@/components/chat/ChatHeader";
+import { isJadwalArrived } from "@/lib/utils/dialog-deadline";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -48,6 +49,8 @@ export default async function DialogEditPage({ params }: PageProps) {
         aspek={dialog.aspek}
         isLanjutan={dialog.id_dialog_induk !== null}
         metodeList={metodeList}
+        jadwalDialog={dialog.jadwal_dialog}
+        isJadwalArrived={isJadwalArrived(dialog.jadwal_dialog)}
       />
       <ChatHeader
         dialogId={dialog.id}

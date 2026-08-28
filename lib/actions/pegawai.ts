@@ -17,6 +17,7 @@ import {
 import type { JenisAspek } from "@/generated/prisma/enums";
 import { sendDialogSubmissionEmail } from "@/lib/dialog-email";
 import { dateInputFromDaysFromNow } from "@/lib/utils/format";
+import { isDialogExpired } from "@/lib/utils/dialog-deadline";
 
 export interface AspekItemInput {
   id?: number;
@@ -162,6 +163,7 @@ export async function saveDialogForm(
       status: true,
       id_dialog_induk: true,
       id_atasan: true,
+      jadwal_dialog: true,
       atasan: {
         select: { nama_pegawai: true, email: true },
       },
@@ -177,6 +179,11 @@ export async function saveDialogForm(
   }
   if (dialog.status !== "menunggu_pegawai") {
     return { error: "Dialog sudah dikirim dan tidak dapat diubah." };
+  }
+
+  // Check H+7 expiry (7 days after jadwal_dialog) - server-side enforcement
+  if (isDialogExpired(dialog.jadwal_dialog)) {
+    return { error: "Waktu pengisian dialog telah berakhir (maksimal 7 hari setelah jadwal dialog)." };
   }
 
   for (const aspek of aspekInput) {

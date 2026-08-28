@@ -22,6 +22,7 @@ import {
 import { ASPEK_DESC, ASPEK_LABEL, ASPEK_ORDER } from "@/lib/constants/aspek";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
+import { isDialogExpired } from "@/lib/utils/dialog-deadline";
 import {
   useDialogLive,
   formatClock,
@@ -283,6 +284,8 @@ export function DialogForm({
   aspek,
   isLanjutan = false,
   metodeList,
+  jadwalDialog,
+  isJadwalArrived,
 }: {
   dialogId: number;
   periodeTahun: number;
@@ -293,6 +296,8 @@ export function DialogForm({
   aspek: ExistingAspek[];
   isLanjutan?: boolean;
   metodeList: MetodeOption[];
+  jadwalDialog?: Date | null;
+  isJadwalArrived?: boolean;
 }) {
   const [drafts, setDrafts] = useState<AspekDraft[]>(() =>
     ASPEK_ORDER.map((jenis) => {
@@ -529,6 +534,13 @@ export function DialogForm({
 
   async function handleSubmitClick() {
     await flushPersist();
+
+    // Check H+7 expiry (7 days after jadwal_dialog)
+    if (isDialogExpired(jadwalDialog)) {
+      showError("Waktu pengisian dialog telah berakhir (maksimal 7 hari setelah jadwal dialog).");
+      return;
+    }
+
     const validationError = validateSubmit(
       draftsRef.current,
       isLainnya,
@@ -560,6 +572,18 @@ export function DialogForm({
               {formatPeriode(triwulan, periodeTahun)}
             </span>
           </div>
+          {jadwalDialog && (
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="rounded-md border border-outline bg-surface-muted px-2.5 py-0.5 text-xs font-semibold text-ink-muted">
+                Jadwal: {new Date(jadwalDialog).toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+              </span>
+              {!isJadwalArrived && (
+                <span className="rounded-md border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+                  Belum waktunya mengisi (mulai {new Date(jadwalDialog).toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short" })})
+                </span>
+              )}
+            </div>
+          )}
           <p className="text-sm leading-5 text-ink-muted">
             Atasan: <span className="font-medium text-ink">{atasanNama}</span> · Lengkapi empat aspek evaluasi di bawah ini.
           </p>
