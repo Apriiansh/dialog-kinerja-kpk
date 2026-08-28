@@ -6,6 +6,7 @@ import { initiateDialog } from "@/lib/actions/pegawai";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import { formatPeriode, getTriwulanFromDate } from "@/lib/constants/triwulan";
 import { dateInputFromDaysFromNow } from "@/lib/utils";
+import { AutoResizeTextarea } from "@/components/dialog/auto-resize-textarea";
 
 export interface EligibleParentInfo {
   id: number;
@@ -218,7 +219,7 @@ export function InitiateDialogButton({
                 >
                   Catatan / Konteks Pengajuan (Opsional)
                 </label>
-                <textarea
+                <AutoResizeTextarea
                   id="deskripsi-pegawai"
                   rows={3}
                   value={deskripsi}

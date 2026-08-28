@@ -5,6 +5,7 @@ import { useState } from "react";
 import { approveDialog, rejectDialog } from "@/lib/actions/atasan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import { generateIcsContent, downloadIcsFile } from "@/lib/utils/ics";
+import { AutoResizeTextarea } from "@/components/dialog/auto-resize-textarea";
 
 export function AtasanApprovalPanel({
   dialogId,
@@ -113,7 +114,7 @@ const formattedDate = jadwalDialog
         >
           {deskripsiPegawai?.trim() ? "Deskripsi Kinerja (versi Atasan - Opsional)" : "Deskripsi Kinerja (Atasan - Opsional)"}
         </label>
-        <textarea
+        <AutoResizeTextarea
           id="deskripsi-atasan-input"
           rows={2}
           value={deskripsiAtasan}

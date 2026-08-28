@@ -841,7 +841,7 @@ export function DialogForm({
                             </span>
                           ) : null}
                         </div>
-                        <textarea
+                        <AutoResizeTextarea
                           id={`${jenis}-tj-pegawai`}
                           rows={3}
                           value={draft.tanggung_jawab_pegawai}
@@ -876,7 +876,7 @@ export function DialogForm({
                             </span>
                           ) : null}
                         </div>
-                        <textarea
+                        <AutoResizeTextarea
                           id={`${jenis}-tj-atasan`}
                           rows={3}
                           value={draft.tanggung_jawab_atasan ?? ""}

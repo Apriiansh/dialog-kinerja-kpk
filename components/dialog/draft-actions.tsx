@@ -5,6 +5,7 @@ import { useState } from "react";
 import { updateDraftDialog, deleteDraftDialog } from "@/lib/actions/pegawai";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 import { dateInputFromDaysFromNow } from "@/lib/utils";
+import { AutoResizeTextarea } from "@/components/dialog/auto-resize-textarea";
 
 export function PegawaiDraftActions({
   dialogId,
@@ -136,7 +137,7 @@ export function PegawaiDraftActions({
                 <label htmlFor="edit-deskripsi" className="text-xs font-bold uppercase tracking-wider text-ink-muted">
                   Catatan / Konteks Pengajuan
                 </label>
-                <textarea
+                <AutoResizeTextarea
                   id="edit-deskripsi"
                   rows={3}
                   value={deskripsi}

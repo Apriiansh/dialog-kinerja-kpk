@@ -11,6 +11,7 @@ import {
 } from "@phosphor-icons/react";
 import { saveDeskripsiKinerja, submitDialog } from "@/lib/actions/atasan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
+import { AutoResizeTextarea } from "@/components/dialog/auto-resize-textarea";
 
 import type { Triwulan } from "@/generated/prisma/enums";
 
@@ -196,14 +197,14 @@ export function DeskripsiKinerjaForm({
               >
                 Deskripsi Kinerja
               </label>
-              <textarea
+              <AutoResizeTextarea
                 id="deskripsi_kinerja"
                 name="deskripsi_kinerja"
                 value={value}
                 onChange={(e) => handleChange(e.target.value)}
                 rows={6}
                 placeholder="Contoh: Target capaian kinerja tahun ini belum optimal pada indikator kualitas layanan. Perlu pembahasan strategi peningkatan…"
-                className="resize-y rounded-lg border border-outline bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus"
+                className="rounded-lg border border-outline bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus"
               />
             </div>
           </div>

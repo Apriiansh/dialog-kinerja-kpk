@@ -406,7 +406,7 @@ export function AtasanEditForm({
                             </span>
                           ) : null}
                         </div>
-                        <textarea
+                        <AutoResizeTextarea
                           id={`aspek_${id}`}
                           name={`aspek_${id}`}
                           value={responses[id] ?? ""}
@@ -421,7 +421,7 @@ export function AtasanEditForm({
                           onFocus={() => notifyTyping(fieldKey)}
                           rows={3}
                           placeholder="Tulis tanggung jawab atasan untuk mendukung aspek ini…"
-                          className={`w-full resize-y rounded-md border border-outline bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus ${
+                          className={`w-full rounded-md border border-outline bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus ${
                             isLocked
                               ? "bg-surface-muted/60 cursor-not-allowed opacity-80"
                               : ""
