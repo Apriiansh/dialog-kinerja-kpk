@@ -1,6 +1,6 @@
 {
-  "installCommand": "npm install",
-  "buildCommand": "prisma generate && prisma migrate deploy && next build",
+  "installCommand": "npm install && npx prisma generate",
+  "buildCommand": "next build",
   "crons": [
     {
       "path": "/api/cron/dialog-reminders",
