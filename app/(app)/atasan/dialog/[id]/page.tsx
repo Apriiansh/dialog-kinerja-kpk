@@ -58,8 +58,16 @@ function StatusNote({ status }: { status: string }) {
     return (
       <p className="text-xs leading-5 text-ink-muted sm:text-sm">
         Pegawai telah mengisi dialog. Menunggu validasi Anda: reviu isian
-        pegawai, isi tanggung jawab atasan, lalu beri persetujuan dan tanda
-        tangan di bawah.
+        pegawai, isi tanggung jawab atasan, lalu setujui dan tanda tangan, atau
+        kembalikan dengan catatan revisi.
+      </p>
+    );
+  }
+  if (status === "revisi_evaluasi") {
+    return (
+      <p className="text-xs leading-5 text-ink-muted sm:text-sm">
+        Dialog telah Anda kembalikan untuk revisi. Menunggu pegawai memperbaiki
+        isian dan mengirim ulang.
       </p>
     );
   }

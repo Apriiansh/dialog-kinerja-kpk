@@ -41,6 +41,8 @@ export default async function PegawaiReviuDetailPage({
   if (!reviu) notFound();
 
   const isDraft = reviu.status === "draft_pegawai";
+  const isRevisi = reviu.status === "revisi_capaian";
+  const isEditable = isDraft || isRevisi;
   const isSelesai = reviu.status === "selesai";
   const showEvaluasiLanjutan =
     isSelesai && reviu.dialog.status === "selesai";
@@ -76,7 +78,7 @@ export default async function PegawaiReviuDetailPage({
                 <ReviuStatusBadge status={reviu.status} />
                 <CapaianBadge
                   statusDialog={reviu.dialog.status}
-                  filledAspekCount={5}
+                  filledAspekCount={4}
                   reviu={{
                     status: reviu.status,
                     is_tercapai: reviu.is_tercapai,
@@ -107,11 +109,12 @@ export default async function PegawaiReviuDetailPage({
               </div>
             </div>
 
-            {isDraft ? (
+            {isEditable ? (
               <div className="flex flex-col gap-2 rounded-lg border border-outline bg-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-5 text-ink-muted">
-                  Reviu masih berupa draft dan belum dikirim ke atasan. Lengkapi
-                  isian lalu kirim untuk mendapat persetujuan atasan.
+                  {isRevisi
+                    ? "Reviu dikembalikan atasan untuk direvisi. Perbaiki isian sesuai catatan lalu kirim ulang."
+                    : "Reviu masih berupa draft dan belum dikirim ke atasan. Lengkapi isian lalu kirim untuk mendapat persetujuan atasan."}
                 </p>
                 <div className="flex shrink-0 items-center gap-2">
                   <Link
@@ -121,8 +124,18 @@ export default async function PegawaiReviuDetailPage({
                     <PencilSimpleIcon size={16} weight="bold" />
                     Edit Reviu
                   </Link>
-                  <DeleteReviuButton reviuId={reviu.id} />
+                  {isDraft ? <DeleteReviuButton reviuId={reviu.id} /> : null}
                 </div>
+              </div>
+            ) : null}
+            {isRevisi && reviu.alasan_tolak ? (
+              <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3">
+                <p className="text-xs font-bold uppercase tracking-wider text-amber-800">
+                  Catatan Revisi dari Atasan
+                </p>
+                <p className="mt-1 text-sm leading-5 text-amber-900">
+                  {reviu.alasan_tolak}
+                </p>
               </div>
             ) : null}
             {reviu.status === "menunggu_atasan" ? (

@@ -29,7 +29,7 @@ export type PegawaiDialog = NonNullable<
 >;
 
 export function canEditDialog(status: StatusDialog) {
-  return status === "menunggu_pegawai";
+  return status === "menunggu_pegawai" || status === "revisi_evaluasi";
 }
 
 export function canValidateDialog(status: StatusDialog) {

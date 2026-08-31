@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/auth/session";
 import { saveTtdFile } from "@/lib/export/ttd";
 import { assertActiveActor } from "@/lib/auth/guards";
 import { flashRedirect } from "@/lib/utils/flash";
-import { JenisAspek, Triwulan } from "@/generated/prisma/client";
+import { JenisAspek, StatusDialog, Triwulan } from "@/generated/prisma/client";
 import { createNotification } from "@/lib/notifications";
 import { getTriwulanFromDate } from "@/lib/constants/triwulan";
 import { publishDialogUpdate } from "@/lib/realtime/bus";
@@ -383,42 +383,63 @@ export async function rejectDialog(
   }
 
   const dialog = await prisma.dialogKinerja.findFirst({
-    where: { id: dialogId, id_atasan: session.id, status: "draft" },
-    select: { id: true, id_pegawai: true, periode_tahun: true, triwulan: true },
+    where: {
+      id: dialogId,
+      id_atasan: session.id,
+      status: { in: ["draft", "menunggu_atasan"] },
+    },
+    select: {
+      id: true,
+      id_pegawai: true,
+      periode_tahun: true,
+      triwulan: true,
+      status: true,
+    },
   });
   if (!dialog) {
     return { error: "Pengajuan dialog tidak ditemukan atau sudah diproses." };
   }
 
+  const currentStatus = dialog.status;
+  const targetStatus: StatusDialog =
+    currentStatus === "menunggu_atasan" ? "revisi_evaluasi" : "draft";
+
   try {
     await prisma.dialogKinerja.update({
-      where: { id: dialogId },
+      where: { id: dialog.id },
       data: {
-        status: "draft",
+        status: targetStatus,
         alasan_tolak: alasan_tolak.trim(),
       },
     });
   } catch {
-    return { error: "Gagal mengembalikan pengajuan dialog." };
+    return { error: "Gagal mengembalikan dialog untuk revisi." };
   }
 
-  publishDialogUpdate(dialogId, {
+  publishDialogUpdate(dialog.id, {
     kind: "status",
     byUserId: session.id,
   });
 
+  const isEvaluasi =
+    currentStatus === "menunggu_atasan";
+
   await createNotification({
     userId: dialog.id_pegawai,
     type: "dialog_status",
-    title: "Pengajuan Dialog Memerlukan Revisi",
-    description: `Pengajuan Dialog Kinerja ${dialog.triwulan} ${dialog.periode_tahun} perlu direvisi: "${alasan_tolak.trim()}".`,
+    title: isEvaluasi
+      ? "Evaluasi Dialog Memerlukan Revisi"
+      : "Pengajuan Dialog Memerlukan Revisi",
+    description: `Dialog Kinerja ${dialog.triwulan} ${dialog.periode_tahun} ${
+      isEvaluasi ? "dikembalikan untuk diperbaiki" : "perlu direvisi"
+    }: "${alasan_tolak.trim()}".`,
     link: `/pegawai/dialog/${dialog.id}`,
   });
 
   revalidatePath("/atasan/dialog");
-  revalidatePath(`/atasan/dialog/${dialogId}`);
+  revalidatePath(`/atasan/dialog/${dialog.id}`);
   revalidatePath("/pegawai/dialog");
-  revalidatePath(`/pegawai/dialog/${dialogId}`);
+  revalidatePath(`/pegawai/dialog/${dialog.id}`);
 
   return {};
 }

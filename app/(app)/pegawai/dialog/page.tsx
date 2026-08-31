@@ -16,6 +16,7 @@ import { formatPeriode } from "@/lib/constants/triwulan";
 import type { StatusDialog } from "@/generated/prisma/enums";
 import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { InitiateDialogButton } from "@/components/dialog/initiate-button";
+import { countFilledAspek } from "@/lib/utils/capaian";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -47,6 +48,11 @@ const CTA: Record<
     href: (id) => `/pegawai/dialog/${id}`,
     variant: "primary",
   },
+  revisi_evaluasi: {
+    label: "Isi Dialog",
+    href: (id) => `/pegawai/dialog/${id}/edit`,
+    variant: "primary",
+  },
   selesai: {
     label: "Lihat Detail",
     href: (id) => `/pegawai/dialog/${id}`,
@@ -59,6 +65,7 @@ const VALID_STATUSES: StatusDialog[] = [
   "menunggu_pegawai",
   "menunggu_atasan",
   "menunggu_validasi",
+  "revisi_evaluasi",
   "selesai",
 ];
 
@@ -68,6 +75,7 @@ const FILTERS: { key: StatusDialog | "semua"; label: string }[] = [
   { key: "menunggu_pegawai", label: "Perlu Diisi" },
   { key: "menunggu_atasan", label: "Menunggu Atasan" },
   { key: "menunggu_validasi", label: "Menunggu Validasi" },
+  { key: "revisi_evaluasi", label: "Revisi Evaluasi" },
   { key: "selesai", label: "Selesai" },
 ];
 
@@ -99,21 +107,17 @@ const STATUS_CARD: Record<
     accent: "border-l-status-indigo",
     chip: "bg-indigo-100 text-indigo-800",
   },
+  revisi_evaluasi: {
+    card: "border-orange-200 bg-orange-50/50",
+    accent: "border-l-orange-400",
+    chip: "bg-orange-100 text-orange-800",
+  },
   selesai: {
     card: "border-emerald-200 bg-status-green-soft/50",
     accent: "border-l-status-green",
     chip: "bg-emerald-100 text-emerald-800",
   },
 };
-
-function filledAspekCount(
-  aspek: { tanggung_jawab_pegawai: string | null; item: { id: number }[] }[],
-) {
-  return aspek.filter(
-    (a) =>
-      (a.tanggung_jawab_pegawai?.trim() ?? "") !== "" || a.item.length > 0,
-  ).length;
-}
 
 export default async function PegawaiDialogListPage({
   searchParams,
@@ -135,7 +139,7 @@ export default async function PegawaiDialogListPage({
 
   const baseWhere = { id_pegawai: session.id };
 
-  const [allDialogs, menungguAtasanCount, menungguValidasiCount, selesaiCount] =
+  const [allDialogs, menungguAtasanCount, menungguValidasiCount, selesaiCount, revisiEvaluasiCount] =
     await Promise.all([
       prisma.dialogKinerja.findMany({
         where: baseWhere,
@@ -170,6 +174,7 @@ export default async function PegawaiDialogListPage({
       prisma.dialogKinerja.count({ where: { ...baseWhere, status: "menunggu_atasan" } }),
       prisma.dialogKinerja.count({ where: { ...baseWhere, status: "menunggu_validasi" } }),
       prisma.dialogKinerja.count({ where: { ...baseWhere, status: "selesai" } }),
+      prisma.dialogKinerja.count({ where: { ...baseWhere, status: "revisi_evaluasi" } }),
     ]);
 
   const allTotal = allDialogs.length;
@@ -226,6 +231,13 @@ export default async function PegawaiDialogListPage({
       className: "bg-status-indigo-soft text-status-indigo",
     },
     {
+      key: "revisi_evaluasi" as const,
+      label: "Revisi Evaluasi",
+      count: revisiEvaluasiCount,
+      icon: PencilSimpleIcon,
+      className: "bg-orange-100 text-orange-700",
+    },
+    {
       key: "selesai" as const,
       label: "Selesai",
       count: selesaiCount,
@@ -271,7 +283,7 @@ export default async function PegawaiDialogListPage({
       </header>
 
       {/* Stats Summary Banner */}
-      <section aria-label="Ringkasan status dialog" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Ringkasan status dialog" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {stats.map(({ key, label, count, icon: Icon, className }) => (
           <Link
             key={key}
@@ -428,7 +440,7 @@ export default async function PegawaiDialogListPage({
                       <div className="mt-1 flex items-center gap-3">
                         <CapaianBadge
                           statusDialog={d.status}
-                          filledAspekCount={filledAspekCount(d.aspek)}
+                          filledAspekCount={countFilledAspek(d.aspek)}
                           reviu={d.reviu.at(-1)}
                           items={d.aspek.flatMap((a) => a.item)}
                         />

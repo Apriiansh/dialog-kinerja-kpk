@@ -15,6 +15,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { formatTanggal } from "@/lib/utils/format";
+import { countFilledAspek } from "@/lib/utils/capaian";
 
 export const dynamic = "force-dynamic";
 
@@ -225,11 +226,7 @@ export default async function AdminPegawaiMonitoringPage({
           <ul className="flex flex-col gap-3.5">
             {pegawai.dialogAsPegawai.map((dialog, index) => {
               const sequenceNum = index + 1;
-              const filledCount = dialog.aspek.filter(
-                (a) =>
-                  (a.tanggung_jawab_pegawai?.trim() ?? "") !== "" ||
-                  a.item.length > 0,
-              ).length;
+              const filledCount = countFilledAspek(dialog.aspek);
               const totalItems = dialog.aspek.reduce(
                 (acc, curr) => acc + curr.item.length,
                 0,

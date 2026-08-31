@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SealCheckIcon, XIcon } from "@phosphor-icons/react";
 import { submitReviuAtasan, validateReviu } from "@/lib/actions/reviu";
+import { ReviuRejectForm } from "@/components/reviu/reject-form";
 import { Button } from "@/components/ui/button";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 
@@ -65,15 +66,18 @@ export function ReviuSignForm({
           </div>
         </div>
 
-        <Button
-          type="button"
-          size="default"
-          onClick={() => setOpen(true)}
-          className="shrink-0"
-        >
-          <SealCheckIcon size={16} weight="bold" />
-          {role === "atasan" ? "Setujui Reviu" : "Validasi Reviu"}
-        </Button>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {role === "atasan" ? <ReviuRejectForm reviuId={reviuId} /> : null}
+          <Button
+            type="button"
+            size="default"
+            onClick={() => setOpen(true)}
+            className="shrink-0"
+          >
+            <SealCheckIcon size={16} weight="bold" />
+            {role === "atasan" ? "Setujui Reviu" : "Validasi Reviu"}
+          </Button>
+        </div>
       </div>
 
       {/* Alert Modal Validasi Reviu */}
@@ -136,8 +140,8 @@ export function ReviuSignForm({
                 {pending
                   ? "Memproses…"
                   : role === "atasan"
-                  ? "Setujui Sekarang"
-                  : "Validasi Sekarang"}
+                  ? "Ya, Setujui"
+                  : "Ya, Validasi"}
               </button>
             </div>
           </div>

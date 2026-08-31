@@ -42,7 +42,7 @@ export function NewReviuButton({ dialogs }: { dialogs: SelesaiDialogOption[] }) 
         className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-on-primary shadow-xs transition-colors hover:bg-primary-strong"
       >
         <PlusIcon size={16} weight="bold" />
-        Buat Evaluasi
+        Buat Reviu
       </button>
 
       {open ? (
@@ -60,7 +60,7 @@ export function NewReviuButton({ dialogs }: { dialogs: SelesaiDialogOption[] }) 
             <div className="flex items-center justify-between border-b border-outline px-6 py-4">
               <div className="flex flex-col gap-0.5">
                 <h2 className="text-base font-semibold text-ink">
-                  Pilih Dialog untuk Dievaluasi
+                  Pilih Dialog untuk Direviu
                 </h2>
                 <p className="text-xs leading-4 text-ink-muted">
                   Pilih dokumen dialog kinerja selesai yang belum memiliki formulir evaluasi.
@@ -132,7 +132,7 @@ export function NewReviuButton({ dialogs }: { dialogs: SelesaiDialogOption[] }) 
                             href={`/pegawai/reviu/new?dialog=${d.id}`}
                             className="inline-flex h-8 items-center gap-1 rounded-md bg-primary px-3 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
                           >
-                            Isi Evaluasi →
+                            Isi Reviu →
                           </Link>
                         </td>
                       </tr>

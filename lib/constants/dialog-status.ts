@@ -5,6 +5,7 @@ export type StatusTone =
   | "waiting-pegawai"
   | "waiting-atasan"
   | "validation"
+  | "revision"
   | "done";
 
 export interface StatusConfig {
@@ -17,5 +18,6 @@ export const STATUS_CONFIG: Record<StatusDialog, StatusConfig> = {
   menunggu_pegawai: { label: "Menunggu Pegawai", tone: "waiting-pegawai" },
   menunggu_atasan: { label: "Menunggu Atasan", tone: "waiting-atasan" },
   menunggu_validasi: { label: "Menunggu Validasi", tone: "validation" },
+  revisi_evaluasi: { label: "Revisi Evaluasi", tone: "revision" },
   selesai: { label: "Selesai", tone: "done" },
 };

@@ -20,6 +20,11 @@ export const DIALOG_STATUS_CHART: Record<
     short: "M. Validasi",
     color: "#4338ca",
   },
+  revisi_evaluasi: {
+    label: "Revisi Evaluasi",
+    short: "Revisi Evaluasi",
+    color: "#ea580c",
+  },
   selesai: { label: "Selesai", short: "Selesai", color: "#15803d" },
 };
 

@@ -12,9 +12,11 @@ import {
   SpinnerGapIcon,
   TrendUpIcon,
   UserFocusIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 import {
   autosaveResponses,
+  rejectDialog,
   saveDeskripsiKinerja,
   submitEvaluasi,
 } from "@/lib/actions/atasan";
@@ -66,6 +68,9 @@ export function AtasanEditForm({
   const [setuju, setSetuju] = useState(false);
   const [pending, setPending] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [alasanTolak, setAlasanTolak] = useState("");
+  const [rejectPending, setRejectPending] = useState(false);
 
   const deskripsiRef = useRef(deskripsi);
   const tahunRef = useRef(tahun);
@@ -225,6 +230,34 @@ export function AtasanEditForm({
 
     showSuccess("Evaluasi berhasil dikirim ke pegawai");
     setShowConfirmModal(false);
+    router.refresh();
+    router.push(`/atasan/dialog/${dialogId}`);
+  };
+
+  const handleOpenReject = async () => {
+    if (pending) return;
+    if (timer.current) clearTimeout(timer.current);
+    await persist();
+    setShowRejectModal(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (rejectPending || !alasanTolak.trim()) {
+      showError("Alasan revisi wajib diisi.");
+      return;
+    }
+    setRejectPending(true);
+
+    const result = await rejectDialog(dialogId, alasanTolak);
+
+    if (result?.error) {
+      showError(result.error);
+      setRejectPending(false);
+      return;
+    }
+
+    showSuccess("Dialog dikembalikan ke pegawai untuk revisi.");
+    setShowRejectModal(false);
     router.refresh();
     router.push(`/atasan/dialog/${dialogId}`);
   };
@@ -486,15 +519,26 @@ export function AtasanEditForm({
               Simpan
             </button>
             {canSubmitEvaluasi ? (
-              <button
-                type="button"
-                onClick={handleOpenConfirm}
-                disabled={pending}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong cursor-pointer disabled:opacity-60"
-              >
-                <PaperPlaneTiltIcon size={16} weight="bold" />
-                Simpan &amp; Kirim Evaluasi
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={handleOpenReject}
+                  disabled={pending}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-5 text-sm font-semibold text-amber-900 transition-colors hover:bg-amber-100 cursor-pointer disabled:opacity-60"
+                >
+                  <XIcon size={16} weight="bold" />
+                  Tolak (Revisi)
+                </button>
+                <button
+                  type="button"
+                  onClick={handleOpenConfirm}
+                  disabled={pending}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-strong cursor-pointer disabled:opacity-60"
+                >
+                  <PaperPlaneTiltIcon size={16} weight="bold" />
+                  Setujui
+                </button>
+              </>
             ) : null}
           </div>
         </div>
@@ -548,7 +592,66 @@ export function AtasanEditForm({
                 {pending ? (
                   <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current/40 border-t-current" />
                 ) : null}
-                {pending ? "Mengirim…" : "Kirim Evaluasi"}
+                {pending ? "Mengirim…" : "Ya, Setujui"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Reject Modal */}
+      {showRejectModal ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="relative w-full max-w-md rounded-xl border border-outline bg-surface p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-ink">
+              Kembalikan Dialog untuk Revisi
+            </h3>
+            <p className="mt-1.5 text-xs leading-5 text-ink-muted">
+              Berikan catatan revisi kepada pegawai. Dialog akan dikembalikan
+              agar isian diperbaiki lalu dikirim ulang.
+            </p>
+
+            <div className="mt-5 flex flex-col gap-1.5">
+              <label
+                htmlFor="alasan-tolak-evaluasi"
+                className="text-xs font-bold uppercase tracking-wider text-ink-muted"
+              >
+                Catatan Revisi *
+              </label>
+              <textarea
+                id="alasan-tolak-evaluasi"
+                rows={4}
+                required
+                value={alasanTolak}
+                onChange={(e) => setAlasanTolak(e.target.value)}
+                placeholder="Contoh: Uraian kompetensi pada aspek SKP perlu ditambahkan rincian target…"
+                className="w-full rounded-lg border border-outline bg-surface p-3 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-muted/70 focus:border-primary focus:shadow-focus"
+              />
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setShowRejectModal(false)}
+                disabled={rejectPending}
+                className="inline-flex h-9 items-center justify-center rounded-lg border border-outline px-4 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted disabled:opacity-50 cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmReject}
+                disabled={rejectPending || !alasanTolak.trim()}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-amber-600 px-4 text-xs font-semibold text-white transition-colors hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+              >
+                {rejectPending ? (
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current/40 border-t-current" />
+                ) : null}
+                {rejectPending ? "Mengembalikan…" : "Kirim Catatan Revisi"}
               </button>
             </div>
           </div>

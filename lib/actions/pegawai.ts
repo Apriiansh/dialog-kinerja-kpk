@@ -177,7 +177,7 @@ export async function saveDialogForm(
   if (!dialog) {
     return { error: "Dialog tidak ditemukan." };
   }
-  if (dialog.status !== "menunggu_pegawai") {
+  if (dialog.status !== "menunggu_pegawai" && dialog.status !== "revisi_evaluasi") {
     return { error: "Dialog sudah dikirim dan tidak dapat diubah." };
   }
 
@@ -284,7 +284,7 @@ export async function saveDialogForm(
       if (mode === "submit") {
         await tx.dialogKinerja.update({
           where: { id: dialog.id },
-          data: { status: "menunggu_atasan" },
+          data: { status: "menunggu_atasan", alasan_tolak: null },
         });
       }
     });

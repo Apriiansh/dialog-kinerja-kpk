@@ -63,6 +63,14 @@ function StatusNote({
       </p>
     );
   }
+  if (status === "revisi_evaluasi") {
+    return (
+      <p className="text-xs leading-5 text-ink-muted sm:text-sm">
+        Tanggapan atasan memerlukan revisi. Silakan perbaiki isian sesuai
+        catatan dan kirim ulang.
+      </p>
+    );
+  }
   if (status === "menunggu_validasi") {
     if (isValidPegawai) {
       return (

@@ -8,6 +8,8 @@ export const ASPEK_ORDER: JenisAspek[] = [
   "KARIR_MENENGAH",
 ];
 
+export const TOTAL_ASPEK = 4;
+
 export const ASPEK_LABEL: Record<JenisAspek, string> = {
   SKP: "Evaluasi Kinerja (SKP)",
   GAP_ASESMEN: "Evaluasi Gap Asesmen",

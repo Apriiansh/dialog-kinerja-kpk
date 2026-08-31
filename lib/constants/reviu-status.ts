@@ -4,6 +4,7 @@ export type StatusReviuTone =
   | "draft"
   | "waiting-atasan"
   | "validation"
+  | "revision"
   | "done";
 
 export interface StatusReviuConfig {
@@ -15,6 +16,7 @@ export const STATUS_REVIU_CONFIG: Record<StatusReviu, StatusReviuConfig> = {
   draft_pegawai: { label: "Draft", tone: "draft" },
   menunggu_atasan: { label: "Menunggu Atasan", tone: "waiting-atasan" },
   menunggu_validasi: { label: "Menunggu Validasi", tone: "validation" },
+  revisi_capaian: { label: "Revisi Capaian", tone: "revision" },
   selesai: { label: "Selesai", tone: "done" },
 };
 

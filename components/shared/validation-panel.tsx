@@ -124,7 +124,7 @@ export function ValidationPanel({
                 {pending ? (
                   <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current/40 border-t-current" />
                 ) : null}
-                {pending ? "Memproses…" : "Validasi Sekarang"}
+                {pending ? "Memproses…" : "Ya, Validasi"}
               </button>
             </div>
           </div>

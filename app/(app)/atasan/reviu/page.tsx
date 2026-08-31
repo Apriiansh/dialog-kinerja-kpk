@@ -30,6 +30,7 @@ const VALID_STATUSES: StatusReviu[] = [
   "draft_pegawai",
   "menunggu_atasan",
   "menunggu_validasi",
+  "revisi_capaian",
   "selesai",
 ];
 
@@ -37,6 +38,7 @@ const FILTERS: { key: StatusReviu | "semua"; label: string }[] = [
   { key: "semua", label: "Semua" },
   { key: "menunggu_atasan", label: "Menunggu Reviu Anda" },
   { key: "menunggu_validasi", label: "Menunggu Validasi" },
+  { key: "revisi_capaian", label: "Revisi Capaian" },
   { key: "selesai", label: "Selesai" },
 ];
 
@@ -88,6 +90,7 @@ export default async function AtasanReviuListPage({
     draftCount,
     menungguAtasanCount,
     menungguValidasiCount,
+    revisiCapaianCount,
     selesaiCount,
     allDialogsForYears,
   ] = await Promise.all([
@@ -102,6 +105,7 @@ export default async function AtasanReviuListPage({
     prisma.reviu.count({ where: { ...baseWhere, status: "draft_pegawai" } }),
     prisma.reviu.count({ where: { ...baseWhere, status: "menunggu_atasan" } }),
     prisma.reviu.count({ where: { ...baseWhere, status: "menunggu_validasi" } }),
+    prisma.reviu.count({ where: { ...baseWhere, status: "revisi_capaian" } }),
     prisma.reviu.count({ where: { ...baseWhere, status: "selesai" } }),
     prisma.dialogKinerja.findMany({
       where: { id_atasan: session.id },
@@ -110,7 +114,8 @@ export default async function AtasanReviuListPage({
     }),
   ]);
 
-  const allTotal = draftCount + menungguAtasanCount + menungguValidasiCount + selesaiCount;
+  const allTotal =
+    draftCount + menungguAtasanCount + menungguValidasiCount + revisiCapaianCount + selesaiCount;
   const totalPages = Math.ceil(total / PAGE_SIZE);
   const availableYears = allDialogsForYears.map((d) => d.periode_tahun).sort((a, b) => b - a);
 
@@ -118,6 +123,7 @@ export default async function AtasanReviuListPage({
     if (status === "draft_pegawai") return draftCount;
     if (status === "menunggu_atasan") return menungguAtasanCount;
     if (status === "menunggu_validasi") return menungguValidasiCount;
+    if (status === "revisi_capaian") return revisiCapaianCount;
     return selesaiCount;
   };
 
@@ -144,6 +150,13 @@ export default async function AtasanReviuListPage({
       className: "bg-status-indigo-soft text-status-indigo",
     },
     {
+      key: "revisi_capaian" as const,
+      label: "Revisi Capaian",
+      count: count("revisi_capaian"),
+      icon: ArrowsClockwiseIcon,
+      className: "bg-status-amber-soft text-status-amber",
+    },
+    {
       key: "selesai" as const,
       label: "Selesai",
       count: count("selesai"),
@@ -164,7 +177,7 @@ export default async function AtasanReviuListPage({
         </p>
       </header>
 
-      <section aria-label="Ringkasan status reviu" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Ringkasan status reviu" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {stats.map(({ key, label, count, icon: Icon, className }) => (
           <Link
             key={key}
@@ -341,7 +354,7 @@ export default async function AtasanReviuListPage({
                             : "border border-outline bg-white text-ink hover:border-outline-strong hover:bg-surface-muted"
                           }`}
                       >
-                        {isPending ? "Reviu & Tandatangani" : "Lihat Dialog"}
+                        {isPending ? "Tinjau & Validasi" : "Lihat Dialog"}
                       </Link>
                     </div>
                   </div>

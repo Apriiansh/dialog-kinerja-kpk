@@ -182,7 +182,7 @@ export type ReviuRow = NonNullable<
 >;
 
 export function canEditReviu(status: StatusReviu) {
-  return status === "draft_pegawai";
+  return status === "draft_pegawai" || status === "revisi_capaian";
 }
 
 export function canValidateReviu(status: StatusReviu) {

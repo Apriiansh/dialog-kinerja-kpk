@@ -72,7 +72,7 @@ export default async function NewReviuPage({
           Kembali ke Reviu
         </Link>
         <h1 className="text-[24px] font-semibold leading-8 tracking-[-0.01em] text-ink">
-          Buat Evaluasi Tindak Lanjut Dialog Kinerja
+          Buat Reviu / Tindak Lanjut Dialog Kinerja
         </h1>
         <p className="text-sm leading-5 text-ink-muted">
           Evaluasi tindak lanjut dibuat untuk menilai capaian item dari dialog kinerja yang telah selesai.

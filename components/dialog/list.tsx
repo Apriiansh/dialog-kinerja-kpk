@@ -1,9 +1,10 @@
 import { EyeIcon, PencilSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
-import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
+import type { StatusDialog, Triwulan, JenisAspek } from "@/generated/prisma/enums";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { CapaianBadge } from "@/components/shared/capaian-badge";
+import { countFilledAspek } from "@/lib/utils/capaian";
 
 export interface DialogRow {
   id: number;
@@ -23,6 +24,7 @@ export interface DialogRow {
   sequence_number?: number;
   reviu?: { status: string; is_tercapai: boolean; is_tidak_tercapai: boolean }[];
   aspek?: {
+    jenis_aspek: JenisAspek;
     tanggung_jawab_pegawai: string | null;
     item: { id: number; is_tercapai: boolean | null }[];
   }[];
@@ -48,12 +50,8 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
             const canEditDialog =
               perluEvaluasi || dialog.status === "menunggu_pegawai";
             const filledCount = dialog.aspek
-              ? dialog.aspek.filter(
-                  (a) =>
-                    (a.tanggung_jawab_pegawai?.trim() ?? "") !== "" ||
-                    a.item.length > 0,
-                ).length
-              : 5;
+              ? countFilledAspek(dialog.aspek)
+              : 0;
             return (
               <tr
                 key={dialog.id}

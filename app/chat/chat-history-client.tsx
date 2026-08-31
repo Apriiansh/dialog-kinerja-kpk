@@ -26,6 +26,7 @@ const STATUS_STYLES: Record<StatusTone, string> = {
   "waiting-atasan":
     "bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200/70",
   validation: "bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-200/70",
+  revision: "bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-200/70",
   done: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200/70",
 };
 

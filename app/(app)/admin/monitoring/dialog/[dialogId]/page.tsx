@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { UnduhBuktiButton } from "@/components/shared/unduh-bukti-button";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { formatPeriode } from "@/lib/constants/triwulan";
+import { countFilledAspek } from "@/lib/utils/capaian";
 
 export const dynamic = "force-dynamic";
 
@@ -60,9 +61,7 @@ export default async function AdminDialogDetailPage({
     where: { id_pegawai: dialog.pegawai.id, id: { lte: idNum } },
   });
 
-  const filledCount = dialog.aspek.filter(
-    (a) => (a.tanggung_jawab_pegawai?.trim() ?? "") !== "" || a.item.length > 0,
-  ).length;
+  const filledCount = countFilledAspek(dialog.aspek);
 
   return (
     <div className="flex flex-col gap-8">

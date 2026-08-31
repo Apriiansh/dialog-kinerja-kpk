@@ -13,6 +13,7 @@ import { requireRole } from "@/lib/auth/session";
 import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { Pagination, PAGE_SIZE } from "@/components/ui/pagination";
 import { getPageParams } from "@/lib/utils/pagination";
+import { countFilledAspek } from "@/lib/utils/capaian";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -78,6 +79,7 @@ export default async function AdminMonitoringPage({
               status: true,
               aspek: {
                 select: {
+                  jenis_aspek: true,
                   tanggung_jawab_pegawai: true,
                   item: { select: { is_tercapai: true } },
                 },
@@ -238,11 +240,7 @@ export default async function AdminMonitoringPage({
                 const latestDialog = p.dialogAsPegawai[0];
                 const latestReviu = latestDialog?.reviu?.[0];
                 const filledCount = latestDialog
-                  ? latestDialog.aspek.filter(
-                      (a) =>
-                        (a.tanggung_jawab_pegawai?.trim() ?? "") !== "" ||
-                        a.item.length > 0,
-                    ).length
+                  ? countFilledAspek(latestDialog.aspek)
                   : 0;
 
                 return (

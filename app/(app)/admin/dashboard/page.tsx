@@ -25,6 +25,7 @@ const STATUS_ORDER: StatusDialog[] = [
   "menunggu_pegawai",
   "menunggu_atasan",
   "menunggu_validasi",
+  "revisi_evaluasi",
   "selesai",
 ];
 const ROLE_ORDER: Role[] = ["ATASAN", "PEGAWAI"];

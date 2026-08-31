@@ -4,11 +4,12 @@ import { ReviuStatusBadge } from "@/components/reviu/status-badge";
 import { TindakLanjutBadge } from "@/components/shared/tindak-lanjut-badge";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { tindakLanjutLabel } from "@/lib/constants/reviu-status";
+import type { StatusReviu } from "@/generated/prisma/enums";
 import React from "react";
 
 interface ReviuListRow {
   id: number;
-  status: "draft_pegawai" | "menunggu_atasan" | "menunggu_validasi" | "selesai";
+  status: StatusReviu;
   is_tercapai: boolean;
   is_tidak_tercapai: boolean;
   penjelasan_tercapai: string | null;

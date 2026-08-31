@@ -22,7 +22,7 @@ interface CapaianBadgeProps {
 export function CapaianBadge({
   statusDialog,
   filledAspekCount,
-  totalAspekCount = 5,
+  totalAspekCount = 4,
   reviu,
   items = [],
 }: CapaianBadgeProps) {

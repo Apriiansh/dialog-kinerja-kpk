@@ -225,7 +225,7 @@ export async function saveReviu(
   if (!reviu) {
     return { error: "Reviu tidak ditemukan." };
   }
-  if (reviu.status !== "draft_pegawai") {
+  if (reviu.status !== "draft_pegawai" && reviu.status !== "revisi_capaian") {
     return { error: "Reviu sudah dikirim dan tidak dapat diubah." };
   }
 
@@ -253,7 +253,8 @@ export async function saveReviu(
         penjelasan_tidak_tercapai: toNullable(input.penjelasan_tidak_tercapai),
         rencana_tindak_lanjut: toNullable(input.rencana_tindak_lanjut),
         tanggal_next_evaluasi: toNullableDate(input.tanggal_next_evaluasi),
-        status: mode === "submit" ? "menunggu_atasan" : "draft_pegawai",
+        status: mode === "submit" ? "menunggu_atasan" : reviu.status,
+        ...(mode === "submit" ? { alasan_tolak: null } : {}),
       },
     });
   } catch {
@@ -359,6 +360,72 @@ export async function submitReviuAtasan(
   revalidatePath("/atasan/dashboard");
   revalidatePath("/atasan/reviu");
   revalidatePath(`/atasan/reviu/${reviu.id}`);
+  revalidatePath(`/pegawai/reviu/${reviu.id}`);
+  return {};
+}
+
+export async function rejectReviu(
+  reviuId: number,
+  alasan_tolak: string,
+): Promise<ReviuSignState> {
+  const session = await requireRole("ATASAN");
+  const err = await assertActiveActor(session.id);
+  if (err) return { error: err };
+
+  if (!alasan_tolak?.trim()) {
+    return { error: "Alasan pengembalian/revisi wajib diisi." };
+  }
+
+  const reviu = await prisma.reviu.findFirst({
+    where: { id: reviuId, dialog: { id_atasan: session.id } },
+    select: {
+      id: true,
+      status: true,
+      dialog: {
+        select: {
+          id: true,
+          id_pegawai: true,
+          periode_tahun: true,
+          triwulan: true,
+        },
+      },
+    },
+  });
+  if (!reviu) {
+    return { error: "Reviu tidak ditemukan." };
+  }
+  if (reviu.status !== "menunggu_atasan") {
+    return { error: "Reviu belum siap untuk direviu atasan." };
+  }
+
+  try {
+    await prisma.reviu.update({
+      where: { id: reviu.id },
+      data: {
+        status: "revisi_capaian",
+        alasan_tolak: alasan_tolak.trim(),
+        is_valid_atasan: false,
+        ttd_atasan_path: null,
+        waktu_validasi_atasan: null,
+      },
+    });
+  } catch {
+    return { error: "Gagal mengembalikan reviu untuk revisi." };
+  }
+
+  await createNotification({
+    userId: reviu.dialog.id_pegawai,
+    type: "reviu_status",
+    title: "Reviu Perlu Revisi",
+    description: `Reviu untuk dialog kinerja tahun ${reviu.dialog.periode_tahun} (${reviu.dialog.triwulan}) dikembalikan untuk diperbaiki: "${alasan_tolak.trim()}".`,
+    link: `/pegawai/reviu/${reviu.id}`,
+  });
+
+  revalidatePath("/atasan/reviu");
+  revalidatePath(`/atasan/reviu/${reviu.id}`);
+  revalidatePath("/atasan/dialog");
+  revalidatePath(`/atasan/dialog/${reviu.dialog.id}`);
+  revalidatePath("/pegawai/reviu");
   revalidatePath(`/pegawai/reviu/${reviu.id}`);
   return {};
 }

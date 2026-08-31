@@ -49,6 +49,11 @@ const CTA: Record<
     href: (id) => `/pegawai/reviu/${id}`,
     variant: "primary",
   },
+  revisi_capaian: {
+    label: "Edit Reviu",
+    href: (id) => `/pegawai/reviu/${id}/edit`,
+    variant: "primary",
+  },
   selesai: {
     label: "Lihat Detail",
     href: (id) => `/pegawai/reviu/${id}`,
@@ -60,6 +65,7 @@ const VALID_STATUSES: StatusReviu[] = [
   "draft_pegawai",
   "menunggu_atasan",
   "menunggu_validasi",
+  "revisi_capaian",
   "selesai",
 ];
 
@@ -68,6 +74,7 @@ const FILTERS: { key: StatusReviu | "semua"; label: string }[] = [
   { key: "draft_pegawai", label: "Draft" },
   { key: "menunggu_atasan", label: "Menunggu Atasan" },
   { key: "menunggu_validasi", label: "Menunggu Validasi" },
+  { key: "revisi_capaian", label: "Revisi Capaian" },
   { key: "selesai", label: "Selesai" },
 ];
 
@@ -131,6 +138,7 @@ export default async function PegawaiReviuListPage({
     draftCount,
     menungguAtasanCount,
     menungguValidasiCount,
+    revisiCapaianCount,
     selesaiCount,
     selesaiDialogs,
     allDialogsForYears,
@@ -146,6 +154,7 @@ export default async function PegawaiReviuListPage({
     prisma.reviu.count({ where: { ...baseWhere, status: "draft_pegawai" } }),
     prisma.reviu.count({ where: { ...baseWhere, status: "menunggu_atasan" } }),
     prisma.reviu.count({ where: { ...baseWhere, status: "menunggu_validasi" } }),
+    prisma.reviu.count({ where: { ...baseWhere, status: "revisi_capaian" } }),
     prisma.reviu.count({ where: { ...baseWhere, status: "selesai" } }),
     getPegawaiSelesaiDialogOptions(session.id),
     prisma.dialogKinerja.findMany({
@@ -155,7 +164,8 @@ export default async function PegawaiReviuListPage({
     }),
   ]);
 
-  const allTotal = draftCount + menungguAtasanCount + menungguValidasiCount + selesaiCount;
+  const allTotal =
+    draftCount + menungguAtasanCount + menungguValidasiCount + revisiCapaianCount + selesaiCount;
   const totalPages = Math.ceil(filteredTotal / PAGE_SIZE);
   const availableYears = allDialogsForYears.map((d) => d.periode_tahun).sort((a, b) => b - a);
 
@@ -182,6 +192,13 @@ export default async function PegawaiReviuListPage({
       className: "bg-status-indigo-soft text-status-indigo",
     },
     {
+      key: "revisi_capaian" as const,
+      label: "Revisi Capaian",
+      count: revisiCapaianCount,
+      icon: ArrowsClockwiseIcon,
+      className: "bg-status-amber-soft text-status-amber",
+    },
+    {
       key: "selesai" as const,
       label: "Selesai",
       count: selesaiCount,
@@ -205,7 +222,7 @@ export default async function PegawaiReviuListPage({
         <NewReviuButton dialogs={selesaiDialogs} />
       </header>
 
-      <section aria-label="Ringkasan status reviu" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Ringkasan status reviu" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {stats.map(({ key, label, count, icon: Icon, className }) => (
           <Link
             key={key}

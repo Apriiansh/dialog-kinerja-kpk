@@ -19,9 +19,10 @@ import { ChartCard } from "@/components/dashboard/chart-card";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { GreetingCard } from "@/components/dashboard/greeting-card";
 import { EmptyState } from "@/components/shared/empty-state";
-import { ASPEK_ORDER } from "@/lib/constants/aspek";
+import { TOTAL_ASPEK } from "@/lib/constants/aspek";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { formatDistanceToNow } from "@/lib/utils/format";
+import { countFilledAspek } from "@/lib/utils/capaian";
 import type { StatusDialog, Triwulan } from "@/generated/prisma/enums";
 
 function greeting() {
@@ -56,21 +57,17 @@ const CTA: Record<
     href: (id) => `/pegawai/dialog/${id}`,
     variant: "primary",
   },
+  revisi_evaluasi: {
+    label: "Edit Evaluasi",
+    href: (id) => `/pegawai/dialog/${id}/edit`,
+    variant: "primary",
+  },
   selesai: {
     label: "Lihat Detail",
     href: (id) => `/pegawai/dialog/${id}`,
     variant: "plain",
   },
 };
-
-function filledAspekCount(
-  aspek: { tanggung_jawab_pegawai: string | null; item: { id: number }[] }[],
-) {
-  return aspek.filter(
-    (a) =>
-      (a.tanggung_jawab_pegawai?.trim() ?? "") !== "" || a.item.length > 0,
-  ).length;
-}
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -355,9 +352,9 @@ export default async function PegawaiDashboardPage({
         ) : (
           <ul className="flex flex-col gap-3">
             {urgentDialogs.map((d) => {
-              const filled = filledAspekCount(d.aspek);
+              const filled = countFilledAspek(d.aspek);
               const cta = CTA[d.status];
-              const progress = Math.round((filled / ASPEK_ORDER.length) * 100);
+              const progress = Math.round((filled / TOTAL_ASPEK) * 100);
               return (
                 <li key={d.id}>
                   <Link
@@ -381,7 +378,7 @@ export default async function PegawaiDashboardPage({
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 flex-col gap-1">
                         <span className="text-[11px] font-medium text-ink-muted">
-                          {filled}/{ASPEK_ORDER.length} aspek terisi
+                          {filled}/{TOTAL_ASPEK} aspek terisi
                         </span>
                         <div
                           role="progressbar"

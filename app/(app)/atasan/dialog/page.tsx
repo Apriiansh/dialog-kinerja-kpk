@@ -22,6 +22,7 @@ const VALID_STATUSES: StatusDialog[] = [
   "menunggu_pegawai",
   "menunggu_atasan",
   "menunggu_validasi",
+  "revisi_evaluasi",
   "selesai",
 ];
 
@@ -81,6 +82,7 @@ export default async function DialogIndexPage({
         },
         aspek: {
           select: {
+            jenis_aspek: true,
             tanggung_jawab_pegawai: true,
             item: { select: { id: true, is_tercapai: true } },
           },
@@ -174,6 +176,13 @@ export default async function DialogIndexPage({
       count: countByStatus("menunggu_validasi"),
       icon: SealCheckIcon,
       className: "bg-status-indigo-soft text-status-indigo",
+    },
+    {
+      key: "revisi_evaluasi",
+      label: "Revisi Evaluasi",
+      count: countByStatus("revisi_evaluasi"),
+      icon: PencilSimpleIcon,
+      className: "bg-orange-100 text-orange-700",
     },
   ];
 

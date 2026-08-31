@@ -78,7 +78,7 @@ export default async function AtasanReviuDetailPage({
                 <ReviuStatusBadge status={reviu.status} />
                 <CapaianBadge
                   statusDialog={reviu.dialog.status}
-                  filledAspekCount={5}
+                  filledAspekCount={4}
                   reviu={{
                     status: reviu.status,
                     is_tercapai: reviu.is_tercapai,
@@ -121,6 +121,12 @@ export default async function AtasanReviuDetailPage({
             {reviu.status === "menunggu_validasi" ? (
               <p className="text-sm leading-5 text-ink-muted">
                 Reviu telah ditandatangani atasan dan menunggu validasi pegawai.
+              </p>
+            ) : null}
+            {reviu.status === "revisi_capaian" ? (
+              <p className="text-sm leading-5 text-ink-muted">
+                Reviu telah Anda kembalikan untuk revisi. Menunggu pegawai
+                memperbaiki isian dan mengirim ulang.
               </p>
             ) : null}
             {isSelesai ? (

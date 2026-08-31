@@ -17,6 +17,7 @@ const REMINDER_STATUSES: StatusDialog[] = [
   "menunggu_pegawai",
   "menunggu_atasan",
   "menunggu_validasi",
+  "revisi_evaluasi",
 ];
 
 const WINDOW_PAD_DAYS = 3;

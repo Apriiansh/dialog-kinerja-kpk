@@ -21,6 +21,7 @@ enum StatusDialog {
   menunggu_pegawai
   menunggu_atasan
   menunggu_validasi
+  revisi_evaluasi
   selesai
 }
 
@@ -43,6 +44,7 @@ enum StatusReviu {
   draft_pegawai
   menunggu_atasan
   menunggu_validasi
+  revisi_capaian
   selesai
 }
 
@@ -199,6 +201,7 @@ model Reviu {
   rencana_tindak_lanjut  String?            @db.Text
   tanggal_next_evaluasi  DateTime?          @db.Date @map("tanggal_next_reviu")
   status                 StatusReviu        @default(draft_pegawai)
+  alasan_tolak           String?            @db.Text
   is_valid_pegawai       Boolean            @default(false)
   is_valid_atasan        Boolean            @default(false)
   ttd_pegawai_path       String?            @db.VarChar(255)

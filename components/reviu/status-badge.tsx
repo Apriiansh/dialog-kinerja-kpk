@@ -1,4 +1,4 @@
-import { CheckCircleIcon } from "@phosphor-icons/react/dist/ssr";
+import { CheckCircleIcon, ArrowsClockwiseIcon } from "@phosphor-icons/react/dist/ssr";
 import type { StatusReviu } from "@/generated/prisma/enums";
 
 const STATUS: Record<
@@ -16,6 +16,11 @@ const STATUS: Record<
   menunggu_validasi: {
     label: "Menunggu Validasi",
     className: "bg-indigo-100 text-indigo-800",
+  },
+  revisi_capaian: {
+    label: "Revisi Capaian",
+    className: "bg-orange-100 text-orange-800",
+    icon: ArrowsClockwiseIcon,
   },
   selesai: {
     label: "Selesai",
