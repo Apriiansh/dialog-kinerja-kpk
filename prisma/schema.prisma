@@ -120,8 +120,6 @@ model DialogKinerja {
   status                 StatusDialog @default(draft)
   is_valid_pegawai       Boolean      @default(false)
   is_valid_atasan        Boolean      @default(false)
-  ttd_pegawai_path       String?      @db.VarChar(255)
-  ttd_atasan_path        String?      @db.VarChar(255)
   waktu_validasi_pegawai DateTime?
   waktu_validasi_atasan  DateTime?
   created_at             DateTime     @default(now())
@@ -204,8 +202,6 @@ model Reviu {
   alasan_tolak           String?            @db.Text
   is_valid_pegawai       Boolean            @default(false)
   is_valid_atasan        Boolean            @default(false)
-  ttd_pegawai_path       String?            @db.VarChar(255)
-  ttd_atasan_path        String?            @db.VarChar(255)
   waktu_validasi_pegawai DateTime?
   waktu_validasi_atasan  DateTime?
   created_at             DateTime           @default(now())

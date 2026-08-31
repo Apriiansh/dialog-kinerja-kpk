@@ -156,33 +156,11 @@ function signatureTable(args: {
   pegawaiName: string;
   pegawaiNpp: string;
   pegawaiJabatan: string;
-  ttdAtasanBuf: Buffer | null;
-  ttdPegawaiBuf: Buffer | null;
 }): Table {
-  const atasanTtd = args.ttdAtasanBuf
-    ? new Paragraph({
-        spacing: { before: 80, after: 80 },
-        children: [
-          new ImageRun({
-            data: args.ttdAtasanBuf,
-            transformation: { width: 130, height: 65 },
-            type: "png",
-          }),
-        ],
-      })
-    : new Paragraph({ spacing: { before: 80, after: 80 }, children: [txt(" ")] });
-  const pegawaiTtd = args.ttdPegawaiBuf
-    ? new Paragraph({
-        spacing: { before: 80, after: 80 },
-        children: [
-          new ImageRun({
-            data: args.ttdPegawaiBuf,
-            transformation: { width: 130, height: 65 },
-            type: "png",
-          }),
-        ],
-      })
-    : new Paragraph({ spacing: { before: 80, after: 80 }, children: [txt(" ")] });
+  const blankLine = new Paragraph({
+    spacing: { before: 80, after: 80 },
+    children: [txt(" ")],
+  });
 
   const atasanCell = new TableCell({
     borders: NO_TABLE_BORDER,
@@ -194,7 +172,7 @@ function signatureTable(args: {
         children: [txt(args.dateText)],
       }),
       new Paragraph({ spacing: { after: 80 }, children: [boldTxt("Atasan Pegawai,")] }),
-      atasanTtd,
+      blankLine,
       new Paragraph({ children: [boldTxt(args.atasanName, { underline: {} })] }),
       new Paragraph({ children: [txt(`NPP. ${args.atasanNpp}`)] }),
       new Paragraph({
@@ -213,7 +191,7 @@ function signatureTable(args: {
         children: [txt(" ")],
       }),
       new Paragraph({ spacing: { after: 80 }, children: [boldTxt("Pegawai,")] }),
-      pegawaiTtd,
+      blankLine,
       new Paragraph({ children: [boldTxt(args.pegawaiName, { underline: {} })] }),
       new Paragraph({ children: [txt(`NPP. ${args.pegawaiNpp}`)] }),
       new Paragraph({
@@ -401,8 +379,6 @@ export async function generateDialogKinerjaDocx(
     pegawaiName: dialog.pegawai.nama_pegawai || "—",
     pegawaiNpp: dialog.pegawai.npp,
     pegawaiJabatan: dialog.pegawai.nama_jabatan || "Jabatan",
-    ttdAtasanBuf: null,
-    ttdPegawaiBuf: null,
   });
 
   /* ---- Assemble document ---- */
@@ -605,8 +581,6 @@ const sigTable = signatureTable({
     pegawaiName: reviu.dialog.pegawai.nama_pegawai || "—",
     pegawaiNpp: reviu.dialog.pegawai.npp,
     pegawaiJabatan: reviu.dialog.pegawai.nama_jabatan || "Jabatan",
-    ttdAtasanBuf: null,
-    ttdPegawaiBuf: null,
   });
 
   /* ---- Assemble ---- */

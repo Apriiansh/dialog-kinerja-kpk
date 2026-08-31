@@ -25,7 +25,6 @@ export function ValidationPanel({
 
     const result = await validateDialog(dialogId, {
       setuju,
-      ttdDataUrl: null,
     });
 
     if (result?.error) {

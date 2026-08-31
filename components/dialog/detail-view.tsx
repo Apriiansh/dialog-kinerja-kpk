@@ -18,8 +18,6 @@ interface ActorProfile {
 interface FormulirDialog {
   status: string;
   deskripsi_kinerja: string | null;
-  ttd_pegawai_path: string | null;
-  ttd_atasan_path: string | null;
   waktu_validasi_pegawai: Date | null;
   waktu_validasi_atasan: Date | null;
   aspek: AspekPegawaiRow[];

@@ -33,8 +33,6 @@ interface FormulirReviuData {
   penjelasan_tidak_tercapai: string | null;
   rencana_tindak_lanjut: string | null;
   tanggal_next_evaluasi: Date | null;
-  ttd_pegawai_path: string | null;
-  ttd_atasan_path: string | null;
   waktu_validasi_pegawai: Date | null;
   waktu_validasi_atasan: Date | null;
   status: string;

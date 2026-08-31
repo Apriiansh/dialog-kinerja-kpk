@@ -118,7 +118,6 @@ export function DialogResponsesForm({
 
     const result = await submitEvaluasi(dialogId, {
       setuju,
-      ttdDataUrl: null,
     });
 
     if (result?.error) {

@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
-import { saveTtdFile } from "@/lib/export/ttd";
 import { assertActiveActor } from "@/lib/auth/guards";
 import { flashRedirect } from "@/lib/utils/flash";
 import { createNotification } from "@/lib/notifications";
@@ -304,7 +303,7 @@ export async function deleteReviu(reviuId: number): Promise<{ error?: string }> 
 
 export async function submitReviuAtasan(
   reviuId: number,
-  input: { setuju: boolean; ttdDataUrl: string | null },
+  input: { setuju: boolean },
 ): Promise<ReviuSignState> {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
@@ -325,21 +324,11 @@ export async function submitReviuAtasan(
     return { error: "Reviu belum siap untuk direviu atasan." };
   }
 
-  let ttdUrl: string | null = null;
-  if (input.ttdDataUrl) {
-    try {
-      ttdUrl = await saveTtdFile(input.ttdDataUrl, reviu.dialog.id, "atasan");
-    } catch {
-      return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
-    }
-  }
-
   try {
     await prisma.reviu.update({
       where: { id: reviu.id },
       data: {
         is_valid_atasan: true,
-        ttd_atasan_path: ttdUrl,
         waktu_validasi_atasan: new Date(),
         status: "menunggu_validasi",
       },
@@ -352,7 +341,7 @@ export async function submitReviuAtasan(
     userId: reviu.dialog.id_pegawai,
     type: "reviu_status",
     title: "Reviu Perlu Validasi",
-    description: `Reviu untuk dialog kinerja tahun ${reviu.dialog.periode_tahun} (${reviu.dialog.triwulan}) telah ditandatangani atasan. Silakan validasi.`,
+    description: `Reviu untuk dialog kinerja tahun ${reviu.dialog.periode_tahun} (${reviu.dialog.triwulan}) telah divalidasi atasan. Silakan validasi.`,
     link: `/pegawai/reviu/${reviu.id}`,
   });
 
@@ -405,7 +394,6 @@ export async function rejectReviu(
         status: "revisi_capaian",
         alasan_tolak: alasan_tolak.trim(),
         is_valid_atasan: false,
-        ttd_atasan_path: null,
         waktu_validasi_atasan: null,
       },
     });
@@ -432,7 +420,7 @@ export async function rejectReviu(
 
 export async function validateReviu(
   reviuId: number,
-  input: { setuju: boolean; ttdDataUrl: string | null },
+  input: { setuju: boolean },
 ): Promise<ReviuSignState> {
   const session = await requireRole("PEGAWAI");
   const err = await assertActiveActor(session.id);
@@ -461,21 +449,11 @@ export async function validateReviu(
     return { error: "Anda sudah melakukan validasi." };
   }
 
-  let ttdUrl: string | null = null;
-  if (input.ttdDataUrl) {
-    try {
-      ttdUrl = await saveTtdFile(input.ttdDataUrl, reviu.dialog.id, "pegawai");
-    } catch {
-      return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
-    }
-  }
-
   try {
     await prisma.reviu.update({
       where: { id: reviu.id },
       data: {
         is_valid_pegawai: true,
-        ttd_pegawai_path: ttdUrl,
         waktu_validasi_pegawai: new Date(),
         status: "selesai",
       },

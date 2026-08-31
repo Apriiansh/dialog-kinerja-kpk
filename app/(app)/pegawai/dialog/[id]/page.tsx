@@ -82,8 +82,7 @@ function StatusNote({
     }
     return (
       <p className="text-xs leading-5 text-ink-muted sm:text-sm">
-        Tanggapan atasan telah selesai. Lakukan persetujuan dan tanda tangan di
-        bawah untuk mengesahkan target.
+        Tanggapan atasan telah selesai. Lakukan persetujuan di bawah untuk mengesahkan target.
       </p>
     );
   }

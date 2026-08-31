@@ -115,12 +115,12 @@ export default async function AtasanReviuDetailPage({
 
             {isMenungguAtasan ? (
               <p className="text-sm leading-5 text-ink-muted">
-                Reviu dari pegawai menunggu persetujuan dan tanda tangan Anda.
+                Reviu dari pegawai menunggu persetujuan Anda.
               </p>
             ) : null}
             {reviu.status === "menunggu_validasi" ? (
               <p className="text-sm leading-5 text-ink-muted">
-                Reviu telah ditandatangani atasan dan menunggu validasi pegawai.
+                Reviu telah divalidasi atasan dan menunggu validasi pegawai.
               </p>
             ) : null}
             {reviu.status === "revisi_capaian" ? (
@@ -131,7 +131,7 @@ export default async function AtasanReviuDetailPage({
             ) : null}
             {isSelesai ? (
               <p className="text-sm leading-5 text-ink-muted">
-                Reviu telah selesai ditandatangani oleh atasan dan pegawai.
+                Reviu telah selesai divalidasi oleh atasan dan pegawai.
               </p>
             ) : null}
           </header>

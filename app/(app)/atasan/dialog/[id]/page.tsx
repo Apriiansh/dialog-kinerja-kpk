@@ -58,7 +58,7 @@ function StatusNote({ status }: { status: string }) {
     return (
       <p className="text-xs leading-5 text-ink-muted sm:text-sm">
         Pegawai telah mengisi dialog. Menunggu validasi Anda: reviu isian
-        pegawai, isi tanggung jawab atasan, lalu setujui dan tanda tangan, atau
+        pegawai, isi tanggung jawab atasan, lalu validasi, atau
         kembalikan dengan catatan revisi.
       </p>
     );
@@ -74,8 +74,7 @@ function StatusNote({ status }: { status: string }) {
   if (status === "menunggu_validasi") {
     return (
       <p className="text-xs leading-5 text-ink-muted sm:text-sm">
-        Evaluasi atasan telah disimpan. Menunggu validasi dan tanda tangan
-        pegawai untuk menyelesaikan dialog.
+        Evaluasi atasan telah disimpan. Menunggu validasi pegawai untuk menyelesaikan dialog.
       </p>
     );
   }

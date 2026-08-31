@@ -100,11 +100,11 @@ const alurSteps = [
   },
   {
     step: "03",
-    title: "Reviu, TTD & Validasi",
+    title: "Reviu & Validasi",
     role: "Atasan & Pegawai",
     icon: ClockCounterClockwiseIcon,
     description:
-      "Atasan menilai, menandatangani, dan menyetujui. Pegawai memvalidasi serta menandatangani. Dialog terkunci dan siap di-export.",
+      "Atasan menilai dan menyetujui. Pegawai memvalidasi. Dialog terkunci dan siap di-export.",
   },
   {
     step: "04",

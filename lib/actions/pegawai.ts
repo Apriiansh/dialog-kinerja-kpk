@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
-import { saveTtdFile } from "@/lib/export/ttd";
 import { assertActiveActor } from "@/lib/auth/guards";
 import { canValidateDialog } from "@/lib/queries/dialog";
 import { flashRedirect } from "@/lib/utils/flash";
@@ -334,7 +333,7 @@ export async function saveDialogForm(
 
 export async function validateDialog(
   dialogId: number,
-  input: { setuju: boolean; ttdDataUrl: string | null },
+  input: { setuju: boolean },
 ): Promise<ValidateDialogState> {
   const session = await requireRole("PEGAWAI");
 
@@ -367,21 +366,11 @@ export async function validateDialog(
     return { error: "Anda sudah melakukan validasi." };
   }
 
-  let ttdUrl: string | null = null;
-  if (input.ttdDataUrl) {
-    try {
-      ttdUrl = await saveTtdFile(input.ttdDataUrl, dialog.id, "pegawai");
-    } catch {
-      return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
-    }
-  }
-
   try {
     await prisma.dialogKinerja.update({
       where: { id: dialog.id },
       data: {
         is_valid_pegawai: true,
-        ttd_pegawai_path: ttdUrl,
         waktu_validasi_pegawai: new Date(),
         status: dialog.is_valid_atasan ? "selesai" : "menunggu_validasi",
       },

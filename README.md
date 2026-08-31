@@ -111,7 +111,8 @@ evaluasi, data masuk ke staging dan otomatis di-insert ke dialog saat dibuat
 ### Atasan
 
 - **Dashboard** — kartu sapaan (carousel foto gedung), stat cards (jumlah pegawai, dialog aktif, menunggu atasan, selesai), grafik **Tren Pencapaian Evaluasi Tim** (rata-rata % capaian per triwulan tahun berjalan), kalender jadwal evaluasi (dari `tanggal_next_evaluasi` reviu), dan analitik capaian kinerja per pegawai & per aspek
-- **Dialog** — buat dialog baru, isi tanggung jawab (bisa kolaborasi real-time), tanda tangani, ekspor. Input juga bisa dari import staging.
+- **Dialog** — buat dialog baru, isi tanggung jawab (bisa kolaborasi real-time), 
+i, ekspor. Input juga bisa dari import staging.
 - **Pegawai** — CRUD bawahan, profil, riwayat dialog; halaman detail pegawai menampilkan **Tren Pencapaian Evaluasi** individu dan daftar **Carry-over** (item belum tercapai dari periode terakhir)
 - **Reviu** — lihat, tanda tangani, dan menyetujui reviu dari pegawai
 - **Histori** — daftar dialog yang sudah selesai

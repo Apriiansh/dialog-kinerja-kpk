@@ -26,7 +26,7 @@ export function ReviuSignForm({
     if (pending || !setuju) return;
     setPending(true);
 
-    const input = { setuju, ttdDataUrl: null };
+    const input = { setuju };
     const result =
       role === "atasan"
         ? await submitReviuAtasan(reviuId, input)

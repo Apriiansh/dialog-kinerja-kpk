@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth/session";
-import { saveTtdFile } from "@/lib/export/ttd";
 import { assertActiveActor } from "@/lib/auth/guards";
 import { flashRedirect } from "@/lib/utils/flash";
 import { JenisAspek, StatusDialog, Triwulan } from "@/generated/prisma/client";
@@ -450,7 +449,7 @@ export interface SubmitEvaluasiState {
 
 export async function submitEvaluasi(
   dialogId: number,
-  input: { setuju: boolean; ttdDataUrl: string | null },
+  input: { setuju: boolean },
 ): Promise<SubmitEvaluasiState> {
   const session = await requireRole("ATASAN");
 
@@ -469,22 +468,12 @@ export async function submitEvaluasi(
     return { error: "Dialog tidak ditemukan atau belum siap dievaluasi." };
   }
 
-  let ttdUrl: string | null = null;
-  if (input.ttdDataUrl) {
-    try {
-      ttdUrl = await saveTtdFile(input.ttdDataUrl, dialog.id, "atasan");
-    } catch {
-      return { error: "Tanda tangan gagal disimpan. Silakan coba lagi." };
-    }
-  }
-
   try {
     await prisma.dialogKinerja.update({
       where: { id: dialog.id },
       data: {
         status: "menunggu_validasi",
         is_valid_atasan: true,
-        ttd_atasan_path: ttdUrl,
         waktu_validasi_atasan: new Date(),
       },
     });
@@ -501,7 +490,7 @@ export async function submitEvaluasi(
     userId: dialog.id_pegawai,
     type: "dialog_status",
     title: "Evaluasi Atasan Selesai",
-    description: `Evaluasi atasan untuk dialog kinerja tahun ${dialog.periode_tahun} (${dialog.triwulan}) telah selesai. Silakan validasi dan tanda tangani.`,
+    description: `Evaluasi atasan untuk dialog kinerja tahun ${dialog.periode_tahun} (${dialog.triwulan}) telah selesai. Silakan validasi.`,
     link: `/pegawai/dialog/${dialog.id}`,
   });
 

@@ -39,7 +39,6 @@ Next.js 16.3 + React 19 + Tailwind v4 + Prisma 7 (PostgreSQL) app for a performa
 - Sessions: iron-session cookie (`lib/auth/session.ts`). Roles come from `session.role`; a user's capabilities derive from `is_admin` / `as_pegawai` flags via `capabilitiesForUser`. Guards: `requireAuth()`, `requireRole(...roles)`.
 - Route groups: `app/(app)/admin`, `app/(app)/atasan`, `app/(app)/pegawai` each have their own `layout.tsx`; shared group layout in `app/(app)/layout.tsx`.
 - Mutations are server actions under `lib/actions/*`; read queries in `lib/*-queries.ts`; helpers (status/display/format) in `lib/*.ts`.
-- Signature uploads live in `uploads/` (gitignored) and are served by `app/ttd/[file]/route.ts`.
 - Word export: `lib/export/word-legacy.ts` (HTML-as-`.doc`), `lib/export/docx.ts` (native via `docx` npm package). PDF export via `@react-pdf/renderer` in `lib/export/pdf.ts`.
 - Path alias: `@/*` → repo root (e.g. `@/lib/auth/session`).
 

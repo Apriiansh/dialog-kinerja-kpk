@@ -303,8 +303,7 @@ export default async function AtasanReviuListPage({
                 : `Tidak ada reviu berstatus "${FILTERS.find((f) => f.key === activeStatus)?.label}"`}
             </h3>
             <p className="max-w-sm text-sm leading-5 text-ink-muted">
-              Reviu yang diajukan pegawai akan tampil di sini untuk direviu
-              dan ditandatangani.
+              Reviu yang diajukan pegawai akan tampil di sini untuk direviu dan divalidasi.
             </p>
           </div>
         ) : (
