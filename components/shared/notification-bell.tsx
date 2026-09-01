@@ -4,7 +4,12 @@ import { useEffect, useState, useRef } from "react";
 import { BellIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getUnreadCountAction, markAsRead, getRecentNotificationsAction } from "@/lib/actions/notification";
+import {
+  getUnreadCountAction,
+  markAllAsRead,
+  markAsRead,
+  getRecentNotificationsAction,
+} from "@/lib/actions/notification";
 import { formatDistanceToNow } from "@/lib/utils/format";
 
 interface NotificationItem {
@@ -95,6 +100,14 @@ export function NotificationBell({ role }: { role: string }) {
     router.push(notification.link);
   }
 
+  async function handleMarkAllRead() {
+    if (unreadCount === 0) return;
+
+    await markAllAsRead();
+    setUnreadCount(0);
+    setRecent((prev) => prev.map((notification) => ({ ...notification, is_read: true })));
+  }
+
   return (
     <div className="relative" ref={panelRef}>
       <button
@@ -115,7 +128,16 @@ export function NotificationBell({ role }: { role: string }) {
         <div className="absolute right-0 top-full mt-2 w-80 rounded-lg border border-outline bg-surface shadow-lg">
           <div className="flex items-center justify-between border-b border-outline px-4 py-3">
             <h3 className="text-sm font-semibold text-ink">Notifikasi</h3>
-            {unreadCount > 0 && (
+            <div className="flex items-center gap-3">
+              {unreadCount > 0 && (
+                <button
+                  type="button"
+                  onClick={handleMarkAllRead}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Tandai Semua Dibaca
+                </button>
+              )}
               <Link
                 href={`/${role}/notifikasi`}
                 onClick={() => setOpen(false)}
@@ -123,7 +145,7 @@ export function NotificationBell({ role }: { role: string }) {
               >
                 Lihat Semua
               </Link>
-            )}
+            </div>
           </div>
 
           <div className="max-h-80 overflow-y-auto">
