@@ -76,8 +76,6 @@ model User {
   atasan    User?  @relation("Hierarki", fields: [id_atasan], references: [id])
   bawahan   User[] @relation("Hierarki")
 
-  id_atasan_pending
-
   dialogAsAtasan  DialogKinerja[] @relation("DialogAtasan")
   dialogAsPegawai DialogKinerja[] @relation("DialogPegawai")
 
