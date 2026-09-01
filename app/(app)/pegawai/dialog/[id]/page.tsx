@@ -5,6 +5,7 @@ import {
   ArrowLeftIcon,
   PencilSimpleIcon,
   ChatCircleDotsIcon,
+  ArrowClockwiseIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/auth/session";
 import {
@@ -174,6 +175,12 @@ export default async function DialogDetailPage({
 
               <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 lg:justify-end">
                 <StatusBadge status={dialog.status} />
+                {dialog.alasan_tolak ? (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-orange-100 px-2.5 py-1 text-[11px] font-bold text-orange-800">
+                    <ArrowClockwiseIcon size={12} weight="bold" />
+                    Revisi
+                  </span>
+                ): null}
                 {!isSelesai ? (
                   <ChatHeader
                     dialogId={dialog.id}

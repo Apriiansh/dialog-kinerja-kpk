@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft,
-  PencilSimple,
+  ArrowLeftIcon,
+  PencilSimpleIcon,
   ChatCircleDotsIcon,
 } from "@phosphor-icons/react/dist/ssr";
 import { requireRole } from "@/lib/auth/session";
@@ -155,7 +155,7 @@ export default async function DialogDetailPage({
             href="/atasan/dialog"
             className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-ink-muted transition-colors hover:text-ink"
           >
-            <ArrowLeft size={14} weight="bold" />
+            <ArrowLeftIcon size={14} weight="bold" />
             Kembali ke Daftar Dialog
           </Link>
 
@@ -205,7 +205,7 @@ export default async function DialogDetailPage({
                     href={`/atasan/dialog/${dialog.id}/edit`}
                     className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-outline-strong bg-primary px-3.5 text-xs font-semibold text-muted shadow-xs transition-colors hover:bg-surface-muted"
                   >
-                    <PencilSimple size={14} weight="bold" />
+                    <PencilSimpleIcon size={14} weight="bold" />
                     Isi Dialog
                   </Link>
                 ) : null}

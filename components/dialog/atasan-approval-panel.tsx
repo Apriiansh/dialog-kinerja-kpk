@@ -124,40 +124,48 @@ const formattedDate = jadwalDialog
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onClick={() => setOpenReject(true)}
-          disabled={loading}
-          className="inline-flex h-9 items-center gap-1.5 rounded-md border border-amber-300 bg-amber-50 px-4 text-xs font-semibold text-amber-900 transition-colors hover:bg-amber-100 cursor-pointer disabled:opacity-50"
-        >
-          <XIcon size={15} weight="bold" />
-          Tolak (Revisi)
-        </button>
-
-        <button
-          type="button"
-          onClick={handleApprove}
-          disabled={loading}
-          className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-semibold text-on-primary shadow-xs transition-colors hover:bg-primary-strong cursor-pointer disabled:opacity-50"
-        >
-          {loading ? (
-            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-          ) : (
-            <CheckIcon size={15} weight="bold" />
-          )}
-          Setujui Pengajuan
-        </button>
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         {jadwalDialog && (
           <button
             type="button"
             onClick={handleDownloadIcs}
-            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-outline bg-primary px-4 text-xs font-semibold text-on-primary shadow-xs transition-colors hover:bg-primary-strong cursor-pointer"
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-outline bg-blue-500 px-4 text-xs font-semibold text-on-primary shadow-xs transition-colors hover:bg-blue-700 cursor-pointer"
           >
             <CalendarCheckIcon size={15} weight="bold" />
             Tambah ke Kalender
           </button>
+
         )}
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setOpenReject(true)}
+            disabled={loading}
+            className="inline-flex h-9 items-center gap-1.5 rounded-md border border-amber-300 bg-amber-50 px-4 text-xs font-semibold text-amber-900 transition-colors hover:bg-amber-100 cursor-pointer disabled:opacity-50"
+          >
+            <XIcon size={15} weight="bold" />
+            Tolak (Revisi)
+          </button>
+
+          <button
+            type="button"
+            onClick={handleApprove}
+            disabled={loading}
+            className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-4 text-xs font-semibold text-on-primary shadow-xs transition-colors hover:bg-primary-strong cursor-pointer disabled:opacity-50"
+          >
+            {loading ? (
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+            ) : (
+              <CheckIcon size={15} weight="bold" />
+            )}
+            Setujui Pengajuan
+          </button>
+        </div>
+
+
+        <p className="w-full rounded-md bg-sky-50 border border-sky-200 px-3 py-2 text-[11px] text-sky-800 leading-relaxed">
+          File <strong>.ics</strong> akan otomatis terbuka di aplikasi kalender Outlook. Pastikan sudah login di aplikasi tersebut agar jadwal langsung tersimpan.
+        </p>
       </div>
 
       {/* Reject Modal */}
