@@ -56,10 +56,13 @@ model User {
   email                    String?  @db.VarChar(255)
   tanggal_bergabung        DateTime? @db.Date
   nama_jabatan             String?  @db.VarChar(150)
-  unit_kerja               String?  @db.VarChar(150)
   masa_kerja_unit_terakhir String?  @db.VarChar(100)
-  password                 String   @db.VarChar(255)
+  unit_kerja               String?  @db.VarChar(150)
+  unit_kerja_id            Int?
+  unit                     UnitKerja? @relation(fields: [unit_kerja_id], references: [id], onDelete: SetNull)
+
   email_verified_at        DateTime?
+  password                 String   @db.VarChar(255) @default("")
 
   default_role             Role     @default(PEGAWAI) // peran default saat login (bukan pembatas akses)
   as_pegawai               Boolean  @default(false)   // true kalau user ini bawahan seseorang
@@ -72,6 +75,8 @@ model User {
   id_atasan Int?
   atasan    User?  @relation("Hierarki", fields: [id_atasan], references: [id])
   bawahan   User[] @relation("Hierarki")
+
+  id_atasan_pending
 
   dialogAsAtasan  DialogKinerja[] @relation("DialogAtasan")
   dialogAsPegawai DialogKinerja[] @relation("DialogPegawai")
@@ -262,4 +267,24 @@ model ImportStagingItem {
   @@index([npp, jenis_aspek, periode_tahun, triwulan])
   @@index([batch_id])
   @@map("import_staging_items")
+}
+
+model UnitKerja {
+  id              Int         @id @default(autoincrement())
+  nama_unit       String      @db.VarChar(255)
+  jenis           String?     @db.VarChar(100)
+  kepala_jabatan  String?     @db.VarChar(150)
+  level           Int         @default(1)
+  is_active       Boolean     @default(true)
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+
+  parent_id Int?
+  parent    UnitKerja?  @relation("UnitTree", fields: [parent_id], references: [id], onDelete: Restrict)
+  children  UnitKerja[] @relation("UnitTree")
+
+  users User[]
+
+  @@index([parent_id])
+  @@map("unit_kerja")
 }

@@ -8,11 +8,14 @@ import {
   normalizeRow,
   validateRow,
   cellToDigits,
+  matchUnitKerja,
+  type UnitKerjaOption,
   type ImportRowInput,
   type ImportPreviewRow,
   type ImportRowAction,
   type ImportAction,
   type ImportResult,
+  type UnmatchedUnitPolicy,
 } from "@/lib/import-utils";
 
 /* ------------------------------------------------------------------ */
@@ -23,6 +26,12 @@ export async function importUsersPreview(
   rawRows: ImportRowInput[],
 ): Promise<ImportPreviewRow[]> {
   await requireRole("ADMIN");
+
+  const unitOptions: UnitKerjaOption[] = (
+    await prisma.unitKerja.findMany({
+      select: { id: true, nama_unit: true },
+    })
+  ).map((u) => ({ id: u.id, nama_unit: u.nama_unit }));
 
   const allNpps = new Set<string>();
   const allNips = new Set<string>();
@@ -76,6 +85,7 @@ export async function importUsersPreview(
   return rawRows.map((raw, idx) => {
     const row = normalizeRow(raw);
     const error = validateRow(row, atasanMap);
+    const unitMatch = matchUnitKerja(row.unit_kerja, unitOptions);
 
     if (error) {
       return {
@@ -85,6 +95,8 @@ export async function importUsersPreview(
         existingUserId: null,
         errorMessage: error,
         suggestedAction: "skip" as const,
+        unitKerjaId: unitMatch?.id ?? null,
+        unitMatched: unitMatch !== null,
       };
     }
 
@@ -104,6 +116,8 @@ export async function importUsersPreview(
         existingUserId: null,
         errorMessage: "NPP atau NIP duplikat dalam file yang sama.",
         suggestedAction: "skip" as const,
+        unitKerjaId: unitMatch?.id ?? null,
+        unitMatched: unitMatch !== null,
       };
     }
 
@@ -118,6 +132,8 @@ export async function importUsersPreview(
         existingUserId: existing.id,
         errorMessage: null,
         suggestedAction: "update" as const,
+        unitKerjaId: unitMatch?.id ?? null,
+        unitMatched: unitMatch !== null,
       };
     }
 
@@ -128,6 +144,8 @@ export async function importUsersPreview(
       existingUserId: null,
       errorMessage: null,
       suggestedAction: "create" as const,
+      unitKerjaId: unitMatch?.id ?? null,
+      unitMatched: unitMatch !== null,
     };
   });
 }
@@ -139,8 +157,15 @@ export async function importUsersPreview(
 export async function importUsersExecute(
   rawRows: ImportRowInput[],
   actions: ImportRowAction[],
+  policy: UnmatchedUnitPolicy = "keep",
 ): Promise<ImportResult> {
   await requireRole("ADMIN");
+
+  const unitOptions: UnitKerjaOption[] = (
+    await prisma.unitKerja.findMany({
+      select: { id: true, nama_unit: true },
+    })
+  ).map((u) => ({ id: u.id, nama_unit: u.nama_unit }));
 
   const actionMap = new Map<number, ImportAction>();
   for (const a of actions) {
@@ -221,6 +246,12 @@ export async function importUsersExecute(
       continue;
     }
 
+    const unitMatch = matchUnitKerja(row.unit_kerja, unitOptions);
+    if (row.unit_kerja && !unitMatch && policy === "skip") {
+      result.skipped++;
+      continue;
+    }
+
     const tanggal = row.tanggal_bergabung
       ? new Date(row.tanggal_bergabung)
       : null;
@@ -255,6 +286,7 @@ export async function importUsersExecute(
             tanggal_bergabung: tanggal,
             nama_jabatan: row.nama_jabatan || null,
             unit_kerja: row.unit_kerja || null,
+            unit_kerja_id: unitMatch?.id ?? null,
             masa_kerja_unit_terakhir: row.masa_kerja_unit_terakhir || null,
             password: defaultPassword,
             default_role: row.default_role,
@@ -323,6 +355,7 @@ export async function importUsersExecute(
             tanggal_bergabung: tanggal,
             nama_jabatan: row.nama_jabatan || null,
             unit_kerja: row.unit_kerja || null,
+            unit_kerja_id: unitMatch?.id ?? null,
             masa_kerja_unit_terakhir: row.masa_kerja_unit_terakhir || null,
             default_role: row.default_role,
             is_admin: row.default_role === "ADMIN",

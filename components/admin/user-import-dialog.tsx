@@ -12,13 +12,20 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
+import {
+  Progress,
+  ProgressLabel,
+  ProgressValue,
+} from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import {
   importUsersPreview,
   importUsersExecute,
 } from "@/lib/actions/import-users";
-import { error as showError, success as showSuccess } from "@/components/ui/toast";
+import {
+  error as showError,
+  success as showSuccess,
+} from "@/components/ui/toast";
 import {
   COLUMN_ALIASES,
   type ImportRowInput,
@@ -26,6 +33,7 @@ import {
   type ImportRowAction,
   type ImportAction,
   type ImportResult,
+  type UnmatchedUnitPolicy,
 } from "@/lib/import-utils";
 
 /* ------------------------------------------------------------------ */
@@ -52,9 +60,7 @@ function normalizeHeader(h: string): string {
     .trim();
 }
 
-function matchColumn(
-  header: string,
-): keyof typeof COLUMN_ALIASES | null {
+function matchColumn(header: string): keyof typeof COLUMN_ALIASES | null {
   const norm = normalizeHeader(header);
   let bestKey: keyof typeof COLUMN_ALIASES | null = null;
   let bestScore = 0;
@@ -95,6 +101,8 @@ export function UserImportDialog() {
   const [rawRows, setRawRows] = useState<ImportRowInput[]>([]);
   const [previewRows, setPreviewRows] = useState<ImportPreviewRow[]>([]);
   const [actions, setActions] = useState<ImportRowAction[]>([]);
+  const [unmatchedPolicy, setUnmatchedPolicy] =
+    useState<UnmatchedUnitPolicy>("keep");
   const [result, setResult] = useState<ImportResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -115,6 +123,7 @@ export function UserImportDialog() {
     setPreviewLoading(false);
     setError(null);
     setQuery("");
+    setUnmatchedPolicy("keep");
   }, []);
 
   const handleClose = useCallback(() => {
@@ -142,7 +151,9 @@ export function UserImportDialog() {
         return;
       }
       if (json.length > MAX_ROWS) {
-        setError(`File terlalu besar. Maksimal ${MAX_ROWS.toLocaleString("id-ID")} baris.`);
+        setError(
+          `File terlalu besar. Maksimal ${MAX_ROWS.toLocaleString("id-ID")} baris.`,
+        );
         setLoading(false);
         return;
       }
@@ -167,7 +178,9 @@ export function UserImportDialog() {
       });
       setRawRows(rows);
     } catch {
-      setError("Gagal membaca file. Pastikan format file valid (.xlsx atau .csv).");
+      setError(
+        "Gagal membaca file. Pastikan format file valid (.xlsx atau .csv).",
+      );
     } finally {
       setLoading(false);
     }
@@ -214,7 +227,7 @@ export function UserImportDialog() {
     setLoading(true);
     setError(null);
     try {
-      const res = await importUsersExecute(rawRows, actions);
+      const res = await importUsersExecute(rawRows, actions, unmatchedPolicy);
       setResult(res);
       setStep("result");
       const total = res.success + res.updated;
@@ -222,7 +235,9 @@ export function UserImportDialog() {
         showSuccess("Impor berhasil", `${total} pengguna berhasil diproses.`);
       }
       if (res.errors.length > 0) {
-        showError(`${res.errors.length} baris gagal diimpor. Lihat detail di bawah.`);
+        showError(
+          `${res.errors.length} baris gagal diimpor. Lihat detail di bawah.`,
+        );
       }
     } catch {
       const msg = "Gagal menjalankan impor. Silakan coba lagi.";
@@ -231,7 +246,7 @@ export function UserImportDialog() {
     } finally {
       setLoading(false);
     }
-  }, [rawRows, actions]);
+  }, [rawRows, actions, unmatchedPolicy]);
 
   const filteredPreview = useMemo(() => {
     if (!query.trim()) return previewRows;
@@ -245,14 +260,34 @@ export function UserImportDialog() {
   }, [previewRows, query]);
 
   const stats = useMemo(() => {
-    const s = { new: 0, existing: 0, error: 0, total: previewRows.length };
+    const s = {
+      new: 0,
+      existing: 0,
+      error: 0,
+      unmatched: 0,
+      total: previewRows.length,
+    };
     for (const r of previewRows) {
       if (r.status === "new") s.new++;
       else if (r.status === "existing") s.existing++;
       else s.error++;
+      if (r.unit_kerja && !r.unitMatched) s.unmatched++;
     }
     return s;
   }, [previewRows]);
+
+  const willImportCount = useMemo(() => {
+    const rowByIndex = new Map(previewRows.map((r) => [r.rowIndex, r]));
+    return actions.filter((a) => {
+      if (a.action === "skip") return false;
+      const row = rowByIndex.get(a.rowIndex);
+      if (!row) return false;
+      if (unmatchedPolicy === "skip" && row.unit_kerja && !row.unitMatched) {
+        return false;
+      }
+      return true;
+    }).length;
+  }, [actions, previewRows, unmatchedPolicy]);
 
   const mappedCount = Object.values(mapped).filter(Boolean).length;
   const unmappedHeaders = headers.filter((h) => !mapped[h]);
@@ -268,7 +303,7 @@ export function UserImportDialog() {
       className="inline-flex h-10 items-center gap-2 rounded-md border border-outline bg-surface px-4 text-sm font-semibold text-ink transition-colors hover:bg-surface-muted"
     >
       <FileArrowUpIcon size={16} weight="bold" />
-      Impor Pengguna
+      Import Pengguna
     </button>
   );
 
@@ -280,7 +315,7 @@ export function UserImportDialog() {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Impor pengguna"
+          aria-label="Import pengguna"
           className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
           onClick={handleClose}
         >
@@ -292,13 +327,14 @@ export function UserImportDialog() {
             <div className="flex items-center justify-between border-b border-outline px-6 py-4">
               <div className="flex flex-col gap-0.5">
                 <h2 className="text-base font-semibold text-ink">
-                  Impor Pengguna
+                  Import Pengguna
                 </h2>
                 <p className="text-xs leading-4 text-ink-muted">
-                  {step === "upload" && "Unggah file Excel atau CSV untuk mengimpor data pengguna."}
+                  {step === "upload" &&
+                    "Unggah file Excel atau CSV untuk mengimpor data pengguna."}
                   {step === "preview" &&
                     `Pratinjau ${previewRows.length.toLocaleString("id-ID")} baris dari "${file?.name ?? ""}".`}
-                  {step === "result" && "Hasil impor pengguna."}
+                  {step === "result" && "Hasil import pengguna."}
                 </p>
               </div>
               <button
@@ -330,7 +366,11 @@ export function UserImportDialog() {
             <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
               {error ? (
                 <div className="mb-4 flex items-start gap-3 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  <WarningIcon size={16} className="mt-0.5 shrink-0" weight="fill" />
+                  <WarningIcon
+                    size={16}
+                    className="mt-0.5 shrink-0"
+                    weight="fill"
+                  />
                   <span>{error}</span>
                 </div>
               ) : null}
@@ -361,7 +401,8 @@ export function UserImportDialog() {
                       </p>
                     </div>
                     <p className="text-[11px] text-ink-muted/70">
-                      Format: .xlsx, .csv — Maks. {MAX_ROWS.toLocaleString("id-ID")} baris
+                      Format: .xlsx, .csv — Maks.{" "}
+                      {MAX_ROWS.toLocaleString("id-ID")} baris
                     </p>
                   </div>
                   <input
@@ -442,6 +483,75 @@ export function UserImportDialog() {
                     )}
                   </div>
 
+                  {/* Unit kerja handling */}
+                  <div className="rounded-md border border-outline bg-surface-muted/30 px-4 py-3">
+                    <p className="mb-2 text-xs font-semibold text-ink">
+                      Unit Kerja
+                      {stats.unmatched > 0 ? (
+                        <span className="ml-1.5 font-normal text-amber-600">
+                          · {stats.unmatched} baris unit tidak cocok dengan
+                          struktur
+                        </span>
+                      ) : (
+                        <span className="ml-1.5 font-normal text-emerald-600">
+                          · semua unit cocok dengan struktur
+                        </span>
+                      )}
+                    </p>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+                      <div className="flex items-center gap-2 text-xs text-ink-muted">
+                        <InfoIcon
+                          size={14}
+                          weight="fill"
+                          className="shrink-0"
+                        />
+                        <span>
+                          Baris dengan unit di luar struktur organisasi:
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <label
+                          className={`inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
+                            unmatchedPolicy === "keep"
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-outline bg-surface text-ink-muted hover:bg-surface-muted"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="unmatched-unit-policy"
+                            checked={unmatchedPolicy === "keep"}
+                            onChange={() => setUnmatchedPolicy("keep")}
+                            className="accent-(--color-primary)"
+                          />
+                          Tetap impor
+                          <span className="font-normal opacity-70">
+                            (unit dikosongkan dari struktur)
+                          </span>
+                        </label>
+                        <label
+                          className={`inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
+                            unmatchedPolicy === "skip"
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-outline bg-surface text-ink-muted hover:bg-surface-muted"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="unmatched-unit-policy"
+                            checked={unmatchedPolicy === "skip"}
+                            onChange={() => setUnmatchedPolicy("skip")}
+                            className="accent-(--color-primary)"
+                          />
+                          Lewati baris
+                          <span className="font-normal opacity-70">
+                            ({stats.unmatched} baris)
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Stats + Search */}
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex flex-wrap gap-2">
@@ -479,12 +589,11 @@ export function UserImportDialog() {
                       <table className="w-full text-left text-xs">
                         <thead className="sticky top-0 z-10 border-b border-outline bg-surface-muted/80 backdrop-blur">
                           <tr className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">
-                            <th className="px-3 py-2.5 text-center w-10">
-                              #
-                            </th>
+                            <th className="px-3 py-2.5 text-center w-10">#</th>
                             <th className="px-3 py-2.5">NPP</th>
                             <th className="px-3 py-2.5">Nama</th>
                             <th className="px-3 py-2.5">Jabatan</th>
+                            <th className="px-3 py-2.5">Unit</th>
                             <th className="px-3 py-2.5">Role</th>
                             <th className="px-3 py-2.5">Status</th>
                             <th className="px-3 py-2.5 text-right w-32">
@@ -496,7 +605,7 @@ export function UserImportDialog() {
                           {filteredPreview.length === 0 ? (
                             <tr>
                               <td
-                                colSpan={7}
+                                colSpan={8}
                                 className="px-4 py-8 text-center text-ink-muted"
                               >
                                 Tidak ada data yang cocok.
@@ -523,6 +632,39 @@ export function UserImportDialog() {
                                   </td>
                                   <td className="px-3 py-2 text-ink-muted">
                                     {r.nama_jabatan || "—"}
+                                  </td>
+                                  <td className="px-3 py-2">
+                                    {r.unit_kerja ? (
+                                      <span
+                                        title={r.unit_kerja}
+                                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 ring-inset ${
+                                          r.unitMatched
+                                            ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20"
+                                            : "bg-amber-50 text-amber-700 ring-amber-600/20"
+                                        }`}
+                                      >
+                                        {r.unitMatched ? (
+                                          <CheckCircleIcon
+                                            size={10}
+                                            weight="fill"
+                                          />
+                                        ) : (
+                                          <WarningIcon
+                                            size={10}
+                                            weight="fill"
+                                          />
+                                        )}
+                                        <span className="max-w-36 truncate">
+                                          {r.unitMatched
+                                            ? "Tercocok"
+                                            : "Diluar struktur"}
+                                        </span>
+                                      </span>
+                                    ) : (
+                                      <span className="text-ink-muted/50">
+                                        —
+                                      </span>
+                                    )}
                                   </td>
                                   <td className="px-3 py-2 text-ink-muted">
                                     {r.default_role}
@@ -555,7 +697,10 @@ export function UserImportDialog() {
                                         <button
                                           type="button"
                                           onClick={() =>
-                                            handleToggleAction(r.rowIndex, "update")
+                                            handleToggleAction(
+                                              r.rowIndex,
+                                              "update",
+                                            )
                                           }
                                           className={`rounded px-2 py-0.5 text-[10px] font-semibold transition-colors ${
                                             currentAction === "update"
@@ -568,7 +713,10 @@ export function UserImportDialog() {
                                         <button
                                           type="button"
                                           onClick={() =>
-                                            handleToggleAction(r.rowIndex, "skip")
+                                            handleToggleAction(
+                                              r.rowIndex,
+                                              "skip",
+                                            )
                                           }
                                           className={`rounded px-2 py-0.5 text-[10px] font-semibold transition-colors ${
                                             currentAction === "skip"
@@ -692,7 +840,7 @@ export function UserImportDialog() {
                       Memproses...
                     </>
                   ) : (
-                    `Impor ${actions.filter((a) => a.action !== "skip").length} Baris`
+                    `Impor ${willImportCount} Baris`
                   )}
                 </button>
               )}

@@ -572,6 +572,36 @@ async function main() {
 
   const idByNpp = new Map<string, number>();
 
+  const distinctUnits = [...new Set(USERS.map((u) => u.unit_kerja).filter(Boolean))];
+
+  // Petakan nama unit lama di data USERS ke unit yang sudah ada di struktur
+  // organisasi (impor struktur_kpk), supaya relasi unit_kerja_id menunjuk ke
+  // unit yang benar. Hanya dibuat unit baru bila tidak ada yang cocok.
+  const UNIT_ALIAS: Record<string, string> = {
+    "Biro SDM": "BIRO SUMBER DAYA MANUSIA",
+    "Biro Umum": "BIRO UMUM",
+  };
+
+  async function resolveUnitId(nama: string): Promise<number | null> {
+    const candidates = [UNIT_ALIAS[nama] ?? nama, nama];
+    for (const candidate of candidates) {
+      const existing = await prisma.unitKerja.findFirst({
+        where: { nama_unit: candidate },
+        select: { id: true },
+      });
+      if (existing) return existing.id;
+    }
+    const created = await prisma.unitKerja.create({
+      data: { nama_unit: nama, level: 1, is_active: true },
+    });
+    return created.id;
+  }
+
+  const unitIdByNama = new Map<string, number | null>();
+  for (const nama of distinctUnits) {
+    unitIdByNama.set(nama, await resolveUnitId(nama));
+  }
+
   for (const user of USERS) {
     const hashedPassword = await bcrypt.hash(user.password, 10);
     const { create, update } = upsertData(user, hashedPassword);
@@ -581,6 +611,16 @@ async function main() {
       update,
     });
     idByNpp.set(user.npp, record.id);
+
+    if (user.unit_kerja) {
+      const unitId = unitIdByNama.get(user.unit_kerja);
+      if (unitId) {
+        await prisma.user.update({
+          where: { id: record.id },
+          data: { unit_kerja_id: unitId },
+        });
+      }
+    }
   }
 
   for (const user of USERS) {
@@ -596,9 +636,10 @@ async function main() {
   const activeCount = USERS.filter((u) => u.is_active).length;
   const inactiveCount = USERS.length - activeCount;
   const withBawahan = new Set(USERS.map((u) => u.atasan_npp).filter(Boolean));
+  const unitCount = await prisma.unitKerja.count();
   console.log(
     `Seeded ${USERS.length} user (${activeCount} aktif, ${inactiveCount} nonaktif), ` +
-      `${withBawahan.size} di antaranya punya bawahan.`,
+      `${withBawahan.size} di antaranya punya bawahan, ke ${unitCount} unit kerja.`,
   );
 
   const metodeById = new Map(

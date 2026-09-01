@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { requireRole, capabilitiesForUser } from "@/lib/auth/session";
 import { getUserProfileData } from "@/lib/queries/profile";
 import { ProfileView } from "@/components/profile/profile-view";
+import { getKandidatAtasan } from "@/lib/queries/hierarki";
 
 export const metadata = {
   title: "Profil Saya - Dialog Kinerja KPK",
@@ -15,6 +16,7 @@ export default async function AdminProfilePage() {
     notFound();
   }
 
+  const kandidatAtasan = await getKandidatAtasan();
   const allowedRoles = capabilitiesForUser(user);
 
   return (
@@ -22,6 +24,7 @@ export default async function AdminProfilePage() {
       user={user}
       activeRole={session.role}
       allowedRoles={allowedRoles}
+      kandidatAtasan={kandidatAtasan}
     />
   );
 }

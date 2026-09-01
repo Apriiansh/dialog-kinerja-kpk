@@ -7,7 +7,8 @@ type NotificationType =
   | "reviu_reminder"
   | "evaluasi_reminder"
   | "chat_message"
-  | "email_verification";
+  | "email_verification"
+  | "hierarki_ditugaskan";
 
 interface CreateNotificationInput {
   userId: number;

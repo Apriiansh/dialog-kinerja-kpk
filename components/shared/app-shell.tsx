@@ -15,6 +15,7 @@ import {
   FileArrowUpIcon,
   CaretDoubleLeftIcon,
   CaretDoubleRightIcon,
+  TreeStructureIcon,
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
@@ -115,6 +116,11 @@ const ADMIN_NAV_GROUPS: NavGroup[] = [
         href: "/admin/import-data",
         label: "Impor Data Evaluasi",
         icon: FileArrowUpIcon,
+      },
+      {
+        href: "/admin/struktur-organisasi",
+        label: "Struktur Organisasi",
+        icon: TreeStructureIcon,
       },
       {
         href: "/admin/metode",

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { requireRole, capabilitiesForUser } from "@/lib/auth/session";
 import { getUserProfileData } from "@/lib/queries/profile";
 import { ProfileView } from "@/components/profile/profile-view";
+import { getKandidatAtasan } from "@/lib/queries/hierarki";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -16,6 +17,7 @@ export default async function AtasanProfilePage() {
     notFound();
   }
 
+  const kandidatAtasan = await getKandidatAtasan();
   const allowedRoles = capabilitiesForUser(user);
 
   return (
@@ -23,6 +25,7 @@ export default async function AtasanProfilePage() {
       user={user}
       activeRole={session.role}
       allowedRoles={allowedRoles}
+      kandidatAtasan={kandidatAtasan}
     />
   );
 }

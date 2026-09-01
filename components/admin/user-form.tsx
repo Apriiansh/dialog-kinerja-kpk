@@ -22,6 +22,13 @@ interface AtasanOption {
   id: number;
   nama_pegawai: string;
   npp: string;
+  unit_kerja_id: number | null;
+}
+
+interface UnitKerjaOption {
+  id: number;
+  nama_unit: string;
+  depth: number;
 }
 
 export function AdminUserForm({
@@ -31,6 +38,7 @@ export function AdminUserForm({
   action,
   values: initialValues,
   atasanOptions,
+  unitOptions,
   isSelf,
 }: {
   backHref: string;
@@ -39,6 +47,7 @@ export function AdminUserForm({
   action: (formData: FormData) => Promise<AdminUserFormState>;
   values?: Record<string, string>;
   atasanOptions: AtasanOption[];
+  unitOptions: UnitKerjaOption[];
   isSelf?: boolean;
 }) {
   const router = useRouter();
@@ -49,7 +58,37 @@ export function AdminUserForm({
   const [pending, setPending] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  const unitMap = new Map(unitOptions.map((u) => [u.id, u]));
   const isAdmin = values.is_admin === "1" || values.is_admin === "true";
+
+  const selectedUnitId = (() => {
+    const v = values.unit_kerja_id;
+    if (!v || v === "custom") return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  })();
+
+  const filteredAtasan = (() => {
+    if (!selectedUnitId) return atasanOptions;
+    const match: AtasanOption[] = [];
+    const rest: AtasanOption[] = [];
+    for (const a of atasanOptions) {
+      if (a.unit_kerja_id === selectedUnitId) match.push(a);
+      else rest.push(a);
+    }
+    return [...match, ...rest];
+  })();
+
+  function handleUnitChange(v: string) {
+    setValues((prev) => {
+      const next: Record<string, string> = { ...prev, unit_kerja_id: v };
+      if (v !== "" && v !== "custom") {
+        const unit = unitMap.get(Number(v));
+        if (unit) next.unit_kerja = unit.nama_unit;
+      }
+      return next;
+    });
+  }
 
   function setField(key: string, value: string) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -266,19 +305,47 @@ export function AdminUserForm({
 
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="unit_kerja" className={LABEL_CLASSES}>
+            <label htmlFor="unit_kerja_id" className={LABEL_CLASSES}>
               Unit Kerja
             </label>
-            <input
-              id="unit_kerja"
-              name="unit_kerja"
-              type="text"
-              value={values.unit_kerja ?? ""}
-              onChange={(e) => setField("unit_kerja", e.target.value)}
-              placeholder="Contoh: Direktorat X"
+            <select
+              id="unit_kerja_id"
+              name="unit_kerja_id"
+              value={values.unit_kerja_id ?? ""}
+              onChange={(e) => handleUnitChange(e.target.value)}
               className={INPUT_CLASSES}
               disabled={pending}
-            />
+            >
+              <option value="">— Pilih Unit —</option>
+              {unitOptions.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {"\u00A0\u00A0".repeat(u.depth)}
+                  {u.nama_unit}
+                </option>
+              ))}
+              <option value="custom">Unit lain (tulis manual)</option>
+            </select>
+            {values.unit_kerja_id === "custom" && (
+              <input
+                id="unit_kerja"
+                name="unit_kerja"
+                type="text"
+                value={values.unit_kerja ?? ""}
+                onChange={(e) => setField("unit_kerja", e.target.value)}
+                placeholder="Contoh: Direktorat X"
+                className={INPUT_CLASSES}
+                disabled={pending}
+              />
+            )}
+            {values.unit_kerja_id !== "" &&
+              values.unit_kerja_id !== "custom" &&
+              values.unit_kerja && (
+                <input type="hidden" name="unit_kerja" value={values.unit_kerja} />
+              )}
+            <p className="text-xs leading-5 text-ink-muted">
+              Pilih unit dari struktur organisasi, atau pilih &quot;Unit
+              lain&quot; untuk unit yang belum terdaftar.
+            </p>
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -401,7 +468,7 @@ export function AdminUserForm({
               className={INPUT_CLASSES}
             >
               <option value="">— Tanpa Atasan —</option>
-              {atasanOptions.map((a) => (
+              {filteredAtasan.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.nama_pegawai} ({a.npp})
                 </option>

@@ -45,6 +45,10 @@ const userSchema = z
       .trim()
       .optional()
       .transform((v) => (v ? v : undefined)),
+    unit_kerja_id: z
+      .string()
+      .optional()
+      .transform((v) => (v && v !== "" && v !== "custom" ? Number(v) : undefined)),
     masa_kerja_unit_terakhir: z
       .string()
       .trim()
@@ -98,6 +102,7 @@ function toValues(formData: FormData): Record<string, string> {
     "tanggal_bergabung",
     "nama_jabatan",
     "unit_kerja",
+    "unit_kerja_id",
     "masa_kerja_unit_terakhir",
     "default_role",
     "is_admin",
@@ -145,6 +150,22 @@ async function hasActiveCycles(
   return false;
 }
 
+async function resolveUnitKerja(input: {
+  unit_kerja?: string;
+  unit_kerja_id?: number;
+}): Promise<{ unit_kerja: string | null; unit_kerja_id: number | null }> {
+  if (input.unit_kerja_id !== undefined) {
+    const unit = await prisma.unitKerja.findUnique({
+      where: { id: input.unit_kerja_id },
+      select: { id: true, nama_unit: true },
+    });
+    if (unit) {
+      return { unit_kerja: unit.nama_unit, unit_kerja_id: unit.id };
+    }
+  }
+  return { unit_kerja: input.unit_kerja ?? null, unit_kerja_id: null };
+}
+
 export async function createAdminUser(
   _prev: AdminUserFormState,
   formData: FormData,
@@ -167,6 +188,7 @@ export async function createAdminUser(
   const tanggal = data.tanggal_bergabung
     ? new Date(data.tanggal_bergabung)
     : null;
+  const unitKerja = await resolveUnitKerja(data);
 
   try {
     await prisma.user.create({
@@ -177,7 +199,8 @@ export async function createAdminUser(
         nama_pegawai: data.nama_pegawai,
         tanggal_bergabung: tanggal,
         nama_jabatan: data.nama_jabatan,
-        unit_kerja: data.unit_kerja,
+        unit_kerja: unitKerja.unit_kerja,
+        unit_kerja_id: unitKerja.unit_kerja_id,
         masa_kerja_unit_terakhir: data.masa_kerja_unit_terakhir,
         password: await bcrypt.hash(data.password!, 10),
         default_role: data.default_role,
@@ -231,6 +254,7 @@ export async function updateAdminUser(
   const tanggal = data.tanggal_bergabung
     ? new Date(data.tanggal_bergabung)
     : null;
+  const unitKerja = await resolveUnitKerja(data);
 
   const existing = await prisma.user.findUnique({
     where: { id },
@@ -266,7 +290,8 @@ export async function updateAdminUser(
         nama_pegawai: data.nama_pegawai,
         tanggal_bergabung: tanggal,
         nama_jabatan: data.nama_jabatan,
-        unit_kerja: data.unit_kerja,
+        unit_kerja: unitKerja.unit_kerja,
+        unit_kerja_id: unitKerja.unit_kerja_id,
         masa_kerja_unit_terakhir: data.masa_kerja_unit_terakhir,
         default_role: data.default_role,
         is_admin: data.is_admin,

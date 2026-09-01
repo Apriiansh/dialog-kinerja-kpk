@@ -6,6 +6,7 @@ import {
   PencilSimpleIcon,
   LockKeyIcon,
   GearSixIcon,
+  UsersIcon,
 } from "@phosphor-icons/react";
 import { ProfileHeader } from "./profile-header";
 import { ProfileInfoCards } from "./profile-info-cards";
@@ -13,10 +14,12 @@ import { EmailVerificationCard } from "./email-verification-card";
 import { EditProfileForm } from "./edit-profile-form";
 import { ChangePasswordForm } from "./change-password-form";
 import { ProfilePreferencesForm } from "./profile-preferences-form";
+import { HierarkiPanel } from "./hierarki-panel";
 import type { UserProfileData } from "@/lib/queries/profile";
+import type { KandidatUser } from "@/lib/queries/hierarki";
 import type { Role } from "@/lib/auth/session";
 
-type TabKey = "info" | "edit" | "password" | "preferences";
+type TabKey = "info" | "edit" | "password" | "preferences" | "hierarki";
 
 const TABS: {
   key: TabKey;
@@ -39,6 +42,11 @@ const TABS: {
     icon: LockKeyIcon,
   },
   {
+    key: "hierarki",
+    label: "Pilih Atasan",
+    icon: UsersIcon,
+  },
+  {
     key: "preferences",
     label: "Pengaturan Akun",
     icon: GearSixIcon,
@@ -49,10 +57,12 @@ export function ProfileView({
   user,
   activeRole,
   allowedRoles,
+  kandidatAtasan,
 }: {
   user: UserProfileData;
   activeRole: Role;
   allowedRoles: Role[];
+  kandidatAtasan?: KandidatUser[];
 }) {
   const [activeTab, setActiveTab] = useState<TabKey>("info");
 
@@ -64,7 +74,8 @@ export function ProfileView({
           Profil Pegawai
         </h1>
         <p className="text-sm leading-5 text-ink-muted">
-          Informasi data induk kepegawaian, pembaharuan profil, dan keamanan akun Anda.
+          Informasi data induk kepegawaian, pembaharuan profil, dan keamanan
+          akun Anda.
         </p>
       </header>
 
@@ -83,11 +94,10 @@ export function ProfileView({
                 key={key}
                 type="button"
                 onClick={() => setActiveTab(key)}
-                className={`inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-xs font-semibold transition-colors ${
-                  isActive
-                    ? "bg-primary text-on-primary shadow-xs"
-                    : "border border-outline bg-surface text-ink-muted hover:border-primary hover:text-primary"
-                }`}
+                className={`inline-flex items-center gap-2 rounded-md px-3.5 py-2 text-xs font-semibold transition-colors ${isActive
+                  ? "bg-primary text-on-primary shadow-xs"
+                  : "border border-outline bg-surface text-ink-muted hover:border-primary hover:text-primary"
+                  }`}
               >
                 <Icon size={16} weight={isActive ? "bold" : "regular"} />
                 {label}
@@ -101,11 +111,11 @@ export function ProfileView({
           {activeTab === "info" && <ProfileInfoCards user={user} />}
           {activeTab === "edit" && <EditProfileForm user={user} />}
           {activeTab === "password" && <ChangePasswordForm />}
+          {activeTab === "hierarki" && (
+            <HierarkiPanel user={user} kandidatAtasan={kandidatAtasan ?? []} />
+          )}
           {activeTab === "preferences" && (
-            <ProfilePreferencesForm
-              user={user}
-              allowedRoles={allowedRoles}
-            />
+            <ProfilePreferencesForm user={user} allowedRoles={allowedRoles} />
           )}
         </div>
       </div>

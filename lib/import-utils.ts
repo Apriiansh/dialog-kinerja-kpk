@@ -46,7 +46,11 @@ export interface ImportPreviewRow {
   existingUserId: number | null;
   errorMessage: string | null;
   suggestedAction: ImportAction;
+  unitKerjaId: number | null;
+  unitMatched: boolean;
 }
+
+export type UnmatchedUnitPolicy = "keep" | "skip";
 
 export interface ImportRowAction {
   rowIndex: number;
@@ -231,4 +235,51 @@ export function validateRow(
     return "Pengguna admin tidak memiliki atasan.";
   }
   return null;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Unit kerja resolution                                             */
+/* ------------------------------------------------------------------ */
+
+export interface UnitKerjaOption {
+  id: number;
+  nama_unit: string;
+}
+
+// Alias nama unit dari berkas impor -> unit yang ada di struktur organisasi.
+const UNIT_ALIAS: Record<string, string> = {
+  "biro sdm": "biro sumber daya manusia",
+  "biro umum": "biro umum",
+};
+
+export function normalizeUnitName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Mencocokkan teks unit kerja dari berkas impor ke daftar unit yang ada di
+ * struktur organisasi. Mengembalikan unit yang cocok, atau null bila tidak
+ * ditemukan. Pencocokan: alias -> kecocokan nama persis (ternormalisasi).
+ */
+export function matchUnitKerja(
+  unitText: string,
+  options: UnitKerjaOption[],
+): UnitKerjaOption | null {
+  const raw = normalizeUnitName(unitText);
+  if (!raw) return null;
+
+  const byName = new Map<string, UnitKerjaOption>();
+  for (const o of options) {
+    byName.set(normalizeUnitName(o.nama_unit), o);
+  }
+
+  const aliased = UNIT_ALIAS[raw];
+  if (aliased && byName.has(aliased)) {
+    return byName.get(aliased)!;
+  }
+
+  return byName.get(raw) ?? null;
 }

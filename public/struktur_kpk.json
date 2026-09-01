@@ -1,0 +1,354 @@
+{
+  "institusi": "Komisi Pemberantasan Korupsi (KPK)",
+  "struktur_organisasi": {
+    "nama_unit": "KPK",
+    "jenis": "institusi",
+    "kepala_jabatan": null,
+    "children": [
+      {
+        "nama_unit": "DEWAN PENGAWAS",
+        "jenis": "dewan_pengawas",
+        "kepala_jabatan": "Ketua Dewan Pengawas",
+        "children": [
+          {
+            "nama_unit": "SEKRETARIAT DEWAN PENGAWAS",
+            "jenis": "sekretariat",
+            "kepala_jabatan": "Kepala Sekretariat Dewan Pengawas",
+            "children": []
+          }
+        ]
+      },
+      {
+        "nama_unit": "PIMPINAN",
+        "jenis": "pimpinan",
+        "kepala_jabatan": "Ketua KPK",
+        "children": [
+          { "nama_unit": "STAF KHUSUS", "jenis": "staf", "kepala_jabatan": null, "children": [] },
+          {
+            "nama_unit": "INSPEKTORAT",
+            "jenis": "inspektorat",
+            "kepala_jabatan": "Inspektur",
+            "children": [
+              {
+                "nama_unit": "SEKRETARIAT INSPEKTORAT",
+                "jenis": "sekretariat",
+                "kepala_jabatan": "Kepala Sekretariat Inspektorat",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              }
+            ]
+          },
+          { "nama_unit": "JURU BICARA", "jenis": "staf", "kepala_jabatan": null, "children": [] },
+          { "nama_unit": "PUSAT PERENCANAAN STRATEGIS PEMBERANTASAN KORUPSI", "jenis": "pusat", "kepala_jabatan": "Kepala Pusat Perencanaan Strategis Pemberantasan Korupsi", "children": [] },
+          { "nama_unit": "SEKRETARIAT PIMPINAN", "jenis": "sekretariat", "kepala_jabatan": "Kepala Sekretariat Pimpinan", "children": [] },
+          {
+            "nama_unit": "SEKRETARIAT JENDERAL",
+            "jenis": "sekretariat_jenderal",
+            "kepala_jabatan": "Sekretaris Jenderal",
+            "children": [
+              {
+                "nama_unit": "BIRO KEUANGAN",
+                "jenis": "biro",
+                "kepala_jabatan": "Kepala Biro Keuangan",
+                "children": [
+                  { "nama_unit": "Bagian Anggaran", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Anggaran", "children": [] },
+                  { "nama_unit": "Bagian Perbendaharaan", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Perbendaharaan", "children": [] },
+                  { "nama_unit": "Bagian Verifikasi, Akuntansi dan Pelaporan Keuangan", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Verifikasi, Akuntansi dan Pelaporan Keuangan", "children": [] },
+                  { "nama_unit": "Kelompok Jabatan Fungsional", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "BIRO SUMBER DAYA MANUSIA",
+                "jenis": "biro",
+                "kepala_jabatan": "Kepala Biro Sumber Daya Manusia",
+                "children": [
+                  { "nama_unit": "Bagian Perencanaan dan Pengembangan Sumber Daya Manusia", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Perencanaan dan Pengembangan Sumber Daya Manusia", "children": [] },
+                  { "nama_unit": "Bagian Pelayanan Kepegawaian", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Pelayanan Kepegawaian", "children": [] },
+                  { "nama_unit": "Kelompok Jabatan Fungsional", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "BIRO HUKUM",
+                "jenis": "biro",
+                "kepala_jabatan": "Kepala Biro Hukum",
+                "children": [
+                  { "nama_unit": "Bagian Perancangan Peraturan dan Produk Hukum", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Perancangan Peraturan dan Produk Hukum", "children": [] },
+                  { "nama_unit": "Bagian Litigasi dan Perlindungan Saksi", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Litigasi dan Perlindungan Saksi", "children": [] },
+                  { "nama_unit": "Kelompok Jabatan Fungsional", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "BIRO HUBUNGAN MASYARAKAT",
+                "jenis": "biro",
+                "kepala_jabatan": "Kepala Biro Hubungan Masyarakat",
+                "children": [
+                  { "nama_unit": "Bagian Pelayanan Informasi dan Komunikasi Publik", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Pelayanan Informasi dan Komunikasi Publik", "children": [] },
+                  { "nama_unit": "Bagian Pemberitaan", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Pemberitaan", "children": [] },
+                  { "nama_unit": "Bagian Diseminasi dan Publikasi", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Diseminasi dan Publikasi", "children": [] },
+                  { "nama_unit": "Kelompok Jabatan Fungsional", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "BIRO UMUM",
+                "jenis": "biro",
+                "kepala_jabatan": "Kepala Biro Umum",
+                "children": [
+                  { "nama_unit": "Bagian Pengelolaan BMN dan Kerumahtanggaan", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Pengelolaan BMN dan Kerumahtanggaan", "children": [] },
+                  { "nama_unit": "Bagian Pengadaan", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Pengadaan", "children": [] },
+                  { "nama_unit": "Bagian Pengelolaan Gedung", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Pengelolaan Gedung", "children": [] },
+                  { "nama_unit": "Bagian Kearsipan dan Administrasi Perkantoran", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Kearsipan dan Administrasi Perkantoran", "children": [] },
+                  { "nama_unit": "Bagian Pengamanan", "jenis": "bagian", "kepala_jabatan": "Kepala Bagian Pengamanan", "children": [] },
+                  { "nama_unit": "Kelompok Jabatan Fungsional", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              }
+            ]
+          },
+          {
+            "nama_unit": "DEPUTI BIDANG PENDIDIKAN DAN PERAN SERTA MASYARAKAT",
+            "jenis": "deputi",
+            "kepala_jabatan": "Deputi Bidang Pendidikan dan Peran Serta Masyarakat",
+            "children": [
+              {
+                "nama_unit": "SEKRETARIAT DEPUTI PENDIDIKAN DAN PERAN SERTA MASYARAKAT",
+                "jenis": "sekretariat_deputi",
+                "kepala_jabatan": "Kepala Sekretariat Deputi Pendidikan dan Peran Serta Masyarakat",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT JEJARING PENDIDIKAN",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Jejaring Pendidikan",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT SOSIALISASI DAN KAMPANYE ANTIKORUPSI",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Sosialisasi dan Kampanye Antikorupsi",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT PEMBINAAN PERAN SERTA MASYARAKAT",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Pembinaan Peran Serta Masyarakat",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT PENDIDIKAN DAN PELATIHAN ANTIKORUPSI",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Pendidikan dan Pelatihan Antikorupsi",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              }
+            ]
+          },
+          {
+            "nama_unit": "DEPUTI BIDANG PENCEGAHAN DAN MONITORING",
+            "jenis": "deputi",
+            "kepala_jabatan": "Deputi Bidang Pencegahan dan Monitoring",
+            "children": [
+              {
+                "nama_unit": "SEKRETARIAT DEPUTI PENCEGAHAN DAN MONITORING",
+                "jenis": "sekretariat_deputi",
+                "kepala_jabatan": "Kepala Sekretariat Deputi Pencegahan dan Monitoring",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT PP LHKPN",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur PP LHKPN",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT GRATIFIKASI DAN PELAYANAN PUBLIK",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Gratifikasi dan Pelayanan Publik",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT MONITORING",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Monitoring",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT ANTIKORUPSI BADAN USAHA",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Antikorupsi Badan Usaha",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              }
+            ]
+          },
+          {
+            "nama_unit": "DEPUTI BIDANG PENINDAKAN DAN EKSEKUSI",
+            "jenis": "deputi",
+            "kepala_jabatan": "Deputi Bidang Penindakan dan Eksekusi",
+            "children": [
+              {
+                "nama_unit": "SEKRETARIAT DEPUTI BIDANG PENINDAKAN DAN EKSEKUSI",
+                "jenis": "sekretariat_deputi",
+                "kepala_jabatan": "Kepala Sekretariat Deputi Bidang Penindakan dan Eksekusi",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT PENYELIDIKAN",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Penyelidikan",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT PENYIDIKAN",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Penyidikan",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT PENUNTUTAN",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Penuntutan",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT LABUKSI",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Labuksi",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              }
+            ]
+          },
+          {
+            "nama_unit": "DEPUTI BIDANG KOORDINASI DAN SUPERVISI",
+            "jenis": "deputi",
+            "kepala_jabatan": "Deputi Bidang Koordinasi dan Supervisi",
+            "children": [
+              {
+                "nama_unit": "SEKRETARIAT DEPUTI BIDANG KOORDINASI DAN SUPERVISI",
+                "jenis": "sekretariat_deputi",
+                "kepala_jabatan": "Kepala Sekretariat Deputi Bidang Koordinasi dan Supervisi",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT KOORDINASI DAN SUPERVISI WILAYAH I",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Koordinasi dan Supervisi Wilayah I",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT KOORDINASI DAN SUPERVISI WILAYAH II",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Koordinasi dan Supervisi Wilayah II",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT KOORDINASI DAN SUPERVISI WILAYAH III",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Koordinasi dan Supervisi Wilayah III",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT KOORDINASI DAN SUPERVISI WILAYAH IV",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Koordinasi dan Supervisi Wilayah IV",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT KOORDINASI DAN SUPERVISI WILAYAH V",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Koordinasi dan Supervisi Wilayah V",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              }
+            ]
+          },
+          {
+            "nama_unit": "DEPUTI BIDANG INFORMASI DAN DATA",
+            "jenis": "deputi",
+            "kepala_jabatan": "Deputi Bidang Informasi dan Data",
+            "children": [
+              {
+                "nama_unit": "SEKRETARIAT DEPUTI BIDANG INFORMASI DAN DATA",
+                "jenis": "sekretariat_deputi",
+                "kepala_jabatan": "Kepala Sekretariat Deputi Bidang Informasi dan Data",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT PELAYANAN LAPORAN DAN PENGADUAN MASYARAKAT",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Pelayanan Laporan dan Pengaduan Masyarakat",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT MANAJEMEN INFORMASI",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Manajemen Informasi",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT PJKAKI",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur PJKAKI",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              },
+              {
+                "nama_unit": "DIREKTORAT DETEKSI DAN ANALISIS KORUPSI",
+                "jenis": "direktorat",
+                "kepala_jabatan": "Direktur Deteksi dan Analisis Korupsi",
+                "children": [
+                  { "nama_unit": "KELOMPOK JABATAN FUNGSIONAL", "jenis": "kelompok_jf", "kepala_jabatan": null, "children": [] }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
