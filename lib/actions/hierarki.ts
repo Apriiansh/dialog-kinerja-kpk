@@ -25,12 +25,15 @@ async function validasiRelasi(
   return null;
 }
 
-export async function pilihAtasan(
-  atasanId: number,
-): Promise<HierarkiState> {
+export async function pilihAtasan(atasanId: number): Promise<HierarkiState> {
   const session = await requireAuth();
   const error = await validasiRelasi(session.id, atasanId);
   if (error) return { error };
+
+  const { count: dialogPindah } = await prisma.dialogKinerja.updateMany({
+    where: { id_pegawai: session.id, status: { not: "selesai" } },
+    data: { id_atasan: atasanId },
+  });
 
   const atasan = await prisma.user.findUnique({
     where: { id: atasanId },
@@ -47,7 +50,10 @@ export async function pilihAtasan(
       userId: atasan.id,
       type: "hierarki_ditugaskan",
       title: "Pegawai Baru di Bawah Anda",
-      description: `${session.nama} menempatkan diri sebagai pegawai di bawah pembinaan Anda.`,
+      description:
+        dialogPindah > 0
+          ? `${session.nama} menempatkan diri sebagai pegawai di bawah pembinaan Anda. ${dialogPindah} dialog kinerja yang belum selesai ikut dipindahkan ke Anda.`
+          : `${session.nama} menempatkan diri sebagai pegawai di bawah pembinaan Anda.`,
       link: "/atasan/profil",
     });
   }

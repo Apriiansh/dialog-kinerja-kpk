@@ -66,7 +66,8 @@ export default async function AtasanPegawaiDetailPage({
         },
         orderBy: { nama_pegawai: "asc" },
       },
-      dialogAsPegawai: {
+        dialogAsPegawai: {
+        where: { id_atasan: session.id },
         select: {
           id: true,
           periode_tahun: true,

@@ -126,7 +126,7 @@ export default async function AtasanDashboardPage() {
         nama_pegawai: true,
         npp: true,
         dialogAsPegawai: {
-          where: { status: "selesai", periode_tahun: new Date().getFullYear() },
+          where: { id_atasan: session.id, status: "selesai", periode_tahun: new Date().getFullYear() },
           select: {
             id: true,
             triwulan: true,
@@ -221,7 +221,7 @@ export default async function AtasanDashboardPage() {
     }))));
     const tercapaiCount = items.filter(i => i.is_tercapai).length;
     const tidakTercapaiCount = items.filter(i => !i.is_tercapai).length;
-    
+
     return {
       pegawaiId: p.id,
       nama_pegawai: p.nama_pegawai,
@@ -236,7 +236,7 @@ export default async function AtasanDashboardPage() {
   const totalTidakTercapai = achievementStats.reduce((sum, emp) => sum + emp.tidakTercapaiCount, 0);
 
   const evalMap = new Map<string, { evaluasi: string; tercapai: number; tidakTercapai: number }>();
-  
+
   analyticsByPegawai.forEach(p => {
     p.dialogAsPegawai.forEach(d => {
       d.aspek.forEach(a => {
@@ -366,14 +366,14 @@ export default async function AtasanDashboardPage() {
             <EvaluationCalendar events={calendarEvents} />
           </div>
         </ChartCard>
-        
+
         <ChartCard
           title="Analisis Capaian Kinerja"
           subtitle={`Statistik capaian target tim Anda di tahun ${new Date().getFullYear()}`}
         >
           <div className="w-full flex flex-col gap-4">
-            <AchievementList 
-              analytics={achievementStats} 
+            <AchievementList
+              analytics={achievementStats}
               evalAnalytics={analyticsByEvaluasi}
               totalTercapai={totalTercapai}
               totalTidakTercapai={totalTidakTercapai}
