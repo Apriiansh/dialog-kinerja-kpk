@@ -19,7 +19,7 @@ const LABEL_CLASSES =
   "text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-muted";
 
 interface AtasanOption {
-  id: number;
+  id: string;
   nama_pegawai: string;
   npp: string;
   unit_kerja_id: number | null;

@@ -8,10 +8,11 @@ import {
 import { DialogForm } from "@/components/dialog/edit-form";
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { isJadwalArrived } from "@/lib/utils/dialog-deadline";
+import { Metadata } from "next";
 
 type PageProps = { params: Promise<{ id: string }> };
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   return { title: `Isi Dialog Kinerja #${id}` };
 }
@@ -20,8 +21,7 @@ export default async function DialogEditPage({ params }: PageProps) {
   const { id } = await params;
   const session = await requireRole("PEGAWAI");
 
-  const dialogId = Number(id);
-  if (Number.isNaN(dialogId)) redirect("/pegawai/dashboard");
+  const dialogId = id;
 
   const [dialog, metodeList] = await Promise.all([
     getPegawaiDialog(dialogId, session.id),

@@ -14,14 +14,10 @@ export async function GET(
   }
 
   const { id } = await params;
-  const reviuId = Number(id);
-  if (Number.isNaN(reviuId)) {
-    return new NextResponse("Invalid ID", { status: 400 });
-  }
 
   try {
     const { filename, buffer } = await generateReviuDocx(
-      reviuId,
+      id,
       session.id,
       session.role,
     );

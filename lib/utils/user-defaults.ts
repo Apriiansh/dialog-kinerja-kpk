@@ -42,7 +42,7 @@ export function adminUserFormDefaults(user: {
   default_role: Role;
   is_admin: boolean;
   as_pegawai: boolean;
-  id_atasan: number | null;
+  id_atasan: string | null;
 }): Record<string, string> {
   return {
     npp: user.npp,
@@ -57,6 +57,6 @@ export function adminUserFormDefaults(user: {
     default_role: user.default_role,
     is_admin: user.is_admin ? "1" : "",
     as_pegawai: user.as_pegawai ? "1" : "",
-    id_atasan: user.id_atasan ? String(user.id_atasan) : "",
+    id_atasan: user.id_atasan ?? "",
   };
 }

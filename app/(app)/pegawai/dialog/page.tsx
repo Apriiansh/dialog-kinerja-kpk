@@ -17,16 +17,17 @@ import type { StatusDialog } from "@/generated/prisma/enums";
 import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { InitiateDialogButton } from "@/components/dialog/initiate-button";
 import { countFilledAspek } from "@/lib/utils/capaian";
+import { Metadata } from "next";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Dialog Kinerja Saya - Dialog Kinerja KPK",
 };
 
 const CTA: Record<
   StatusDialog,
-  { label: string; href: (id: number) => string; variant: "primary" | "plain" }
+  { label: string; href: (id: string) => string; variant: "primary" | "plain" }
 > = {
   draft: {
     label: "Lihat Pengajuan",
@@ -205,7 +206,9 @@ export default async function PegawaiDialogListPage({
   const totalPages = Math.ceil(filteredTotal / PAGE_SIZE);
   const visibleDialogs = filteredDialogs.slice(skip, skip + PAGE_SIZE);
 
-  const sortedById = [...allDialogs].sort((a, b) => a.id - b.id);
+  const sortedById = [...allDialogs].sort(
+    (a, b) => a.created_at.getTime() - b.created_at.getTime(),
+  );
   const seqMap = new Map(sortedById.map((d, index) => [d.id, index + 1]));
 
   const stats = [

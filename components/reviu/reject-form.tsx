@@ -6,7 +6,7 @@ import { ArrowsClockwiseIcon, XIcon } from "@phosphor-icons/react";
 import { rejectReviu } from "@/lib/actions/reviu";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 
-export function ReviuRejectForm({ reviuId }: { reviuId: number }) {
+export function ReviuRejectForm({ reviuId }: { reviuId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [alasanTolak, setAlasanTolak] = useState("");

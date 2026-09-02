@@ -31,7 +31,7 @@ export function HierarkiPanel({
     if (!atasanId) return;
     setPendingAtasan(true);
     try {
-      const res = await pilihAtasan(Number(atasanId));
+      const res = await pilihAtasan(atasanId);
 
       if (res.error) {
         showError(res.error);

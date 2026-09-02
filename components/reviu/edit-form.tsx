@@ -10,21 +10,21 @@ import { ASPEK_ORDER, ASPEK_LABEL } from "@/lib/constants/aspek";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
 export interface ReviuAspekItem {
-  id: number;
+  id: string;
   dialog_evaluasi: string | null;
   kompetensi_dikembangkan: string | null;
   is_tercapai: boolean | null;
 }
 
 export interface ReviuAspekRow {
-  id: number;
+  id: string;
   jenis_aspek: JenisAspek;
   item: ReviuAspekItem[];
 }
 
 interface ReviuFormProps {
-  dialogId?: number;
-  reviuId?: number;
+  dialogId?: string;
+  reviuId?: string;
   aspek?: ReviuAspekRow[];
   isLanjutan?: boolean;
   previousItemKeys?: Set<string>;
@@ -43,7 +43,7 @@ interface CapaianState {
 }
 
 function buildInitialCapaian(aspek: ReviuAspekRow[] | undefined) {
-  const map: Record<number, CapaianState> = {};
+  const map: Record<string, CapaianState> = {};
   for (const group of aspek ?? []) {
     for (const item of group.item) {
       map[item.id] = { tercapai: item.is_tercapai ?? false };
@@ -81,7 +81,7 @@ export function ReviuForm({
     (item) => !capaian[item.id]?.tercapai,
   );
 
-  function toggleItem(id: number) {
+  function toggleItem(id: string) {
     setCapaian((previous) => ({
       ...previous,
       [id]: {

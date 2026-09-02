@@ -6,7 +6,7 @@ import { TrashIcon } from "@phosphor-icons/react";
 import { deleteDialog } from "@/lib/actions/atasan";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 
-export function DeleteDialogButton({ dialogId }: { dialogId: number }) {
+export function DeleteDialogButton({ dialogId }: { dialogId: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 

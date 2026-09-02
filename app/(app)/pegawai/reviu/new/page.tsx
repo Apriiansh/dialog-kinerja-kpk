@@ -6,12 +6,13 @@ import { requireRole } from "@/lib/auth/session";
 import { getDialogAspekItems } from "@/lib/queries/reviu";
 import { ReviuForm } from "@/components/reviu/edit-form";
 import { formatPeriode } from "@/lib/constants/triwulan";
+import { Metadata } from "next";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Buat Reviu - Dialog Kinerja KPK",
 };
 
@@ -22,7 +23,7 @@ export default async function NewReviuPage({
 }) {
   const session = await requireRole("PEGAWAI");
   const sp = await searchParams;
-  const rawDialogId = typeof sp.dialog === "string" ? Number(sp.dialog) : NaN;
+  const rawDialogId = typeof sp.dialog === "string" ? sp.dialog : null;
 
   const selesaiDialogs = await prisma.dialogKinerja.findMany({
     where: { id_pegawai: session.id, status: "selesai" },
@@ -50,8 +51,8 @@ export default async function NewReviuPage({
     orderBy: { updated_at: "desc" },
   });
 
-  let selectedDialogId: number | null = null;
-  if (!Number.isNaN(rawDialogId)) {
+  let selectedDialogId: string | null = null;
+  if (rawDialogId !== null) {
     const exists = selesaiDialogs.some((d) => d.id === rawDialogId);
     if (!exists) notFound();
     selectedDialogId = rawDialogId;

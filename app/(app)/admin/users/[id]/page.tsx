@@ -17,12 +17,9 @@ export default async function AdminUserDetailPage({
 }) {
   const session = await requireRole("ADMIN");
   const { id } = await params;
-  const numericId = Number(id);
-  if (isNaN(numericId)) notFound();
-
   const user = await prisma.user.findUnique({
     where: {
-      id: numericId,
+      id,
     },
       select: {
         id: true,
@@ -105,12 +102,12 @@ export default async function AdminUserDetailPage({
 
   async function handleToggleStatus(isActive: boolean) {
     "use server";
-    return await setUserStatus(numericId, isActive);
+    return await setUserStatus(id, isActive);
   }
 
   async function handleDelete() {
     "use server";
-    return await deleteAdminUser(numericId);
+    return await deleteAdminUser(id);
   }
 
   return (
@@ -118,8 +115,8 @@ export default async function AdminUserDetailPage({
       user={userData}
       context="ADMIN"
       backHref="/admin/users"
-      editHref={`/admin/users/${numericId}/edit`}
-      isSelf={session.id === numericId}
+      editHref={`/admin/users/${id}/edit`}
+      isSelf={session.id === id}
       onToggleStatus={handleToggleStatus}
       onDelete={handleDelete}
     />

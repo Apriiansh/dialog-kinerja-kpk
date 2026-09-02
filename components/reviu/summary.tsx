@@ -4,7 +4,7 @@ import { ASPEK_ORDER, ASPEK_LABEL } from "@/lib/constants/aspek";
 import type { JenisAspek } from "@/generated/prisma/enums";
 
 interface ReviuAspekItem {
-  id: number;
+  id: string;
   dialog_evaluasi: string | null;
   kompetensi_dikembangkan: string | null;
   is_tercapai: boolean | null;
@@ -12,7 +12,7 @@ interface ReviuAspekItem {
 }
 
 interface ReviuAspekRow {
-  id: number;
+  id: string;
   jenis_aspek: JenisAspek;
   item: ReviuAspekItem[];
 }

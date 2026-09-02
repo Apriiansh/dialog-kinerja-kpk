@@ -14,14 +14,10 @@ export async function GET(
   }
 
   const { id } = await params;
-  const dialogId = Number(id);
-  if (Number.isNaN(dialogId)) {
-    return new NextResponse("Invalid ID", { status: 400 });
-  }
 
   try {
     const { filename, buffer } = await generateDialogKinerjaDocx(
-      dialogId,
+      id,
       session.id,
       session.role,
     );

@@ -14,13 +14,14 @@ import { DeleteReviuButton } from "@/components/reviu/delete-button";
 import { InitiateDialogButton } from "@/components/dialog/initiate-button";
 import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { formatPeriode } from "@/lib/constants/triwulan";
+import { Metadata } from "next";
 
 type PageProps = {
   params: Promise<{ id: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   return { title: `Reviu #${id}` };
 }
@@ -34,8 +35,7 @@ export default async function PegawaiReviuDetailPage({
   const cetak = sp?.cetak === "1";
   const session = await requireRole("PEGAWAI");
 
-  const reviuId = Number(id);
-  if (Number.isNaN(reviuId)) notFound();
+  const reviuId = id;
 
   const reviu = await getPegawaiReviu(reviuId, session.id);
   if (!reviu) notFound();

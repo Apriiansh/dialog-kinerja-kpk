@@ -98,14 +98,16 @@ export default async function DialogDetailPage({
   const chatOpen = sp?.chat === "1";
   const session = await requireRole("ATASAN");
 
-  const dialogId = Number(id);
-  if (Number.isNaN(dialogId)) notFound();
+  const dialogId = id
 
   const dialog = await getAtasanDialog(dialogId, session.id);
   if (!dialog) notFound();
 
   const sequenceNum = await prisma.dialogKinerja.count({
-    where: { id_pegawai: dialog.id_pegawai, id: { lte: dialogId } },
+    where: {
+      id_pegawai: dialog.id_pegawai,
+      created_at: { lte: dialog.created_at },
+    },
   });
 
   const status = dialog.status;

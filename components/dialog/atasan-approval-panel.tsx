@@ -13,7 +13,7 @@ export function AtasanApprovalPanel({
   deskripsiPegawai,
   initialDeskripsiAtasan,
 }: {
-  dialogId: number;
+  dialogId: string;
   jadwalDialog?: Date | null;
   deskripsiPegawai?: string | null;
   initialDeskripsiAtasan?: string | null;

@@ -2,7 +2,7 @@ import { formatTanggal } from "@/lib/utils/format";
 import type { PegawaiDetail } from "@/components/pegawai/detail-modal";
 
 export interface PegawaiDetailRow {
-  id: number;
+  id: string;
   npp: string;
   nip: string | null;
   nama_pegawai: string;
@@ -20,7 +20,7 @@ export interface PegawaiDetailRow {
 
 export function mapPegawaiDetail(
   row: PegawaiDetailRow,
-  editHrefFor: (id: number) => string,
+  editHrefFor: (id: string) => string,
 ): PegawaiDetail {
   return {
     id: row.id,

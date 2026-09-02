@@ -11,7 +11,7 @@ import { useDialogSocket, type LiveTransport, type SocketTypingEvent } from "./u
 export type { LiveTransport };
 
 interface UseDialogLiveOptions {
-  dialogId: number;
+  dialogId: string;
   enabled?: boolean;
   pollIntervalMs?: number;
   onState: (state: DialogLiveState) => void;

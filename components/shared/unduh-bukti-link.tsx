@@ -10,7 +10,7 @@ export function UnduhBuktiLink({
   label = "Unduh PDF",
   className = DEFAULT_CLASS,
 }: {
-  dialogId: number;
+  dialogId: string;
   path: string;
   label?: string;
   className?: string;

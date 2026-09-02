@@ -20,7 +20,6 @@ type ChatClientProps = {
 
 export default function ChatClient({ dialogId }: ChatClientProps) {
   const router = useRouter();
-  const numDialogId = Number(dialogId);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -35,7 +34,7 @@ export default function ChatClient({ dialogId }: ChatClientProps) {
     error,
     sendMessage,
     removeMessages,
-  } = useChat(numDialogId);
+  } = useChat(dialogId);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

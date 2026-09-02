@@ -272,7 +272,7 @@ export default async function AtasanDashboardPage() {
     items: items.sort((a, b) => (b.tercapai + b.tidakTercapai) - (a.tercapai + a.tidakTercapai))
   }));
 
-  const dialogCountByPegawai = new Map<number, number>();
+  const dialogCountByPegawai = new Map<string, number>();
   for (const d of dialogs) {
     dialogCountByPegawai.set(
       d.id_pegawai,

@@ -6,7 +6,7 @@ import { TrashIcon } from "@phosphor-icons/react";
 import { deleteReviu } from "@/lib/actions/reviu";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 
-export function DeleteReviuButton({ reviuId }: { reviuId: number }) {
+export function DeleteReviuButton({ reviuId }: { reviuId: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 

@@ -5,14 +5,14 @@ import { useState } from "react";
 import { EmptyState } from "@/components/shared/empty-state";
 
 export type AnalyticsItem = {
-  id: number;
+  id: string;
   jenis_aspek: string;
   dialog_evaluasi: string;
   is_tercapai: boolean;
 };
 
 export type EmployeeAnalytics = {
-  pegawaiId: number;
+  pegawaiId: string;
   nama_pegawai: string;
   npp: string;
   tercapaiCount: number;
@@ -46,7 +46,7 @@ const ASPEK_LABELS: Record<string, string> = {
 
 export function AchievementList({ analytics, evalAnalytics, totalTercapai, totalTidakTercapai }: AchievementListProps) {
   const [activeTab, setActiveTab] = useState<"pegawai" | "evaluasi">("pegawai");
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const total = totalTercapai + totalTidakTercapai;
   const tercapaiPercent = total > 0 ? Math.round((totalTercapai / total) * 100) : 0;
   const tidakPercent = total > 0 ? 100 - tercapaiPercent : 0;

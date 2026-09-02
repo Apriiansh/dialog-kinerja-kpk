@@ -12,7 +12,7 @@ export function ReviuSignForm({
   reviuId,
   role = "pegawai",
 }: {
-  reviuId: number;
+  reviuId: string;
   role?: "atasan" | "pegawai";
 }) {
   const router = useRouter();

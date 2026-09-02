@@ -30,7 +30,7 @@ import { error as showError, success as showSuccess } from "@/components/ui/toas
 import { formatPeriode } from "@/lib/constants/triwulan";
 
 export interface UserDetailData {
-  id: number;
+  id: string;
   npp: string;
   email: string | null;
   email_verified: boolean;
@@ -45,13 +45,13 @@ export interface UserDetailData {
   is_active: boolean;
   default_role: string;
   atasan?: {
-    id: number;
+    id: string;
     nama_pegawai: string;
     npp: string;
     nama_jabatan: string | null;
   } | null;
   bawahan?: {
-    id: number;
+    id: string;
     npp: string;
     nama_pegawai: string;
     nama_jabatan: string | null;
@@ -59,7 +59,7 @@ export interface UserDetailData {
     is_active: boolean;
   }[];
   dialogs?: {
-    id: number;
+    id: string;
     periode_tahun: number;
     triwulan: Triwulan;
     status: StatusDialog;
@@ -340,9 +340,9 @@ export function UserDetailView({
                 {isActiveState ? "Aktif" : "Nonaktif"}
               </span>
             </div>
-            <p className="text-sm font-medium text-ink-muted">
+            {/*<p className="text-sm font-medium text-ink-muted">
               {user.nama_jabatan || "Belum ada jabatan"} · {user.unit_kerja || "Belum ada unit kerja"}
-            </p>
+            </p>*/}
             <div className="mt-1 flex flex-wrap gap-1.5">
               {user.is_admin && <RoleTag role="ADMIN" />}
               {user.as_pegawai && <RoleTag role="PEGAWAI" />}
@@ -418,21 +418,6 @@ export function UserDetailView({
                 value={user.masa_kerja_unit_terakhir || "-"}
               />
 
-              <InfoItem
-                icon={<UserSwitchIcon size={22} />}
-                label="Atasan Langsung"
-                value={
-                  user.atasan ? (
-                    <>
-                      <span className="text-sm font-semibold text-ink">{user.atasan.nama_pegawai}</span>
-                      <span className="block text-xs text-ink-muted">NPP {user.atasan.npp}</span>
-                    </>
-                  ) : (
-                    <span className="text-sm font-semibold text-ink-muted">—</span>
-                  )
-                }
-              />
-
             </div>
           </div>
 
@@ -483,6 +468,38 @@ export function UserDetailView({
 
         {/* Right Col (1 col): Struktur Bawahan */}
         <div className="flex flex-col gap-6">
+          <div className="flex flex-col rounded-xl border border-outline bg-surface p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-ink-muted">
+                Atasan Langsung
+              </h3>
+              <UserSwitchIcon size={18} className="text-ink-muted" />
+            </div>
+
+            {!user.atasan ? (
+              <p className="text-sm text-ink-muted">Tidak memiliki atasan langsung.</p>
+            ) : (
+              <Link
+                href={context === "ADMIN" ? `/admin/users/${user.atasan.id}` : `/atasan/pegawai/${user.atasan.id}`}
+                className="group -mx-2 flex items-center justify-between rounded-lg p-2.5 transition-colors hover:bg-surface-muted/50"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-muted text-primary text-xs font-bold">
+                    {user.atasan.nama_pegawai.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <span className="block text-xs font-semibold text-ink group-hover:text-primary transition-colors">
+                      {user.atasan.nama_pegawai}
+                    </span>
+                    <span className="block text-[11px] text-ink-muted">
+                      NPP {user.atasan.npp} · {user.atasan.nama_jabatan || "—"}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            )}
+          </div>
+
           <div className="flex flex-col rounded-xl border border-outline bg-surface p-5">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-sm font-bold uppercase tracking-wider text-ink-muted">

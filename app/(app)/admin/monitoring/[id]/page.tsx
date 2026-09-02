@@ -17,12 +17,13 @@ import { formatPeriode } from "@/lib/constants/triwulan";
 import { formatTanggal } from "@/lib/utils/format";
 import { countFilledAspek } from "@/lib/utils/capaian";
 import z from "zod";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
 type PageProps = { params: Promise<{ id: string }> };
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const user = await prisma.user.findUnique({
     where: { id },

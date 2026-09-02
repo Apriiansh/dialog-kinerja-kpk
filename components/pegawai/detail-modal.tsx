@@ -15,7 +15,7 @@ import { RoleTag } from "@/components/shared/role-tag";
 import { error as showError, success as showSuccess } from "@/components/ui/toast";
 
 export interface PegawaiDetail {
-  id: number;
+  id: string;
   npp: string;
   nip: string | null;
   nama_pegawai: string;

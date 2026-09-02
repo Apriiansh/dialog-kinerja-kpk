@@ -107,25 +107,28 @@ export default async function DialogDetailPage({
   const chatOpen = sp?.chat === "1";
   const session = await requireRole("PEGAWAI");
 
-  const dialogId = Number(id);
-  if (Number.isNaN(dialogId)) notFound();
+  const dialogId = id;
 
-  const [dialog, pegawai, sequenceNum] = await Promise.all([
+  const [dialog, pegawai] = await Promise.all([
     getPegawaiDialog(dialogId, session.id),
     getDialogActor(session.id),
-    prisma.dialogKinerja.count({
-      where: { id_pegawai: session.id, id: { lte: dialogId } },
-    }),
   ]);
   if (!dialog) notFound();
+
+  const sequenceNum = await prisma.dialogKinerja.count({
+    where: {
+      id_pegawai: session.id,
+      created_at: { lte: dialog.created_at },
+    },
+  });
 
   const isEditable = canEditDialog(dialog.status);
   const isSelesai = dialog.status === "selesai";
   const showValidation =
     canValidateDialog(dialog.status) && !dialog.is_valid_pegawai;
   const selesaiReviuIds = dialog.reviu
-    .filter((r: { status: string; id: number }) => r.status === "selesai")
-    .map((r: { id: number }) => r.id);
+    .filter((r) => r.status === "selesai")
+    .map((r) => r.id);
   const latestSelesaiReviuId = selesaiReviuIds[selesaiReviuIds.length - 1];
   const hasLanjutan = dialog.dialog_lanjutan.length > 0;
 

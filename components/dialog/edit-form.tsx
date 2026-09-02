@@ -39,7 +39,7 @@ interface MetodeOption {
 }
 
 interface ItemDraft {
-  id?: number;
+  id?: string;
   dialog_evaluasi: string;
   kompetensi_dikembangkan: string;
   id_metode_pengembangan: string;
@@ -59,7 +59,7 @@ interface ExistingAspek {
   tanggung_jawab_pegawai: string | null;
   tanggung_jawab_atasan?: string | null;
   item: {
-    id: number;
+    id: string;
     dialog_evaluasi: string | null;
     kompetensi_dikembangkan: string | null;
     id_metode_pengembangan: number | null;
@@ -288,7 +288,7 @@ export function DialogForm({
   jadwalDialog,
   isJadwalArrived,
 }: {
-  dialogId: number;
+  dialogId: string;
   periodeTahun: number;
   triwulan: Triwulan;
   deskripsiKinerja: string | null;

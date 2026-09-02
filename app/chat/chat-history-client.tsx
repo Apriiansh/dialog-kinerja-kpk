@@ -60,10 +60,10 @@ export function ChatHistoryClient({
 }) {
   const router = useRouter();
   const [conversations, setConversations] = useState(items);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDelete = async (dialogId: number, partnerNama: string) => {
+  const handleDelete = async (dialogId: string, partnerNama: string) => {
     if (!window.confirm(`Hapus seluruh riwayat chat dengan ${partnerNama}?`)) {
       return;
     }

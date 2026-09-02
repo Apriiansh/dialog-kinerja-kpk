@@ -12,18 +12,18 @@ const HEARTBEAT_INTERVAL_MS = 30_000;
 const MAX_PAYLOAD_BYTES = 16 * 1024;
 
 interface SessionPayload {
-  id?: number;
+  id?: string;
 }
 
 type LiveSocket = WebSocket & { isAlive?: boolean };
 
 interface RoomEntry {
   ws: LiveSocket;
-  userId: number;
+  userId: string;
 }
 
-const rooms = new Map<number, Set<RoomEntry>>();
-const roomUnsubscribers = new Map<number, () => void>();
+const rooms = new Map<string, Set<RoomEntry>>();
+const roomUnsubscribers = new Map<string, () => void>();
 
 function parseCookies(header: string | undefined): Record<string, string> {
   if (!header) return {};
@@ -50,8 +50,8 @@ function isSameOrigin(req: IncomingMessage): boolean {
 
 async function authenticateUpgrade(
   req: IncomingMessage,
-  dialogId: number,
-): Promise<number | null> {
+  dialogId: string,
+): Promise<string | null> {
   if (!isSameOrigin(req)) return null;
 
   const secret = process.env.SESSION_SECRET;
@@ -70,7 +70,7 @@ async function authenticateUpgrade(
     return null;
   }
   const userId = session.id;
-  if (typeof userId !== "number") return null;
+  if (!userId) return null;
 
   const dialog = await prisma.dialogKinerja.findFirst({
     where: {
@@ -90,7 +90,7 @@ async function authenticateUpgrade(
   return userId;
 }
 
-function ensureRoom(dialogId: number): Set<RoomEntry> {
+function ensureRoom(dialogId: string): Set<RoomEntry> {
   let room = rooms.get(dialogId);
   if (!room) {
     room = new Set();
@@ -109,7 +109,7 @@ function ensureRoom(dialogId: number): Set<RoomEntry> {
   return room;
 }
 
-function releaseRoomIfEmpty(dialogId: number): void {
+function releaseRoomIfEmpty(dialogId: string): void {
   const room = rooms.get(dialogId);
   if (room && room.size === 0) {
     rooms.delete(dialogId);
@@ -150,8 +150,8 @@ export function setupWebSocketHub({
       return;
     }
 
-    const dialogId = Number(rawId);
-    if (pathname !== WS_PATH || !Number.isInteger(dialogId)) {
+    const dialogId = rawId ?? "";
+    if (pathname !== WS_PATH || !dialogId) {
       try {
         getNextUpgradeHandler()(req, socket, head);
       } catch {
@@ -181,7 +181,7 @@ export function setupWebSocketHub({
       });
   });
 
-  wss.on("connection", (rawSocket: WebSocket, dialogId: number, userId: number) => {
+  wss.on("connection", (rawSocket: WebSocket, dialogId: string, userId: string) => {
     const ws = rawSocket as LiveSocket;
     ws.isAlive = true;
     ws.on("pong", () => {

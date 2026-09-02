@@ -34,8 +34,7 @@ export default async function AtasanReviuDetailPage({
   const cetak = sp?.cetak === "1";
   const session = await requireRole("ATASAN");
 
-  const reviuId = Number(id);
-  if (Number.isNaN(reviuId)) notFound();
+  const reviuId = id;
 
   const reviu = await getAtasanReviu(reviuId, session.id);
   if (!reviu) notFound();

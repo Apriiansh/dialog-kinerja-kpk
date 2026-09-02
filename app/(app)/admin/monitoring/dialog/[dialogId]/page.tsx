@@ -13,6 +13,7 @@ import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { countFilledAspek } from "@/lib/utils/capaian";
 import z from "zod";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { dialogId } = await params;
   return { title: `Detail Dialog #${dialogId} - Monitoring Admin` };
 }
@@ -61,7 +62,10 @@ export default async function AdminDialogDetailPage({
   if (!dialog) notFound();
 
   const sequenceNum = await prisma.dialogKinerja.count({
-    where: { id_pegawai: dialog.pegawai.id, id: { lte: id } },
+    where: {
+      id_pegawai: dialog.pegawai.id,
+      created_at: { lte: dialog.created_at },
+    },
   });
 
   const filledCount = countFilledAspek(dialog.aspek);

@@ -13,8 +13,8 @@ export function EvaluasiLanjutanButton({
   size = "sm",
   className,
 }: {
-  reviuId?: number;
-  parentDialogId?: number;
+  reviuId?: string;
+  parentDialogId?: string;
   parentPeriodeLabel?: string;
   label?: string;
   variant?: "primary" | "outline";

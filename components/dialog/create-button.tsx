@@ -8,17 +8,17 @@ import { error as showError, success as showSuccess } from "@/components/ui/toas
 import { triwulanLabel, getAvailableYears } from "@/lib/constants/triwulan";
 
 export interface PegawaiOption {
-  id: number;
+  id: string;
   npp: string;
   nama_pegawai: string;
   nama_jabatan: string | null;
   unit_kerja: string | null;
   dialogAsPegawai?: {
-    id: number;
+    id: string;
     periode_tahun: number;
     triwulan: import("@/generated/prisma/enums").Triwulan;
     status: string;
-    reviu: { id: number; status: string }[];
+    reviu: { id: string; status: string }[];
   }[];
 }
 
@@ -28,7 +28,7 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
   const [query, setQuery] = useState("");
   const [unit, setUnit] = useState("");
   const [jabatan, setJabatan] = useState("");
-  const [creatingId, setCreatingId] = useState<number | null>(null);
+  const [creatingId, setCreatingId] = useState<string | null>(null);
   
   // Hanya fokus ke TW1 dan TW3 (TW2 dan TW4 di-hide)
   const [tahun, setTahun] = useState<number>(new Date().getFullYear());
@@ -74,7 +74,7 @@ export function NewDialogButton({ pegawai }: { pegawai: PegawaiOption[] }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  async function handleStartDialog(pegawaiId: number) {
+  async function handleStartDialog(pegawaiId: string) {
     setCreatingId(pegawaiId);
     // Tanggal untuk TW1 = 15 Januari, TW3 = 15 Juli
     const dateStr = triwulan === "TW1" ? `${tahun}-01-15` : `${tahun}-07-15`;

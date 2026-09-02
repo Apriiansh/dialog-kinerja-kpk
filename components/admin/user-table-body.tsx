@@ -31,7 +31,7 @@ function isRecentlyUpdated(created: Date, updated: Date): boolean {
 
 interface AdminUserRowProps {
   user: {
-    id: number;
+    id: string;
     npp: string;
     nama_pegawai: string;
     nama_jabatan: string | null;

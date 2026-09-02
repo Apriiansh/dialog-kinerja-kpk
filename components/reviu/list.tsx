@@ -8,7 +8,7 @@ import type { StatusReviu } from "@/generated/prisma/enums";
 import React from "react";
 
 interface ReviuListRow {
-  id: number;
+  id: string;
   status: StatusReviu;
   is_tercapai: boolean;
   is_tidak_tercapai: boolean;
@@ -37,7 +37,7 @@ export function ReviuList({
   href,
 }: {
   reviu: ReviuListRow[];
-  href?: (id: number) => string;
+  href?: (id: string) => string;
 }) {
   if (reviu.length === 0) return null;
 

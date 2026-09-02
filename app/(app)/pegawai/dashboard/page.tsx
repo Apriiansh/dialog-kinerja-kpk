@@ -35,7 +35,7 @@ function greeting() {
 
 const CTA: Record<
   StatusDialog,
-  { label: string; href: (id: number) => string; variant: "primary" | "plain" }
+  { label: string; href: (id: string) => string; variant: "primary" | "plain" }
 > = {
   draft: {
     label: "Lihat Pengajuan",

@@ -24,12 +24,9 @@ export default async function AtasanPegawaiDetailPage({
 }) {
   const session = await requireRole("ATASAN");
   const { id } = await params;
-  const numericId = Number(id);
-  if (isNaN(numericId)) notFound();
-
   const user = await prisma.user.findFirst({
     where: {
-      id: numericId,
+      id,
       id_atasan: session.id,
     },
       select: {
@@ -189,15 +186,15 @@ export default async function AtasanPegawaiDetailPage({
   async function handleToggleStatus(isActive: boolean) {
     "use server";
     if (isActive) {
-      return await aktifkanPegawai(numericId);
+      return await aktifkanPegawai(id);
     } else {
-      return await nonaktifkanPegawai(numericId);
+      return await nonaktifkanPegawai(id);
     }
   }
 
   async function handleDelete() {
     "use server";
-    return await deletePegawai(numericId);
+    return await deletePegawai(id);
   }
 
   return (
@@ -206,8 +203,8 @@ export default async function AtasanPegawaiDetailPage({
         user={userData}
         context="ATASAN"
         backHref="/atasan/pegawai"
-        editHref={`/atasan/pegawai/${numericId}/edit`}
-        isSelf={session.id === numericId}
+        editHref={`/atasan/pegawai/${id}/edit`}
+        isSelf={session.id === id}
         onToggleStatus={handleToggleStatus}
         onDelete={handleDelete}
       />

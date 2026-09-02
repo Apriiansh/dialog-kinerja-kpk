@@ -12,7 +12,7 @@ import {
 import { useChat } from "@/lib/hooks/use-chat";
 
 interface ChatWidgetProps {
-  dialogId: number;
+  dialogId: string;
   userRole: "atasan" | "pegawai" | "admin";
   open: boolean;
   onOpenChange?: (open: boolean) => void;

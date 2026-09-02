@@ -9,8 +9,8 @@ import { EmptyState } from "@/components/shared/empty-state";
 import type { Triwulan } from "@/generated/prisma/enums";
 
 export type CalendarEvent = {
-  id: number;
-  dialogId: number;
+  id: string;
+  dialogId: string;
   date: string;
   pegawaiName: string;
   npp: string;

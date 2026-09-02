@@ -17,7 +17,7 @@ export default async function AdminUserEditPage({
   const { id } = await params;
 
   const user = await prisma.user.findUnique({
-    where: { id: Number(id) },
+    where: { id },
     select: {
       id: true,
       npp: true,
@@ -64,7 +64,7 @@ export default async function AdminUserEditPage({
       isSelf={user.id === session.id}
       action={async (formData) => {
         "use server";
-        return updateAdminUser(Number(id), {}, formData);
+        return updateAdminUser(id, {}, formData);
       }}
       values={adminUserFormDefaults(user)}
     />

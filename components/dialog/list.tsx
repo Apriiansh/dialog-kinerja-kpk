@@ -7,15 +7,15 @@ import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { countFilledAspek } from "@/lib/utils/capaian";
 
 export interface DialogRow {
-  id: number;
+  id: string;
   periode_tahun: number;
   triwulan: Triwulan;
   status: StatusDialog;
   is_valid_pegawai: boolean;
   is_valid_atasan: boolean;
-  id_dialog_induk: number | null;
+  id_dialog_induk: string | null;
   dialog_induk: { periode_tahun: number; triwulan: Triwulan } | null;
-  dialog_lanjutan: { id: number }[];
+  dialog_lanjutan: { id: string }[];
   pegawai: {
     nama_pegawai: string;
     nama_jabatan: string | null;
@@ -26,7 +26,7 @@ export interface DialogRow {
   aspek?: {
     jenis_aspek: JenisAspek;
     tanggung_jawab_pegawai: string | null;
-    item: { id: number; is_tercapai: boolean | null }[];
+    item: { id: string; is_tercapai: boolean | null }[];
   }[];
 }
 
@@ -99,10 +99,10 @@ export function DialogList({ dialogs }: { dialogs: DialogRow[] }) {
                     {canEditDialog ? (
                       <Link
                         href={`/atasan/dialog/${dialog.id}/edit`}
-                        className="inline-flex h-8 items-center gap-1 rounded-md border border-outline bg-surface px-2.5 text-xs font-semibold text-ink transition-colors hover:bg-surface-muted"
+                        className="w-24 inline-flex h-8 items-center gap-1 rounded-md border border-outline bg-blue-500 px-2.5 text-xs font-semibold text-muted transition-colors hover:bg-surface-muted"
                       >
                         <PencilSimpleIcon size={12} weight="bold" />
-                        Isi Dialog
+                        Isi dialog
                       </Link>
                     ) : null}
                     <Link

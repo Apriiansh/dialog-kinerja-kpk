@@ -41,7 +41,7 @@ export function AtasanEditForm({
   aspek,
   deskripsiPegawai = "",
 }: {
-  dialogId: number;
+  dialogId: string;
   status: StatusDialog;
   initialDeskripsiKinerja: string;
   initialTahun?: number;

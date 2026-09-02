@@ -11,7 +11,7 @@ export function ValidationPanel({
   dialogId,
   roleLabel = "Pegawai",
 }: {
-  dialogId: number;
+  dialogId: string;
   roleLabel?: string;
 }) {
   const router = useRouter();

@@ -9,7 +9,7 @@ import {
 
 interface PegawaiRowProps {
   pegawai: {
-    id: number;
+    id: string;
     npp: string;
     nip: string | null;
     nama_pegawai: string;

@@ -12,7 +12,7 @@ export interface SocketTypingEvent {
 }
 
 interface UseDialogSocketOptions {
-  dialogId: number;
+  dialogId: string;
   enabled?: boolean;
   pollIntervalMs?: number;
   onOpen?: () => void;

@@ -18,7 +18,7 @@ export default async function EditDialogPage({
   const session = await requireRole("ATASAN");
 
   const dialog = await prisma.dialogKinerja.findFirst({
-    where: { id: Number(id), id_atasan: session.id },
+    where: { id, id_atasan: session.id },
     select: {
       id: true,
       deskripsi_kinerja: true,

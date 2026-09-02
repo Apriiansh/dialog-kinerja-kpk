@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ChatWidget } from "./ChatWidget";
 
 interface ChatHeaderProps {
-  dialogId: number;
+  dialogId: string;
   userRole: "atasan" | "pegawai" | "admin";
   partnerName?: string;
   partnerRoleLabel?: string;

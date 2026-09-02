@@ -16,7 +16,7 @@ interface UseChatOptions {
   pollIntervalMs?: number;
 }
 
-export function useChat(dialogId: number, options: UseChatOptions = {}) {
+export function useChat(dialogId: string, options: UseChatOptions = {}) {
   const { enabled = true, pollIntervalMs = 3500 } = options;
 
   const [messages, setMessages] = useState<ChatMessageItem[]>([]);
@@ -124,7 +124,7 @@ export function useChat(dialogId: number, options: UseChatOptions = {}) {
     const optimisticMsg: ChatMessageItem = {
       id: tempId,
       dialogId,
-      senderId: 0,
+      senderId: "",
       senderName: "Saya",
       senderRole: "pegawai",
       isCurrentUser: true,

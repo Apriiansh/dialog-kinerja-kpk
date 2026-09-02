@@ -13,7 +13,7 @@ export function PegawaiStatusToggle({
   nama,
   isActive,
 }: {
-  id: number;
+  id: string;
   nama: string;
   isActive: boolean;
 }) {

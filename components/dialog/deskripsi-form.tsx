@@ -23,7 +23,7 @@ export function DeskripsiKinerjaForm({
   initialTahun = 2026,
   initialTriwulan = "TW3",
 }: {
-  dialogId: number;
+  dialogId: string;
   initialValue: string;
   initialTahun?: number;
   initialTriwulan?: Triwulan;

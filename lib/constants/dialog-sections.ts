@@ -1,7 +1,7 @@
 import type { JenisAspek } from "@/generated/prisma/client";
 
 export interface DialogField {
-  id: number;
+  id: string;
   label: string;
 }
 
@@ -13,7 +13,7 @@ export interface DialogSection {
 }
 
 export interface DialogAspekRow {
-  id: number;
+  id: string;
   jenis_aspek: JenisAspek;
   tanggung_jawab_atasan: string | null;
 }

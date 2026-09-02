@@ -16,7 +16,7 @@ export default async function AtasanPegawaiEditPage({
   const { id } = await params;
 
   const user = await prisma.user.findFirst({
-    where: { id: Number(id), id_atasan: session.id },
+    where: { id, id_atasan: session.id },
     select: {
       npp: true,
       email: true,
@@ -37,7 +37,7 @@ export default async function AtasanPegawaiEditPage({
       submitLabel={`Edit ${user.nama_pegawai}`}
       action={async (formData) => {
         "use server";
-        return updatePegawai(Number(id), {}, formData);
+        return updatePegawai(id, {}, formData);
       }}
       values={pegawaiFormDefaults(user)}
     />

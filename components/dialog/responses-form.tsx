@@ -31,7 +31,7 @@ export function DialogResponsesForm({
   liveEnabled = false,
   aspek,
 }: {
-  dialogId: number;
+  dialogId: string;
   canEdit: boolean;
   canSubmit?: boolean;
   liveEnabled?: boolean;

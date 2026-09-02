@@ -11,7 +11,7 @@ export function AdminUserStatusToggle({
   isActive,
   isSelf,
 }: {
-  id: number;
+  id: string;
   nama: string;
   isActive: boolean;
   isSelf: boolean;

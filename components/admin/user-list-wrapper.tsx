@@ -14,7 +14,7 @@ import {
 import { EmptyState } from "@/components/shared/empty-state";
 
 interface UserRow {
-  id: number;
+  id: string;
   npp: string;
   nama_pegawai: string;
   nama_jabatan: string | null;

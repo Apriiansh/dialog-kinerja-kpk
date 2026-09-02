@@ -43,7 +43,7 @@ export function EvaluasiReminderBanner({
     getServerSnapshot,
   );
 
-  const dismissed: number[] = (() => {
+  const dismissed: string[] = (() => {
     try {
       return JSON.parse(dismissedJson);
     } catch {
@@ -57,9 +57,9 @@ export function EvaluasiReminderBanner({
     return null;
   }
 
-  function handleDismiss(id: number) {
+  function handleDismiss(id: string) {
     try {
-      const current: number[] = JSON.parse(
+      const current: string[] = JSON.parse(
         sessionStorage.getItem("dismissed_evaluasi_reminders") ?? "[]",
       );
       const updated = [...current, id];

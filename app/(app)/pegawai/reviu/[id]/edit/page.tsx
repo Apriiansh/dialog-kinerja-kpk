@@ -6,10 +6,11 @@ import { canEditReviu, getPegawaiReviu } from "@/lib/queries/reviu";
 import { toDateInput } from "@/lib/utils/format";
 import { ReviuForm } from "@/components/reviu/edit-form";
 import { formatPeriode } from "@/lib/constants/triwulan";
+import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Edit Reviu - Dialog Kinerja KPK",
 };
 
@@ -20,8 +21,7 @@ export default async function EditReviuPage({
 }) {
   const session = await requireRole("PEGAWAI");
   const { id } = await params;
-  const reviuId = Number(id);
-  if (Number.isNaN(reviuId)) notFound();
+  const reviuId = id;
 
   const reviu = await getPegawaiReviu(reviuId, session.id);
   if (!reviu) notFound();
