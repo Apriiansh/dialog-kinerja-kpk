@@ -22,7 +22,7 @@ const ATASAN_DIALOG_INCLUDE = {
   },
 } as const;
 
-export async function getAtasanDialog(dialogId: number, atasanId: number) {
+export async function getAtasanDialog(dialogId: string, atasanId: string) {
   return prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_atasan: atasanId },
     include: ATASAN_DIALOG_INCLUDE,

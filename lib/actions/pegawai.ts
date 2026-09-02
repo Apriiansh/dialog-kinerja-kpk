@@ -19,7 +19,7 @@ import { dateInputFromDaysFromNow } from "@/lib/utils/format";
 import { isDialogExpired } from "@/lib/utils/dialog-deadline";
 
 export interface AspekItemInput {
-  id?: number;
+  id?: string;
   dialog_evaluasi?: string;
   kompetensi_dikembangkan?: string;
   id_metode_pengembangan?: number | null;
@@ -146,7 +146,7 @@ async function validateSubmitInput(
 }
 
 export async function saveDialogForm(
-  dialogId: number,
+  dialogId: string,
   mode: "draft" | "submit",
   aspekInput: AspekInput[],
   deskripsiPegawai?: string,
@@ -245,7 +245,7 @@ export async function saveDialogForm(
           select: { id: true },
         });
         const existingIds = new Set(existing.map((item) => item.id));
-        const keepIds = new Set<number>();
+        const keepIds = new Set<string>();
 
         for (const item of aspek.items) {
           if (isEmptyItem(item)) continue;
@@ -332,7 +332,7 @@ export async function saveDialogForm(
 }
 
 export async function validateDialog(
-  dialogId: number,
+  dialogId: string,
   input: { setuju: boolean },
 ): Promise<ValidateDialogState> {
   const session = await requireRole("PEGAWAI");
@@ -397,7 +397,7 @@ export async function validateDialog(
 export async function initiateDialog(input: {
   jadwal_dialog: string;
   deskripsi_pegawai?: string;
-  id_dialog_induk?: number;
+  id_dialog_induk?: string;
 }) {
   const session = await requireRole("PEGAWAI");
   const err = await assertActiveActor(session.id);
@@ -477,7 +477,7 @@ export async function initiateDialog(input: {
     }
   }
 
-  let newDialogId: number;
+  let newDialogId: string;
   try {
     const dialog = await prisma.$transaction(async (tx) => {
       const created = await tx.dialogKinerja.create({
@@ -567,7 +567,7 @@ export async function initiateDialog(input: {
 }
 
 export async function updateDraftDialog(
-  dialogId: number,
+  dialogId: string,
   input: {
     jadwal_dialog: string;
     deskripsi_pegawai?: string;
@@ -675,7 +675,7 @@ export async function updateDraftDialog(
   return {};
 }
 
-export async function deleteDraftDialog(dialogId: number) {
+export async function deleteDraftDialog(dialogId: string) {
   const session = await requireRole("PEGAWAI");
   const err = await assertActiveActor(session.id);
   if (err) return { error: err };

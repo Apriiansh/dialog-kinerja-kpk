@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { capabilitiesForUser, type SessionData } from "@/lib/auth/session";
 
 export async function assertActiveActor(
-  userId: number,
+  userId: string,
 ): Promise<string | null> {
   const actor = await prisma.user.findUnique({
     where: { id: userId },

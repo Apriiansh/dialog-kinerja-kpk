@@ -22,7 +22,7 @@ const VALID_JENIS: JenisAspek[] = [
 ];
 
 export async function createDialogLanjutan(
-  reviuId: number,
+  reviuId: string,
   customPeriode?: { periode_tahun: number; triwulan: Triwulan },
 ): Promise<DialogLanjutanState> {
   const session = await requireRole("PEGAWAI", "ATASAN", "ADMIN");
@@ -77,7 +77,7 @@ export async function createDialogLanjutan(
   const tahunBerjalan = customPeriode?.periode_tahun ?? now.getFullYear();
   const triwulan = customPeriode?.triwulan ?? getTriwulanFromDate(now);
 
-  let newDialog: number;
+  let newDialog: string;
   try {
     newDialog = await prisma.$transaction(async (tx) => {
       const created = await tx.dialogKinerja.create({

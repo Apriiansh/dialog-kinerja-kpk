@@ -159,7 +159,7 @@ export async function createPegawai(
 }
 
 export async function updatePegawai(
-  id: number,
+  id: string,
   _prev: PegawaiFormState,
   formData: FormData,
 ): Promise<PegawaiFormState> {
@@ -238,7 +238,7 @@ export interface PegawaiStatusState {
 }
 
 export async function nonaktifkanPegawai(
-  id: number,
+  id: string,
 ): Promise<PegawaiStatusState> {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
@@ -271,7 +271,7 @@ export async function nonaktifkanPegawai(
   return {};
 }
 
-export async function aktifkanPegawai(id: number): Promise<PegawaiStatusState> {
+export async function aktifkanPegawai(id: string): Promise<PegawaiStatusState> {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
   if (err) return { error: err };
@@ -290,7 +290,7 @@ export async function aktifkanPegawai(id: number): Promise<PegawaiStatusState> {
   return {};
 }
 
-export async function deletePegawai(id: number): Promise<PegawaiStatusState> {
+export async function deletePegawai(id: string): Promise<PegawaiStatusState> {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
   if (err) return { error: err };

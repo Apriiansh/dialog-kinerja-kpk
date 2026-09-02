@@ -69,7 +69,7 @@ export const REVIU_INCLUDE = {
 } as const;
 
 export async function getPegawaiReviuList(
-  pegawaiId: number,
+  pegawaiId: string,
   opts?: { skip?: number; take?: number; status?: StatusReviu },
 ) {
   const where: Record<string, unknown> = { dialog: { id_pegawai: pegawaiId } };
@@ -83,14 +83,14 @@ export async function getPegawaiReviuList(
   });
 }
 
-export async function getPegawaiReviu(reviuId: number, pegawaiId: number) {
+export async function getPegawaiReviu(reviuId: string, pegawaiId: string) {
   return prisma.reviu.findFirst({
     where: { id: reviuId, dialog: { id_pegawai: pegawaiId } },
     include: REVIU_INCLUDE,
   });
 }
 
-export async function getAtasanReviu(reviuId: number, atasanId: number) {
+export async function getAtasanReviu(reviuId: string, atasanId: string) {
   return prisma.reviu.findFirst({
     where: { id: reviuId, dialog: { id_atasan: atasanId } },
     include: REVIU_INCLUDE,
@@ -98,7 +98,7 @@ export async function getAtasanReviu(reviuId: number, atasanId: number) {
 }
 
 export async function getAtasanReviuList(
-  atasanId: number,
+  atasanId: string,
   opts?: { skip?: number; take?: number; status?: StatusReviu },
 ) {
   const where: Record<string, unknown> = { dialog: { id_atasan: atasanId } };
@@ -118,7 +118,7 @@ export async function countReviu(
   return prisma.reviu.count({ where });
 }
 
-export async function getDialogReviuList(dialogId: number) {
+export async function getDialogReviuList(dialogId: string) {
   return prisma.reviu.findMany({
     where: { id_dialog: dialogId },
     include: REVIU_INCLUDE,
@@ -126,7 +126,7 @@ export async function getDialogReviuList(dialogId: number) {
   });
 }
 
-export async function getDialogAspekItems(dialogId: number) {
+export async function getDialogAspekItems(dialogId: string) {
   return prisma.dialogKinerjaAspek.findMany({
     where: { id_dialog: dialogId },
     select: {
@@ -148,8 +148,8 @@ export async function getDialogAspekItems(dialogId: number) {
 }
 
 export interface SelesaiDialogOption {
-  id: number;
-  id_dialog_induk: number | null;
+  id: string;
+  id_dialog_induk: string | null;
   periode_tahun: number;
   triwulan: import("@/generated/prisma/enums").Triwulan;
   atasan: { nama_pegawai: string; nama_jabatan: string | null };
@@ -157,7 +157,7 @@ export interface SelesaiDialogOption {
 }
 
 export async function getPegawaiSelesaiDialogOptions(
-  pegawaiId: number,
+  pegawaiId: string,
 ): Promise<SelesaiDialogOption[]> {
   return prisma.dialogKinerja.findMany({
     where: {
@@ -190,8 +190,8 @@ export function canValidateReviu(status: StatusReviu) {
 }
 
 export interface EvaluasiReminderItem {
-  id: number;
-  dialogId: number;
+  id: string;
+  dialogId: string;
   namaPegawai?: string;
   periodeTahun: number;
   triwulan: import("@/generated/prisma/enums").Triwulan;
@@ -200,7 +200,7 @@ export interface EvaluasiReminderItem {
 }
 
 export async function getActiveEvaluasiReminders(
-  userId: number,
+  userId: string,
   role: "PEGAWAI" | "ATASAN" | "ADMIN",
 ): Promise<EvaluasiReminderItem[]> {
   const today = new Date();
@@ -287,4 +287,3 @@ export async function getActiveEvaluasiReminders(
 
   return [];
 }
-

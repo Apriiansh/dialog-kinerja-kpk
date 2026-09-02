@@ -17,7 +17,7 @@ const PEGAWAI_DETAIL_INCLUDE = {
   },
 } as const;
 
-export async function getPegawaiDialog(dialogId: number, pegawaiId: number) {
+export async function getPegawaiDialog(dialogId: string, pegawaiId: string) {
   return prisma.dialogKinerja.findFirst({
     where: { id: dialogId, id_pegawai: pegawaiId },
     include: PEGAWAI_DETAIL_INCLUDE,
@@ -45,15 +45,15 @@ const ACTOR_PROFILE_SELECT = {
   masa_kerja_unit_terakhir: true,
 } as const;
 
-export async function getDialogActor(actorId: number) {
+export async function getDialogActor(actorId: string) {
   return prisma.user.findUnique({
     where: { id: actorId },
     select: ACTOR_PROFILE_SELECT,
   });
 }
 
-export async function getDialogSequenceMap(dialogIds: number[]) {
-  if (dialogIds.length === 0) return new Map<number, number>();
+export async function getDialogSequenceMap(dialogIds: string[]) {
+  if (dialogIds.length === 0) return new Map<string, number>();
 
   const dialogs = await prisma.dialogKinerja.findMany({
     where: { id: { in: dialogIds } },
@@ -68,8 +68,8 @@ export async function getDialogSequenceMap(dialogIds: number[]) {
     orderBy: { id: "asc" },
   });
 
-  const seqMap = new Map<number, number>();
-  const counts = new Map<number, number>();
+  const seqMap = new Map<string, number>();
+  const counts = new Map<string, number>();
 
   for (const d of allPegawaiDialogs) {
     const nextCount = (counts.get(d.id_pegawai) ?? 0) + 1;

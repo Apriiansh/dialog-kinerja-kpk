@@ -68,7 +68,7 @@ const userSchema = z
     id_atasan: z
       .string()
       .optional()
-      .transform((v) => (v && v !== "" ? Number(v) : undefined)),
+      .transform((v) => (v && v !== "" ? v : undefined)),
     password: z.string().optional(),
   })
   .superRefine((data, ctx) => {
@@ -129,17 +129,17 @@ function fieldErrorMap(
 }
 
 async function hasActiveCycles(
-  userId: number,
-  proposedAtasanId: number | undefined,
+  userId: string,
+  proposedAtasanId: string | undefined,
 ): Promise<boolean> {
   if (proposedAtasanId === undefined) return false;
   if (proposedAtasanId === userId) return true;
-  const visited = new Set<number>([userId]);
-  let current: number | null = proposedAtasanId;
+  const visited = new Set<string>([userId]);
+  let current: string | null = proposedAtasanId;
   while (current !== null) {
     if (visited.has(current)) return true;
     visited.add(current);
-    const atasan: { id_atasan: number | null } | null =
+    const atasan: { id_atasan: string | null } | null =
       await prisma.user.findUnique({
         where: { id: current },
         select: { id_atasan: true },
@@ -232,7 +232,7 @@ export async function createAdminUser(
 }
 
 export async function updateAdminUser(
-  id: number,
+  id: string,
   _prev: AdminUserFormState,
   formData: FormData,
 ): Promise<AdminUserFormState> {
@@ -328,7 +328,7 @@ export interface AdminUserStatusState {
 }
 
 export async function setUserStatus(
-  id: number,
+  id: string,
   isActive: boolean,
 ): Promise<AdminUserStatusState> {
   const session = await requireRole("ADMIN");
@@ -351,7 +351,7 @@ export async function setUserStatus(
 }
 
 export async function resetPassword(
-  id: number,
+  id: string,
   newPassword: string,
 ): Promise<AdminUserStatusState> {
   const session = await requireRole("ADMIN");
@@ -377,7 +377,7 @@ export async function resetPassword(
 }
 
 export async function deleteAdminUser(
-  id: number,
+  id: string,
 ): Promise<AdminUserStatusState> {
   const session = await requireRole("ADMIN");
   const err = await assertActiveActor(session.id);

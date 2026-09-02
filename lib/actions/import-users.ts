@@ -74,7 +74,7 @@ export async function importUsersPreview(
         })
       : [];
 
-  const atasanMap = new Map<string, number>();
+  const atasanMap = new Map<string, string>();
   for (const u of atasanUsers) {
     atasanMap.set(u.npp, u.id);
   }
@@ -211,7 +211,7 @@ export async function importUsersExecute(
         })
       : [];
 
-  const atasanMap = new Map<string, number>();
+  const atasanMap = new Map<string, string>();
   for (const u of atasanUsers) {
     atasanMap.set(u.npp, u.id);
   }

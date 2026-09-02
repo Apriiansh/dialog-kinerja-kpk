@@ -8,8 +8,8 @@ import { sendEmail } from "@/lib/email";
 
 export interface ChatMessageItem {
   id: number;
-  dialogId: number;
-  senderId: number;
+  dialogId: string;
+  senderId: string;
   senderName: string;
   senderRole: "atasan" | "pegawai" | "admin";
   isCurrentUser: boolean;
@@ -18,15 +18,15 @@ export interface ChatMessageItem {
 }
 
 export interface ChatDialogInfo {
-  id: number;
+  id: string;
   periodeTahun: number;
   path: string;
-  atasan: { id: number; nama: string; jabatan?: string | null };
-  pegawai: { id: number; nama: string; jabatan?: string | null };
+  atasan: { id: string; nama: string; jabatan?: string | null };
+  pegawai: { id: string; nama: string; jabatan?: string | null };
 }
 
 export async function getChatMessages(
-  dialogId: number,
+  dialogId: string,
   afterId?: number,
 ): Promise<{
   success: boolean;
@@ -65,7 +65,7 @@ export async function getChatMessages(
       return { success: false, error: "Akses ditolak" };
     }
 
-    const whereClause: { id_dialog: number; id?: { gt: number } } = {
+    const whereClause: { id_dialog: string; id?: { gt: number } } = {
       id_dialog: dialogId,
     };
     if (afterId && afterId > 0) {
@@ -139,7 +139,7 @@ export async function getChatMessages(
 }
 
 export async function sendChatMessage(
-  dialogId: number,
+  dialogId: string,
   content: string,
 ): Promise<{
   success: boolean;
@@ -446,7 +446,7 @@ export async function deleteChatMessage(
 }
 
 export async function deleteDialogChat(
-  dialogId: number,
+  dialogId: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await getSession();

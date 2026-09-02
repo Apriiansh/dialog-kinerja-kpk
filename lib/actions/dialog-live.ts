@@ -9,7 +9,7 @@ import type {
 } from "@/generated/prisma/enums";
 
 export interface DialogLiveItem {
-  id: number;
+  id: string;
   dialog_evaluasi: string | null;
   kompetensi_dikembangkan: string | null;
   is_tercapai: boolean | null;
@@ -19,7 +19,7 @@ export interface DialogLiveItem {
 }
 
 export interface DialogLiveAspekRow {
-  id: number;
+  id: string;
   jenis_aspek: JenisAspek;
   tanggung_jawab_pegawai: string | null;
   tanggung_jawab_atasan: string | null;
@@ -34,7 +34,7 @@ export interface DialogLiveState {
 }
 
 export async function getDialogLiveState(
-  dialogId: number,
+  dialogId: string,
 ): Promise<DialogLiveState | null> {
   const session = await getSession();
   if (!session?.id) return null;
@@ -52,14 +52,14 @@ export async function getDialogLiveState(
       deskripsi_kinerja: true,
       deskripsi_pegawai: true,
       aspek: {
-        orderBy: { id: "asc" },
+        orderBy: { created_at: "asc" },
         select: {
           id: true,
           jenis_aspek: true,
           tanggung_jawab_pegawai: true,
           tanggung_jawab_atasan: true,
           item: {
-            orderBy: { id: "asc" },
+            orderBy: { created_at: "asc" },
             select: {
               id: true,
               dialog_evaluasi: true,

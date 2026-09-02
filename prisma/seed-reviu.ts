@@ -99,8 +99,8 @@ const REVIU_SEEDS: ReviuSeed[] = [
 ];
 
 async function createSelesaiDialog(pegawai: {
-  id: number;
-  id_atasan: number | null;
+  id: string;
+  id_atasan: string | null;
 }) {
   const periodeTahun = new Date().getFullYear();
   const now = new Date();
@@ -163,7 +163,7 @@ async function main() {
     throw new Error(`User NPP ${TARGET_NPP} belum memiliki atasan.`);
   }
 
-  let dialog: { id: number; periode_tahun: number } | null =
+  let dialog: { id: string; periode_tahun: number } | null =
     await prisma.dialogKinerja.findFirst({
       where: { id_pegawai: pegawai.id, status: "selesai" },
       orderBy: { updated_at: "desc" },

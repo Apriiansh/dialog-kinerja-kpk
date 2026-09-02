@@ -10,8 +10,8 @@ export interface HierarkiState {
 }
 
 async function validasiRelasi(
-  pegawaiId: number,
-  atasanId: number,
+  pegawaiId: string,
+  atasanId: string,
 ): Promise<string | null> {
   if (atasanId === pegawaiId) return "Tidak bisa memilih diri sendiri.";
 
@@ -25,7 +25,7 @@ async function validasiRelasi(
   return null;
 }
 
-export async function pilihAtasan(atasanId: number): Promise<HierarkiState> {
+export async function pilihAtasan(atasanId: string): Promise<HierarkiState> {
   const session = await requireAuth();
   const error = await validasiRelasi(session.id, atasanId);
   if (error) return { error };

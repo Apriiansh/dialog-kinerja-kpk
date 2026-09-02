@@ -12,6 +12,7 @@ import { UnduhBuktiButton } from "@/components/shared/unduh-bukti-button";
 import { UnduhWordLink } from "@/components/shared/unduh-word-link";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { countFilledAspek } from "@/lib/utils/capaian";
+import z from "zod";
 
 export const dynamic = "force-dynamic";
 
@@ -34,11 +35,13 @@ export default async function AdminDialogDetailPage({
   const cetak = sp?.cetak === "1";
   await requireRole("ADMIN");
 
-  const idNum = Number(dialogId);
-  if (Number.isNaN(idNum)) notFound();
+  const id = dialogId;
+  if (!z.string().uuid().safeParse(id).success) {
+    notFound();
+  }
 
   const dialog = await prisma.dialogKinerja.findUnique({
-    where: { id: idNum },
+    where: { id },
     include: {
       pegawai: {
         select: { id: true, npp: true, nama_pegawai: true, nama_jabatan: true, unit_kerja: true },
@@ -58,7 +61,7 @@ export default async function AdminDialogDetailPage({
   if (!dialog) notFound();
 
   const sequenceNum = await prisma.dialogKinerja.count({
-    where: { id_pegawai: dialog.pegawai.id, id: { lte: idNum } },
+    where: { id_pegawai: dialog.pegawai.id, id: { lte: id } },
   });
 
   const filledCount = countFilledAspek(dialog.aspek);

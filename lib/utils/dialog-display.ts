@@ -19,7 +19,7 @@ export function aspekItemKey(item: AspekPegawaiItem): string {
 }
 
 export interface AspekPegawaiRow {
-  id: number;
+  id: string;
   jenis_aspek: JenisAspek;
   tanggung_jawab_pegawai: string | null;
   tanggung_jawab_atasan: string | null;

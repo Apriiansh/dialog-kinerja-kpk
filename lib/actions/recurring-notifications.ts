@@ -63,7 +63,7 @@ export async function checkUpcomingReviuReminders(): Promise<void> {
     const periode = formatPeriodeLengkap(r.dialog.triwulan as "TW1" | "TW3", r.dialog.periode_tahun);
     const base = `Dialog kinerja ${periode} dijadwalkan pada ${tanggal}.`;
     const result: {
-      userId: number;
+      userId: string;
       type: "evaluasi_reminder";
       title: string;
       description: string;
@@ -94,4 +94,3 @@ export async function checkUpcomingReviuReminders(): Promise<void> {
     await createNotifications(inputs);
   }
 }
-

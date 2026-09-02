@@ -570,7 +570,7 @@ async function main() {
     where: { npp: { in: LEGACY_DUMMY_NPPS } },
   });
 
-  const idByNpp = new Map<string, number>();
+  const idByNpp = new Map<string, string>();
 
   const distinctUnits = [...new Set(USERS.map((u) => u.unit_kerja).filter(Boolean))];
 
@@ -652,7 +652,7 @@ async function main() {
   // Bersihkan data Dialog Kinerja dan turunannya agar seed bersih (cascade berjalan)
   await prisma.dialogKinerja.deleteMany({});
   
-  const dialogIdByRef = new Map<string, number>();
+  const dialogIdByRef = new Map<string, string>();
   let seededDialogs = 0;
   
   for (const seed of DIALOG_SEEDS) {

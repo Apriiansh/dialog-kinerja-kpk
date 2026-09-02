@@ -11,7 +11,7 @@ const NOTIFICATION_SELECT = {
 } as const;
 
 export async function getNotificationsByUser(
-  userId: number,
+  userId: string,
   page: number = 1,
   limit: number = 20,
 ) {
@@ -38,14 +38,14 @@ export async function getNotificationsByUser(
   };
 }
 
-export async function getUnreadCount(userId: number): Promise<number> {
+export async function getUnreadCount(userId: string): Promise<number> {
   return prisma.notification.count({
     where: { id_user: userId, is_read: false },
   });
 }
 
 export async function getRecentNotifications(
-  userId: number,
+  userId: string,
   limit: number = 5,
 ) {
   return prisma.notification.findMany({

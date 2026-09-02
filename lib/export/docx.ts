@@ -236,8 +236,8 @@ const KARIR_TITLE: Record<"KARIR_PENDEK" | "KARIR_MENENGAH", string> = {
 };
 
 export async function generateDialogKinerjaDocx(
-  dialogId: number,
-  sessionUserId: number,
+  dialogId: string,
+  sessionUserId: string,
   sessionRole: string,
 ): Promise<{ filename: string; buffer: Buffer }> {
   const dialog = await prisma.dialogKinerja.findUnique({
@@ -471,8 +471,8 @@ export async function generateDialogKinerjaDocx(
 /* ------------------------------------------------------------------ */
 
 export async function generateReviuDocx(
-  reviuId: number,
-  sessionUserId: number,
+  reviuId: string,
+  sessionUserId: string,
   sessionRole: string,
 ): Promise<{ filename: string; buffer: Buffer }> {
   const reviu = await prisma.reviu.findUnique({

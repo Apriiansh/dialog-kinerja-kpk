@@ -11,9 +11,9 @@ import { getTriwulanFromDate } from "@/lib/constants/triwulan";
 import { publishDialogUpdate } from "@/lib/realtime/bus";
 
 export async function startDialog(
-  pegawaiId: number,
+  pegawaiId: string,
   tanggalPeriode?: string,
-): Promise<{ error?: string; dialogId?: number }> {
+): Promise<{ error?: string; dialogId?: string }> {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
   if (err) return { error: err };
@@ -25,16 +25,16 @@ export async function startDialog(
 
   const latestDialog = await prisma.dialogKinerja.findFirst({
     where: { id_pegawai: pegawaiId },
-    orderBy: { id: "desc" },
+    orderBy: { created_at: "desc" },
     include: {
       reviu: {
-        orderBy: { id: "desc" },
+        orderBy: { created_at: "desc" },
         take: 1,
       },
     },
   });
 
-  let idDialogInduk: number | null = null;
+  let idDialogInduk: string | null = null;
   let aspekData:
     | {
         jenis_aspek: JenisAspek;
@@ -159,7 +159,7 @@ export async function startDialog(
     });
     const aspekIdByJenis = new Map(dialogAspeks.map((a) => [a.jenis_aspek, a.id]));
 
-    const itemsToCreate: { id_aspek: number; dialog_evaluasi: string }[] = [];
+    const itemsToCreate: { id_aspek: string; dialog_evaluasi: string }[] = [];
     const consumedIds: number[] = [];
 
     for (const item of stagingItems) {
@@ -192,7 +192,7 @@ export async function startDialog(
 }
 
 export async function autosaveResponses(
-  dialogId: number,
+  dialogId: string,
   values: Record<string, string>,
 ) {
   const session = await requireRole("ATASAN");
@@ -214,7 +214,7 @@ export async function autosaveResponses(
   await prisma.$transaction(
     Object.entries(values).map(([id, value]) =>
       prisma.dialogKinerjaAspek.updateMany({
-        where: { id: Number(id), id_dialog: dialogId },
+        where: { id: id, id_dialog: dialogId },
         data: { tanggung_jawab_atasan: value.trim() || null },
       }),
     ),
@@ -231,7 +231,7 @@ export interface SaveDeskripsiState {
 }
 
 export async function saveDeskripsiKinerja(
-  dialogId: number,
+  dialogId: string,
   value: string,
   periode_tahun?: number,
   triwulan?: Triwulan,
@@ -277,7 +277,7 @@ export async function saveDeskripsiKinerja(
   return {};
 }
 
-export async function submitDialog(dialogId: number) {
+export async function submitDialog(dialogId: string) {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
   if (err) flashRedirect("/login", {
@@ -318,7 +318,7 @@ export async function submitDialog(dialogId: number) {
 }
 
 export async function approveDialog(
-  dialogId: number,
+  dialogId: string,
   deskripsiKinerja?: string,
 ): Promise<{ error?: string }> {
   const session = await requireRole("ATASAN");
@@ -370,7 +370,7 @@ export async function approveDialog(
 }
 
 export async function rejectDialog(
-  dialogId: number,
+  dialogId: string,
   alasan_tolak: string,
 ): Promise<{ error?: string }> {
   const session = await requireRole("ATASAN");
@@ -448,7 +448,7 @@ export interface SubmitEvaluasiState {
 }
 
 export async function submitEvaluasi(
-  dialogId: number,
+  dialogId: string,
   input: { setuju: boolean },
 ): Promise<SubmitEvaluasiState> {
   const session = await requireRole("ATASAN");
@@ -499,7 +499,7 @@ export async function submitEvaluasi(
   return {};
 }
 
-export async function deleteDialog(dialogId: number): Promise<{ error?: string }> {
+export async function deleteDialog(dialogId: string): Promise<{ error?: string }> {
   const session = await requireRole("ATASAN");
   const err = await assertActiveActor(session.id);
   if (err) return { error: err };

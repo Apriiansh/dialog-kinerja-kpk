@@ -7,7 +7,7 @@ import { cache } from "react";
 export type Role = "ADMIN" | "ATASAN" | "PEGAWAI";
 
 export interface SessionData {
-  id: number;
+  id: string;
   npp: string;
   nama: string;
   role: Role;

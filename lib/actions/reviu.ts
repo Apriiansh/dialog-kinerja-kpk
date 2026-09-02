@@ -8,7 +8,7 @@ import { flashRedirect } from "@/lib/utils/flash";
 import { createNotification } from "@/lib/notifications";
 
 export interface ReviuCapaianItem {
-  id: number;
+  id: string;
   is_tercapai: boolean;
   keterangan?: string;
 }
@@ -47,7 +47,7 @@ function toNullableDate(value: string | null | undefined): Date | null {
 
 function validateSubmitInput(
   input: ReviuInput,
-  itemIds: number[],
+  itemIds: string[],
 ): string | null {
   const problems: string[] = [];
   const capaianMap = new Map(
@@ -77,7 +77,7 @@ function validateSubmitInput(
 }
 
 function deriveGlobalFlags(
-  itemIds: number[],
+  itemIds: string[],
   itemCapaian: ReviuCapaianItem[] | undefined,
 ): { is_tercapai: boolean; is_tidak_tercapai: boolean } {
   const capaianMap = new Map((itemCapaian ?? []).map((c) => [c.id, c]));
@@ -89,7 +89,7 @@ function deriveGlobalFlags(
 }
 
 async function applyItemCapaian(
-  dialogId: number,
+  dialogId: string,
   itemCapaian: ReviuCapaianItem[] | undefined,
 ): Promise<void> {
   if (!itemCapaian || itemCapaian.length === 0) return;
@@ -114,7 +114,7 @@ async function applyItemCapaian(
 }
 
 export async function createReviu(
-  dialogId: number,
+  dialogId: string,
   mode: "draft" | "submit",
   input: ReviuInput,
 ): Promise<ReviuSaveState> {
@@ -154,7 +154,7 @@ export async function createReviu(
     input.itemCapaian,
   );
 
-  let reviuId: number;
+  let reviuId: string;
   try {
     const reviu = await prisma.reviu.create({
       data: {
@@ -197,7 +197,7 @@ export async function createReviu(
 }
 
 export async function saveReviu(
-  reviuId: number,
+  reviuId: string,
   mode: "draft" | "submit",
   input: ReviuInput,
 ): Promise<ReviuSaveState> {
@@ -282,7 +282,7 @@ export async function saveReviu(
   );
 }
 
-export async function deleteReviu(reviuId: number): Promise<{ error?: string }> {
+export async function deleteReviu(reviuId: string): Promise<{ error?: string }> {
   const session = await requireRole("PEGAWAI");
   const err = await assertActiveActor(session.id);
   if (err) return { error: err };
@@ -302,7 +302,7 @@ export async function deleteReviu(reviuId: number): Promise<{ error?: string }> 
 }
 
 export async function submitReviuAtasan(
-  reviuId: number,
+  reviuId: string,
   input: { setuju: boolean },
 ): Promise<ReviuSignState> {
   const session = await requireRole("ATASAN");
@@ -354,7 +354,7 @@ export async function submitReviuAtasan(
 }
 
 export async function rejectReviu(
-  reviuId: number,
+  reviuId: string,
   alasan_tolak: string,
 ): Promise<ReviuSignState> {
   const session = await requireRole("ATASAN");
@@ -419,7 +419,7 @@ export async function rejectReviu(
 }
 
 export async function validateReviu(
-  reviuId: number,
+  reviuId: string,
   input: { setuju: boolean },
 ): Promise<ReviuSignState> {
   const session = await requireRole("PEGAWAI");

@@ -49,7 +49,7 @@ enum StatusReviu {
 }
 
 model User {
-  id                       Int      @id @default(autoincrement())
+  id                       String   @id @default(uuid()) @db.VarChar(36)
   npp                      String   @unique @db.VarChar(50)
   nip                      String?  @unique @db.VarChar(50)
   nama_pegawai             String   @db.VarChar(255)
@@ -72,7 +72,7 @@ model User {
   created_at               DateTime @default(now())
   updated_at               DateTime @updatedAt
 
-  id_atasan Int?
+  id_atasan String? @db.VarChar(36)
   atasan    User?  @relation("Hierarki", fields: [id_atasan], references: [id])
   bawahan   User[] @relation("Hierarki")
 
@@ -89,7 +89,7 @@ model User {
 
 model PasswordResetToken {
   id        Int      @id @default(autoincrement())
-  userId    Int      @map("user_id")
+  userId    String   @db.VarChar(36) @map("user_id")
   tokenHash String   @unique @db.VarChar(64) @map("token_hash")
   expiresAt DateTime @map("expires_at")
   usedAt    DateTime? @map("used_at")
@@ -111,9 +111,9 @@ model MasterMetodePengembangan {
   @@map("master_metode_pengembangan")
 }
 model DialogKinerja {
-  id                     Int          @id @default(autoincrement())
-  id_atasan              Int
-  id_pegawai             Int
+  id                     String       @id @default(uuid()) @db.VarChar(36)
+  id_atasan              String       @db.VarChar(36)
+  id_pegawai             String       @db.VarChar(36)
   periode_tahun          Int
   triwulan               Triwulan
   deskripsi_kinerja      String?      @db.Text
@@ -131,7 +131,7 @@ model DialogKinerja {
   atasan  User @relation("DialogAtasan", fields: [id_atasan], references: [id], onDelete: Restrict)
   pegawai User @relation("DialogPegawai", fields: [id_pegawai], references: [id], onDelete: Restrict)
 
-  id_dialog_induk Int?
+  id_dialog_induk String? @db.VarChar(36)
 
   aspek DialogKinerjaAspek[]
   reviu Reviu[]
@@ -146,7 +146,7 @@ model DialogKinerja {
 
 model DialogEmailLog {
   id         Int      @id @default(autoincrement())
-  id_dialog  Int
+  id_dialog  String   @db.VarChar(36)
   jenis      String   @db.VarChar(30) // h_minus_1 | h
   created_at DateTime @default(now())
 
@@ -157,8 +157,8 @@ model DialogEmailLog {
 }
 
 model DialogKinerjaAspek {
-  id                     Int        @id @default(autoincrement())
-  id_dialog              Int
+  id                     String     @id @default(uuid()) @db.VarChar(36)
+  id_dialog              String     @db.VarChar(36)
   jenis_aspek            JenisAspek
   tanggung_jawab_pegawai String?    @db.Text
   tanggung_jawab_atasan  String?    @db.Text
@@ -174,8 +174,8 @@ model DialogKinerjaAspek {
 }
 
 model DialogKinerjaItem {
-  id                          Int       @id @default(autoincrement())
-  id_aspek                    Int
+  id                          String    @id @default(uuid()) @db.VarChar(36)
+  id_aspek                    String    @db.VarChar(36)
   dialog_evaluasi             String?   @db.Text
   kompetensi_dikembangkan     String?   @db.Text
   id_metode_pengembangan      Int?
@@ -193,8 +193,8 @@ model DialogKinerjaItem {
 }
 
 model Reviu {
-  id                     Int                @id @default(autoincrement())
-  id_dialog              Int
+  id                     String             @id @default(uuid()) @db.VarChar(36)
+  id_dialog              String             @db.VarChar(36)
   is_tercapai            Boolean            @default(false)
   is_tidak_tercapai      Boolean            @default(false)
   penjelasan_tercapai    String?            @db.Text
@@ -217,7 +217,7 @@ model Reviu {
 
 model Notification {
   id          Int      @id @default(autoincrement())
-  id_user     Int
+  id_user     String   @db.VarChar(36)
   type        String   @db.VarChar(50)
   title       String   @db.VarChar(255)
   description String   @db.Text
@@ -234,8 +234,8 @@ model Notification {
 
 model DialogChatMessage {
   id         Int      @id @default(autoincrement())
-  id_dialog  Int
-  id_sender  Int
+  id_dialog  String   @db.VarChar(36)
+  id_sender  String   @db.VarChar(36)
   message    String   @db.Text
   created_at DateTime @default(now())
 
@@ -255,9 +255,9 @@ model ImportStagingItem {
   narasi        String     @db.Text    // teks yang masuk ke dialog_evaluasi
   metadata      Json?                   // data mentah (target, capaian, nilai, dll.)
   is_consumed   Boolean    @default(false)
-  id_dialog     Int?
+  id_dialog     String?    @db.VarChar(36)
   batch_id      String     @db.VarChar(100)
-  imported_by   Int
+  imported_by   String     @db.VarChar(36)
   imported_at   DateTime   @default(now())
 
   importer User @relation("ImportedBy", fields: [imported_by], references: [id])

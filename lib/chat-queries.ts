@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import type { Role, SessionData } from "@/lib/auth/session";
 import { formatPeriode } from "@/lib/constants/triwulan";
 
-export function chatDialogPath(role: Role, dialogId: number): string {
+export function chatDialogPath(role: Role, dialogId: string): string {
   switch (role) {
     case "ADMIN":
       return `/admin/monitoring/dialog/${dialogId}`;
@@ -14,7 +14,7 @@ export function chatDialogPath(role: Role, dialogId: number): string {
 }
 
 export type ChatHistoryItem = {
-  dialogId: number;
+  dialogId: string;
   status: string;
   dialogPath: string;
   partnerNama: string;

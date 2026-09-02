@@ -34,7 +34,7 @@ export interface AspekImportPreviewRow {
   nip?: string;
   namaExcel?: string;
   namaDb?: string;
-  userId?: number;
+  userId?: string;
   narasi: string;
   status: "valid" | "npp_not_found" | "error";
   errorMessage?: string;

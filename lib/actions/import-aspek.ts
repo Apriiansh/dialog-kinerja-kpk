@@ -49,7 +49,7 @@ export async function importAspekPreview(
     },
   });
 
-  const userMap = new Map<string, { id: number; nama: string; npp: string }>();
+  const userMap = new Map<string, { id: string; nama: string; npp: string }>();
   for (const u of users) {
     userMap.set(u.npp.toLowerCase(), { id: u.id, nama: u.nama_pegawai, npp: u.npp });
     if (u.nip) {

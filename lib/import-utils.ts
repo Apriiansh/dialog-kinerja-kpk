@@ -43,7 +43,7 @@ export interface ImportPreviewRow {
   default_role: "ADMIN" | "ATASAN" | "PEGAWAI";
   atasan_npp: string;
   status: "new" | "existing" | "error";
-  existingUserId: number | null;
+  existingUserId: string | null;
   errorMessage: string | null;
   suggestedAction: ImportAction;
   unitKerjaId: number | null;
@@ -214,7 +214,7 @@ export function normalizeRow(raw: ImportRowInput): NormalizedRow {
 
 export function validateRow(
   row: NormalizedRow,
-  atasanMap: Map<string, number>,
+  atasanMap: Map<string, string>,
 ): string | null {
   if (!row.npp || !/^\d{7}$/.test(row.npp)) {
     return "NPP wajib 7 digit angka.";

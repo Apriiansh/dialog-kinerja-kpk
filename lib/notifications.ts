@@ -11,7 +11,7 @@ type NotificationType =
   | "hierarki_ditugaskan";
 
 interface CreateNotificationInput {
-  userId: number;
+  userId: string;
   type: NotificationType;
   title: string;
   description: string;
@@ -51,7 +51,7 @@ export async function ensureEmailVerificationNotification({
   userId,
   role,
 }: {
-  userId: number;
+  userId: string;
   role: Role;
 }): Promise<void> {
   const user = await prisma.user.findUnique({
@@ -78,7 +78,7 @@ export async function ensureEmailVerificationNotification({
   ]);
 }
 
-export async function clearEmailVerificationNotifications(userId: number) {
+export async function clearEmailVerificationNotifications(userId: string) {
   await prisma.notification.deleteMany({
     where: { id_user: userId, type: "email_verification" },
   });

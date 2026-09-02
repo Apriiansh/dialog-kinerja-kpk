@@ -16,6 +16,7 @@ import { CapaianBadge } from "@/components/shared/capaian-badge";
 import { formatPeriode } from "@/lib/constants/triwulan";
 import { formatTanggal } from "@/lib/utils/format";
 import { countFilledAspek } from "@/lib/utils/capaian";
+import z from "zod";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,7 @@ type PageProps = { params: Promise<{ id: string }> };
 export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
   const user = await prisma.user.findUnique({
-    where: { id: Number(id) || 0 },
+    where: { id },
     select: { nama_pegawai: true },
   });
   return {
@@ -40,8 +41,10 @@ export default async function AdminPegawaiMonitoringPage({
   const { id } = await params;
   await requireRole("ADMIN");
 
-  const pegawaiId = Number(id);
-  if (Number.isNaN(pegawaiId)) notFound();
+  const pegawaiId = id;
+  if (!z.string().uuid().safeParse(pegawaiId).success) {
+    notFound();
+  }
 
   const pegawai = await prisma.user.findUnique({
     where: { id: pegawaiId },
@@ -56,7 +59,7 @@ export default async function AdminPegawaiMonitoringPage({
         },
       },
       dialogAsPegawai: {
-        orderBy: { id: "asc" },
+        orderBy: { created_at: "asc" },
         include: {
           atasan: {
             select: {

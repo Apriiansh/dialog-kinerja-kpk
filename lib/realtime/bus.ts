@@ -8,7 +8,7 @@ export type DialogUpdateKind =
 
 export interface DialogUpdateEvent {
   kind: DialogUpdateKind;
-  byUserId: number;
+  byUserId: string;
 }
 
 type BusGlobal = typeof globalThis & {
@@ -26,14 +26,14 @@ function getBus(): EventEmitter {
 }
 
 export function publishDialogUpdate(
-  dialogId: number,
+  dialogId: string,
   event: DialogUpdateEvent,
 ): void {
   getBus().emit(`dialog:${dialogId}`, event);
 }
 
 export function subscribeDialog(
-  dialogId: number,
+  dialogId: string,
   listener: (event: DialogUpdateEvent) => void,
 ): () => void {
   const channel = `dialog:${dialogId}`;
