@@ -220,7 +220,7 @@ export default async function DialogDetailPage({
                         href={`/pegawai/reviu/new?dialog=${dialog.id}`}
                         className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-primary px-3.5 text-xs font-semibold text-on-primary transition-colors hover:bg-primary-strong"
                       >
-                        Isi Evaluasi Kinerja
+                        Buat Reviu
                       </Link>
                     ) : null}
                     {latestSelesaiReviuId && !hasLanjutan ? (

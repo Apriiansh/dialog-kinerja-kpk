@@ -21,7 +21,7 @@ import {
 } from "@/lib/actions/pegawai";
 import { ASPEK_DESC, ASPEK_LABEL, ASPEK_ORDER } from "@/lib/constants/aspek";
 import { formatPeriode } from "@/lib/constants/triwulan";
-import { error as showError, success as showSuccess } from "@/components/ui/toast";
+import { error as showError, success as showSuccess, warning } from "@/components/ui/toast";
 import { isDialogExpired } from "@/lib/utils/dialog-deadline";
 import { AutoResizeTextarea } from "@/components/dialog/auto-resize-textarea";
 import {
@@ -328,6 +328,7 @@ export function DialogForm({
   );
   const [pending, setPending] = useState<"draft" | "submit" | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [hasWarnings, setHasWarnings] = useState(false);
 
   const [saveState, setSaveState] = useState<
     "idle" | "saving" | "saved" | "error"
@@ -558,8 +559,10 @@ export function DialogForm({
       isLanjutan,
     );
     if (validationError) {
-      showError(validationError);
-      return;
+      setHasWarnings(true);
+      warning(`Masih ada isian yang belum lengkap: ${validationError}`);
+    } else {
+      setHasWarnings(false);
     }
     setShowConfirm(true);
   }
@@ -965,7 +968,10 @@ export function DialogForm({
           aria-modal="true"
           aria-label="Konfirmasi kirim dialog"
           className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4"
-          onClick={() => setShowConfirm(false)}
+          onClick={() => {
+            setShowConfirm(false);
+            setHasWarnings(false);
+          }}
         >
           <div
             className="flex w-full max-w-md flex-col rounded-lg bg-surface shadow-ambient"
@@ -982,7 +988,10 @@ export function DialogForm({
               </div>
               <button
                 type="button"
-                onClick={() => setShowConfirm(false)}
+                onClick={() => {
+                  setShowConfirm(false);
+                  setHasWarnings(false);
+                }}
                 aria-label="Tutup"
                 className="flex h-8 w-8 items-center justify-center rounded-md text-ink-muted transition-colors hover:bg-surface-muted hover:text-ink"
               >
@@ -995,10 +1004,19 @@ export function DialogForm({
                 Apakah Anda yakin ingin mengirim dialog kinerja ini ke atasan?
                 Setelah dikirim, isian tidak dapat diubah lagi.
               </p>
+              {hasWarnings && (
+                <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-4 text-amber-700">
+                  Beberapa isian masih kosong atau belum lengkap, namun Anda
+                  tetap dapat mengirim dialog ini ke atasan.
+                </p>
+              )}
               <div className="flex items-center justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setShowConfirm(false)}
+                  onClick={() => {
+                    setShowConfirm(false);
+                    setHasWarnings(false);
+                  }}
                   className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-outline-strong bg-surface px-5 text-sm font-semibold text-ink transition-colors hover:bg-surface-muted"
                 >
                   Batal
