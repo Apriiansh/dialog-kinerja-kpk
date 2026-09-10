@@ -6,7 +6,7 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isLoggedIn = Boolean(session?.id);
-  const publicPaths = ["/", "/login", "/forgot-password"];
+  const publicPaths = ["/", "/login", "/forgot-password", "/alur"];
   const isPublicPath =
     publicPaths.includes(pathname) || pathname.startsWith("/reset-password/");
 

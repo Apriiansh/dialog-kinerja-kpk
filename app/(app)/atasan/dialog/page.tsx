@@ -1,7 +1,6 @@
 import { ChartLineUpIcon } from "@phosphor-icons/react/dist/ssr";
 import {
   CheckCircleIcon,
-  HourglassIcon,
   PencilSimpleIcon,
   SealCheckIcon,
 } from "@phosphor-icons/react/dist/ssr";
@@ -155,13 +154,6 @@ export default async function DialogIndexPage({
       count: countByStatus("selesai"),
       icon: CheckCircleIcon,
       className: "bg-status-green-soft text-status-green",
-    },
-    {
-      key: "menunggu_pegawai",
-      label: "Pegawai Melengkapi",
-      count: countByStatus("menunggu_pegawai"),
-      icon: HourglassIcon,
-      className: "bg-status-amber-soft text-status-amber",
     },
     {
       key: "menunggu_atasan",

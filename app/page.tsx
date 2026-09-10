@@ -128,6 +128,11 @@ export default async function LandingPage() {
                       Masuk ke Sistem
                     </Link>
                   </li>
+                  <li>
+                    <Link href="/alur" className="hover:text-primary-strong dark:hover:text-[#FF7A86] transition-colors">
+                      Alur Proses (BPMN 2.0)
+                    </Link>
+                  </li>
                   <li>Biro SDM KPK</li>
                 </ul>
               </div>

@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "tsx watch server.ts --dev",
+    "dev": "next dev",
+    "dev:custom": "tsx watch server.ts --dev",
     "build": "prisma generate && prisma migrate deploy && next build",
-    "start": "tsx server.ts",
+    "start": "next start",
+    "start:custom": "tsx server.ts",
     "lint": "eslint",
     "postinstall": "prisma generate"
   },

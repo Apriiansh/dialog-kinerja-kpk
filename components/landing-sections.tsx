@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -14,7 +15,11 @@ import {
   UserCheckIcon,
   SealCheckIcon,
   ArrowRightIcon,
+  TreeStructureIcon,
+  ListNumbersIcon,
+  ArrowSquareOutIcon,
 } from "@phosphor-icons/react";
+import { AlurBpmnDiagram } from "./alur-bpmn-diagram";
 
 interface LandingSectionsProps {
   isLoggedIn: boolean;
@@ -84,27 +89,27 @@ const aspekList = [
 const alurSteps = [
   {
     step: "01",
-    title: "Atasan Menyusun Dialog",
-    role: "Atasan Langsung",
-    icon: FileTextIcon,
-    description:
-      "Memilih pegawai, menyusun indikator tanggung jawab, target kerja, dan arahan pembinaan. Dapat mengisi bersamaan saat pegawai bekerja.",
-  },
-  {
-    step: "02",
-    title: "Pegawai Mengisi & Submit",
+    title: "Pegawai Mengajukan Dialog",
     role: "Pegawai Dinilai",
     icon: UserCheckIcon,
     description:
-      "Melengkapi 4 aspek evaluasi (SKP, Gap Asesmen, Perilaku, & Karir) dengan item-item evaluasi, lalu mengirim ke atasan.",
+      "Mengajukan jadwal dialog kinerja, deskripsi rencana pembahasan, dan periode evaluasi kepada atasan langsung.",
+  },
+  {
+    step: "02",
+    title: "Atasan Meninjau & Menyetujui",
+    role: "Atasan Langsung",
+    icon: FileTextIcon,
+    description:
+      "Memeriksa pengajuan jadwal dan rencana dialog. Atasan menyetujui pengajuan atau mengembalikan jika jadwal perlu disesuaikan.",
   },
   {
     step: "03",
-    title: "Reviu & Validasi",
-    role: "Atasan & Pegawai",
+    title: "Pengisian 5 Aspek & Tanggung Jawab Pembinaan",
+    role: "Pegawai & Atasan",
     icon: ClockCounterClockwiseIcon,
     description:
-      "Atasan menilai dan menyetujui. Pegawai memvalidasi. Dialog terkunci dan siap di-export.",
+      "Pegawai melengkapi target kinerja (SKP, Gap Asesmen, Perilaku, & Karir). Atasan juga dapat langsung mengisi komitmen tanggung jawab pembinaan atasan secara bersamaan sebelum evaluasi dan penandatanganan.",
   },
   {
     step: "04",
@@ -125,6 +130,7 @@ const alurSteps = [
 ];
 
 export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsProps) {
+  const [viewMode, setViewMode] = useState<"diagram" | "steps">("diagram");
   return (
     <>
       {/* SECTION 1: ASPEK EVALUASI */}
@@ -282,49 +288,101 @@ export function LandingSections({ isLoggedIn, userHomePath }: LandingSectionsPro
             />
           </svg>
 
-          <div className="relative pl-8 sm:pl-10 space-y-0">
-            {/* Vertical connector line */}
-            <div className="absolute left-3 sm:left-4 top-3 bottom-3 w-px bg-outline dark:bg-white/10" />
+          {/* View Mode Selector Tabs */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="inline-flex rounded-xl p-1 bg-white dark:bg-white/5 border border-outline dark:border-white/10">
+              <button
+                type="button"
+                onClick={() => setViewMode("diagram")}
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                  viewMode === "diagram"
+                    ? "bg-primary-strong text-white shadow-xs"
+                    : "text-ink-muted hover:text-ink"
+                }`}
+              >
+                <TreeStructureIcon size={16} weight="bold" />
+                <span>Diagram BPMN 2.0 (Interaktif)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("steps")}
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                  viewMode === "steps"
+                    ? "bg-primary-strong text-white shadow-xs"
+                    : "text-ink-muted hover:text-ink"
+                }`}
+              >
+                <ListNumbersIcon size={16} weight="bold" />
+                <span>Ringkasan Tahapan (5 Langkah)</span>
+              </button>
+            </div>
 
-            {alurSteps.map((step, index) => {
-              const StepIcon = step.icon;
-              return (
-                <motion.div
-                  key={step.step}
-                  initial={{ opacity: 0, x: -16 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
-                  className="relative flex gap-4 sm:gap-5 pb-8 last:pb-0"
-                >
-                  {/* Step indicator */}
-                  <div className="absolute -left-8 sm:-left-10 z-10 flex h-6 w-6 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full border-2 border-primary-strong bg-background text-[10px] sm:text-xs font-bold text-primary-strong">
-                    {step.step}
-                  </div>
+            <Link
+              href="/alur"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-strong hover:underline"
+            >
+              <span>Buka Diagram Layar Penuh</span>
+              <ArrowSquareOutIcon size={14} weight="bold" />
+            </Link>
+          </div>
 
-                  {/* Content card */}
-                  <div className="group flex-1 p-4 sm:p-5 rounded-xl bg-white dark:bg-white/3 border border-outline dark:border-white/10 hover:border-primary-strong/40 transition-colors duration-150">
-                    <div className="flex items-start gap-3">
-                      <div className="shrink-0 mt-0.5 w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-soft dark:bg-[#FF7A86]/10 flex items-center justify-center text-primary-strong dark:text-[#FF7A86]">
-                        <StepIcon size={18} weight="bold" />
-                      </div>
-                      <div className="flex-1 min-w-0 space-y-1.5">
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className="text-sm sm:text-base font-bold">{step.title}</h3>
-                          <span className="text-[10px] sm:text-[11px] font-mono text-outline-strong shrink-0">
-                            PIC: {step.role}
-                          </span>
+          {viewMode === "diagram" ? (
+            <div className="space-y-2">
+              <AlurBpmnDiagram isEmbedded={true} />
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-ink-muted dark:text-[#A89F91]">
+                <span>
+                  Tip: Geser horizontal diagram atau klik simbol alur untuk melihat prasyarat &amp; referensi kode sumber.
+                </span>
+                <Link href="/alur" className="text-primary-strong font-semibold hover:underline">
+                  Pelajari Standar Notasi BPMN 2.0 Lengkap →
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="relative pl-8 sm:pl-10 space-y-0">
+              {/* Vertical connector line */}
+              <div className="absolute left-3 sm:left-4 top-3 bottom-3 w-px bg-outline dark:bg-white/10" />
+
+              {alurSteps.map((step, index) => {
+                const StepIcon = step.icon;
+                return (
+                  <motion.div
+                    key={step.step}
+                    initial={{ opacity: 0, x: -16 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
+                    className="relative flex gap-4 sm:gap-5 pb-8 last:pb-0"
+                  >
+                    {/* Step indicator */}
+                    <div className="absolute -left-8 sm:-left-10 z-10 flex h-6 w-6 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full border-2 border-primary-strong bg-background text-[10px] sm:text-xs font-bold text-primary-strong">
+                      {step.step}
+                    </div>
+
+                    {/* Content card */}
+                    <div className="group flex-1 p-4 sm:p-5 rounded-xl bg-white dark:bg-white/3 border border-outline dark:border-white/10 hover:border-primary-strong/40 transition-colors duration-150">
+                      <div className="flex items-start gap-3">
+                        <div className="shrink-0 mt-0.5 w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-soft dark:bg-[#FF7A86]/10 flex items-center justify-center text-primary-strong dark:text-[#FF7A86]">
+                          <StepIcon size={18} weight="bold" />
                         </div>
-                        <p className="text-xs sm:text-sm text-ink-muted dark:text-[#C9C2B6] leading-relaxed">
-                          {step.description}
-                        </p>
+                        <div className="flex-1 min-w-0 space-y-1.5">
+                          <div className="flex items-center justify-between gap-2">
+                            <h3 className="text-sm sm:text-base font-bold">{step.title}</h3>
+                            <span className="text-[10px] sm:text-[11px] font-mono text-outline-strong shrink-0">
+                              PIC: {step.role}
+                            </span>
+                          </div>
+                          <p className="text-xs sm:text-sm text-ink-muted dark:text-[#C9C2B6] leading-relaxed">
+                            {step.description}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Siklus Berkelanjutan */}
           <motion.div
