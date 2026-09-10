@@ -32,7 +32,7 @@ import {
 // Layout geometry constants (Draw.io style grid)
 const LANE_HEADER_W = 150;
 const COL_W = 205;
-const TOTAL_COLS = 24;
+const TOTAL_COLS = 25;
 const CANVAS_W = LANE_HEADER_W + TOTAL_COLS * COL_W;
 
 const PHASE_HEADER_H = 44;
@@ -586,7 +586,7 @@ export function AlurBpmnDiagram({
                   const archY = 62; // corridor above pegawai tasks
                   pathD = `M ${x1} ${y1} L ${x1} ${archY + 8} Q ${x1} ${archY} ${x1 - 8} ${archY} L ${x2 + 25} ${archY} Q ${x2 + 15} ${archY} ${x2 + 15} ${archY + 8} L ${x2 + 15} ${y2} L ${x2} ${y2}`;
                 } else if (edge.id === "e29") {
-                  // t_revisi_reviu (col 21 atasan) -> t_reviu (col 15 pegawai)
+                  // t_revisi_reviu (col 22 atasan) -> t_centang (col 16 pegawai)
                   x1 = p1.cx;
                   y1 = p1.cy - p1.h / 2;
                   x2 = p2.cx + p2.w / 2;

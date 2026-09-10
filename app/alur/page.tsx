@@ -101,7 +101,7 @@ export default async function AlurPage() {
                 2 Fase Alur
               </span>
               <span className="px-2.5 py-1 rounded-lg border border-outline dark:border-white/10 bg-white dark:bg-white/3">
-                24 Tahapan
+                25 Tahapan
               </span>
             </div>
           </div>

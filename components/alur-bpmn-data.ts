@@ -71,11 +71,11 @@ export const LANES: { id: LaneId; label: string; desc: string }[] = [
 
 export const PHASES: { label: string; from: number; to: number }[] = [
   { label: "Fase 1 · Dialog Kinerja", from: 1, to: 14 },
-  { label: "Fase 2 · Reviu Tindak Lanjut", from: 15, to: 22 },
-  { label: "Fase 1 · Dialog Kinerja", from: 23, to: 24 },
+  { label: "Fase 2 · Reviu Tindak Lanjut", from: 15, to: 23 },
+  { label: "Fase 1 · Dialog Kinerja", from: 24, to: 25 },
 ];
 
-export const TOTAL_COLS = 24;
+export const TOTAL_COLS = 25;
 
 export const NODES: BpmnNode[] = [
   // ── Lane Pegawai ──────────────────────────────────────────────
@@ -113,26 +113,36 @@ export const NODES: BpmnNode[] = [
     lane: "pegawai",
     col: 15,
     type: "user",
-    title: "Buat reviu capaian",
-    desc: "Setelah dialog selesai, pegawai menandai setiap item evaluasi: tercapai atau tidak tercapai. Semua item wajib ditandai.",
+    title: "Buat Reviu",
+    desc: "Pegawai memulai proses reviu capaian dari dialog yang sudah selesai. Sistem membuat record reviu baru yang terhubung ke dialog terkait.",
     icon: ListChecksIcon,
     codeRef: "createReviu · lib/actions/reviu.ts:116",
   },
   {
-    id: "g_item",
+    id: "t_centang",
     lane: "pegawai",
     col: 16,
+    type: "user",
+    title: "Centang Evaluasi & Isi Penjelasan",
+    desc: "Pegawai mencentang status ketercapaian setiap item evaluasi (tercapai / tidak tercapai) dan mengisi penjelasan capaian untuk setiap butir.",
+    icon: NotePencilIcon,
+    codeRef: "validateSubmitInput · lib/actions/reviu.ts:48",
+  },
+  {
+    id: "g_item",
+    lane: "pegawai",
+    col: 17,
     type: "gateway",
-    title: "Ada item tidak tercapai?",
-    desc: "Percabangan isian reviu: jika ada item tidak tercapai, pegawai wajib mengisi penyebab, rencana tindak lanjut, dan tanggal evaluasi berikutnya.",
+    title: "Ada yang tidak tercapai?",
+    desc: "Pengecekan kondisi: apakah terdapat item evaluasi yang ditandai tidak tercapai? Jika ya, pegawai wajib melengkapi field tambahan sebelum submit.",
   },
   {
     id: "t_lengkapi",
     lane: "pegawai",
-    col: 17,
+    col: 18,
     type: "user",
-    title: "Lengkapi & submit reviu",
-    desc: "Ada yang tidak tercapai: isi penyebab + rencana + tanggal evaluasi. Semua tercapai: cukup penjelasan capaian. Lalu kirim ke atasan.",
+    title: "Isi Field Tidak Tercapai",
+    desc: "Untuk setiap item yang tidak tercapai: pegawai wajib mengisi penyebab ketidaktercapaian, rencana tindak lanjut, dan tanggal target evaluasi berikutnya. Setelah selesai, reviu dikirim ke atasan.",
     icon: NotePencilIcon,
     codeRef: "validateSubmitInput · lib/actions/reviu.ts:48",
   },
@@ -209,7 +219,7 @@ export const NODES: BpmnNode[] = [
   {
     id: "t_setuju_reviu",
     lane: "atasan",
-    col: 19,
+    col: 20,
     type: "user",
     title: "Setujui reviu",
     desc: "Atasan memeriksa reviu capaian pegawai dan menandatangani persetujuan.",
@@ -219,7 +229,7 @@ export const NODES: BpmnNode[] = [
   {
     id: "g_reviu",
     lane: "atasan",
-    col: 20,
+    col: 21,
     type: "gateway",
     title: "Reviu disetujui?",
     desc: "Atasan dapat menyetujui reviu atau mengembalikannya sebagai revisi_capaian.",
@@ -227,7 +237,7 @@ export const NODES: BpmnNode[] = [
   {
     id: "t_revisi_reviu",
     lane: "atasan",
-    col: 21,
+    col: 22,
     type: "user",
     title: "Kembalikan reviu",
     desc: "Reviu dikembalikan (status revisi_capaian) beserta alasan untuk diperbaiki pegawai.",
@@ -330,7 +340,7 @@ export const NODES: BpmnNode[] = [
   {
     id: "s_r_ma",
     lane: "sistem",
-    col: 18,
+    col: 19,
     type: "intermediate",
     title: "Status reviu",
     desc: "Reviu sudah dikirim pegawai dan menunggu persetujuan atasan.",
@@ -340,7 +350,7 @@ export const NODES: BpmnNode[] = [
   {
     id: "s_r_mv",
     lane: "sistem",
-    col: 21,
+    col: 22,
     type: "intermediate",
     title: "Status reviu",
     desc: "Reviu disetujui atasan (is_valid_atasan = true). Menunggu penyelesaian sistem.",
@@ -350,7 +360,7 @@ export const NODES: BpmnNode[] = [
   {
     id: "t_rdone",
     lane: "sistem",
-    col: 22,
+    col: 23,
     type: "service",
     title: "Tandai reviu selesai",
     desc: "Sistem menandai reviu selesai. Tampilan ini disederhanakan: langkah validasi final oleh pegawai tidak digambar.",
@@ -362,7 +372,7 @@ export const NODES: BpmnNode[] = [
   {
     id: "g_lanjut",
     lane: "sistem",
-    col: 23,
+    col: 24,
     type: "gateway",
     title: "Ada item is_tercapai = false?",
     desc: "Pengecekan otomatis: hanya item yang tidak tercapai yang diteruskan ke dialog lanjutan.",
@@ -370,7 +380,7 @@ export const NODES: BpmnNode[] = [
   {
     id: "t_salin",
     lane: "sistem",
-    col: 23,
+    col: 24,
     sub: true,
     type: "service",
     title: "Salin item ✗ → lanjutan",
@@ -382,7 +392,7 @@ export const NODES: BpmnNode[] = [
   {
     id: "link_throw",
     lane: "sistem",
-    col: 24,
+    col: 25,
     sub: true,
     type: "link-throw",
     title: "Link: kembali ke draft",
@@ -391,7 +401,7 @@ export const NODES: BpmnNode[] = [
   {
     id: "end",
     lane: "sistem",
-    col: 24,
+    col: 25,
     type: "end",
     title: "Selesai",
     desc: "Semua item tercapai. Siklus dialog–reviu untuk periode ini berakhir di sini.",
@@ -421,14 +431,16 @@ export const EDGES: BpmnEdge[] = [
   { id: "e19", from: "t_kunci", to: "s_selesai", kind: "flow" },
   { id: "e20", from: "s_selesai", to: "d_hasil", kind: "assoc" },
   { id: "e21", from: "s_selesai", to: "t_reviu", kind: "flow" },
-  { id: "e22", from: "t_reviu", to: "g_item", kind: "flow" },
-  { id: "e23", from: "g_item", to: "t_lengkapi", kind: "flow", label: "Lengkapi sesuai kondisi" },
+  { id: "e22", from: "t_reviu", to: "t_centang", kind: "flow" },
+  { id: "e22b", from: "t_centang", to: "g_item", kind: "flow" },
+  { id: "e23", from: "g_item", to: "t_lengkapi", kind: "flow", label: "Ya", labelDy: -4 },
+  { id: "e23b", from: "g_item", to: "s_r_ma", kind: "flow", label: "Tidak", labelDy: -4 },
   { id: "e24", from: "t_lengkapi", to: "s_r_ma", kind: "flow" },
   { id: "e25", from: "s_r_ma", to: "t_setuju_reviu", kind: "flow" },
   { id: "e26", from: "t_setuju_reviu", to: "g_reviu", kind: "flow" },
   { id: "e27", from: "g_reviu", to: "t_revisi_reviu", kind: "flow", label: "Kembalikan", hideWith: "revisi" },
   { id: "e28", from: "g_reviu", to: "s_r_mv", kind: "flow", label: "Setuju", labelDy: -4 },
-  { id: "e29", from: "t_revisi_reviu", to: "t_reviu", kind: "return", label: "Revisi capaian", hideWith: "revisi" },
+  { id: "e29", from: "t_revisi_reviu", to: "t_centang", kind: "return", label: "Revisi capaian", hideWith: "revisi" },
   { id: "e30", from: "s_r_mv", to: "t_rdone", kind: "flow" },
   { id: "e31", from: "t_rdone", to: "g_lanjut", kind: "flow" },
   { id: "e32", from: "g_lanjut", to: "end", kind: "flow", label: "Semua tercapai" },
