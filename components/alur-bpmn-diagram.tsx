@@ -1046,7 +1046,7 @@ function DrawioBpmnNodeRenderer({
     );
   }
 
-  // 5. Draw.io Exclusive Gateway (XOR): Diamond shape with "X", label positioned outside
+  // 5. Draw.io Data-Based Exclusive Gateway: Diamond shape with "?", label positioned outside
   if (node.type === "gateway") {
     return (
       <div
@@ -1064,27 +1064,18 @@ function DrawioBpmnNodeRenderer({
             stroke="#CA8A04"
             strokeWidth={isSelected ? "2.5" : "2"}
           />
-          {/* Draw.io diagonal X lines */}
-          <line
-            x1="15"
-            y1="15"
-            x2="29"
-            y2="29"
-            stroke="#854D0E"
-            className="dark:stroke-[#FACC15]"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
-          <line
-            x1="29"
-            y1="15"
-            x2="15"
-            y2="29"
-            stroke="#854D0E"
-            className="dark:stroke-[#FACC15]"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
+          {/* Draw.io "?" mark for Data-Based Exclusive Gateway */}
+          <text
+            x="22"
+            y="27"
+            textAnchor="middle"
+            fontSize="16"
+            fontWeight="700"
+            fill="#854D0E"
+            className="dark:fill-[#FACC15] select-none"
+          >
+            ?
+          </text>
         </svg>
 
         {/* Question Title placed outside diamond (Draw.io standard) */}

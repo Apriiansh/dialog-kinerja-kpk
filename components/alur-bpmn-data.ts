@@ -488,10 +488,10 @@ export const BPMN_TYPE_DETAILS: Record<
     color: "#7C3AED",
   },
   gateway: {
-    name: "Exclusive Gateway (XOR)",
-    standard: "Data-Based Exclusive Gateway (XOR)",
-    description: "Percabangan kondisi logika; alur memilih tepat satu jalur berdasarkan hasil evaluasi/validasi.",
-    color: "#0284C7",
+    name: "Exclusive Gateway (?)",
+    standard: "Data-Based Exclusive Gateway (BPMN 2.0)",
+    description: "Percabangan kondisi logika; alur memilih tepat satu jalur berdasarkan hasil evaluasi/validasi. Ditandai dengan simbol '?' (data-based).",
+    color: "#CA8A04",
   },
   data: {
     name: "Data Object",
